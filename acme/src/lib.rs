@@ -7,8 +7,6 @@
 */
 #[cfg(feature = "compilers")]
 pub use acme_compilers as compilers;
-#[cfg(feature = "conduits")]
-pub use acme_conduits as conduits;
 #[cfg(feature = "core")]
 pub use acme_core::*;
 #[cfg(feature = "derive")]
@@ -25,8 +23,6 @@ pub mod prelude {
 
     #[cfg(feature = "compilers")]
     pub use super::compilers::*;
-    #[cfg(feature = "conduits")]
-    pub use super::conduits::*;
     #[cfg(feature = "net")]
     pub use super::net::*;
     #[cfg(feature = "pipelines")]

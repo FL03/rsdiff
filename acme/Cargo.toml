@@ -19,7 +19,6 @@ test = true
 [features]
 default = ["core"]
 full = [
-    "conduits", 
     "core", 
     "compilers",
     "derive",
@@ -35,14 +34,12 @@ macros = ["acme-macros/default"]
 extras = []
 
 net = ["acme-net"]
-conduits = ["acme-conduits"]
 compilers = ["acme-compilers"]
 pipelines = ["acme-pipelines"]
 
 [build-dependencies]
 
 [dependencies]
-acme-conduits = { features = [], optional = true, path = "../crates/conduits", version = "0.2.5" }
 acme-core = { features = [], optional = true, path = "../core", version = "0.2.5" }
 acme-compilers = { features = [], optional = true, path = "../crates/compilers", version = "0.2.5" }
 acme-derive = { features = [], optional = true, path = "../derive", version = "0.2.5" }

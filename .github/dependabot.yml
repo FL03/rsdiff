@@ -29,10 +29,6 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /crates/conduits
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
     directory: /crates/net
     schedule:
       interval: daily

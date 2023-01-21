@@ -1,0 +1,34 @@
+[package]
+description = "Acme is a complete development toolkit for extending platform functionality"
+name = "acme-derive"
+
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[features]
+default = []
+
+[lib]
+proc-macro = true
+test = true
+
+[build-dependencies]
+
+[dependencies]
+syn = { features = [], version = "1" }
+proc-macro2 = "1"
+
+[dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

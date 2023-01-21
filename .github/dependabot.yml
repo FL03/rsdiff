@@ -1,11 +1,11 @@
 version: 2
 updates:
-  - package-ecosystem: github-actions
+  - package-ecosystem: cargo
     directory: /
     schedule:
       interval: daily
-  - package-ecosystem: cargo
-    directory: /xtask
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
       interval: daily
   - package-ecosystem: cargo
@@ -13,26 +13,18 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /crates/compilers
+    directory: /core
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /crates/conduits
+    directory: /derive
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /crates/core
+    directory: /macros
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /crates/gateways
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /crates/net
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /crates/pipelines
+    directory: /net
     schedule:
       interval: daily

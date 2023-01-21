@@ -5,7 +5,8 @@ edition = "2021"
 homepage = "https://github.com/FL03/acme/wikis"
 license = "Apache-2.0"
 repository = "https://github.com/FL03/acme"
-version = "0.2.4" # TODO - Update cargo package version
+readme = "README.md"
+version = "0.2.5" # TODO - Update cargo package version
 
 [workspace]
 default-members = [
@@ -14,8 +15,16 @@ default-members = [
 exclude = [ "xtask" ]
 members = [
     "acme",
-    "crates/*",
+    "core",
+    "derive",
+    "macros",
+    "net",
 ]
+
+[workspace.dependencies]
+scsys = { features = ["full"], version = "0.1.41" }
+serde = { features = ["derive"], version = "1" }
+serde_json = "1"
 
 [profile.dev]
 codegen-units = 256

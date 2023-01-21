@@ -1,16 +1,17 @@
 [package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://github.com)"]
 categories = []
-description = "Acme is a complete development toolkit for extending platform functionality"
-edition = "2021"
-homepage = "https://github.com/scattered-systems/acme/wikis"
 keywords = ["async", "scsys"]
-license = "Apache-2.0"
 name = "acme"
 publish = true
-readme = "README.md"
-repository = "https://github.com/scattered-systems/acme"
-version = "0.2.4" # TODO - Update cargo package version
+
+authors.workspace = true
+description.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -18,26 +19,28 @@ test = true
 
 [features]
 default = ["core"]
-full = ["conduits", "core", "compilers", "extras", "gateways", "net", "pipelines",]
+full = [
+    "core",
+    "derive",
+    "extras", 
+    "macros",
+    "net",
+]
 
 core = ["acme-core"]
+derive = ["acme-derive/default"]
+macros = ["acme-macros/default"]
 extras = []
 
 net = ["acme-net"]
-conduits = ["acme-conduits"]
-compilers = ["acme-compilers"]
-gateways = ["acme-gateways"]
-pipelines = ["acme-pipelines"]
 
 [build-dependencies]
 
 [dependencies]
-acme-conduits = { features = [], optional = true, path = "../crates/conduits", version = "0.2.4" }
-acme-core = { features = [], optional = true, path = "../crates/core", version = "0.2.4" }
-acme-compilers = { features = [], optional = true, path = "../crates/compilers", version = "0.2.4" }
-acme-gateways = { features = [], optional = true, path = "../crates/gateways", version = "0.2.4" }
-acme-net = { features = [], optional = true, path = "../crates/net", version = "0.2.4" }
-acme-pipelines = { features = [], optional = true, path = "../crates/pipelines", version = "0.2.4" }
+acme-core = { features = [], optional = true, path = "../core", version = "0.2.5" }
+acme-derive = { features = [], optional = true, path = "../derive", version = "0.2.5" }
+acme-macros = { features = [], optional = true, path = "../macros", version = "0.2.5" }
+acme-net = { features = [], optional = true, path = "../net", version = "0.2.5" }
 
 [package.metadata.docs.rs]
 all-features = true

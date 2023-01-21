@@ -2,6 +2,8 @@
 
 [![Clippy](https://github.com/FL03/acme/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/acme/actions/workflows/clippy.yml)
 [![Rust](https://github.com/FL03/acme/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/acme/actions/workflows/rust.yml)
+[![crates.io](https://img.shields.io/crates/v/acme.svg)](https://crates.io/crates/acme)
+[![docs.rs](https://docs.rs/acme/badge.svg)](https://docs.rs/acme)
 
 ***
 

@@ -1,14 +1,14 @@
 [package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
-categories = []
 description = "acme"
-edition = "2021"
-homepage = "https://github.com/FL03/acme/wiki"
-keywords = ["scsys"]
-license = "Apache-2.0"
 name = "acme-net"
-repository = "https://github.com/FL03/acme"
-version = "0.2.5"
+
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -23,9 +23,9 @@ http = "0.2.8"
 http-body = "0.4.5"
 hyper = { features = ["full"], version = "0.14.23" }
 mio = "0.8.4"
-scsys = { features = ["full"], version = "0.1.40" }
-serde = { features = ["derive"], version = "1" }
-serde_json = "1"
+scsys.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 strum = { features = ["derive"], version = "0.24.1" }
 tokio = { features = ["macros", "signal"], version = "1.23.0" }
 tower = "0.4.13"

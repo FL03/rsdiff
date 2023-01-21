@@ -1,14 +1,14 @@
 [package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
-categories = []
 description = "Acme is a complete development toolkit for extending platform functionality"
-edition = "2021"
-homepage = "https://github.com/FL03/acme/wikis"
-keywords = ["async", "macros", "scsys"]
-license = "Apache-2.0"
 name = "acme-macros"
-repository = "https://github.com/FL03/acme"
-version = "0.2.5" # TODO - Update cargo package version
+
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
 
 [features]
 default = []

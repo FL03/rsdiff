@@ -4,7 +4,8 @@
    Description: ... Summary ...
 */
 use crate::{EventSpec, Eventful};
-use scsys::prelude::{Hash, Hashable, Message, Timestamp};
+use decanter::prelude::{Hash, Hashable};
+use scsys::prelude::{Message, Timestamp};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]

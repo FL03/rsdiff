@@ -14,9 +14,6 @@ pub use acme_macros::*;
 #[cfg(feature = "net")]
 pub use acme_net as net;
 
-#[cfg(feature = "wasm")]
-pub use acme_wasm::*;
-
 pub mod prelude {
     pub use super::*;
 

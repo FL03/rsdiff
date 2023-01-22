@@ -19,6 +19,7 @@ members = [
     "derive",
     "macros",
     "net",
+    "wasm"
 ]
 
 [workspace.dependencies]

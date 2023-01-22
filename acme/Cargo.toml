@@ -33,15 +33,22 @@ macros = ["acme-macros/default"]
 extras = []
 
 net = ["acme-net"]
+wasm = ["acme-wasm/default"]
 
 [build-dependencies]
 
 [dependencies]
-acme-core = { features = [], optional = true, path = "../core", version = "0.2.5" }
-acme-derive = { features = [], optional = true, path = "../derive", version = "0.2.5" }
-acme-macros = { features = [], optional = true, path = "../macros", version = "0.2.5" }
-acme-net = { features = [], optional = true, path = "../net", version = "0.2.5" }
+acme-core = { features = [], optional = true, path = "../core", version = "0.2.6" }
+acme-derive = { features = [], optional = true, path = "../derive", version = "0.2.6" }
+acme-macros = { features = [], optional = true, path = "../macros", version = "0.2.6" }
+acme-net = { features = [], optional = true, path = "../net", version = "0.2.6" }
+acme-wasm = { features = [], optional = true, path = "../wasm", version = "0.2.6" }
+
 
 [package.metadata.docs.rs]
 all-features = true
 rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

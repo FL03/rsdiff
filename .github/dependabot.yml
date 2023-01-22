@@ -28,3 +28,7 @@ updates:
     directory: /net
     schedule:
       interval: daily
+  - package-ecosystem: cargo
+    directory: /wasm
+    schedule:
+      interval: daily

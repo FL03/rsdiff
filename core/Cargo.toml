@@ -11,10 +11,10 @@ repository.workspace = true
 version.workspace = true
 
 [features]
-default = [ "cli"]
-full = [ "cli" ]
+default = []
 
-cli = [ "clap/cargo", "clap/derive", "clap/default", "clap/env"]
+wasm = []
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -30,8 +30,6 @@ serde.workspace = true
 serde_json.workspace = true
 
 async-trait = "0.1"
-axum-core = "0.3"
-clap = { features = ["cargo", "derive", "env"], optional = true, version = "4" }
 decanter = { features = ["derive"], version = "0.1.3" }
 futures = "0.3"
 strum = { features = ["derive"], version = "0.24" }

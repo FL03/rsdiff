@@ -26,11 +26,19 @@ full = [
     "macros",
     "net",
 ]
+api = []
+cli = [
+    "clap/default",
+    "clap/cargo",
+    "clap/derive",
+    "clap/env"
+]
 
 core = ["acme-core"]
 derive = ["acme-derive/default"]
 macros = ["acme-macros/default"]
 extras = []
+
 
 net = ["acme-net"]
 wasm = ["acme-wasm/default"]
@@ -38,6 +46,13 @@ wasm = ["acme-wasm/default"]
 [build-dependencies]
 
 [dependencies]
+async-trait = "0.1"
+axum-core = { optional = true, version = "0.3"}
+clap = { features = ["cargo", "derive", "env"], optional = true, version = "4" }
+scsys.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
 acme-core = { features = [], optional = true, path = "../core", version = "0.2.6" }
 acme-derive = { features = [], optional = true, path = "../derive", version = "0.2.6" }
 acme-macros = { features = [], optional = true, path = "../macros", version = "0.2.6" }

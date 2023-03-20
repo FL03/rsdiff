@@ -20,7 +20,7 @@ test = true
 [build-dependencies]
 
 [dependencies]
-syn = { features = [], version = "1" }
+syn = { features = [], version = "2" }
 proc-macro2 = "1"
 
 [dev-dependencies]

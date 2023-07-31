@@ -1,11 +1,10 @@
 [package]
-description = "acme"
-name = "acme-core"
-
 authors.workspace = true
+description = "This is the core library for the Acme project. It contains the core primitives that are used throughout the project."
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
+name = "acme-core"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -17,7 +16,9 @@ wasm = []
 
 
 [lib]
+bench = false
 crate-type = ["cdylib", "rlib"]
+doctest = true
 test = true
 
 [build-dependencies]
@@ -28,12 +29,12 @@ test = true
 anyhow.workspace = true
 async-trait = "0.1"
 futures = "0.3"
+lazy_static = "1"
 serde.workspace = true
 serde_json.workspace = true
 strum.workspace = true
 smart-default.workspace = true
 tokio = { features = ["macros", "sync"], version = "1" }
-tracing-subscriber = "0.3"
 
 [package.metadata.docs.rs]
 all-features = true

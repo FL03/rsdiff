@@ -22,15 +22,12 @@ default = ["core"]
 full = [
     "core",
     "derive",
-    "extras", 
     "macros",
 ]
 
-
 core = ["acme-core"]
-derive = ["acme-derive/default"]
-macros = ["acme-macros/default"]
-extras = []
+derive = ["acme-derive"]
+macros = ["acme-macros"]
 
 
 [build-dependencies]

@@ -1,8 +1,10 @@
 /*
-    Appellation: handler <module>
+    Appellation: actor <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
+//! # Actor
+//! 
+//! An actor 
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]

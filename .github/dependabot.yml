@@ -24,11 +24,3 @@ updates:
     directory: /macros
     schedule:
       interval: daily
-  - package-ecosystem: cargo
-    directory: /net
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /wasm
-    schedule:
-      interval: daily

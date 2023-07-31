@@ -1,11 +1,11 @@
 [package]
-description = "Acme is a complete development toolkit for extending platform functionality"
-name = "acme-derive"
-
 authors.workspace = true
+categories.workspace = true
+description = "Acme is a complete development toolkit for extending platform functionality"
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
+name = "acme-derive"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -20,7 +20,7 @@ test = true
 [build-dependencies]
 
 [dependencies]
-syn = { features = [], version = "1" }
+syn = { features = [], version = "2" }
 proc-macro2 = "1"
 
 [dev-dependencies]

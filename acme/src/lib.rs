@@ -13,6 +13,8 @@ pub use acme_derive::*;
 #[cfg(feature = "macros")]
 pub use acme_macros::*;
 
+pub mod agents;
+
 
 pub mod prelude {
     #[cfg(feature = "core")]

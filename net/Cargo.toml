@@ -29,7 +29,7 @@ mio = "0.8.4"
 scsys.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-strum = { features = ["derive"], version = "0.24.1" }
+strum = { features = ["derive"], version = "0.25.0" }
 tokio = { features = ["macros", "signal"], version = "1.24" }
 tower = "0.4.13"
 tower-http = { features = [], version = "0.4.3" }

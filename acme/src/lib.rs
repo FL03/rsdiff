@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # acme
-//! 
+//!
 //! Acme is a complete framework for building intelligent agents in Rust
 
 #[cfg(feature = "core")]
@@ -14,7 +14,6 @@ pub use acme_derive::*;
 pub use acme_macros::*;
 
 pub mod agents;
-
 
 pub mod prelude {
     #[cfg(feature = "core")]

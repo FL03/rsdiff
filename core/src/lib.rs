@@ -9,8 +9,8 @@ pub mod actors;
 pub mod events;
 
 pub(crate) mod primitives;
-pub(crate) mod utils;
 pub(crate) mod specs;
+pub(crate) mod utils;
 
 pub mod prelude {
     pub use super::actors::*;

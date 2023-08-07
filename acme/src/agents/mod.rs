@@ -12,7 +12,6 @@ pub enum ReflexAgent {
     ModelBased = 0,
     #[default]
     Simple = 1,
-
 }
 
 pub enum AgentType {
@@ -30,8 +29,6 @@ pub trait Architecture {
 pub trait Agent {
     type Arch: Architecture;
     type Program: AgentProgram;
-
-
 }
 
 pub trait Observer {
@@ -61,9 +58,7 @@ pub trait Actuator {
     fn act(&self, action: Self::Action, env: &mut Self::Env) -> &mut Self::Env;
 }
 
-pub trait AgentProgram: AgentFunction {
-
-}
+pub trait AgentProgram: AgentFunction {}
 
 pub trait AgentFunction {
     type Action;
@@ -72,5 +67,9 @@ pub trait AgentFunction {
     type Reward;
     type State;
 
-    fn agent_fn(&self, params: Self::Params, env: &mut Self::Env) -> (Self::Action, Self::Reward, Self::State);
+    fn agent_fn(
+        &self,
+        params: Self::Params,
+        env: &mut Self::Env,
+    ) -> (Self::Action, Self::Reward, Self::State);
 }

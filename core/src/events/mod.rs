@@ -8,9 +8,7 @@ pub use self::event::*;
 pub(crate) mod event;
 
 pub trait Eventful {
-   type Event: EventSpec;
+    type Event: EventSpec;
 }
 
-pub trait EventSpec {
-
-}
+pub trait EventSpec {}

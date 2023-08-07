@@ -64,12 +64,6 @@ pub trait AgentFunction {
     type Action;
     type Env: Environment;
     type Params;
-    type Reward;
-    type State;
 
-    fn agent_fn(
-        &self,
-        params: Self::Params,
-        env: &mut Self::Env,
-    ) -> (Self::Action, Self::Reward, Self::State);
+    fn compute(&self, params: Self::Params, env: &mut Self::Env) -> Self::Action;
 }

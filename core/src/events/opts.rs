@@ -4,10 +4,11 @@
    Description: ... Summary ...
 */
 use crate::{events::Event, Eventful};
+use decanter::prelude::{Hash, Hashable};
 use scsys::prelude::Message;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Events {
     Custom(String),
     Startup,

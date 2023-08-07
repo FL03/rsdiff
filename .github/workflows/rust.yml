@@ -48,6 +48,7 @@ jobs:
           - acme-derive
           - acme-macros
           - acme-net
+          - acme-wasm
     steps:
       - uses: actions/checkout@v3
       - name: Publish (${{matrix.package}})

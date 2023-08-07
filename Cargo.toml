@@ -6,7 +6,7 @@ homepage = "https://github.com/FL03/acme/wikis"
 license = "Apache-2.0"
 repository = "https://github.com/FL03/acme"
 readme = "README.md"
-version = "0.2.5" # TODO - Update cargo package version
+version = "0.2.6" # TODO - Update cargo package version
 
 [workspace]
 default-members = [
@@ -19,6 +19,7 @@ members = [
     "derive",
     "macros",
     "net",
+    "wasm"
 ]
 
 [workspace.dependencies]

@@ -1,8 +1,11 @@
 [package]
-description = "acme"
-name = "acme-core"
+categories = []
+keywords = ["async", "scsys"]
+name = "acme-wasm"
+publish = true
 
 authors.workspace = true
+description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
@@ -13,28 +16,15 @@ version.workspace = true
 [features]
 default = []
 
-wasm = []
-
-
 [lib]
 crate-type = ["cdylib", "rlib"]
 test = true
 
 [build-dependencies]
 
-[dev-dependencies]
-
 [dependencies]
-scsys.workspace = true
-serde.workspace = true
-serde_json.workspace = true
 
-async-trait = "0.1"
-decanter = { features = ["derive"], version = "0.1.3" }
-futures = "0.3"
-strum = { features = ["derive"], version = "0.24" }
-tokio = { features = ["macros", "process", "signal", "sync"], version = "1" }
-tracing-subscriber = "0.3"
+[dev-dependencies]
 
 [package.metadata.docs.rs]
 all-features = true

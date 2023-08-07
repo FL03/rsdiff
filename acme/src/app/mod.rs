@@ -1,8 +1,17 @@
 /*
-    Appellation: application <module>
+    Appellation: app <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+pub use self::application::*;
+
+pub(crate) mod application;
+
+#[cfg(feature = "cli")]
+pub use self::cli::*;
+#[cfg(feature = "cli")]
+pub(crate) mod cli;
+
 use crate::AsyncSpawnable;
 use scsys::prelude::{AsyncResult, Configurable, Contextual, Locked};
 

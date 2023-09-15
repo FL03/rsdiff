@@ -24,12 +24,10 @@ pub enum AgentType {
 pub trait Architecture {
     type Actuator: Actuator;
     type Observer: Observer;
+
+    fn actuators(&self) -> Vec<Box<dyn Actuator>>;
 }
 
-pub trait Agent {
-    type Arch: Architecture;
-    type Program: AgentProgram;
-}
 
 pub trait Observer {
     type Observation;

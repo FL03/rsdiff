@@ -22,7 +22,7 @@ test = true
 [dependencies]
 async-trait = "0.1.60"
 axum = "0.6.1"
-http = "0.2.8"
+http = "1.0.0"
 http-body = "0.4.5"
 hyper = { features = ["full"], version = "0.14.23" }
 mio = "0.8.4"

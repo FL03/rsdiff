@@ -23,7 +23,7 @@ test = true
 async-trait = "0.1.60"
 axum = "0.6.1"
 http = "0.2.8"
-http-body = "0.4.5"
+http-body = "1.0.0"
 hyper = { features = ["full"], version = "0.14.23" }
 mio = "0.8.4"
 scsys.workspace = true

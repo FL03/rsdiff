@@ -47,7 +47,7 @@ wasm = ["acme-wasm/default"]
 
 [dependencies]
 async-trait = "0.1"
-axum-core = { optional = true, version = "0.3"}
+axum-core = { optional = true, version = "0.4"}
 clap = { features = ["cargo", "derive", "env"], optional = true, version = "4" }
 scsys.workspace = true
 serde.workspace = true

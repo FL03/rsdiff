@@ -1,11 +1,9 @@
 /*
-    Appellation: agents <module>
+    Appellation: specs <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{agent::*, environment::*};
 
-pub(crate) mod agent;
-pub(crate) mod environment;
+use crate::env::Environment;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ReflexAgent {
@@ -25,9 +23,8 @@ pub trait Architecture {
     type Actuator: Actuator;
     type Observer: Observer;
 
-    fn actuators(&self) -> Vec<Box<dyn Actuator>>;
+    fn actuators(&self);
 }
-
 
 pub trait Observer {
     type Observation;

@@ -5,6 +5,4 @@
 
 pub trait Environment {}
 
-pub trait Percept {
-    
-}
+pub trait Percept {}

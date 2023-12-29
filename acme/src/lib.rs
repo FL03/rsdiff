@@ -5,7 +5,8 @@
 //! # acme
 //!
 //! Acme is a complete framework for building intelligent agents in Rust
-
+#[cfg(feature = "agents")]
+pub use acme_agents as agents;
 #[cfg(feature = "core")]
 pub use acme_core as core;
 #[cfg(feature = "derive")]
@@ -13,11 +14,11 @@ pub use acme_derive::*;
 #[cfg(feature = "macros")]
 pub use acme_macros::*;
 
-pub mod agents;
-
 pub mod prelude {
+    #[cfg(feature = "agents")]
+    pub use crate::agents::prelude::*;
     #[cfg(feature = "core")]
-    pub use super::core::prelude::*;
+    pub use crate::core::prelude::*;
     #[cfg(feature = "derive")]
     pub use acme_derive::*;
     #[cfg(feature = "macros")]

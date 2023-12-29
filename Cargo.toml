@@ -15,7 +15,8 @@ default-members = [
 ]
 exclude = [ "xtask" ]
 members = [
-    "acme",
+    "acme", 
+    "agents",
     "core",
     "derive",
     "macros"

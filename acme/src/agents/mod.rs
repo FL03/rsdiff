@@ -24,12 +24,10 @@ pub enum AgentType {
 pub trait Architecture {
     type Actuator: Actuator;
     type Observer: Observer;
+
+    fn actuators(&self) -> Vec<Box<dyn Actuator>>;
 }
 
-pub trait Agent {
-    type Arch: Architecture;
-    type Program: AgentProgram;
-}
 
 pub trait Observer {
     type Observation;
@@ -64,12 +62,6 @@ pub trait AgentFunction {
     type Action;
     type Env: Environment;
     type Params;
-    type Reward;
-    type State;
 
-    fn agent_fn(
-        &self,
-        params: Self::Params,
-        env: &mut Self::Env,
-    ) -> (Self::Action, Self::Reward, Self::State);
+    fn compute(&self, params: Self::Params, env: &mut Self::Env) -> Self::Action;
 }

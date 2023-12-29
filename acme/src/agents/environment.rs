@@ -4,3 +4,7 @@
 */
 
 pub trait Environment {}
+
+pub trait Percept {
+    
+}

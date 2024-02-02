@@ -11,6 +11,7 @@ pub(crate) mod utils;
 
 pub mod errors;
 pub mod ops;
+pub mod stores;
 
 pub mod prelude {
     pub use crate::primitives::*;
@@ -18,4 +19,5 @@ pub mod prelude {
     // pub use crate::utils::*;
 
     pub use crate::ops::*;
+    pub use crate::stores::*;
 }

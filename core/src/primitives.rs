@@ -14,5 +14,5 @@ mod types {
     /// A boxed error type for use in the library.
     pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
     /// A boxed result type for use in the library.
-    pub type BoxResult<T> = std::result::Result<T, BoxError>;
+    pub type BoxResult<T = ()> = std::result::Result<T, BoxError>;
 }

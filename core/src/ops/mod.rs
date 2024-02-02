@@ -5,7 +5,9 @@
 //! # Operations
 //! 
 //! 
+pub use self::kinds::*;
 
+pub(crate) mod kinds;
 
 pub trait Operation {
     

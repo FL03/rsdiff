@@ -17,14 +17,9 @@ version.workspace = true
 [features]
 default = ["core"]
 full = [
-    "agents",
     "core",
     "derive",
     "macros",
-]
-
-agents = [
-    "acme-agents"
 ]
 
 core = [
@@ -48,7 +43,7 @@ test = true
 [build-dependencies]
 
 [dependencies]
-acme-agents = { features = [], optional = true, path = "../agents", version = "0.3.0" }
+# acme-agents = { features = [], optional = true, path = "../agents", version = "0.3.0" }
 acme-core = { features = [], optional = true, path = "../core", version = "0.3.0" }
 acme-derive = { features = [], optional = true, path = "../derive", version = "0.3.0" }
 acme-macros = { features = [], optional = true, path = "../macros", version = "0.3.0" }

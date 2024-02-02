@@ -3,6 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # acme-core
+//! 
+//! 
+#![feature(fn_traits)]
 pub use self::primitives::*;
 
 pub(crate) mod primitives;

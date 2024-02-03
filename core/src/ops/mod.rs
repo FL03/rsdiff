@@ -9,8 +9,6 @@ pub use self::kinds::*;
 
 pub(crate) mod kinds;
 
-
-
 pub trait Differentiable<Args>: Gradient<Args> + Evaluate<Args> {}
 
 impl<S, Args> Differentiable<Args> for S where S: Gradient<Args> + Evaluate<Args> {}

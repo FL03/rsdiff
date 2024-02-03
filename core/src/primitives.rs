@@ -4,9 +4,7 @@
 */
 pub use self::types::*;
 
-mod constants {
-
-}
+mod constants {}
 
 mod statics {}
 

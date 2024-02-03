@@ -12,7 +12,6 @@ version.workspace = true
 [features]
 default = []
 
-wasm = []
 
 
 [lib]
@@ -27,7 +26,9 @@ test = true
 
 [dependencies]
 anyhow.workspace = true
+daggy = { features = [], version = "0.8" }
 lazy_static = "1"
+num = "0.4"
 serde.workspace = true
 serde_json.workspace = true
 strum.workspace = true

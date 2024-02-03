@@ -9,8 +9,6 @@ pub enum Args<T> {
     Unary(T),
 }
 
-pub enum Op {}
-
 pub enum CompareOp {
     Eq,
     Ge,
@@ -29,14 +27,9 @@ pub enum BinaryOp {
     Sub,
 }
 
-pub trait BinaryOperation<T> {
-    type Output;
-
-    fn eval(&self, lhs: T, rhs: T) -> Self::Output;
-}
-
-pub trait UnaryOperation<T> {
-    type Output;
-
-    fn eval(&self, arg: T) -> Self::Output;
+pub enum Op {
+    Binary(BinaryOp),
+    Compare(CompareOp),
+    Custom(String),
+    Unary,
 }

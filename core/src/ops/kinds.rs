@@ -27,9 +27,25 @@ pub enum BinaryOp {
     Sub,
 }
 
-pub enum Op {
-    Binary(BinaryOp),
-    Compare(CompareOp),
+pub enum UnaryOp {
+    Abs,
+    Ceil,
+    Cos,
+    Exp,
+    Floor,
+    Log,
+    Neg,
+    Reciprocal,
+    Round,
+    Rsqrt,
+    Sin,
+    Sqrt,
+    Tan,
+}
+
+pub enum Op<T> {
+    Binary(T, T, BinaryOp),
+    Compare(T, T, CompareOp),
     Custom(String),
-    Unary,
+    Unary(T, UnaryOp),
 }

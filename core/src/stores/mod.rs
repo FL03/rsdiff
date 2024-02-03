@@ -7,9 +7,6 @@ pub use self::gradient::*;
 pub(crate) mod gradient;
 
 use crate::graphs::Arithmetic;
-use daggy::NodeIndex;
-use std::collections::{BTreeMap, HashMap};
-use std::ops::Add;
 
 pub trait Store<K, V> {
     fn get(&self, key: &K) -> Option<&V>;

@@ -9,17 +9,27 @@ pub use self::kinds::*;
 
 pub(crate) mod kinds;
 
-use std::marker::Tuple;
 
-pub trait Operation<Args> {
+
+pub trait Differentiable<Args>: Gradient<Args> + Evaluate<Args> {}
+
+impl<S, Args> Differentiable<Args> for S where S: Gradient<Args> + Evaluate<Args> {}
+
+pub trait Evaluate<T> {
     type Output;
 
-    fn eval(&self, args: Args) -> Self::Output;
+    fn eval(&self, args: T) -> Self::Output;
 }
 
-impl<A, B, O> Operation<A> for O
+pub trait Gradient<T> {
+    type Gradient;
+
+    fn grad(&self, args: T) -> Self::Gradient;
+}
+
+impl<A, B, S> Evaluate<A> for S
 where
-    O: Fn(A) -> B,
+    S: Fn(A) -> B,
 {
     type Output = B;
 

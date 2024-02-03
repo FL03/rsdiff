@@ -39,3 +39,18 @@ impl From<Box<dyn std::error::Error>> for Error {
         Self::new(ErrorKind::Unknown, err.to_string())
     }
 }
+
+impl<E> From<daggy::WouldCycle<E>> for Error {
+    fn from(err: daggy::WouldCycle<E>) -> Self {
+        Self::new(ErrorKind::Graph, err.to_string())
+    }
+}
+
+impl<E> From<daggy::petgraph::algo::Cycle<E>> for Error
+where
+    E: Copy + std::fmt::Debug,
+{
+    fn from(err: daggy::petgraph::algo::Cycle<E>) -> Self {
+        Self::new(ErrorKind::Graph, format!("{:?}", err.node_id()))
+    }
+}

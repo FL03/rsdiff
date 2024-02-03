@@ -27,6 +27,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 #[strum(serialize_all = "camelCase")]
 pub enum ErrorKind {
     Func,
+    Graph,
     #[default]
     Unknown,
 }

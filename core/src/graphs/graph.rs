@@ -3,35 +3,32 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Arithmetic;
-use crate::ops::Operation;
+use crate::cmp::{Constant, Variable};
+use crate::ops::Evaluate;
+use crate::prelude::Result;
 use crate::stores::{GradientStore, Store};
+use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
 use num::traits::NumOps;
 use std::collections::HashMap;
-use std::ops::Mul;
 
 pub enum FnNode<T> {
-    Const(T),
-    Variable(T),
-    Operand(T),
+    Const(Constant<T>),
+    Var(Variable<T>),
+    Op(T),
 }
 
 pub struct FnGraph<T> {
     graph: Dag<T, usize>,
-    store: HashMap<NodeIndex, T>,
 }
 
 impl<T> FnGraph<T> {
     pub fn new() -> Self {
-        Self {
-            graph: Dag::new(),
-            store: HashMap::new(),
-        }
+        Self { graph: Dag::new() }
     }
 
     pub fn clear(&mut self) {
         self.graph.clear();
-        self.store.clear();
     }
 
     pub fn get(&self, index: NodeIndex) -> Option<&T> {
@@ -45,16 +42,19 @@ impl<T> FnGraph<T> {
 
 impl<T> FnGraph<T>
 where
-    T: Clone + Default,
+    T: Clone + Default + 'static,
 {
-    pub fn compute_gradients(&mut self, target: NodeIndex) {
-        let mut gradients = HashMap::new();
+    pub fn compute_gradients(&mut self, target: NodeIndex) -> Result<()> {
+        let nodes = toposort(&self.graph, None)?;
+        let mut gradients = GradientStore::new();
         gradients.insert(target, self.get(target).unwrap().clone());
+        Ok(())
     }
+
     pub fn operator(
         &mut self,
         inputs: Vec<NodeIndex>,
-        op: impl Operation<Vec<T>, Output = T>,
+        op: impl Evaluate<Vec<T>, Output = T>,
     ) -> NodeIndex {
         let args = inputs
             .iter()
@@ -90,12 +90,12 @@ where
         let y = self.graph.node_weight(b).unwrap().clone();
         let res = x * y;
         let c = self.graph.add_node(res);
-        self.graph
-            .extend_with_edges([(a, c), (b, c)])
-            .expect("Failed to add edge");
+
+        let ac = self.graph.add_edge(a, c, 0).expect("Failed to add edge");
+        let bc = self.graph.add_edge(b, c, 0).expect("Failed to add edge");
 
         let fg = |graph: &mut dyn Arithmetic<NodeIndex>, store: &mut GradientStore, rhs: T| {
-            if let Some(grad) = store.get(&a) {
+            if let Some(grad) = store.get(&c) {
                 let grad = graph.mul(*grad, b);
                 store.add_gradient(self, a, &grad);
             }

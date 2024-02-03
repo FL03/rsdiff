@@ -20,6 +20,14 @@ impl<T> Value<T> {
         Self { data, id: None }
     }
 
+    pub fn data(&self) -> &T {
+        &self.data
+    }
+
+    pub fn data_mut(&mut self) -> &mut T {
+        &mut self.data
+    }
+
     pub fn id(&self) -> Option<&GradientId<T>> {
         self.id.as_ref()
     }
@@ -30,13 +38,5 @@ impl<T> Value<T> {
         } else {
             None
         }
-    }
-
-    pub fn data(&self) -> &T {
-        &self.data
-    }
-
-    pub fn data_mut(&mut self) -> &mut T {
-        &mut self.data
     }
 }

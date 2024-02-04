@@ -46,7 +46,9 @@ where
     }
 
     fn insert(&mut self, key: Idx, value: T) -> Option<T> {
-        self.store.insert(key, Box::new(value)).map(|v| v.downcast_ref::<T>().unwrap().clone())
+        self.store
+            .insert(key, Box::new(value))
+            .map(|v| v.downcast_ref::<T>().unwrap().clone())
     }
 
     fn remove(&mut self, key: &Idx) -> Option<T> {

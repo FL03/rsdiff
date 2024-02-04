@@ -11,7 +11,10 @@ pub struct Subtraction;
 
 macro_rules! impl_binary_op {
     ($op:ident, $bound:ident, $exp:expr) => {
-        impl<T> crate::ops::BinaryOperation<T> for $op where T: $bound<T, Output = T> {
+        impl<T> crate::ops::BinaryOperation<T> for $op
+        where
+            T: $bound<T, Output = T>,
+        {
             type Output = T;
 
             fn eval(&self, lhs: T, rhs: T) -> Self::Output {

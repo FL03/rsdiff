@@ -12,44 +12,34 @@ pub(crate) mod kinds;
 
 use std::marker::Tuple;
 
-pub trait Differentiable<Args> {
-    type Output;
-    type Gradient;
-
-    fn eval(&self, args: Args) -> Self::Output;
-
-    fn grad(&self, args: Self::Output) -> Option<Self::Gradient>;
-}
+pub trait Differentiable<Args> {}
 
 pub trait Evaluate<T> {
     type Output;
 
-    fn eval(&self, args: T) -> Self::Output;
+    fn eval(&self) -> Self::Output;
 }
 
-impl<A, B, S> Evaluate<A> for S
+pub trait Gradient<T>
 where
-    S: Fn(A) -> B,
+    T: Gradient<T>,
 {
-    type Output = B;
-
-    fn eval(&self, args: A) -> Self::Output {
-        self(args)
-    }
-}
-
-pub trait Gradient<T> {
     type Gradient;
 
     fn grad(&self, args: T) -> Self::Gradient;
 }
 
-
-
-pub trait Operand<Args> where Args: Tuple {
+pub trait Operand<Args>
+where
+    Args: Tuple,
+{
     type Output;
 
-    fn eval(&mut self, args: Args) -> Self::Output;
+    fn name(&self) -> &str;
+
+    fn eval(&self, args: Args) -> Self::Output;
+
+    fn grad(&self, args: Self::Output) -> Option<Self::Output>;
 }
 
 // impl<A, B, S> Operand<A> for S

@@ -24,7 +24,9 @@ pub trait Store<K, V> {
     {
         match self.get_mut(&id) {
             Some(gradient) => {
-                *gradient = graph.add(gradient.clone(), value.clone());
+                *gradient = graph
+                    .add(gradient.clone(), value.clone())
+                    .expect("Failed to add gradient");
             }
             None => {
                 self.insert(id, value.clone());

@@ -4,8 +4,9 @@
 */
 use super::Constant;
 use crate::ops::{Evaluate, Gradient};
-use num::Num;
+use num::{Num, One, Zero};
 use serde::{Deserialize, Serialize};
+use std::ops::{self, Add, Div, Mul, Rem, Sub};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Variable<T> {
@@ -54,12 +55,12 @@ impl<T> std::fmt::Display for Variable<T> {
 
 impl<T> Evaluate<T> for Variable<T>
 where
-    T: Clone,
+    T: Clone + Default,
 {
     type Output = T;
 
-    fn eval(&self, val: T) -> Self::Output {
-        val
+    fn eval(&self) -> Self::Output {
+        self.value.clone().unwrap_or_default()
     }
 }
 
@@ -80,3 +81,121 @@ where
 unsafe impl<T> Send for Variable<T> {}
 
 unsafe impl<T> Sync for Variable<T> {}
+
+impl<T> Add for Variable<T>
+where
+    T: Add<Output = T> + Clone + Default,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let value = self.eval() + rhs.eval();
+        Variable::new(format!("{} + {}", self.name, rhs.name), Some(value))
+    }
+}
+
+impl<T> Add<T> for Variable<T>
+where
+    T: Add<Output = T> + Clone + Default + std::fmt::Display,
+{
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self::Output {
+        let value = self.eval() + rhs.clone();
+        Variable::new(format!("{} + {}", self.name, rhs), Some(value))
+    }
+}
+
+impl<T> Div for Variable<T>
+where
+    T: Div<Output = T> + Clone + Default,
+{
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        let value = self.eval() / rhs.eval();
+        Variable::new(format!("{} / {}", self.name, rhs.name), Some(value))
+    }
+}
+
+impl<T> Div<T> for Variable<T>
+where
+    T: Div<Output = T> + Clone + Default + std::fmt::Display,
+{
+    type Output = Self;
+
+    fn div(self, rhs: T) -> Self::Output {
+        let value = self.eval() / rhs.clone();
+        Variable::new(format!("{} / {}", self.name, rhs), Some(value))
+    }
+}
+
+impl<T> Mul for Variable<T>
+where
+    T: Mul<Output = T> + Clone + Default,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let value = self.eval() * rhs.eval();
+        Variable::new(format!("{} * {}", self.name, rhs.name), Some(value))
+    }
+}
+
+impl<T> Mul<T> for Variable<T>
+where
+    T: Mul<Output = T> + Clone + Default + std::fmt::Display,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let value = self.eval() * rhs.clone();
+        Variable::new(format!("{} * {}", self.name, rhs), Some(value))
+    }
+}
+
+impl<T> Sub for Variable<T>
+where
+    T: Sub<Output = T> + Clone + Default,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let value = self.eval() - rhs.eval();
+        Variable::new(format!("{} - {}", self.name, rhs.name), Some(value))
+    }
+}
+
+impl<T> Sub<T> for Variable<T>
+where
+    T: Sub<Output = T> + Clone + Default + std::fmt::Display,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        let value = self.eval() - rhs.clone();
+        Variable::new(format!("{} - {}", self.name, rhs), Some(value))
+    }
+}
+
+impl<T> One for Variable<T>
+where
+    T: Clone + Default + One,
+{
+    fn one() -> Self {
+        Variable::new("1", Some(T::one()))
+    }
+}
+
+impl<T> Zero for Variable<T>
+where
+    T: Clone + Default + Zero,
+{
+    fn zero() -> Self {
+        Variable::new("0", Some(T::zero()))
+    }
+
+    fn is_zero(&self) -> bool {
+        self.eval().is_zero()
+    }
+}

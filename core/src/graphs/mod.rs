@@ -11,8 +11,7 @@ pub(crate) mod graph;
 pub(crate) mod node;
 pub(crate) mod value;
 
-use crate::errors::Result;
-use crate::stores::GradientStore;
+use crate::prelude::Result;
 use daggy::{Dag, NodeIndex};
 use std::sync::Arc;
 
@@ -38,8 +37,8 @@ pub trait CoreGraph<T> {
 }
 
 pub trait Arithmetic<T> {
-    fn add(&mut self, a: T, b: T) -> T;
-    fn mul(&mut self, a: T, b: T) -> T;
+    fn add(&mut self, a: T, b: T) -> Result<T>;
+    fn mul(&mut self, a: T, b: T) -> Result<T>;
 }
 
 #[cfg(test)]
@@ -51,16 +50,12 @@ mod tests {
         let mut dag = Graph::new();
         let a = dag.variable(1_f64);
         let b = dag.variable(1_f64);
-        let c = dag.mul(a, b);
+        let c = dag.mul(a, b).unwrap();
 
-        let d = dag
-            .operator(vec![a, b], |v: Vec<f64>| v.iter().product())
-            .unwrap();
-
-        let e = dag.add(c, a);
+        let e = dag.add(c, a).unwrap();
 
         println!("{:?}", &dag.get(c));
-        assert_eq!(dag.get(c), dag.get(d));
+        assert_eq!(*dag.get(c).unwrap(), 1.0);
         assert_eq!(*dag.get(e).unwrap(), 2.0);
     }
 }

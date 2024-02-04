@@ -3,9 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::ops::{Evaluate, Gradient};
-use num::Zero;
+use num::{Num, One, Zero};
 use serde::{Deserialize, Serialize};
-use std::ops::{self, Deref, DerefMut, Neg, Not,};
+use std::ops::{self, Deref, DerefMut, Neg, Not};
 
 #[derive(
     Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
@@ -68,19 +68,19 @@ where
 {
     type Output = T;
 
-    fn eval(&self, _: ()) -> Self::Output {
+    fn eval(&self) -> Self::Output {
         self.0.clone()
     }
 }
 
 impl<T> Gradient<T> for Constant<T>
 where
-    T: Zero,
+    T: Default + Gradient<T>,
 {
     type Gradient = Constant<T>;
 
     fn grad(&self, _: T) -> Self::Gradient {
-        Constant::new(T::zero())
+        Constant::new(T::default())
     }
 }
 
@@ -182,6 +182,28 @@ where
     }
 }
 
+impl<T> ops::Rem for Constant<T>
+where
+    T: ops::Rem<Output = T>,
+{
+    type Output = Constant<T>;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        Constant::new(self.0 % rhs.0)
+    }
+}
+
+impl<T> ops::Rem<T> for Constant<T>
+where
+    T: ops::Rem<Output = T>,
+{
+    type Output = Constant<T>;
+
+    fn rem(self, rhs: T) -> Self::Output {
+        Constant::new(self.0 % rhs)
+    }
+}
+
 impl<T> ops::Sub for Constant<T>
 where
     T: ops::Sub<Output = T>,
@@ -201,5 +223,42 @@ where
 
     fn sub(self, rhs: T) -> Self::Output {
         Constant::new(self.0 - rhs)
+    }
+}
+
+impl<T> Num for Constant<T>
+where
+    T: Num,
+{
+    type FromStrRadixErr = T::FromStrRadixErr;
+
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        T::from_str_radix(str, radix).map(Constant::new)
+    }
+}
+
+impl<T> One for Constant<T>
+where
+    T: One + PartialEq,
+{
+    fn one() -> Self {
+        Constant::new(T::one())
+    }
+
+    fn is_one(&self) -> bool {
+        self.0.is_one()
+    }
+}
+
+impl<T> Zero for Constant<T>
+where
+    T: Zero,
+{
+    fn zero() -> Self {
+        Constant::new(T::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        self.0.is_zero()
     }
 }

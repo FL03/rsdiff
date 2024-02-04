@@ -20,9 +20,12 @@ use std::sync::Arc;
 pub type FnDag<T> = Dag<Value<T>, usize>;
 
 pub type GradientUpdater<C> = Arc<
-    dyn Fn(&<C as Config>::Eval, &mut <C as Config>::Store, NodeIndex) -> Result<()> + Send + Sync,
+    dyn FnMut(&mut <C as Config>::Eval, &mut <C as Config>::Store, NodeIndex) -> Result<()>
+        + Send
+        + Sync,
 >;
 
+// pub type Grad<T> = Arc<dyn Gradient<T, Gradient> + Send + Sync>;
 
 pub trait Config: Default {
     type DType;
@@ -30,75 +33,30 @@ pub trait Config: Default {
     type Store;
 }
 
-pub trait Operator<T> {
-    type Grad;
-    type Output;
-
-    fn eval(&mut self, args: Vec<T>) -> Self::Output;
-
-    fn grad(&self, at: impl Operator<T>) -> Self::Grad;
-}
-
-pub trait Opper<T> {
-    type Grad;
-    type Output;
-
-    fn eval(&self) -> Self::Output;
-
-    fn grad(&self, at: impl Operator<T>) -> Self::Grad;
-}
-
-
-
-// impl<T> Operator<T> for Variable<T> where T: Clone + Default {
-//     type Grad = T;
-//     type Output = T;
-
-//     fn eval(&self) -> Self::Output {
-//         self.value().map(|v| v.clone()).unwrap_or(T::default())
-//     }
-
-//     fn grad(&self, _: impl Operator<T>) -> Self::Grad {
-//         Variable::grad()
-//     }
-// }
-
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct Addition<T>(T, T);
 
-impl<T> Evaluate<(T, T)> for Addition<T> where T: Copy + std::ops::Add<Output = T> {
+impl<T> Evaluate<T> for Addition<T>
+where
+    T: Copy + std::ops::Add<Output = T>,
+{
     type Output = T;
 
-    fn eval(&self, args: (T, T)) -> Self::Output {
-        args.0 + args.1
+    fn eval(&self) -> Self::Output {
+        self.0 + self.1
     }
 }
 
-impl<T> Gradient<T> for Addition<T> where T: Copy + std::ops::Add<Output = T> {
-    type Gradient = (T, T);
+impl<T> Gradient<T> for Addition<T>
+where
+    T: Copy + Gradient<T> + std::ops::Add<Output = T>,
+{
+    type Gradient = Addition<<T as Gradient<T>>::Gradient>;
 
     fn grad(&self, args: T) -> Self::Gradient {
-        (args, args)
+        Addition(self.0.grad(args), self.1.grad(args))
     }
 }
-
-// impl<T> Operator<T> for Addition<T> where T: Copy + Operator<T, Grad = T> + std::ops::Add<Output = T>, {
-//     type Grad = (T, T);
-//     type Output = T;
-
-//     fn eval(&self) -> T {
-//         self.0 + self.1
-//     }
-
-//     fn grad(&self, args: Self::Output) -> Self::Grad {
-//         let dx = self.0.grad(args);
-//         let dy = self.1.grad(args);
-//         (dx, dy)
-//     }
-// }
-
-// impl<T> Operator for 
-
-
 
 // pub struct Backend
 
@@ -116,13 +74,14 @@ impl<T, E> Default for ComputeConfig<T, E> {
     }
 }
 
-impl<T, E> Config for ComputeConfig<T, E> where E: Clone + Default {
+impl<T, E> Config for ComputeConfig<T, E>
+where
+    E: Clone + Default,
+{
     type DType = T;
     type Eval = E;
     type Store = GradientStore<usize>;
 }
-
-
 
 #[cfg(test)]
 mod tests {

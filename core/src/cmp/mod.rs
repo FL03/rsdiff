@@ -18,7 +18,9 @@ use daggy::NodeIndex;
 pub trait Var<T> {
     fn name(&self) -> &str;
 
-    
+    fn evaluate<F>(&self) -> fn(T) -> T {
+        std::convert::identity
+    }
 }
 
 pub trait NodeConfig {
@@ -30,10 +32,7 @@ pub trait NodeConfig {
 pub enum FnNode<T> {
     Const(Constant<T>),
     Var(Variable<T>),
-    Binary {
-        left: NodeIndex,
-        right: NodeIndex,
-    },
+    Binary { left: NodeIndex, right: NodeIndex },
 }
 
 impl<T> FnNode<T> {
@@ -41,9 +40,7 @@ impl<T> FnNode<T> {
         Self::Const(Constant::new(value))
     }
 
-
-
-    pub fn variable(name: impl ToString,) -> Self {
+    pub fn variable(name: impl ToString) -> Self {
         Self::Var(Variable::symbolic(name))
     }
 }

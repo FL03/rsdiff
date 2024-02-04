@@ -44,29 +44,13 @@ where
         gradients.insert(target, self.get(target).unwrap().clone());
         Ok(())
     }
-
-    pub fn operator(
-        &mut self,
-        inputs: Vec<NodeIndex>,
-        op: impl Evaluate<Vec<T>, Output = T>,
-    ) -> Result<NodeIndex> {
-        let args = inputs
-            .iter()
-            .map(|i| self.graph.node_weight(*i).unwrap())
-            .cloned()
-            .collect();
-        let c = self.graph.add_node(op.eval(args));
-        self.graph
-            .extend_with_edges(inputs.into_iter().map(|i| (i, c)))?;
-        Ok(c)
-    }
 }
 
 impl<T> Arithmetic<NodeIndex> for Graph<T>
 where
     T: Clone + Default + NumOps,
 {
-    fn add(&mut self, a: NodeIndex, b: NodeIndex) -> NodeIndex {
+    fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
         let x = self.graph.node_weight(a).unwrap().clone();
         let y = self.graph.node_weight(b).unwrap().clone();
         let res = x + y;
@@ -75,17 +59,17 @@ where
             .extend_with_edges([(a, c), (b, c)])
             .expect("Failed to add edge");
 
-        c
+        Ok(c)
     }
 
-    fn mul(&mut self, a: NodeIndex, b: NodeIndex) -> NodeIndex {
+    fn mul(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
         let x = self.graph.node_weight(a).unwrap().clone();
         let y = self.graph.node_weight(b).unwrap().clone();
         let res = x * y;
         let c = self.graph.add_node(res);
 
-        let _ac = self.graph.add_edge(a, c, 0).expect("Failed to add edge");
-        let _bc = self.graph.add_edge(b, c, 0).expect("Failed to add edge");
+        let _ac = self.graph.add_edge(a, c, 0)?;
+        let _bc = self.graph.add_edge(b, c, 0)?;
 
         // let fg = | graph: &mut dyn Arithmetic<NodeIndex>, store: &mut GradientStore, rhs: T | {
         //     //
@@ -99,6 +83,6 @@ where
         //     }
         //     Ok(())
         // };
-        c
+        Ok(c)
     }
 }

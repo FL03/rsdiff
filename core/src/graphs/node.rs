@@ -14,8 +14,14 @@ pub struct Node<C: Config> {
     updater: Option<GradientUpdater<C>>,
 }
 
-impl<C> Node<C> where C: Config {
-    pub fn new(inputs: impl IntoIterator<Item = Option<Id>>, updater: Option<GradientUpdater<C>>) -> Self {
+impl<C> Node<C>
+where
+    C: Config,
+{
+    pub fn new(
+        inputs: impl IntoIterator<Item = Option<Id>>,
+        updater: Option<GradientUpdater<C>>,
+    ) -> Self {
         Self {
             inputs: Vec::from_iter(inputs),
             updater,

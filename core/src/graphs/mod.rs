@@ -12,18 +12,20 @@ pub(crate) mod node;
 pub(crate) mod value;
 
 use crate::errors::Result;
-use daggy::petgraph::graph::NodeIndex;
-use daggy::Dag;
+use crate::stores::GradientStore;
+use daggy::{Dag, NodeIndex};
 use std::sync::Arc;
 
 pub type FnDag<T> = Dag<Value<T>, usize>;
 
 pub type GradientUpdater<C> = Arc<
-    dyn Fn(&mut <C as Config>::Grad, &<C as Config>::Store, NodeIndex) -> Result<()> + Send + Sync,
+    dyn Fn(&mut <C as Config>::Grad, &mut <C as Config>::Store, NodeIndex) -> Result<()>
+        + Send
+        + Sync,
 >;
 
 pub trait Config {
-    type Eval;
+    type Eval: Clone + Default;
     type Grad;
     type Store;
 }
@@ -46,12 +48,14 @@ mod tests {
 
     #[test]
     fn test_dag() {
-        let mut dag = FnGraph::new();
+        let mut dag = Graph::new();
         let a = dag.variable(1_f64);
         let b = dag.variable(1_f64);
         let c = dag.mul(a, b);
 
-        let d = dag.operator(vec![a, b], |v: Vec<f64>| v.iter().product());
+        let d = dag
+            .operator(vec![a, b], |v: Vec<f64>| v.iter().product())
+            .unwrap();
 
         let e = dag.add(c, a);
 

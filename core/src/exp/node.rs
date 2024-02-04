@@ -10,7 +10,7 @@ use super::{Config, GradientUpdater};
 use crate::cmp::id::Id;
 
 pub struct Node<C: Config> {
-    inputs: Vec<Option<Id>>, // Edges denote which nodes are connected to the current node, thus serving as inputs
+    inputs: Vec<Option<Id>>, 
     updater: Option<GradientUpdater<C>>,
 }
 

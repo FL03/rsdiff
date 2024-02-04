@@ -13,7 +13,7 @@ pub trait Store<K, V> {
 
     fn get_mut(&mut self, key: &K) -> Option<&mut V>;
 
-    fn insert(&mut self, key: K, value: V);
+    fn insert(&mut self, key: K, value: V) -> Option<V>;
 
     fn remove(&mut self, key: &K) -> Option<V>;
 

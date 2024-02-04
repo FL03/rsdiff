@@ -3,16 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Store;
-use crate::graphs::FnGraph;
 use daggy::petgraph::graph::IndexType;
 use daggy::NodeIndex;
+use std::any::Any;
 use std::collections::BTreeMap;
 
 pub struct GradientStore<Idx = NodeIndex>
 where
     Idx: IndexType,
 {
-    store: BTreeMap<Idx, Box<dyn std::any::Any>>,
+    store: BTreeMap<Idx, Box<dyn Any>>,
 }
 
 impl<Idx> GradientStore<Idx>
@@ -25,8 +25,8 @@ where
         }
     }
 
-    pub fn or_insert(&mut self, key: Idx, value: Box<dyn std::any::Any>) {
-        self.store.entry(key).or_insert(value);
+    pub fn or_insert(&mut self, key: Idx, value: Box<dyn Any>) -> &mut dyn Any {
+        self.store.entry(key).or_insert(value)
     }
 }
 
@@ -45,8 +45,8 @@ where
             .map(|v| v.downcast_mut::<T>().unwrap())
     }
 
-    fn insert(&mut self, key: Idx, value: T) {
-        self.store.insert(key, Box::new(value));
+    fn insert(&mut self, key: Idx, value: T) -> Option<T> {
+        self.store.insert(key, Box::new(value)).map(|v| v.downcast_ref::<T>().unwrap().clone())
     }
 
     fn remove(&mut self, key: &Idx) -> Option<T> {

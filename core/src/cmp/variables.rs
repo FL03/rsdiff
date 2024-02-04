@@ -14,7 +14,14 @@ pub struct Variable<T> {
 }
 
 impl<T> Variable<T> {
-    pub fn new(name: impl ToString) -> Self {
+    pub fn new(name: impl ToString, value: Option<T>) -> Self {
+        Self {
+            name: name.to_string(),
+            value: None,
+        }
+    }
+
+    pub fn symbolic(name: impl ToString) -> Self {
         Self {
             name: name.to_string(),
             value: None,
@@ -25,12 +32,21 @@ impl<T> Variable<T> {
         &self.name
     }
 
+    pub fn value(&self) -> Option<&T> {
+        self.value.as_ref()
+    }
+
     pub fn set(&mut self, value: T) {
         self.value = Some(value);
     }
+
+    pub fn with_value(mut self, value: T) -> Self {
+        self.value = Some(value);
+        self
+    }
 }
 
-impl std::fmt::Display for Variable<f64> {
+impl<T> std::fmt::Display for Variable<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name)
     }
@@ -55,9 +71,12 @@ where
 
     fn grad(&self, args: Variable<T>) -> Self::Gradient {
         if self.name() == args.name() {
-            // self == args
             return Constant::new(T::one());
         }
         Constant::new(T::zero())
     }
 }
+
+unsafe impl<T> Send for Variable<T> {}
+
+unsafe impl<T> Sync for Variable<T> {}

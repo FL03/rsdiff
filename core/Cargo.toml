@@ -26,7 +26,7 @@ test = true
 
 [dependencies]
 anyhow.workspace = true
-daggy = { features = [], version = "0.8" }
+daggy = { features = ["serde-1"], version = "0.8" }
 lazy_static = "1"
 num = "0.4"
 serde.workspace = true

@@ -5,11 +5,11 @@
 //! # Graphs
 //!
 //!
-pub use self::{graph::*, node::*, value::*};
+pub use self::{graph::*, node::*, edge::*};
 
 pub(crate) mod graph;
 pub(crate) mod node;
-pub(crate) mod value;
+pub(crate) mod edge;
 
 use crate::prelude::{Evaluate, Gradient, GradientStore, Result, Variable};
 use daggy::NodeIndex;
@@ -21,9 +21,6 @@ pub type GradientUpdater<C> = Arc<
         + Send
         + Sync,
 >;
-
-// pub type DiffOp<C> = Arc<dyn std::any::Any + Send + Sync>;
-// pub type Grad<T> = Arc<dyn Gradient<T, Gradient> + Send + Sync>;
 
 pub trait Config: Default {
     type DType;

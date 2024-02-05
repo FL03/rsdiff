@@ -2,10 +2,11 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Addition, Config, GradientUpdater};
+use super::{Addition, Config, Node, GradientUpdater};
 use crate::ops::{BinaryOp, Op};
 use crate::prelude::{Arithmetic, Evaluate, GradientStore, Result, Store, Variable};
 use daggy::petgraph::algo::toposort;
+use daggy::petgraph::visit::IntoEdges;
 use daggy::{Dag, NodeIndex};
 use num::traits::NumOps;
 use std::collections::HashMap;
@@ -56,6 +57,13 @@ where
 
         let mut gradients = GradientStore::new();
         gradients.insert(target, self.get(target).unwrap().clone());
+        for i in nodes {
+            if i == target {
+                continue;
+            }
+            let _node = self.get(i).unwrap().clone();
+            
+        }
         Ok(())
     }
 }

@@ -9,6 +9,7 @@ pub enum Args<T> {
     Unary(T),
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum CompareOp {
     Eq,
     Ge,
@@ -18,6 +19,7 @@ pub enum CompareOp {
     Ne,
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum BinaryOp {
     Add,
     Div,
@@ -27,6 +29,7 @@ pub enum BinaryOp {
     Sub,
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum UnaryOp {
     Abs,
     Ceil,
@@ -42,7 +45,7 @@ pub enum UnaryOp {
     Sqrt,
     Tan,
 }
-
+#[derive(Clone)]
 pub enum Op<T> {
     Binary(T, T, BinaryOp),
     Compare(T, T, CompareOp),

@@ -19,7 +19,7 @@ members = [
     "core",
     "derive",
     "macros"
-]
+, "tensor"]
 resolver = "2"
 
 [workspace.dependencies]

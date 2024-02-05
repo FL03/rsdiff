@@ -3,22 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{Addition, Config, GradientUpdater};
-use crate::ops::{Evaluate, Op};
-use crate::prelude::{Arithmetic, Constant, GradientStore, Result, Store, Variable};
+use crate::ops::{BinaryOp, Op};
+use crate::prelude::{Arithmetic, Evaluate, GradientStore, Result, Store, Variable};
 use daggy::petgraph::algo::toposort;
-use daggy::{Dag, EdgeIndex, NodeIndex};
+use daggy::{Dag, NodeIndex};
 use num::traits::NumOps;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-
-pub enum Node<C: Config> {
-    Constant(Constant<<C as Config>::DType>),
-    Var(Variable<<C as Config>::DType>),
-    Operand(Op<<C as Config>::DType>),
-}
+use std::sync::Arc;
 
 pub struct FnGraph<C: Config> {
-    graph: Dag<Variable<<C as Config>::DType>, Option<<C as Config>::Grad>>,
+    graph: Dag<Variable<C::DType>, Option<Op<Variable<C::DType>>>>,
     gradients: HashMap<usize, Option<GradientUpdater<C>>>,
 }
 
@@ -66,10 +60,28 @@ where
     }
 }
 
+impl<C> FnGraph<C>
+where
+  C: Config<Store = GradientStore<usize>>,
+    C::DType: Copy + Default + Evaluate<Output = Variable<C::DType>> + NumOps + 'static,
+    C::Eval: Arithmetic<NodeIndex>,
+{
+    pub fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
+        let x = self.graph.node_weight(a).unwrap().clone();
+        let y = self.graph.node_weight(b).unwrap().clone();
+        // let res = x + y;
+        let op = Addition(x.clone(), y.clone());
+        let grad = Op::Binary(x, y, BinaryOp::Add);
+        let c = self.graph.add_node(Variable::new("add", Some(op.eval())));
+        self.graph.extend_with_edges([(a, c, Some(grad.clone())), (b, c, Some(grad))])?;
+        Ok(c)
+    }
+}
+
 impl<C> Arithmetic<NodeIndex> for FnGraph<C>
 where
     C: Config<Store = GradientStore<usize>>,
-    C::DType: Copy + Default + Evaluate<Output = Variable<C::DType>> + NumOps + 'static,
+    C::DType: Clone + Default + Evaluate<Output = Variable<C::DType>> + NumOps + 'static,
     C::Eval: Arithmetic<NodeIndex>,
 {
     fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {

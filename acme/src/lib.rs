@@ -14,6 +14,8 @@ pub use acme_core as core;
 pub use acme_derive::*;
 #[cfg(feature = "macros")]
 pub use acme_macros::*;
+#[cfg(feature = "tensor")]
+pub use acme_tensor as tensor;
 
 pub mod prelude {
     #[cfg(feature = "core")]
@@ -22,4 +24,6 @@ pub mod prelude {
     pub use acme_derive::*;
     #[cfg(feature = "macros")]
     pub use acme_macros::*;
+    #[cfg(feature = "tensor")]
+    pub use crate::tensor::prelude::*;
 }

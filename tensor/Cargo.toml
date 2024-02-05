@@ -1,0 +1,19 @@
+[package]
+authors.workspace = true
+categories.workspace = true
+description.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+name = "acme-tensor"
+repository.workspace = true
+readme.workspace = true
+version.workspace = true
+
+[features]
+default = []
+
+
+
+[dependencies]
+num = "0.4"

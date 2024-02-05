@@ -1,4 +1,7 @@
-use super::BinaryOperation;
+/*
+    Appellation: arithmetic <mod>
+    Contrib: FL03 <jo3mccain@icloud.com>
+*/
 use std::ops::{Add, Div, Mul, Sub};
 
 pub struct Addition;

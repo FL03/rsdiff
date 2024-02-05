@@ -6,42 +6,27 @@
 //!
 //! A computational graph relies on weighted nodes to represent constants, operations, and variables.
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
-use super::{Config, GradientUpdater};
-use crate::cmp::id::Id;
+use crate::cmp::Variable;
+use crate::ops::Op;
 
-pub struct Node<C: Config> {
-    inputs: Vec<Option<Id>>,
-    updater: Option<GradientUpdater<C>>,
+pub enum Node<T> {
+    Const(T),
+    Var(Variable<T>),
+    Op(Op<Variable<T>>),
 }
 
-impl<C> Node<C>
-where
-    C: Config,
-{
-    pub fn new(
-        inputs: impl IntoIterator<Item = Option<Id>>,
-        updater: Option<GradientUpdater<C>>,
-    ) -> Self {
-        Self {
-            inputs: Vec::from_iter(inputs),
-            updater,
-        }
+impl<T> Node<T> {
+    pub fn constant(data: T) -> Self {
+        Self::Const(data)
     }
 
-    pub fn clear(&mut self) {
-        self.inputs.clear();
-        self.updater = None;
+    pub fn variable(name: impl ToString, value: Option<T>) -> Self {
+        Self::Var(Variable::new(name, value))
     }
 
-    pub fn inputs(&self) -> &Vec<Option<Id>> {
-        &self.inputs
+    pub fn operation(op: Op<Variable<T>>) -> Self {
+        Self::Op(op)
     }
 
-    pub fn inputs_mut(&mut self) -> &mut Vec<Option<Id>> {
-        &mut self.inputs
-    }
-
-    pub fn updater(&self) -> Option<&GradientUpdater<C>> {
-        self.updater.as_ref()
-    }
+    
 }

@@ -6,7 +6,7 @@ use super::Constant;
 use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 use serde::{Deserialize, Serialize};
-use std::ops::{self, Add, Div, Mul, Rem, Sub};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Variable<T> {
@@ -18,7 +18,7 @@ impl<T> Variable<T> {
     pub fn new(name: impl ToString, value: Option<T>) -> Self {
         Self {
             name: name.to_string(),
-            value: None,
+            value,
         }
     }
 
@@ -72,9 +72,9 @@ where
 
     fn grad(&self, args: Variable<T>) -> Self::Gradient {
         if self.name() == args.name() {
-            return Constant::new(T::one());
+            return Constant::one();
         }
-        Constant::new(T::zero())
+        Constant::zero()
     }
 }
 

@@ -10,7 +10,7 @@ pub struct Operator<C: Config> {
 }
 
 impl<C> Operator<C> where C: Config {
-    pub fn new(inputs: Vec<C::DType>, operation: C::Eval) -> Self {
-        Self { inputs, operation }
+    pub fn new() -> Self {
+        Self { inputs: Vec::new(), operation: C::Eval::default() }
     }
 }

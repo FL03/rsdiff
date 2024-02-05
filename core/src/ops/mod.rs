@@ -12,10 +12,10 @@ pub(crate) mod kinds;
 
 use std::marker::Tuple;
 
-pub trait Differentiable {
+pub trait Differentiable<T> {
     type Derivative;
 
-    fn derivative(&self) -> Self::Derivative;
+    fn derivative(&self, at: T) -> Self::Derivative;
 }
 
 pub trait Evaluate {
@@ -52,8 +52,8 @@ pub trait BinaryOperation<T> {
     fn eval(&self, lhs: T, rhs: T) -> Self::Output;
 }
 
-pub trait UnaryOperation<T> {
+pub trait UnaryOperation {
     type Output;
 
-    fn eval(&self, arg: T) -> Self::Output;
+    fn eval(self) -> Self::Output;
 }

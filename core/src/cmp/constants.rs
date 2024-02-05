@@ -62,14 +62,11 @@ where
     }
 }
 
-impl<T> Evaluate<()> for Constant<T>
-where
-    T: Clone,
-{
+impl<T> Evaluate for Constant<T> {
     type Output = T;
 
-    fn eval(&self) -> Self::Output {
-        self.0.clone()
+    fn eval(self) -> Self::Output {
+        self.0
     }
 }
 
@@ -116,115 +113,6 @@ unsafe impl<T> Send for Constant<T> {}
 
 unsafe impl<T> Sync for Constant<T> {}
 
-impl<T> ops::Add for Constant<T>
-where
-    T: ops::Add<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Constant::new(self.0 + rhs.0)
-    }
-}
-
-impl<T> ops::Add<T> for Constant<T>
-where
-    T: ops::Add<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn add(self, rhs: T) -> Self::Output {
-        Constant::new(self.0 + rhs)
-    }
-}
-
-impl<T> ops::Div for Constant<T>
-where
-    T: ops::Div<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        Constant::new(self.0 / rhs.0)
-    }
-}
-
-impl<T> ops::Div<T> for Constant<T>
-where
-    T: ops::Div<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn div(self, rhs: T) -> Self::Output {
-        Constant::new(self.0 / rhs)
-    }
-}
-
-impl<T> ops::Mul for Constant<T>
-where
-    T: ops::Mul<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        Constant::new(self.0 * rhs.0)
-    }
-}
-
-impl<T> ops::Mul<T> for Constant<T>
-where
-    T: ops::Mul<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn mul(self, rhs: T) -> Self::Output {
-        Constant::new(self.0 * rhs)
-    }
-}
-
-impl<T> ops::Rem for Constant<T>
-where
-    T: ops::Rem<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        Constant::new(self.0 % rhs.0)
-    }
-}
-
-impl<T> ops::Rem<T> for Constant<T>
-where
-    T: ops::Rem<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn rem(self, rhs: T) -> Self::Output {
-        Constant::new(self.0 % rhs)
-    }
-}
-
-impl<T> ops::Sub for Constant<T>
-where
-    T: ops::Sub<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Constant::new(self.0 - rhs.0)
-    }
-}
-
-impl<T> ops::Sub<T> for Constant<T>
-where
-    T: ops::Sub<Output = T>,
-{
-    type Output = Constant<T>;
-
-    fn sub(self, rhs: T) -> Self::Output {
-        Constant::new(self.0 - rhs)
-    }
-}
 
 impl<T> Num for Constant<T>
 where
@@ -262,3 +150,4 @@ where
         self.0.is_zero()
     }
 }
+

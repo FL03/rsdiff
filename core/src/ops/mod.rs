@@ -12,12 +12,16 @@ pub(crate) mod kinds;
 
 use std::marker::Tuple;
 
-pub trait Differentiable<Args> {}
+pub trait Differentiable {
+    type Derivative;
 
-pub trait Evaluate<T> {
+    fn derivative(&self) -> Self::Derivative;
+}
+
+pub trait Evaluate {
     type Output;
 
-    fn eval(&self) -> Self::Output;
+    fn eval(self) -> Self::Output;
 }
 
 pub trait Gradient<T>
@@ -41,18 +45,6 @@ where
 
     fn grad(&self, args: Self::Output) -> Option<Self::Output>;
 }
-
-// impl<A, B, S> Operand<A> for S
-// where
-//     A: Tuple,
-//     S: Fn(A) -> B,
-// {
-//     type Output = B;
-
-//     fn compute(&self, args: A) -> Self::Output {
-//         self(args)
-//     }
-// }
 
 pub trait BinaryOperation<T> {
     type Output;

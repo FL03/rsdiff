@@ -2,8 +2,8 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Config, GradientUpdater};
-use crate::ops::Op;
+use super::{Addition, Config, GradientUpdater};
+use crate::ops::{Evaluate, Op};
 use crate::prelude::{Arithmetic, Constant, GradientStore, Result, Store, Variable};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, EdgeIndex, NodeIndex};
@@ -18,8 +18,8 @@ pub enum Node<C: Config> {
 }
 
 pub struct FnGraph<C: Config> {
-    graph: Dag<Variable<<C as Config>::DType>, Option<GradientUpdater<C>>>,
-    gradients: Arc<Mutex<HashMap<usize, Option<GradientUpdater<C>>>>>,
+    graph: Dag<Variable<<C as Config>::DType>, Option<<C as Config>::Grad>>,
+    gradients: HashMap<usize, Option<GradientUpdater<C>>>,
 }
 
 impl<C> FnGraph<C>
@@ -29,13 +29,13 @@ where
     pub fn new() -> Self {
         Self {
             graph: Dag::new(),
-            gradients: Arc::new(Mutex::new(HashMap::new())),
+            gradients: HashMap::new(),
         }
     }
 
     pub fn clear(&mut self) {
         self.graph.clear();
-        self.gradients.lock().unwrap().clear();
+        self.gradients.clear();
     }
 
     pub fn get(&self, index: NodeIndex) -> Option<&Variable<<C as Config>::DType>> {
@@ -69,16 +69,18 @@ where
 impl<C> Arithmetic<NodeIndex> for FnGraph<C>
 where
     C: Config<Store = GradientStore<usize>>,
-    C::DType: Clone + Default + NumOps + 'static,
+    C::DType: Copy + Default + Evaluate<Output = Variable<C::DType>> + NumOps + 'static,
     C::Eval: Arithmetic<NodeIndex>,
 {
     fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
         let x = self.graph.node_weight(a).unwrap().clone();
         let y = self.graph.node_weight(b).unwrap().clone();
-        let res = x + y;
-        let c = self.graph.add_node(res);
-        let ex = self.graph.add_edge(a, c, None).unwrap();
-        let ey = self.graph.add_edge(b, c, None)?;
+        // let res = x + y;
+        let op = Addition(x, y);
+        let grad = Arc::new(op.clone());
+        let c = self.graph.add_node(Variable::new("add", Some(op.eval())));
+        // let ex = self.graph.add_edge(a, c, Some(grad.clone())).unwrap();
+        // let ey = self.graph.add_edge(b, c, None)?;
         // let fg = Arc::new(move | gradient: &mut <C as Config>::Eval, store: &mut <C as Config>::Store, rhs | -> Result<()> {
         //     let ai = a.index();
         //     let bi = b.index();

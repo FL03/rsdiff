@@ -53,14 +53,14 @@ impl<T> std::fmt::Display for Variable<T> {
     }
 }
 
-impl<T> Evaluate<T> for Variable<T>
+impl<T> Evaluate for Variable<T>
 where
-    T: Clone + Default,
+    T: Default,
 {
     type Output = T;
 
-    fn eval(&self) -> Self::Output {
-        self.value.clone().unwrap_or_default()
+    fn eval(self) -> Self::Output {
+        self.value.unwrap_or_default()
     }
 }
 
@@ -84,97 +84,105 @@ unsafe impl<T> Sync for Variable<T> {}
 
 impl<T> Add for Variable<T>
 where
-    T: Add<Output = T> + Clone + Default,
+    T: Add<Output = T> + Default,
 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
+        let name = format!("{} + {}", self.name, rhs.name);
         let value = self.eval() + rhs.eval();
-        Variable::new(format!("{} + {}", self.name, rhs.name), Some(value))
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Add<T> for Variable<T>
 where
-    T: Add<Output = T> + Clone + Default + std::fmt::Display,
+    T: Add<Output = T> + Default + std::fmt::Display,
 {
     type Output = Self;
 
     fn add(self, rhs: T) -> Self::Output {
-        let value = self.eval() + rhs.clone();
-        Variable::new(format!("{} + {}", self.name, rhs), Some(value))
+        let name = format!("{} + {}", self.name, rhs);
+        let value = self.eval() + rhs;
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Div for Variable<T>
 where
-    T: Div<Output = T> + Clone + Default,
+    T: Div<Output = T> + Default,
 {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
+        let name = format!("{} / {}", self.name, rhs.name);
         let value = self.eval() / rhs.eval();
-        Variable::new(format!("{} / {}", self.name, rhs.name), Some(value))
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Div<T> for Variable<T>
 where
-    T: Div<Output = T> + Clone + Default + std::fmt::Display,
+    T: Div<Output = T> + Default + std::fmt::Display,
 {
     type Output = Self;
 
     fn div(self, rhs: T) -> Self::Output {
-        let value = self.eval() / rhs.clone();
-        Variable::new(format!("{} / {}", self.name, rhs), Some(value))
+        let name = format!("{} / {}", self.name, rhs);
+        let value = self.eval() / rhs;
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Mul for Variable<T>
 where
-    T: Mul<Output = T> + Clone + Default,
+    T: Mul<Output = T> + Default,
 {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
+        let name = format!("{} * {}", self.name, rhs.name);
         let value = self.eval() * rhs.eval();
-        Variable::new(format!("{} * {}", self.name, rhs.name), Some(value))
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Mul<T> for Variable<T>
 where
-    T: Mul<Output = T> + Clone + Default + std::fmt::Display,
+    T: Mul<Output = T> + Default + std::fmt::Display,
 {
     type Output = Self;
 
     fn mul(self, rhs: T) -> Self::Output {
-        let value = self.eval() * rhs.clone();
-        Variable::new(format!("{} * {}", self.name, rhs), Some(value))
+        let name = format!("{} * {}", self.name, rhs);
+        let value = self.eval() * rhs;
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Sub for Variable<T>
 where
-    T: Sub<Output = T> + Clone + Default,
+    T: Sub<Output = T> + Default,
 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
+        let name = format!("{} - {}", self.name, rhs.name);
         let value = self.eval() - rhs.eval();
-        Variable::new(format!("{} - {}", self.name, rhs.name), Some(value))
+        Variable::new(name, Some(value))
     }
 }
 
 impl<T> Sub<T> for Variable<T>
 where
-    T: Sub<Output = T> + Clone + Default + std::fmt::Display,
+    T: Sub<Output = T> + Default + std::fmt::Display,
 {
     type Output = Self;
 
     fn sub(self, rhs: T) -> Self::Output {
-        let value = self.eval() - rhs.clone();
-        Variable::new(format!("{} - {}", self.name, rhs), Some(value))
+        let name = format!("{} - {}", self.name, rhs);
+        let value = self.eval() - rhs;
+        Variable::new(name, Some(value))
     }
 }
 
@@ -196,6 +204,6 @@ where
     }
 
     fn is_zero(&self) -> bool {
-        self.eval().is_zero()
+        self.clone().eval().is_zero()
     }
 }

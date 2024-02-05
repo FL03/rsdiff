@@ -11,6 +11,12 @@ pub struct Subtraction;
 
 macro_rules! impl_binary_op {
     ($op:ident, $bound:ident, $exp:expr) => {
+        impl $op {
+            pub fn new() -> Self {
+                Self
+            }
+        }
+
         impl<T> crate::ops::BinaryOperation<T> for $op
         where
             T: $bound<T, Output = T>,
@@ -19,18 +25,6 @@ macro_rules! impl_binary_op {
 
             fn eval(&self, lhs: T, rhs: T) -> Self::Output {
                 $exp(lhs, rhs)
-            }
-        }
-
-        impl $op {
-            pub fn new() -> Self {
-                Self
-            }
-        }
-
-        impl Default for $op {
-            fn default() -> Self {
-                Self::new()
             }
         }
     };

@@ -2,15 +2,18 @@
     Appellation: operators <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::exp::Config;
+use daggy::NodeIndex;
 
-pub struct Operator<C: Config> {
-    pub inputs: Vec<C::DType>,
-    pub operation: C::Eval,
+pub struct Operator {
+    pub consumers: Vec<NodeIndex>,
+    pub inputs: Vec<NodeIndex>,
 }
 
-impl<C> Operator<C> where C: Config {
+impl Operator {
     pub fn new() -> Self {
-        Self { inputs: Vec::new(), operation: C::Eval::default() }
+        Self {
+            consumers: Vec::new(),
+            inputs: Vec::new(),
+        }
     }
 }

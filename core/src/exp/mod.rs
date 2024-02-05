@@ -5,11 +5,11 @@
 //! # Graphs
 //!
 //!
-pub use self::{graph::*, node::*, edge::*};
+pub use self::{edge::*, graph::*, node::*};
 
+pub(crate) mod edge;
 pub(crate) mod graph;
 pub(crate) mod node;
-pub(crate) mod edge;
 
 use crate::prelude::{Evaluate, Gradient, GradientStore, Result, Variable};
 use daggy::NodeIndex;

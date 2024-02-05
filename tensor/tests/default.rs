@@ -1,5 +1,4 @@
 #[cfg(test)]
-
 #[test]
 fn compiles() {
     let add = |a, b| a + b;

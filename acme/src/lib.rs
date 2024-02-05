@@ -20,10 +20,10 @@ pub use acme_tensor as tensor;
 pub mod prelude {
     #[cfg(feature = "core")]
     pub use crate::core::prelude::*;
+    #[cfg(feature = "tensor")]
+    pub use crate::tensor::prelude::*;
     #[cfg(feature = "derive")]
     pub use acme_derive::*;
     #[cfg(feature = "macros")]
     pub use acme_macros::*;
-    #[cfg(feature = "tensor")]
-    pub use crate::tensor::prelude::*;
 }

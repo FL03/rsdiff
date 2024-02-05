@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # Edges
-//! 
-//! In computational graphs, edges 
+//!
+//! In computational graphs, edges
 use daggy::NodeIndex;
 use serde::{Deserialize, Serialize};
 
@@ -18,6 +18,4 @@ impl<T> Edge<T> {
     pub fn new(deps: Vec<NodeIndex>, value: T) -> Self {
         Self { deps, value }
     }
-
-    
 }

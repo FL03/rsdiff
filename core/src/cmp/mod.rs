@@ -25,7 +25,6 @@ pub enum FnNode<T> {
     Const(Constant<T>),
     Var(Variable<T>),
     Binary { left: NodeIndex, right: NodeIndex },
-    
 }
 
 impl<T> FnNode<T> {
@@ -40,7 +39,10 @@ impl<T> FnNode<T> {
 
 macro_rules! impl_op {
     ($name:ident, $val:tt) => {
-        impl<T> std::ops::Add for $name<T> where T: std::ops::Add<Output = T> {
+        impl<T> std::ops::Add for $name<T>
+        where
+            T: std::ops::Add<Output = T>,
+        {
             type Output = Self;
 
             fn add(self, rhs: $name<T>) -> Self::Output {
@@ -48,7 +50,10 @@ macro_rules! impl_op {
             }
         }
 
-        impl<T> std::ops::Add<T> for $name<T> where T: std::ops::Add<Output = T> {
+        impl<T> std::ops::Add<T> for $name<T>
+        where
+            T: std::ops::Add<Output = T>,
+        {
             type Output = Self;
 
             fn add(self, rhs: T) -> Self::Output {
@@ -60,7 +65,10 @@ macro_rules! impl_op {
 
 macro_rules! impl_add {
     ($name:ident) => {
-        impl<T> std::ops::Add for $name<T> where T: std::ops::Add<Output = T> {
+        impl<T> std::ops::Add for $name<T>
+        where
+            T: std::ops::Add<Output = T>,
+        {
             type Output = Self;
 
             fn add(self, rhs: $name<T>) -> Self::Output {
@@ -68,7 +76,10 @@ macro_rules! impl_add {
             }
         }
 
-        impl<T> std::ops::Add<T> for $name<T> where T: std::ops::Add<Output = T> {
+        impl<T> std::ops::Add<T> for $name<T>
+        where
+            T: std::ops::Add<Output = T>,
+        {
             type Output = Self;
 
             fn add(self, rhs: T) -> Self::Output {
@@ -80,7 +91,10 @@ macro_rules! impl_add {
 
 macro_rules! impl_div {
     ($name:ident) => {
-        impl<T> std::ops::Div for $name<T> where T: std::ops::Div<Output = T> {
+        impl<T> std::ops::Div for $name<T>
+        where
+            T: std::ops::Div<Output = T>,
+        {
             type Output = Self;
 
             fn div(self, rhs: $name<T>) -> Self::Output {
@@ -88,7 +102,10 @@ macro_rules! impl_div {
             }
         }
 
-        impl<T> std::ops::Div<T> for $name<T> where T: std::ops::Div<Output = T> {
+        impl<T> std::ops::Div<T> for $name<T>
+        where
+            T: std::ops::Div<Output = T>,
+        {
             type Output = Self;
 
             fn div(self, rhs: T) -> Self::Output {
@@ -100,7 +117,10 @@ macro_rules! impl_div {
 
 macro_rules! impl_mul {
     ($name:ident) => {
-        impl<T> std::ops::Mul for $name<T> where T: std::ops::Mul<Output = T> {
+        impl<T> std::ops::Mul for $name<T>
+        where
+            T: std::ops::Mul<Output = T>,
+        {
             type Output = Self;
 
             fn mul(self, rhs: $name<T>) -> Self::Output {
@@ -108,7 +128,10 @@ macro_rules! impl_mul {
             }
         }
 
-        impl<T> std::ops::Mul<T> for $name<T> where T: std::ops::Mul<Output = T> {
+        impl<T> std::ops::Mul<T> for $name<T>
+        where
+            T: std::ops::Mul<Output = T>,
+        {
             type Output = Self;
 
             fn mul(self, rhs: T) -> Self::Output {
@@ -120,7 +143,10 @@ macro_rules! impl_mul {
 
 macro_rules! impl_rem {
     ($name:ident) => {
-        impl<T> std::ops::Rem for $name<T> where T: std::ops::Rem<Output = T> {
+        impl<T> std::ops::Rem for $name<T>
+        where
+            T: std::ops::Rem<Output = T>,
+        {
             type Output = Self;
 
             fn rem(self, rhs: $name<T>) -> Self::Output {
@@ -128,7 +154,10 @@ macro_rules! impl_rem {
             }
         }
 
-        impl<T> std::ops::Rem<T> for $name<T> where T: std::ops::Rem<Output = T> {
+        impl<T> std::ops::Rem<T> for $name<T>
+        where
+            T: std::ops::Rem<Output = T>,
+        {
             type Output = Self;
 
             fn rem(self, rhs: T) -> Self::Output {
@@ -140,7 +169,10 @@ macro_rules! impl_rem {
 
 macro_rules! impl_sub {
     ($name:ident) => {
-        impl<T> std::ops::Sub for $name<T> where T: std::ops::Sub<Output = T> {
+        impl<T> std::ops::Sub for $name<T>
+        where
+            T: std::ops::Sub<Output = T>,
+        {
             type Output = $name<T>;
 
             fn sub(self, rhs: $name<T>) -> Self::Output {
@@ -148,7 +180,10 @@ macro_rules! impl_sub {
             }
         }
 
-        impl<T> std::ops::Sub<T> for $name<T> where T: std::ops::Sub<Output = T> {
+        impl<T> std::ops::Sub<T> for $name<T>
+        where
+            T: std::ops::Sub<Output = T>,
+        {
             type Output = $name<T>;
 
             fn sub(self, rhs: T) -> Self::Output {

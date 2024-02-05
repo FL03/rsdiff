@@ -9,6 +9,4 @@
 
 pub mod storage;
 
-pub mod prelude {
-
-}
+pub mod prelude {}

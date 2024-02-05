@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Addition, Config, Node, GradientUpdater};
+use super::{Addition, Config, GradientUpdater, Node};
 use crate::ops::{BinaryOp, Op};
 use crate::prelude::{Arithmetic, Evaluate, GradientStore, Result, Store, Variable};
 use daggy::petgraph::algo::toposort;
@@ -62,7 +62,6 @@ where
                 continue;
             }
             let _node = self.get(i).unwrap().clone();
-            
         }
         Ok(())
     }
@@ -70,7 +69,7 @@ where
 
 impl<C> FnGraph<C>
 where
-  C: Config<Store = GradientStore<usize>>,
+    C: Config<Store = GradientStore<usize>>,
     C::DType: Copy + Default + Evaluate<Output = Variable<C::DType>> + NumOps + 'static,
     C::Eval: Arithmetic<NodeIndex>,
 {
@@ -81,7 +80,8 @@ where
         let op = Addition(x.clone(), y.clone());
         let grad = Op::Binary(x, y, BinaryOp::Add);
         let c = self.graph.add_node(Variable::new("add", Some(op.eval())));
-        self.graph.extend_with_edges([(a, c, Some(grad.clone())), (b, c, Some(grad))])?;
+        self.graph
+            .extend_with_edges([(a, c, Some(grad.clone())), (b, c, Some(grad))])?;
         Ok(c)
     }
 }

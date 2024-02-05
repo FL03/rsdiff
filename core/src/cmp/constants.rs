@@ -113,7 +113,6 @@ unsafe impl<T> Send for Constant<T> {}
 
 unsafe impl<T> Sync for Constant<T> {}
 
-
 impl<T> Num for Constant<T>
 where
     T: Num,
@@ -150,4 +149,3 @@ where
         self.0.is_zero()
     }
 }
-

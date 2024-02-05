@@ -7,10 +7,10 @@ extern crate acme_core as acme;
 use acme::prelude::Result;
 use daggy::petgraph as pg;
 
-use pg::Outgoing;
+use daggy::Dag;
 use pg::algo::toposort;
 use pg::visit::IntoEdgesDirected;
-use daggy::Dag;
+use pg::Outgoing;
 
 fn main() -> Result<()> {
     let mut dag = Dag::<&str, &str>::new();

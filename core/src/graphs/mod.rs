@@ -11,6 +11,8 @@ pub(crate) mod graph;
 pub(crate) mod node;
 pub(crate) mod value;
 
+pub mod dynamic;
+
 use crate::prelude::Result;
 use daggy::{Dag, NodeIndex};
 use std::sync::Arc;

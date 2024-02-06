@@ -2,11 +2,9 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Addition, Config, GradientUpdater, Node};
-use crate::ops::{BinaryOp, Op};
+use super::{Config, GradientUpdater, Node};
 use crate::prelude::{Arithmetic, Evaluate, GradientStore, Result, Store, Variable};
 use daggy::petgraph::algo::toposort;
-use daggy::petgraph::visit::IntoEdges;
 use daggy::{Dag, NodeIndex};
 use num::traits::NumOps;
 use std::collections::HashMap;

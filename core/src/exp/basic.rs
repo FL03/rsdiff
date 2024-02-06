@@ -87,31 +87,37 @@ impl ComputeGraph {
     }
 
     // Method to compute gradients using backpropagation
-    fn grad(&mut self, output_node_id: usize) {
+    fn grad(&mut self, target: usize) {
         // Initialize gradient of output node with respect to itself
-        self.gradients.insert(output_node_id, 1.0);
+        self.gradients.insert(target, 1.0);
 
         // Compute gradients for all nodes in reverse order
-        for node_id in self.clone().nodes.iter().rev().map(|node| node.id) {
-            let node = self.nodes[node_id].clone();
-            let grad_output = *self.gradients.get(&node.id).unwrap_or(&Default::default());
+        for i in self.clone().nodes.iter().rev().map(|node| node.id) {
+            let node = self.nodes[i].clone();
+            let grad = *self.gradients.get(&node.id).unwrap_or(&Default::default());
 
             // Compute gradient for each input of the node
             for &input_id in &node.inputs {
+                let mut di = 0.0;
                 // Compute gradient contribution from the current node
                 let gradient_contribution = match node.operation.as_str() {
-                    "add" => grad_output,
+                    "add" => {
+                        di += grad;
+                        di
+                    },
                     "multiply" => {
+                        
                         // Compute the product of gradients
-                        let output_value = self.node_values[&node.id];
+                        // let output_value = self.node_values[&node.id];
                         let value = self.node_values[&input_id];
-                        grad_output * value
+                        di += grad * value;
+                        di
                     }
                     _ => 0.0, // Other operations have zero gradient contribution
                 };
 
                 // Update gradient for the input node
-                *self.gradients.entry(input_id).or_insert(0.0) += gradient_contribution;
+                *self.gradients.entry(input_id).or_insert(0.0) += di;
             }
         }
     }
@@ -127,12 +133,12 @@ mod tests {
         let mut graph = ComputeGraph::new();
 
         // Add nodes to the graph
-        let input1 = graph.variable("x".to_string(), Some(1.0));
-        let input2 = graph.variable("y".to_string(), Some(2.0));
-        let add_node = graph.add_node("Add".to_string(), vec![input1, input2], "add".to_string());
+        let x = graph.variable("x".to_string(), Some(1.0));
+        let y = graph.variable("y".to_string(), Some(2.0));
+        let add_node = graph.add_node("Add".to_string(), vec![x, y], "add".to_string());
         let multiply_node = graph.add_node(
             "Multiply".to_string(),
-            vec![add_node, input2],
+            vec![add_node, y],
             "multiply".to_string(),
         );
 
@@ -146,7 +152,7 @@ mod tests {
         graph.grad(multiply_node);
 
         // Check gradients
-        assert_eq!(graph.gradients[&add_node], 1.0);
-        assert_eq!(graph.gradients[&multiply_node], 5.0);
+        assert_eq!(graph.gradients[&x], 2.0);
+        assert_eq!(graph.gradients[&y], 5.0);
     }
 }

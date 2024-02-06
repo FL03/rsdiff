@@ -12,6 +12,7 @@ pub(crate) mod graph;
 pub(crate) mod node;
 
 pub mod basic;
+pub mod ops;
 
 pub use daggy::NodeIndex as Id;
 
@@ -33,37 +34,7 @@ pub trait Config: Default {
     type Store;
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
-pub struct Addition<T>(T, T);
 
-impl<T> Addition<T> {
-    pub fn new(a: T, b: T) -> Self {
-        Self(a, b)
-    }
-}
-
-impl<S, T> Evaluate for Addition<S>
-where
-    S: Evaluate<Output = T>,
-    T: std::ops::Add<Output = T>,
-{
-    type Output = T;
-
-    fn eval(self) -> Self::Output {
-        self.0.eval() + self.1.eval()
-    }
-}
-
-impl<T> Gradient<T> for Addition<T>
-where
-    T: Clone + Gradient<T> + std::ops::Add<Output = T>,
-{
-    type Gradient = Addition<<T as Gradient<T>>::Gradient>;
-
-    fn grad(&self, args: T) -> Self::Gradient {
-        Addition(self.0.grad(args.clone()), self.1.grad(args))
-    }
-}
 
 // pub struct Backend
 
@@ -93,21 +64,5 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::cmp::{Constant, Variable};
 
-    #[test]
-    fn test_addition() {
-        // let mut dag = FnGraph::new();
-        // let a = dag.variable('x', Some(1.0));
-        // let b = dag.variable('y', Some(1.0));
-        let add = Addition::new(Constant::new(1.0), Constant::new(1.0));
-        assert_eq!(add.eval(), 2.0);
-        let x = Variable::new("x", Some(1.0));
-        let y = Variable::new("y", Some(1.0));
-        let add = Addition::new(x.clone(), y.clone());
-        assert_eq!(add.clone().eval(), 2.0);
-        assert_eq!(add.grad(x.clone()).eval(), 1.0);
-        assert_eq!(add.grad(x).eval(), add.grad(y).eval())
-    }
 }

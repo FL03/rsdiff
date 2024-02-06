@@ -4,10 +4,10 @@
 */
 //! # Node
 //!
-//! A computational graph relies on weighted nodes to represent constants, operations, and variables.
+//!
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
 
-
-pub struct Node {
-    
+pub struct Node<T> {
+    data: Vec<T>,
+    operation: String,
 }

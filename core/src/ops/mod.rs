@@ -10,7 +10,14 @@ pub use self::{arithmetic::*, kinds::*};
 pub(crate) mod arithmetic;
 pub(crate) mod kinds;
 
+use crate::prelude::Result;
 use std::marker::Tuple;
+
+pub trait Backward {
+    type Store;
+
+    fn backward(&self) -> Result<Self::Store>;
+}
 
 pub trait Compute<T> {
     type Output;

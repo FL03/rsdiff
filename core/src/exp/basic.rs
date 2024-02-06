@@ -87,39 +87,39 @@ impl ComputeGraph {
     }
 
     // Method to compute gradients using backpropagation
-    fn grad(&mut self, target: usize) {
+    fn grad(&mut self, output_node_id: usize) -> HashMap<usize, f64> {
+        let mut gradients: HashMap<usize, f64> = HashMap::new();
+        let mut gradients_stack: Vec<(usize, f64)> = Vec::new();
+
         // Initialize gradient of output node with respect to itself
-        self.gradients.insert(target, 1.0);
+        gradients.insert(output_node_id, 1.0);
+        gradients_stack.push((output_node_id, 1.0));
 
         // Compute gradients for all nodes in reverse order
-        for i in self.clone().nodes.iter().rev().map(|node| node.id) {
-            let node = self.nodes[i].clone();
-            let grad = *self.gradients.get(&node.id).unwrap_or(&Default::default());
+        while let Some((node_id, grad_output)) = gradients_stack.pop() {
+            let node = &self.nodes[node_id];
 
             // Compute gradient for each input of the node
             for &input_id in &node.inputs {
-                let mut di = 0.0;
                 // Compute gradient contribution from the current node
                 let gradient_contribution = match node.operation.as_str() {
-                    "add" => {
-                        di += grad;
-                        di
-                    },
+                    "add" => grad_output,
                     "multiply" => {
-                        
                         // Compute the product of gradients
-                        // let output_value = self.node_values[&node.id];
-                        let value = self.node_values[&input_id];
-                        di += grad * value;
-                        di
+                        let output_value = self.node_values[&node_id];
+                        let input_value = self.node_values[&input_id];
+                        grad_output * input_value
                     }
                     _ => 0.0, // Other operations have zero gradient contribution
                 };
 
                 // Update gradient for the input node
-                *self.gradients.entry(input_id).or_insert(0.0) += di;
+                *gradients.entry(input_id).or_insert(0.0) += gradient_contribution;
+                gradients_stack.push((input_id, gradient_contribution));
             }
         }
+
+        gradients
     }
 }
 

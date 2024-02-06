@@ -5,10 +5,22 @@
 use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 use serde::{Deserialize, Serialize};
-use std::ops::{self, Deref, DerefMut, Neg, Not};
+use std::marker::ConstParamTy;
+use std::ops::{Deref, DerefMut, Neg, Not};
 
 #[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+    Clone,
+    ConstParamTy,
+    Copy,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
 )]
 #[repr(transparent)]
 pub struct Constant<T>(pub T);

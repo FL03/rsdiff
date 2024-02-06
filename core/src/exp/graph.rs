@@ -51,7 +51,7 @@ where
     C: Config,
     C::DType: Clone + Default + 'static,
 {
-    pub fn compute_gradients(&mut self, target: NodeIndex) -> Result<()> {
+    pub fn compute_gradients(&self, target: NodeIndex) -> Result<GradientStore> {
         // retrieve the topological order of the graph
         let nodes = toposort(&self.graph, None)?;
         // create a new gradient store
@@ -70,9 +70,13 @@ where
                     let mut grad = C::DType::default();
                     match name.as_str() {
                         "add" => {
-                            let a = self.get(args[0]).unwrap().clone();
-                            let b = self.get(args[1]).unwrap().clone();
-                            // grad = a + b;
+                            for _arg in args {
+                                // if let Some(n) = store.get(&arg) {
+                                //     grad += n.clone();
+                                // }
+                                // grad += arg_val;
+                            }
+                            store.insert(i, grad);
                         }
                         _ => {}
                     }
@@ -82,7 +86,7 @@ where
                 }
             }
         }
-        Ok(())
+        Ok(store)
     }
 }
 

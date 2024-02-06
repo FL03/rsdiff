@@ -5,8 +5,9 @@
 //! # Ids
 //!
 //!
-pub use self::{gradient::*, id::*};
+pub use self::{atomic::*, gradient::*, id::*};
 
+pub(crate) mod atomic;
 pub(crate) mod gradient;
 pub(crate) mod id;
 

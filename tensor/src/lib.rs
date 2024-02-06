@@ -6,7 +6,17 @@
 //!
 //!
 #![feature(fn_traits, tuple_trait, unboxed_closures)]
+pub use self::tensor::*;
 
-pub mod storage;
+pub(crate) mod tensor;
 
-pub mod prelude {}
+pub mod shape;
+pub mod store;
+
+pub(crate) use acme_core as core;
+
+pub mod prelude {
+    pub use crate::shape::*;
+    // pub use crate::storage::*;
+    pub use crate::tensor::*;
+}

@@ -7,11 +7,11 @@ use crate::stores::{GradientStore, Store};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
 
-pub struct Graph<T> {
+pub struct Dcg<T> {
     graph: Dag<T, usize>,
 }
 
-impl<T> Graph<T> {
+impl<T> Dcg<T> {
     pub fn new() -> Self {
         Self { graph: Dag::new() }
     }
@@ -29,7 +29,7 @@ impl<T> Graph<T> {
     }
 }
 
-impl<T> Graph<T>
+impl<T> Dcg<T>
 where
     T: Clone + Default + 'static,
 {

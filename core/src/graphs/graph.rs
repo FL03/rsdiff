@@ -4,20 +4,26 @@
 */
 use super::Arithmetic;
 use crate::cmp::FnNode;
+use crate::exp::ops::Addition;
 use crate::ops::Evaluate;
 use crate::prelude::Result;
 use crate::stores::{GradientStore, Store};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
 use num::traits::NumOps;
+use std::collections::HashMap;
 
 pub struct Graph<T> {
     graph: Dag<T, usize>,
+    ops: HashMap<NodeIndex, String>,
 }
 
 impl<T> Graph<T> {
     pub fn new() -> Self {
-        Self { graph: Dag::new() }
+        Self {
+            graph: Dag::new(),
+            ops: HashMap::new(),
+        }
     }
 
     pub fn clear(&mut self) {
@@ -42,6 +48,17 @@ where
 
         let mut gradients = GradientStore::new();
         gradients.insert(target, self.get(target).unwrap().clone());
+        for i in nodes {
+            let node = self.get(i).unwrap().clone();
+            if let Some(op) = self.ops.get(&i) {
+                match op.as_str() {
+                    "add" => {
+                        gradients.insert(i, node);
+                    }
+                    _ => {}
+                }
+            }
+        }
         Ok(())
     }
 }
@@ -54,7 +71,9 @@ where
         let x = self.graph.node_weight(a).unwrap().clone();
         let y = self.graph.node_weight(b).unwrap().clone();
         let res = x + y;
+
         let c = self.graph.add_node(res);
+        self.ops.insert(c, "add".to_string());
         self.graph
             .extend_with_edges([(a, c), (b, c)])
             .expect("Failed to add edge");

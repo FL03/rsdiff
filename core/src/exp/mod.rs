@@ -34,8 +34,6 @@ pub trait Config: Default {
     type Store;
 }
 
-
-
 // pub struct Backend
 
 pub struct ComputeConfig<T, E> {
@@ -63,6 +61,4 @@ where
 }
 
 #[cfg(test)]
-mod tests {
-
-}
+mod tests {}

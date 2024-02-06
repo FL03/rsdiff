@@ -5,15 +5,15 @@
 use daggy::NodeIndex;
 
 pub struct Operator {
-    pub consumers: Vec<NodeIndex>,
-    pub inputs: Vec<NodeIndex>,
+    inputs: Vec<NodeIndex>,
+    name: String,
 }
 
 impl Operator {
     pub fn new() -> Self {
         Self {
-            consumers: Vec::new(),
             inputs: Vec::new(),
+            name: String::new(),
         }
     }
 }

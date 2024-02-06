@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct FnGraph<C: Config> {
-    graph: Dag<Variable<C::DType>, Option<Op<Variable<C::DType>>>>,
+    graph: Dag<Node<C::DType>, Option<C::DType>>,
     gradients: HashMap<usize, Option<GradientUpdater<C>>>,
 }
 
@@ -33,7 +33,7 @@ where
         self.gradients.clear();
     }
 
-    pub fn get(&self, index: NodeIndex) -> Option<&Variable<<C as Config>::DType>> {
+    pub fn get(&self, index: NodeIndex) -> Option<&Node<<C as Config>::DType>> {
         self.graph.node_weight(index)
     }
 
@@ -43,7 +43,8 @@ where
         value: Option<<C as Config>::DType>,
     ) -> NodeIndex {
         let var = Variable::new(name, value);
-        self.graph.add_node(var)
+        let node = Node::Var(var);
+        self.graph.add_node(node)
     }
 }
 
@@ -53,15 +54,35 @@ where
     C::DType: Clone + Default + 'static,
 {
     pub fn compute_gradients(&mut self, target: NodeIndex) -> Result<()> {
+        // retrieve the topological order of the graph
         let nodes = toposort(&self.graph, None)?;
-
-        let mut gradients = GradientStore::new();
-        gradients.insert(target, self.get(target).unwrap().clone());
+        // create a new gradient store
+        let mut store = GradientStore::new();
+        // retrieve the target node
+        let node_t = self.get(target).unwrap().clone();
+        // insert the target node into the store
+        store.insert(target, node_t.clone());
         for i in nodes {
             if i == target {
                 continue;
             }
-            let _node = self.get(i).unwrap().clone();
+            let node = self.get(i).unwrap().clone();
+            match node {
+                Node::Op { name, args } => {
+                    let mut grad = C::DType::default();
+                    match name.as_str() {
+                        "add" => {
+                            let a = self.get(args[0]).unwrap().clone();
+                            let b = self.get(args[1]).unwrap().clone();
+                            // grad = a + b;
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {
+                    store.insert(i, C::DType::default());
+                }
+            }
         }
         Ok(())
     }
@@ -77,66 +98,17 @@ where
         let x = self.graph.node_weight(a).unwrap().clone();
         let y = self.graph.node_weight(b).unwrap().clone();
         // let res = x + y;
-        let op = Addition(x.clone(), y.clone());
-        let grad = Op::Binary(x, y, BinaryOp::Add);
-        let c = self.graph.add_node(Variable::new("add", Some(op.eval())));
-        self.graph
-            .extend_with_edges([(a, c, Some(grad.clone())), (b, c, Some(grad))])?;
-        Ok(c)
-    }
-}
+        // let op = Addition(x.clone(), y.clone());
+        // let grad = Op::Binary(x, y, BinaryOp::Add);
+        let node = Node::Op {
+            name: "add".to_string(),
+            args: vec![a, b],
+        };
+        let c = self.graph.add_node(node);
 
-impl<C> Arithmetic<NodeIndex> for FnGraph<C>
-where
-    C: Config<Store = GradientStore<usize>>,
-    C::DType: Clone + Default + Evaluate<Output = Variable<C::DType>> + NumOps + 'static,
-    C::Eval: Arithmetic<NodeIndex>,
-{
-    fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.graph.node_weight(a).unwrap().clone();
-        let y = self.graph.node_weight(b).unwrap().clone();
-        // let res = x + y;
-        let op = Addition(x, y);
-        let grad = Arc::new(op.clone());
-        let c = self.graph.add_node(Variable::new("add", Some(op.eval())));
-        // let ex = self.graph.add_edge(a, c, Some(grad.clone())).unwrap();
-        // let ey = self.graph.add_edge(b, c, None)?;
-        // let fg = Arc::new(move | gradient: &mut <C as Config>::Eval, store: &mut <C as Config>::Store, rhs | -> Result<()> {
-        //     let ai = a.index();
-        //     let bi = b.index();
-        //     //
-        //     if let Some(grad) = store.get(&ai) {
-        //         let grad = gradient.add(*grad, b)?;
-        //         store.add_gradient(self, ex.index(), &grad);
-        //     }
-        //     if let Some(grad) = store.get(&bi) {
-        //         let grad = gradient.add(*grad, a)?;
-        //         store.add_gradient(self, ey.index(), &grad);
-        //     }
-        //     Ok(())
-        // });
-
-        // self.gradients.lock().unwrap().insert(ex.index(), Some(fg));
+        let _ac = self.graph.add_edge(a, c, None)?;
+        let _bc = self.graph.add_edge(b, c, None)?;
 
         Ok(c)
-    }
-
-    fn mul(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.graph.node_weight(a).unwrap().clone();
-        let y = self.graph.node_weight(b).unwrap().clone();
-        let res = x * y;
-        let c = self.graph.add_node(res);
-        self.graph
-            .extend_with_edges([(a, c), (b, c)])
-            .expect("Failed to add edge");
-        Ok(c)
-    }
-}
-
-pub struct AddOp;
-
-impl AddOp {
-    pub fn new() -> Self {
-        Self
     }
 }

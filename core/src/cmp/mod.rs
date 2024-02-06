@@ -25,6 +25,7 @@ pub enum FnNode<T> {
     Const(Constant<T>),
     Var(Variable<T>),
     Binary { left: NodeIndex, right: NodeIndex },
+    Operator {},
 }
 
 impl<T> FnNode<T> {

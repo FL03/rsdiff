@@ -11,6 +11,10 @@ pub(crate) mod edge;
 pub(crate) mod graph;
 pub(crate) mod node;
 
+pub mod basic;
+
+pub use daggy::NodeIndex as Id;
+
 use crate::prelude::{Evaluate, Gradient, GradientStore, Result, Variable};
 use daggy::NodeIndex;
 use std::marker::PhantomData;
@@ -90,13 +94,20 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cmp::{Constant, Variable};
 
     #[test]
-    fn test_dag() {
+    fn test_addition() {
         // let mut dag = FnGraph::new();
         // let a = dag.variable('x', Some(1.0));
         // let b = dag.variable('y', Some(1.0));
-
-        // assert_eq!(*dag.get(e).unwrap(), 2.0);
+        let add = Addition::new(Constant::new(1.0), Constant::new(1.0));
+        assert_eq!(add.eval(), 2.0);
+        let x = Variable::new("x", Some(1.0));
+        let y = Variable::new("y", Some(1.0));
+        let add = Addition::new(x.clone(), y.clone());
+        assert_eq!(add.clone().eval(), 2.0);
+        assert_eq!(add.grad(x.clone()).eval(), 1.0);
+        assert_eq!(add.grad(x).eval(), add.grad(y).eval())
     }
 }

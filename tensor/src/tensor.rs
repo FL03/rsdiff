@@ -128,3 +128,9 @@ impl<T> Index<&[usize]> for Tensor<T> {
         self.get(index).unwrap()
     }
 }
+
+impl<T> IndexMut<&[usize]> for Tensor<T> {
+    fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
+        self.get_mut(index).unwrap()
+    }
+}

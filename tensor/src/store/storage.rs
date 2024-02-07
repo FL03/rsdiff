@@ -2,28 +2,40 @@
     Appellation: storage <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use std::any::Any;
 
-pub struct Storage {
-    pub(crate) data: Vec<Box<dyn Any + 'static>>,
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Storage<T> {
+    pub(crate) data: Vec<T>,
 }
 
-impl Storage {
+impl<T> Storage<T> {
     pub fn new() -> Self {
         Self { data: Vec::new() }
     }
 
-    pub fn push<T: 'static>(&mut self, value: T) {
-        self.data.push(Box::new(value));
+    pub fn insert(&mut self, index: usize, value: T) {
+        self.data.insert(index, value);
     }
 
-    pub fn get<T: 'static>(&self, index: usize) -> Option<&T> {
-        self.data.get(index).and_then(|value| value.downcast_ref())
+    pub fn push(&mut self, value: T) {
+        self.data.push(value);
     }
 
-    pub fn get_mut<T: 'static>(&mut self, index: usize) -> Option<&mut T> {
-        self.data
-            .get_mut(index)
-            .and_then(|value| value.downcast_mut())
+    pub fn get(&self, index: usize) -> Option<&T> {
+        self.data.get(index)
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        self.data.get_mut(index)
+    }
+
+    pub fn remove(&mut self, index: usize) -> T {
+        self.data.remove(index)
+    }
+}
+
+impl<T> Default for Storage<T> {
+    fn default() -> Self {
+        Self::new()
     }
 }

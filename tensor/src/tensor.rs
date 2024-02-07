@@ -20,18 +20,17 @@ pub struct Tensor<T> {
 
 impl<T> Tensor<T> {
     pub fn from_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
-        let id = AtomicId::new();
         let layout = Layout::contiguous(shape);
         Self {
-            id,
+            id: AtomicId::new(),
             layout,
             store: Arc::new(RwLock::new(store)),
         }
     }
 
     // Function to get the index of the data based on coordinates
-    fn index(&self, coords: impl AsRef<[usize]>) -> usize {
-        let mut index = self.layout.offset;
+    fn position(&self, coords: impl AsRef<[usize]>) -> usize {
+        let mut index = self.layout().offset();
         for (i, &coord) in coords.as_ref().iter().enumerate() {
             index += coord * self.layout.stride[i];
         }

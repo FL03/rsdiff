@@ -68,8 +68,8 @@ where
     T: Clone + Default + NumOps,
 {
     fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.graph.node_weight(a).unwrap().clone();
-        let y = self.graph.node_weight(b).unwrap().clone();
+        let x = self.get(a).unwrap().clone();
+        let y = self.get(b).unwrap().clone();
         let res = x + y;
 
         let c = self.graph.add_node(res);

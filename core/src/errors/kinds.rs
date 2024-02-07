@@ -26,10 +26,17 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 #[serde(rename_all = "camelCase")]
 #[strum(serialize_all = "camelCase")]
 pub enum ErrorKind {
-    Func,
+    Func(FuncError),
     Graph,
+    Sync,
     #[default]
     Unknown,
+}
+
+impl From<FuncError> for ErrorKind {
+    fn from(e: FuncError) -> Self {
+        ErrorKind::Func(e)
+    }
 }
 
 #[derive(
@@ -53,8 +60,7 @@ pub enum ErrorKind {
 #[serde(rename_all = "camelCase")]
 #[strum(serialize_all = "camelCase")]
 pub enum FuncError {
+    #[default]
     ArgCount,
     ArgType,
-    #[default]
-    Unknown,
 }

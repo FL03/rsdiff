@@ -54,3 +54,9 @@ where
         Self::new(ErrorKind::Graph, format!("{:?}", err.node_id()))
     }
 }
+
+impl<T> From<std::sync::TryLockError<T>> for Error {
+    fn from(err: std::sync::TryLockError<T>) -> Self {
+        Self::new(ErrorKind::Sync, err.to_string())
+    }
+}

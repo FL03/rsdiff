@@ -17,6 +17,7 @@ pub(crate) mod exp;
 pub mod cmp;
 pub mod errors;
 pub mod graphs;
+pub mod hkt;
 pub mod ops;
 pub mod stores;
 

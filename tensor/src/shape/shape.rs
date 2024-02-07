@@ -31,6 +31,10 @@ impl Shape {
         Self(Vec::new())
     }
 
+    pub fn dims(&self) -> &[usize] {
+        &self.0
+    }
+
     pub fn elements(&self) -> usize {
         self.0.iter().product()
     }

@@ -28,14 +28,17 @@ where
 
 impl<T> Gradient<T> for Multiply<T>
 where
-    T: Clone + Gradient<T> + std::ops::Add<Output = T>,
-    T::Gradient: Evaluate<Output = T>,
+    T: Clone
+        + Evaluate<Output = T>
+        + Gradient<T, Gradient = T>
+        + std::ops::Add<Output = T>
+        + std::ops::Mul<Output = T>,
 {
     type Gradient = Addition<Multiply<T>>;
 
     fn grad(&self, args: T) -> Self::Gradient {
-        let a = Multiply(self.0.grad(args.clone()).eval(), self.1.clone());
-        let b = Multiply(self.0.clone(), self.1.grad(args).eval());
+        let a = Multiply(self.0.grad(args.clone()).eval(), self.1.clone().eval());
+        let b = Multiply(self.0.clone().eval(), self.1.grad(args).eval());
         Addition::new(a, b)
     }
 }

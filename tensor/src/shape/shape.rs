@@ -6,6 +6,19 @@ use super::Rank;
 use serde::{Deserialize, Serialize};
 use std::ops::{self, Deref};
 
+pub trait IntoShape {
+    fn into_shape(self) -> Shape;
+}
+
+impl<S> IntoShape for S
+where
+    S: Into<Shape>,
+{
+    fn into_shape(self) -> Shape {
+        self.into()
+    }
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Shape(Vec<usize>);
 
@@ -112,6 +125,18 @@ impl From<()> for Shape {
 impl From<usize> for Shape {
     fn from(dim: usize) -> Self {
         Self(vec![dim])
+    }
+}
+
+impl From<Vec<usize>> for Shape {
+    fn from(shape: Vec<usize>) -> Self {
+        Self(shape)
+    }
+}
+
+impl From<&[usize]> for Shape {
+    fn from(shape: &[usize]) -> Self {
+        Self(shape.to_vec())
     }
 }
 

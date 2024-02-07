@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-use crate::shape::Shape;
+use crate::shape::{IntoShape, Shape};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Layout {
@@ -21,8 +21,8 @@ impl Layout {
         }
     }
 
-    pub fn contiguous(shape: impl Into<Shape>) -> Self {
-        let shape = shape.into();
+    pub fn contiguous(shape: impl IntoShape) -> Self {
+        let shape = shape.into_shape();
         let stride = shape.stride_contiguous();
         Self {
             offset: 0,
@@ -31,14 +31,18 @@ impl Layout {
         }
     }
 
-    pub fn contiguous_with_offset(shape: impl Into<Shape>, offset: usize) -> Self {
-        let shape = shape.into();
+    pub fn contiguous_with_offset(shape: impl IntoShape, offset: usize) -> Self {
+        let shape = shape.into_shape();
         let stride = shape.stride_contiguous();
         Self {
             offset,
             shape,
             stride,
         }
+    }
+
+    pub fn elements(&self) -> usize {
+        self.shape.elements()
     }
 
     pub fn offset(&self) -> usize {

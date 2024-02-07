@@ -6,41 +6,36 @@ use crate::core::cmp::id::AtomicId;
 use crate::data::Scalar;
 use crate::shape::{IntoShape, Rank, Shape};
 use crate::store::Layout;
-use std::ops::{Index, IndexMut};
+// use std::ops::{Index, IndexMut};
+use std::sync::{Arc, RwLock};
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub(crate) type TensorStore<T> = Arc<RwLock<Vec<T>>>;
+
+#[derive(Clone, Debug)]
 pub struct Tensor<T> {
     id: AtomicId,
     layout: Layout,
-    store: Vec<T>,
+    store: TensorStore<T>,
 }
 
 impl<T> Tensor<T> {
     pub fn from_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
         let id = AtomicId::new();
         let layout = Layout::contiguous(shape);
-        Self { id, layout, store }
+        Self {
+            id,
+            layout,
+            store: Arc::new(RwLock::new(store)),
+        }
     }
 
     // Function to get the index of the data based on coordinates
-    fn index(&self, coords: &[usize]) -> usize {
+    fn index(&self, coords: impl AsRef<[usize]>) -> usize {
         let mut index = self.layout.offset;
-        for (i, &coord) in coords.iter().enumerate() {
+        for (i, &coord) in coords.as_ref().iter().enumerate() {
             index += coord * self.layout.stride[i];
         }
         index
-    }
-
-    // Function to get a reference to an element at given coordinates
-    fn get(&self, coords: &[usize]) -> Option<&T> {
-        let index = self.index(coords);
-        self.store.get(index)
-    }
-
-    // Function to get a mutable reference to an element at given coordinates
-    fn get_mut(&mut self, coords: &[usize]) -> Option<&mut T> {
-        let index = self.index(coords);
-        self.store.get_mut(index)
     }
 
     pub fn id(&self) -> usize {
@@ -66,20 +61,21 @@ impl<T> Tensor<T> {
 
 impl<T> Tensor<T>
 where
-    T: Clone + Default,
+    T: Clone,
 {
-    pub fn empty(shape: impl IntoShape) -> Self {
-        let id = AtomicId::new();
-        let layout = Layout::contiguous(shape);
-        let store = vec![T::default(); layout.elements()];
-        Self { id, layout, store }
+    pub fn empty(shape: impl IntoShape) -> Self
+    where
+        T: Default,
+    {
+        let shape = shape.into_shape();
+        let store = vec![T::default(); shape.elements()];
+        Self::from_vec(shape, store)
     }
 
     pub fn fill(shape: impl IntoShape, value: T) -> Self {
-        let id = AtomicId::new();
-        let layout = Layout::contiguous(shape);
-        let store = vec![value; layout.elements()];
-        Self { id, layout, store }
+        let shape = shape.into_shape();
+        let store = vec![value; shape.elements()];
+        Self::from_vec(shape, store)
     }
 }
 
@@ -95,42 +91,43 @@ where
             panic!("step must be non-zero");
         }
 
-        let id = AtomicId::new();
         let mut store = vec![start];
-        let layout = Layout::contiguous(store.len());
         let mut cur = T::zero();
         while store.last().unwrap() < &end {
             cur += step;
             store.push(cur);
         }
-        Self { id, layout, store }
+        Self::from_vec(store.len(), store)
     }
 
     pub fn ones(shape: impl IntoShape) -> Self {
-        let id = AtomicId::new();
-        let layout = Layout::contiguous(shape);
-        let store = vec![T::one(); layout.elements()];
-        Self { id, layout, store }
+        Self::fill(shape, T::one())
     }
 
     pub fn zeros(shape: impl IntoShape) -> Self {
-        let id = AtomicId::new();
-        let layout = Layout::contiguous(shape);
-        let store = vec![T::zero(); layout.elements()];
-        Self { id, layout, store }
+        Self::fill(shape, T::zero())
     }
 }
 
-impl<T> Index<&[usize]> for Tensor<T> {
-    type Output = T;
+// impl<T> Index<&[usize]> for Tensor<T> {
+//     type Output = T;
 
-    fn index(&self, index: &[usize]) -> &Self::Output {
-        self.get(index).unwrap()
-    }
-}
+//     fn index(&self, index: &[usize]) -> &Self::Output {
+//         self.get(index).unwrap()
+//     }
+// }
 
-impl<T> IndexMut<&[usize]> for Tensor<T> {
-    fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
-        self.get_mut(index).unwrap()
+// impl<T> IndexMut<&[usize]> for Tensor<T> {
+//     fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
+//         self.get_mut(index).unwrap()
+//     }
+// }
+
+impl<T> PartialEq for Tensor<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
     }
 }

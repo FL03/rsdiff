@@ -7,7 +7,7 @@ use tensor::Tensor;
 fn test_tensor() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape);
-    let b = Tensor::<f64>::ones(shape);
+    let b = Tensor::<f64>::zeros(shape);
 
-    assert_eq!(a[&[1, 1]], b[&[0, 1]]);
+    assert_ne!(&a, &b);
 }

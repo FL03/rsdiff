@@ -6,42 +6,39 @@
 //!
 //! A computational graph relies on weighted nodes to represent constants, operations, and variables.
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
-use super::{Config, GradientUpdater};
-use crate::cmp::id::Id;
+use daggy::NodeIndex;
 
-pub struct Node<C: Config> {
-    inputs: Vec<Option<Id>>,
-    updater: Option<GradientUpdater<C>>,
+#[derive(Clone, Debug, Default)]
+pub struct Node {
+    inputs: Vec<NodeIndex>,
+    op: String,
 }
 
-impl<C> Node<C>
-where
-    C: Config,
-{
+impl Node {
     pub fn new(
-        inputs: impl IntoIterator<Item = Option<Id>>,
-        updater: Option<GradientUpdater<C>>,
+        inputs: impl IntoIterator<Item = NodeIndex>,
+        op: impl ToString,
     ) -> Self {
         Self {
             inputs: Vec::from_iter(inputs),
-            updater,
+            op: op.to_string(),
         }
     }
 
     pub fn clear(&mut self) {
         self.inputs.clear();
-        self.updater = None;
+        self.op = String::new();
     }
 
-    pub fn inputs(&self) -> &Vec<Option<Id>> {
+    pub fn inputs(&self) -> &[NodeIndex] {
         &self.inputs
     }
 
-    pub fn inputs_mut(&mut self) -> &mut Vec<Option<Id>> {
+    pub fn inputs_mut(&mut self) -> &mut Vec<NodeIndex> {
         &mut self.inputs
     }
 
-    pub fn updater(&self) -> Option<&GradientUpdater<C>> {
-        self.updater.as_ref()
+    pub fn operation(&self) -> &str {
+        &self.op
     }
 }

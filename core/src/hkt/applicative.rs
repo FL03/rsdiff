@@ -7,7 +7,7 @@ use super::HKT;
 
 use std::rc::Rc;
 
-trait Applicative<U>: Functor<U> {
+pub trait Applicative<U>: Functor<U> {
     fn pure_(value: U) -> Self::T
     where
         Self: HKT<U, C = U>;

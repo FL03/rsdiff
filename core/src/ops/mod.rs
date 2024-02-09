@@ -38,6 +38,14 @@ pub trait Evaluate {
     fn eval(self) -> Self::Output;
 }
 
+impl Evaluate for f64 {
+    type Output = f64;
+
+    fn eval(self) -> Self::Output {
+        self
+    }
+}
+
 pub trait Gradient<T>
 where
     T: Gradient<T>,

@@ -2,27 +2,25 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Arithmetic;
-use crate::cmp::FnNode;
-use crate::exp::ops::Addition;
-use crate::ops::Evaluate;
+use super::{Config, Node,};
 use crate::prelude::Result;
 use crate::stores::{GradientStore, Store};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
-use num::traits::NumOps;
+use num::traits::{NumAssign, NumOps};
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct Graph<T> {
-    graph: Dag<T, usize>,
-    ops: HashMap<NodeIndex, String>,
+    graph: Dag<Node, usize>,
+    vals: HashMap<NodeIndex, T>,
 }
 
 impl<T> Graph<T> {
     pub fn new() -> Self {
         Self {
             graph: Dag::new(),
-            ops: HashMap::new(),
+            vals: HashMap::new(),
         }
     }
 
@@ -30,63 +28,78 @@ impl<T> Graph<T> {
         self.graph.clear();
     }
 
-    pub fn get(&self, index: NodeIndex) -> Option<&T> {
+    pub fn get(&self, index: NodeIndex) -> Option<&Node> {
         self.graph.node_weight(index)
     }
 
+    pub fn get_value(&self, index: NodeIndex) -> Option<&T> {
+        self.vals.get(&index)
+    }
+
     pub fn variable(&mut self, value: T) -> NodeIndex {
-        self.graph.add_node(value)
+        let v = self.graph.add_node(Node::new(vec![], "input"));
+        self.vals.insert(v, value);
+        v
     }
 }
 
 impl<T> Graph<T>
 where
-    T: Clone + Default + 'static,
+    T: Copy + Default + NumAssign + NumOps + 'static,
 {
-    pub fn compute_gradients(&mut self, target: NodeIndex) -> Result<()> {
+    pub fn gradient_at(&mut self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {
+        let graph = self.clone();
         let nodes = toposort(&self.graph, None)?;
 
-        let mut gradients = GradientStore::new();
-        gradients.insert(target, self.get(target).unwrap().clone());
-        for i in nodes {
-            let node = self.get(i).unwrap().clone();
-            if let Some(op) = self.ops.get(&i) {
-                match op.as_str() {
+        let mut gradients = HashMap::new();
+        gradients.insert(target, *self.get_value(target).unwrap_or(&T::one()));
+        for i in nodes.iter().rev() {
+            let node = graph.get(*i).unwrap_or(&Node::default()).clone();
+            let grad = *gradients.get(&i).unwrap_or(&T::default());
+            for input in node.inputs() {
+                let dt = match node.operation() {
                     "add" => {
-                        gradients.insert(i, node);
-                    }
-                    _ => {}
-                }
+                        grad
+                    },
+                    "mul" => {
+                        let x = *graph.get_value(*i).unwrap();
+                        let out = *graph.get_value(*input).unwrap();
+                        grad * x / out
+                    },
+                    _ => T::default()
+                };
+                *gradients.entry(*input).or_insert(T::default()) += dt;
             }
+            
+            
         }
-        Ok(())
+        Ok(gradients)
     }
 }
 
-impl<T> Arithmetic<NodeIndex> for Graph<T>
+impl<T> Graph<T>
 where
     T: Clone + Default + NumOps,
 {
-    fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.get(a).unwrap().clone();
-        let y = self.get(b).unwrap().clone();
+    pub fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
+        let x = self.get_value(a).unwrap().clone();
+        let y = self.get_value(b).unwrap().clone();
         let res = x + y;
 
-        let c = self.graph.add_node(res);
-        self.ops.insert(c, "add".to_string());
-        self.graph
-            .extend_with_edges([(a, c), (b, c)])
-            .expect("Failed to add edge");
+        let c = self.graph.add_node(Node::new(vec![a, b], "add"));
+        self.vals.insert(c, res);
+        let _ac = self.graph.add_edge(a, c, 0)?;
+        let _bc = self.graph.add_edge(b, c, 0)?;
 
         Ok(c)
     }
 
-    fn mul(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.graph.node_weight(a).unwrap().clone();
-        let y = self.graph.node_weight(b).unwrap().clone();
+    pub fn mul(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
+        let x = self.get_value(a).unwrap().clone();
+        let y = self.get_value(b).unwrap().clone();
         let res = x * y;
-        let c = self.graph.add_node(res);
-
+        let c = self.graph.add_node(Node::new(vec![a, b], "mul"));
+        self.vals.insert(c, res);
         let _ac = self.graph.add_edge(a, c, 0)?;
         let _bc = self.graph.add_edge(b, c, 0)?;
 

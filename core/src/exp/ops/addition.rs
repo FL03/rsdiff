@@ -15,8 +15,8 @@ impl<T> Addition<T> {
 
 impl<S, T> Evaluate for Addition<S>
 where
-    S: Evaluate<Output = T>,
-    T: std::ops::Add<Output = T>,
+    S: Evaluate,
+    S::Output: std::ops::Add<Output = T>,
 {
     type Output = T;
 
@@ -29,7 +29,7 @@ impl<T> Gradient<T> for Addition<T>
 where
     T: Clone + Gradient<T> + std::ops::Add<Output = T>,
 {
-    type Gradient = Addition<<T as Gradient<T>>::Gradient>;
+    type Gradient = Addition<T::Gradient>;
 
     fn grad(&self, args: T) -> Self::Gradient {
         Addition(self.0.grad(args.clone()), self.1.grad(args))

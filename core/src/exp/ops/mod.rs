@@ -7,25 +7,29 @@ pub use self::{addition::*, multiply::*};
 pub(crate) mod addition;
 pub(crate) mod multiply;
 
+pub trait Grad<T> {
+    type Gradient;
+
+    fn grad(&self, at: T) -> Self::Gradient;
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{Addition, Multiply};
     use crate::cmp::{Constant, Variable};
     use crate::ops::{Evaluate, Gradient};
 
     #[test]
     fn test_addition() {
-        // let mut dag = FnGraph::new();
-        // let a = dag.variable('x', Some(1.0));
-        // let b = dag.variable('y', Some(1.0));
         let add = Addition::new(Constant::new(1.0), Constant::new(1.0));
         assert_eq!(add.eval(), 2.0);
         let x = Variable::new("x", Some(1.0));
-        let y = Variable::new("y", Some(1.0));
+        let y = Variable::new("y", Some(2.0));
         let add = Addition::new(x.clone(), y.clone());
-        assert_eq!(add.clone().eval(), 2.0);
-        assert_eq!(add.grad(x.clone()).eval(), 1.0);
-        assert_eq!(add.grad(x).eval(), add.grad(y).eval())
+        assert_eq!(add.clone().eval(), 3.0);
+        assert_eq!(add.grad(x.clone()), Addition::new(1.0, 0.0));
+        assert_eq!(add.grad(y.clone()), Addition::new(0.0, 1.0));
+        assert_eq!(add.grad(x.clone()).eval(), add.grad(y.clone()).eval());
     }
 
     #[test]

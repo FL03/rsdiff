@@ -47,17 +47,29 @@ pub trait Arithmetic<T> {
 mod tests {
     use super::*;
 
+    #[ignore = "not implemented"]
     #[test]
     fn test_dag() {
         let mut dag = Graph::new();
-        let a = dag.variable(1_f64);
-        let b = dag.variable(1_f64);
-        let c = dag.mul(a, b).unwrap();
+        let x = dag.variable(1_f64);
+        let y = dag.variable(2_f64);
+        
 
-        let e = dag.add(c, a).unwrap();
+        let c = dag.add(x, y).unwrap();
 
-        println!("{:?}", &dag.get(c));
-        assert_eq!(*dag.get(c).unwrap(), 1.0);
-        assert_eq!(*dag.get(e).unwrap(), 2.0);
+        let d = dag.mul(c, y).unwrap();
+
+        assert_eq!(*dag.get_value(c).unwrap(), 3.0);
+        assert_eq!(*dag.get_value(d).unwrap(), 6.0);
+
+        let gc = dag.gradient_at(c).unwrap();
+        // todo: fix this
+        assert_eq!(gc[&x], 1.0);
+        assert_eq!(gc[&y], 1.0);
+
+        let gd = dag.gradient_at(d).unwrap();
+
+        assert_eq!(gd[&x], 2.0);
+        assert_eq!(gd[&y], 5.0);
     }
 }

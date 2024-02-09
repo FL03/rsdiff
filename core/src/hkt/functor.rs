@@ -7,11 +7,21 @@
 //! A functor is a type that when mapped over, preserves the structure of the type while applying a function to the values within the type.
 use super::HKT;
 use std::rc::Rc;
+use std::sync::Arc;
 
 pub trait Functor<U>: HKT<U> {
     fn map<F>(&self, f: F) -> Self::T
     where
         F: Fn(&Self::C) -> U;
+}
+
+impl<T, U> Functor<U> for Arc<T> {
+    fn map<F>(&self, f: F) -> Arc<U>
+    where
+        F: Fn(&T) -> U,
+    {
+        Arc::new(f(self))
+    }
 }
 
 impl<T, U> Functor<U> for Box<T> {

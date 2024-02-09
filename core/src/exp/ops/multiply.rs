@@ -16,8 +16,9 @@ impl<T> Multiply<T> {
 
 impl<S, T> Evaluate for Multiply<S>
 where
-    S: Evaluate<Output = T>,
-    T: std::ops::Mul<Output = T>,
+    S: Evaluate,
+    
+    S::Output: std::ops::Mul<Output = T>,
 {
     type Output = T;
 
@@ -34,11 +35,11 @@ where
         + std::ops::Add<Output = T>
         + std::ops::Mul<Output = T>,
 {
-    type Gradient = Addition<Multiply<T>>;
+    type Gradient = T;
 
     fn grad(&self, args: T) -> Self::Gradient {
-        let a = Multiply(self.0.grad(args.clone()).eval(), self.1.clone().eval());
-        let b = Multiply(self.0.clone().eval(), self.1.grad(args).eval());
-        Addition::new(a, b)
+        let a = Multiply(self.0.grad(args.clone()).eval(), self.1.clone().eval()).eval();
+        let b = Multiply(self.0.clone().eval(), self.1.grad(args).eval()).eval();
+        Addition::new(a, b).eval()
     }
 }

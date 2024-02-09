@@ -68,13 +68,13 @@ impl<T> Gradient<Variable<T>> for Variable<T>
 where
     T: Num,
 {
-    type Gradient = Constant<T>;
+    type Gradient = T;
 
     fn grad(&self, args: Variable<T>) -> Self::Gradient {
         if self.name() == args.name() {
-            return Constant::one();
+            return T::one();
         }
-        Constant::zero()
+        T::zero()
     }
 }
 

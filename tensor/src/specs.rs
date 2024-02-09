@@ -24,4 +24,8 @@ pub trait NdTensor {
     fn stride(&self) -> &[usize] {
         self.layout().stride()
     }
+
+    fn matmul(&self, rhs: &Self) -> Self;
+
+    
 }

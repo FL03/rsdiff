@@ -15,7 +15,7 @@ pub(crate) type TensorStore<T> = Arc<RwLock<Vec<T>>>;
 pub struct Tensor<T> {
     id: AtomicId,
     layout: Layout,
-    store: TensorStore<T>,
+    store: Vec<T>,
 }
 
 impl<T> Tensor<T> {
@@ -24,7 +24,7 @@ impl<T> Tensor<T> {
         Self {
             id: AtomicId::new(),
             layout,
-            store: Arc::new(RwLock::new(store)),
+            store, //Arc::new(RwLock::new(store)),
         }
     }
 
@@ -99,8 +99,6 @@ where
         Self::from_vec(store.len(), store)
     }
 
-
-
     pub fn ones(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::one())
     }
@@ -108,15 +106,17 @@ where
     pub fn zeros(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::zero())
     }
+
+    
 }
 
-// impl<T> std::ops::Index<&[usize]> for Tensor<T> {
-//     type Output = T;
+impl<T> std::ops::Index<&[usize]> for Tensor<T> {
+    type Output = T;
 
-//     fn index(&self, index: &[usize]) -> &Self::Output {
-//         self.store.read().unwrap().get(self.position(index)).unwrap()
-//     }
-// }
+    fn index(&self, index: &[usize]) -> &Self::Output {
+        &self.store[self.position(index)]
+    }
+}
 
 // impl<T> IndexMut<&[usize]> for Tensor<T> {
 //     fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {

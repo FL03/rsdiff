@@ -36,8 +36,8 @@ impl_hkt!(Vec);
 #[cfg(test)]
 mod tests {
 
-    use super::*;
     use super::functor::Functor;
+    use super::*;
 
     #[test]
     fn test_hkt() {
@@ -45,5 +45,4 @@ mod tests {
         let v2 = v.map(|x| (x + 1).to_string());
         assert_eq!(v2, vec!["1", "2", "3", "4", "5", "6", "7", "8", "9"]);
     }
-
 }

@@ -17,7 +17,7 @@ impl<T> Multiply<T> {
 impl<S, T> Evaluate for Multiply<S>
 where
     S: Evaluate,
-    
+
     S::Output: std::ops::Mul<Output = T>,
 {
     type Output = T;

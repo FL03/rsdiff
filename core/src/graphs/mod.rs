@@ -53,7 +53,6 @@ mod tests {
         let mut dag = Graph::new();
         let x = dag.variable(1_f64);
         let y = dag.variable(2_f64);
-        
 
         let c = dag.add(x, y).unwrap();
 
@@ -62,7 +61,7 @@ mod tests {
         assert_eq!(*dag.get_value(c).unwrap(), 3.0);
         assert_eq!(*dag.get_value(d).unwrap(), 6.0);
 
-        let gc = dag.gradient_at(c).unwrap();
+        let gc = dag.backward().unwrap();
         // todo: fix this
         assert_eq!(gc[&x], 1.0);
         assert_eq!(gc[&y], 1.0);

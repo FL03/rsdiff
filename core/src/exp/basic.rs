@@ -16,7 +16,7 @@ struct Node {
 // Computational graph structure
 #[derive(Clone, Debug)]
 struct ComputeGraph {
-    nodes: Vec<Node>,                 // Stores all nodes in the graph
+    nodes: Vec<Node>,            // Stores all nodes in the graph
     values: HashMap<usize, f64>, // Stores values of nodes
 }
 

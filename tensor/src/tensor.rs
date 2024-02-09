@@ -7,9 +7,7 @@ use crate::data::Scalar;
 use crate::shape::{IntoShape, Rank, Shape};
 use crate::store::Layout;
 // use std::ops::{Index, IndexMut};
-use std::sync::{Arc, RwLock};
-
-pub(crate) type TensorStore<T> = Arc<RwLock<Vec<T>>>;
+// use std::sync::{Arc, RwLock};
 
 #[derive(Clone, Debug)]
 pub struct Tensor<T> {
@@ -106,8 +104,6 @@ where
     pub fn zeros(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::zero())
     }
-
-    
 }
 
 impl<T> std::ops::Index<&[usize]> for Tensor<T> {

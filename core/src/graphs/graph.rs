@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Config, Node,};
+use super::{Config, Node};
 use crate::prelude::Result;
 use crate::stores::{GradientStore, Store};
 use daggy::petgraph::algo::toposort;
@@ -47,6 +47,30 @@ impl<T> Graph<T>
 where
     T: Copy + Default + NumAssign + NumOps + 'static,
 {
+    pub fn backward(&self) -> Result<HashMap<NodeIndex, T>> {
+        let graph = self.clone();
+        let nodes = toposort(&self.graph, None)?;
+
+        let mut gradients = HashMap::new();
+        gradients.insert(nodes.last().unwrap().clone(), T::one());
+        for i in nodes.iter().rev() {
+            let node = graph.get(*i).unwrap_or(&Node::default()).clone();
+            let grad = *gradients.entry(*i).or_insert(T::default());
+            for input in node.inputs() {
+                let dt = match node.operation() {
+                    "add" => grad,
+                    "mul" => {
+                        let out = *graph.get_value(*i).unwrap();
+                        let val = *graph.get_value(*input).unwrap();
+                        grad * out / val
+                    }
+                    _ => T::default(),
+                };
+                *gradients.entry(*input).or_insert(T::default()) += dt;
+            }
+        }
+        Ok(gradients)
+    }
     pub fn gradient_at(&mut self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {
         let graph = self.clone();
         let nodes = toposort(&self.graph, None)?;
@@ -55,23 +79,19 @@ where
         gradients.insert(target, *self.get_value(target).unwrap_or(&T::one()));
         for i in nodes.iter().rev() {
             let node = graph.get(*i).unwrap_or(&Node::default()).clone();
-            let grad = *gradients.get(&i).unwrap_or(&T::default());
+            let grad = *gradients.entry(*i).or_insert(T::default());
             for input in node.inputs() {
                 let dt = match node.operation() {
-                    "add" => {
-                        grad
-                    },
+                    "add" => grad,
                     "mul" => {
-                        let x = *graph.get_value(*i).unwrap();
-                        let out = *graph.get_value(*input).unwrap();
-                        grad * x / out
-                    },
-                    _ => T::default()
+                        let out = *graph.get_value(*i).unwrap();
+                        let val = *graph.get_value(*input).unwrap();
+                        grad * out / val
+                    }
+                    _ => T::default(),
                 };
                 *gradients.entry(*input).or_insert(T::default()) += dt;
             }
-            
-            
         }
         Ok(gradients)
     }

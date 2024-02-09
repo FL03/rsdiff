@@ -15,10 +15,7 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn new(
-        inputs: impl IntoIterator<Item = NodeIndex>,
-        op: impl ToString,
-    ) -> Self {
+    pub fn new(inputs: impl IntoIterator<Item = NodeIndex>, op: impl ToString) -> Self {
         Self {
             inputs: Vec::from_iter(inputs),
             op: op.to_string(),

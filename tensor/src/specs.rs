@@ -26,6 +26,4 @@ pub trait NdTensor {
     }
 
     fn matmul(&self, rhs: &Self) -> Self;
-
-    
 }

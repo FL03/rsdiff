@@ -7,5 +7,9 @@ pub use self::{layout::*, storage::*};
 pub(crate) mod layout;
 pub(crate) mod storage;
 
+use std::sync::{Arc, RwLock};
+
+pub(crate) type TensorStore<T> = Arc<RwLock<Vec<T>>>;
+
 #[cfg(test)]
 mod tests {}

@@ -99,6 +99,8 @@ where
         Self::from_vec(store.len(), store)
     }
 
+
+
     pub fn ones(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::one())
     }
@@ -108,11 +110,11 @@ where
     }
 }
 
-// impl<T> Index<&[usize]> for Tensor<T> {
+// impl<T> std::ops::Index<&[usize]> for Tensor<T> {
 //     type Output = T;
 
 //     fn index(&self, index: &[usize]) -> &Self::Output {
-//         self.get(index).unwrap()
+//         self.store.read().unwrap().get(self.position(index)).unwrap()
 //     }
 // }
 

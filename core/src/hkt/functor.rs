@@ -5,6 +5,7 @@
 //! # Functor
 //!
 //! A functor is a type that when mapped over, preserves the structure of the type while applying a function to the values within the type.
+//! Functors are useful for modeling the functional effects on values of parameterized data types.
 use super::HKT;
 use std::rc::Rc;
 use std::sync::Arc;

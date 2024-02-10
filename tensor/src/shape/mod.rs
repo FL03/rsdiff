@@ -3,11 +3,12 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # Shapes
-pub use self::{dimension::*, rank::*, shape::*};
+pub use self::{dimension::*, rank::*, shape::*, stride::*};
 
 pub(crate) mod dimension;
 pub(crate) mod rank;
 pub(crate) mod shape;
+pub(crate) mod stride;
 
 #[cfg(test)]
 mod tests {

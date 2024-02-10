@@ -1,5 +1,5 @@
 /*
-    Appellation: value <module>
+    Appellation: edge <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::cmp::id::{GradientId, Id};

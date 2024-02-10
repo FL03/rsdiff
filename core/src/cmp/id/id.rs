@@ -2,6 +2,7 @@
     Appellation: id <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::AtomicId;
 use daggy::NodeIndex;
 use serde::{Deserialize, Serialize};
 
@@ -12,8 +13,11 @@ pub struct Id {
 }
 
 impl Id {
-    pub fn new(id: usize, index: NodeIndex) -> Self {
-        Self { id, index }
+    pub fn new(index: NodeIndex) -> Self {
+        Self {
+            id: *AtomicId::new(),
+            index,
+        }
     }
 
     pub fn id(&self) -> usize {

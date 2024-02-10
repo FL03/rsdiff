@@ -5,11 +5,11 @@
 //! # Graphs
 //!
 //!
-pub use self::{graph::*, node::*, value::*};
+pub use self::{edge::*, graph::*, node::*};
 
+pub(crate) mod edge;
 pub(crate) mod graph;
 pub(crate) mod node;
-pub(crate) mod value;
 
 pub mod dynamic;
 
@@ -47,7 +47,6 @@ pub trait Arithmetic<T> {
 mod tests {
     use super::*;
 
-    #[ignore = "not implemented"]
     #[test]
     fn test_dag() {
         let mut dag = Graph::new();
@@ -61,12 +60,12 @@ mod tests {
         assert_eq!(*dag.get_value(c).unwrap(), 3.0);
         assert_eq!(*dag.get_value(d).unwrap(), 6.0);
 
-        let gc = dag.backward().unwrap();
-        // todo: fix this
+        let gc = dag.gradient_at(c).unwrap();
+
         assert_eq!(gc[&x], 1.0);
         assert_eq!(gc[&y], 1.0);
 
-        let gd = dag.gradient_at(d).unwrap();
+        let gd = dag.backward().unwrap();
 
         assert_eq!(gd[&x], 2.0);
         assert_eq!(gd[&y], 5.0);

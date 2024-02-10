@@ -2,15 +2,14 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Config, Node};
+use super::Node;
 use crate::prelude::Result;
-use crate::stores::{GradientStore, Store};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
 use num::traits::{NumAssign, NumOps};
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Graph<T> {
     graph: Dag<Node, usize>,
     vals: HashMap<NodeIndex, T>,
@@ -36,8 +35,31 @@ impl<T> Graph<T> {
         self.vals.get(&index)
     }
 
+    pub fn constant(&mut self, value: T) -> NodeIndex {
+        let v = self.graph.add_node(Node::new(vec![], "constant"));
+        self.vals.insert(v, value);
+        v
+    }
+
+    pub fn operation(
+        &mut self,
+        inputs: impl IntoIterator<Item = NodeIndex>,
+        operation: impl ToString,
+        result: Option<T>,
+    ) -> Result<NodeIndex>
+    where
+        T: Default,
+    {
+        let node = Node::new(inputs, operation);
+        let v = self.graph.add_node(node.clone());
+        let edges = node.inputs().iter().map(|i| (*i, v));
+        self.vals.insert(v, result.unwrap_or_default());
+        self.graph.extend_with_edges(edges)?;
+        Ok(v)
+    }
+
     pub fn variable(&mut self, value: T) -> NodeIndex {
-        let v = self.graph.add_node(Node::new(vec![], "input"));
+        let v = self.graph.add_node(Node::new(vec![], "var"));
         self.vals.insert(v, value);
         v
     }
@@ -48,49 +70,57 @@ where
     T: Copy + Default + NumAssign + NumOps + 'static,
 {
     pub fn backward(&self) -> Result<HashMap<NodeIndex, T>> {
-        let graph = self.clone();
-        let nodes = toposort(&self.graph, None)?;
-
+        // find the topological order of the graph
+        let nodes: Vec<NodeIndex> = toposort(&self.graph, None)?.iter().rev().cloned().collect();
+        // initialize the gradient store
         let mut gradients = HashMap::new();
-        gradients.insert(nodes.last().unwrap().clone(), T::one());
-        for i in nodes.iter().rev() {
-            let node = graph.get(*i).unwrap_or(&Node::default()).clone();
-            let grad = *gradients.entry(*i).or_insert(T::default());
+        let mut stack = Vec::new();
+        // initialize the gradients
+        gradients.insert(nodes.first().unwrap().clone(), T::one());
+        stack.push((nodes.first().unwrap().clone(), T::one()));
+        // iterate through the nodes in reverse topological order
+        while let Some((i, grad)) = stack.pop() {
+            // get the current node
+            let node = self.graph[i].clone();
+            // iterate through the inputs of the current node
             for input in node.inputs() {
+                // calculate the gradient of each input w.r.t. the current node
                 let dt = match node.operation() {
                     "add" => grad,
                     "mul" => {
-                        let out = *graph.get_value(*i).unwrap();
-                        let val = *graph.get_value(*input).unwrap();
+                        let out = self.vals[&i];
+                        let val = self.vals[input];
                         grad * out / val
                     }
                     _ => T::default(),
                 };
                 *gradients.entry(*input).or_insert(T::default()) += dt;
+                stack.push((*input, dt));
             }
         }
         Ok(gradients)
     }
     pub fn gradient_at(&mut self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {
-        let graph = self.clone();
-        let nodes = toposort(&self.graph, None)?;
-
         let mut gradients = HashMap::new();
-        gradients.insert(target, *self.get_value(target).unwrap_or(&T::one()));
-        for i in nodes.iter().rev() {
-            let node = graph.get(*i).unwrap_or(&Node::default()).clone();
-            let grad = *gradients.entry(*i).or_insert(T::default());
+        let mut stack = Vec::new();
+
+        gradients.insert(target, T::one());
+        stack.push((target, T::one()));
+        while let Some((i, grad)) = stack.pop() {
+            let node = self.graph[i].clone();
+
             for input in node.inputs() {
                 let dt = match node.operation() {
                     "add" => grad,
                     "mul" => {
-                        let out = *graph.get_value(*i).unwrap();
-                        let val = *graph.get_value(*input).unwrap();
+                        let out = self.vals[&i];
+                        let val = self.vals[input];
                         grad * out / val
                     }
                     _ => T::default(),
                 };
                 *gradients.entry(*input).or_insert(T::default()) += dt;
+                stack.push((*input, dt));
             }
         }
         Ok(gradients)
@@ -99,42 +129,24 @@ where
 
 impl<T> Graph<T>
 where
-    T: Clone + Default + NumOps,
+    T: Copy + Default + NumOps,
 {
     pub fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.get_value(a).unwrap().clone();
-        let y = self.get_value(b).unwrap().clone();
+        let x = self.vals[&a];
+        let y = self.vals[&b];
         let res = x + y;
 
-        let c = self.graph.add_node(Node::new(vec![a, b], "add"));
-        self.vals.insert(c, res);
-        let _ac = self.graph.add_edge(a, c, 0)?;
-        let _bc = self.graph.add_edge(b, c, 0)?;
+        let c = self.operation([a, b], "add", Some(res))?;
 
         Ok(c)
     }
 
     pub fn mul(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
-        let x = self.get_value(a).unwrap().clone();
-        let y = self.get_value(b).unwrap().clone();
+        let x = self.vals[&a];
+        let y = self.vals[&b];
         let res = x * y;
-        let c = self.graph.add_node(Node::new(vec![a, b], "mul"));
-        self.vals.insert(c, res);
-        let _ac = self.graph.add_edge(a, c, 0)?;
-        let _bc = self.graph.add_edge(b, c, 0)?;
+        let c = self.operation([a, b], "mul", Some(res))?;
 
-        // let fg = | graph: &mut dyn Arithmetic<NodeIndex>, store: &mut GradientStore, rhs: T | {
-        //     //
-        //     if let Some(grad) = store.get(&a) {
-        //         let grad = graph.mul(*grad, b);
-        //         store.add_gradient(self, a, &grad);
-        //     }
-        //     if let Some(grad) = store.get(&b) {
-        //         let grad = graph.mul(*grad, a);
-        //         store.add_gradient(self, b, &grad);
-        //     }
-        //     Ok(())
-        // };
         Ok(c)
     }
 }

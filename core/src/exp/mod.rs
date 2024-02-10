@@ -6,6 +6,7 @@
 //!
 //!
 pub mod basic;
+pub mod dynamic;
 pub mod ops;
 
 #[cfg(test)]

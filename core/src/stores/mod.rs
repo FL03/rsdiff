@@ -6,8 +6,6 @@ pub use self::gradient::*;
 
 pub(crate) mod gradient;
 
-use crate::graphs::Arithmetic;
-
 pub trait Store<K, V> {
     fn get(&self, key: &K) -> Option<&V>;
 
@@ -16,23 +14,6 @@ pub trait Store<K, V> {
     fn insert(&mut self, key: K, value: V) -> Option<V>;
 
     fn remove(&mut self, key: &K) -> Option<V>;
-
-    fn add_gradient<G>(&mut self, graph: &mut G, id: K, value: &V)
-    where
-        G: Arithmetic<V>,
-        V: Clone + 'static,
-    {
-        match self.get_mut(&id) {
-            Some(gradient) => {
-                *gradient = graph
-                    .add(gradient.clone(), value.clone())
-                    .expect("Failed to add gradient");
-            }
-            None => {
-                self.insert(id, value.clone());
-            }
-        }
-    }
 }
 
 // impl<K, V> Store<K, V> for BTreeMap<K, V> where K: Ord {

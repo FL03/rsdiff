@@ -16,4 +16,17 @@ impl Operator {
             name: String::new(),
         }
     }
+
+    pub fn with_name(mut self, name: impl ToString) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    pub fn inputs(&self) -> &[NodeIndex] {
+        &self.inputs
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 }

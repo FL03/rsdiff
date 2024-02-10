@@ -3,10 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Node;
-use crate::prelude::Result;
+use crate::prelude::{BinaryOp, Ops, Result};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
-use num::traits::{NumAssign, NumOps};
+use num::traits::{NumAssign, NumOps, Signed};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -36,7 +36,7 @@ impl<T> Graph<T> {
     }
 
     pub fn constant(&mut self, value: T) -> NodeIndex {
-        let v = self.graph.add_node(Node::new(vec![], "constant"));
+        let v = self.graph.add_node(Node::new(vec![], None));
         self.vals.insert(v, value);
         v
     }
@@ -44,22 +44,22 @@ impl<T> Graph<T> {
     pub fn operation(
         &mut self,
         inputs: impl IntoIterator<Item = NodeIndex>,
-        operation: impl ToString,
+        operation: Ops,
         result: Option<T>,
     ) -> Result<NodeIndex>
     where
         T: Default,
     {
-        let node = Node::new(inputs, operation);
+        let node = Node::new(inputs, Some(operation));
         let v = self.graph.add_node(node.clone());
         let edges = node.inputs().iter().map(|i| (*i, v));
-        self.vals.insert(v, result.unwrap_or_default());
+        let _val = self.vals.insert(v, result.unwrap_or_default());
         self.graph.extend_with_edges(edges)?;
         Ok(v)
     }
 
     pub fn variable(&mut self, value: T) -> NodeIndex {
-        let v = self.graph.add_node(Node::new(vec![], "var"));
+        let v = self.graph.add_node(Node::new(vec![], None));
         self.vals.insert(v, value);
         v
     }
@@ -67,59 +67,56 @@ impl<T> Graph<T> {
 
 impl<T> Graph<T>
 where
-    T: Copy + Default + NumAssign + NumOps + 'static,
+    T: Copy + Default + NumAssign + NumOps + Signed + 'static,
 {
     pub fn backward(&self) -> Result<HashMap<NodeIndex, T>> {
         // find the topological order of the graph
-        let nodes: Vec<NodeIndex> = toposort(&self.graph, None)?.iter().rev().cloned().collect();
+        let nodes: Vec<NodeIndex> = toposort(&self.graph, None)?;
+        // compute the gradient of the last node
+        self.gradient_at(nodes.last().unwrap().clone())
+    }
+
+    pub fn gradient_at(&self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {
         // initialize the gradient store
         let mut gradients = HashMap::new();
-        let mut stack = Vec::new();
+        // initialize the stack
+        let mut stack = Vec::<(NodeIndex, T)>::new();
         // initialize the gradients
-        gradients.insert(nodes.first().unwrap().clone(), T::one());
-        stack.push((nodes.first().unwrap().clone(), T::one()));
+        gradients.insert(target, T::one());
+        stack.push((target, T::one()));
         // iterate through the nodes in reverse topological order
         while let Some((i, grad)) = stack.pop() {
             // get the current node
             let node = self.graph[i].clone();
             // iterate through the inputs of the current node
-            for input in node.inputs() {
+            for (j, input) in node.inputs().iter().enumerate() {
                 // calculate the gradient of each input w.r.t. the current node
-                let dt = match node.operation() {
-                    "add" => grad,
-                    "mul" => {
-                        let out = self.vals[&i];
-                        let val = self.vals[input];
-                        grad * out / val
+                let dt = if let Some(op) = node.operation() {
+                    match op {
+                        Ops::Binary(op) => match op {
+                            BinaryOp::Add => grad,
+                            BinaryOp::Mul => {
+                                let out = self.vals[&i];
+                                let val = self.vals[input];
+                                grad * out / val
+                            }
+                            BinaryOp::Sub => {
+                                if j % 2 == 0 {
+                                    grad
+                                } else {
+                                    -grad
+                                }
+                            }
+                            _ => T::default(),
+                        },
+                        _ => T::default(),
                     }
-                    _ => T::default(),
+                } else {
+                    T::default()
                 };
+                // add or insert the gradient of the input
                 *gradients.entry(*input).or_insert(T::default()) += dt;
-                stack.push((*input, dt));
-            }
-        }
-        Ok(gradients)
-    }
-    pub fn gradient_at(&mut self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {
-        let mut gradients = HashMap::new();
-        let mut stack = Vec::new();
-
-        gradients.insert(target, T::one());
-        stack.push((target, T::one()));
-        while let Some((i, grad)) = stack.pop() {
-            let node = self.graph[i].clone();
-
-            for input in node.inputs() {
-                let dt = match node.operation() {
-                    "add" => grad,
-                    "mul" => {
-                        let out = self.vals[&i];
-                        let val = self.vals[input];
-                        grad * out / val
-                    }
-                    _ => T::default(),
-                };
-                *gradients.entry(*input).or_insert(T::default()) += dt;
+                // push the input and its gradient onto the stack
                 stack.push((*input, dt));
             }
         }
@@ -136,7 +133,16 @@ where
         let y = self.vals[&b];
         let res = x + y;
 
-        let c = self.operation([a, b], "add", Some(res))?;
+        let c = self.operation([a, b], BinaryOp::Add.into(), Some(res))?;
+
+        Ok(c)
+    }
+
+    pub fn div(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
+        let x = self.vals[&a];
+        let y = self.vals[&b];
+        let res = x / y;
+        let c = self.operation([a, b], BinaryOp::Div.into(), Some(res))?;
 
         Ok(c)
     }
@@ -145,7 +151,16 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x * y;
-        let c = self.operation([a, b], "mul", Some(res))?;
+        let c = self.operation([a, b], BinaryOp::Mul.into(), Some(res))?;
+
+        Ok(c)
+    }
+
+    pub fn sub(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
+        let x = self.vals[&a];
+        let y = self.vals[&b];
+        let res = x - y;
+        let c = self.operation([a, b], BinaryOp::Sub.into(), Some(res))?;
 
         Ok(c)
     }

@@ -2,7 +2,6 @@
     Appellation: variables <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Constant;
 use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 use serde::{Deserialize, Serialize};
@@ -11,7 +10,7 @@ use std::ops::{Add, Div, Mul, Sub};
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Variable<T> {
     name: String,
-    value: Option<T>,
+    pub(crate) value: Option<T>,
 }
 
 impl<T> Variable<T> {

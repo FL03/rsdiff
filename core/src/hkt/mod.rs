@@ -18,7 +18,7 @@ pub trait HKT<U> {
     type T; // Type C swapped with U
 }
 
-macro_rules! impl_hkt {
+macro_rules! hkt {
     ($t:ident) => {
         impl<T, U> HKT<U> for $t<T> {
             type C = T;
@@ -27,20 +27,19 @@ macro_rules! impl_hkt {
     };
 }
 
-impl_hkt!(Arc);
-impl_hkt!(Box);
-impl_hkt!(Option);
-impl_hkt!(Rc);
-impl_hkt!(Vec);
+hkt!(Arc);
+hkt!(Box);
+hkt!(Option);
+hkt!(Rc);
+hkt!(Vec);
 
 #[cfg(test)]
 mod tests {
 
     use super::functor::Functor;
-    use super::*;
 
     #[test]
-    fn test_hkt() {
+    fn test_functor() {
         let v = Vec::from_iter(0..9);
         let v2 = v.map(|x| (x + 1).to_string());
         assert_eq!(v2, vec!["1", "2", "3", "4", "5", "6", "7", "8", "9"]);

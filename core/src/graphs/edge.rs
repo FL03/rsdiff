@@ -6,12 +6,12 @@ use crate::cmp::id::{GradientId, Id};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Value<T> {
-    data: T,
+pub struct Edge<T> {
     id: Option<GradientId<T>>,
+    data: T,
 }
 
-impl<T> Value<T> {
+impl<T> Edge<T> {
     pub fn new(data: T, id: Option<GradientId<T>>) -> Self {
         Self { data, id }
     }

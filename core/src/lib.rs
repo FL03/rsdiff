@@ -5,7 +5,9 @@
 //! # acme-core
 //!
 //!
+#![allow(incomplete_features)]
 #![feature(adt_const_params, fn_traits, tuple_trait, unboxed_closures)]
+
 pub use self::primitives::*;
 
 pub(crate) mod primitives;

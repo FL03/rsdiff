@@ -5,7 +5,7 @@
 //! # acme-tensor
 //!
 //!
-#![feature(fn_traits, tuple_trait, unboxed_closures)]
+#![feature(array_chunks)]
 pub use self::{specs::*, tensor::*};
 
 pub(crate) mod specs;

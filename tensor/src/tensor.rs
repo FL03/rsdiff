@@ -10,13 +10,13 @@ use crate::store::Layout;
 // use std::sync::{Arc, RwLock};
 
 #[derive(Clone, Debug)]
-pub struct Tensor<T> {
+pub struct TensorBase<T> {
     id: AtomicId,
     layout: Layout,
     store: Vec<T>,
 }
 
-impl<T> Tensor<T> {
+impl<T> TensorBase<T> {
     pub fn from_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
         let layout = Layout::contiguous(shape);
         Self {
@@ -56,7 +56,7 @@ impl<T> Tensor<T> {
     }
 }
 
-impl<T> Tensor<T>
+impl<T> TensorBase<T>
 where
     T: Clone,
 {
@@ -76,7 +76,7 @@ where
     }
 }
 
-impl<T> Tensor<T>
+impl<T> TensorBase<T>
 where
     T: Scalar,
 {
@@ -106,7 +106,7 @@ where
     }
 }
 
-impl<T> std::ops::Index<&[usize]> for Tensor<T> {
+impl<T> std::ops::Index<&[usize]> for TensorBase<T> {
     type Output = T;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
@@ -120,7 +120,7 @@ impl<T> std::ops::Index<&[usize]> for Tensor<T> {
 //     }
 // }
 
-impl<T> PartialEq for Tensor<T>
+impl<T> PartialEq for TensorBase<T>
 where
     T: PartialEq,
 {

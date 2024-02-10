@@ -113,10 +113,10 @@ pub enum UnaryOp {
     Cos,
     Cosh,
     Exp,
+    Inverse, // or Reciprocal
     Floor,
     Log,
     Neg,
-    Reciprocal,
     Round,
     Rsqrt,
     Sin,

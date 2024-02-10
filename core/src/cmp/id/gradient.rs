@@ -10,14 +10,14 @@ use std::ops::Deref;
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct GradientId<T> {
     pub(crate) inner: Id,
-    _marker: PhantomData<T>,
+    ptr: PhantomData<T>,
 }
 
 impl<T> GradientId<T> {
     pub fn new(inner: Id) -> Self {
         Self {
             inner,
-            _marker: PhantomData,
+            ptr: PhantomData,
         }
     }
 

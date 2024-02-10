@@ -6,6 +6,7 @@ use super::functor::Functor;
 use super::HKT;
 
 use std::rc::Rc;
+use std::sync::Arc;
 
 pub trait Applicative<U>: Functor<U> {
     fn pure_(value: U) -> Self::T
@@ -15,6 +16,20 @@ pub trait Applicative<U>: Functor<U> {
     where
         F: Fn(&<Self as HKT<U>>::C) -> U,
         Self: HKT<F>;
+}
+
+impl<T, U> Applicative<U> for Arc<T> {
+    fn pure_(value: U) -> Self::T {
+        Arc::new(value)
+    }
+
+    fn seq<F>(&self, fs: <Self as HKT<F>>::T) -> Arc<U>
+    where
+        F: Fn(&T) -> U,
+    {
+        let v = fs(self);
+        Arc::new(v)
+    }
 }
 
 impl<T, U> Applicative<U> for Box<T> {

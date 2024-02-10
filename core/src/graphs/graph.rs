@@ -72,7 +72,7 @@ where
     pub fn backward(&self) -> Result<HashMap<NodeIndex, T>> {
         // find the topological order of the graph
         let nodes: Vec<NodeIndex> = toposort(&self.graph, None)?;
-        // compute the gradient of the last node
+        // compute the gradient w.r.t. the last topological node
         self.gradient_at(nodes.last().unwrap().clone())
     }
 
@@ -95,6 +95,15 @@ where
                     match op {
                         Ops::Binary(op) => match op {
                             BinaryOp::Add => grad,
+                            BinaryOp::Div => {
+                                let out = self.vals[&i];
+                                let val = self.vals[input];
+                                if j % 2 == 0 {
+                                    grad / val
+                                } else {
+                                    -grad * out / (val * val)
+                                }
+                            }
                             BinaryOp::Mul => {
                                 let out = self.vals[&i];
                                 let val = self.vals[input];

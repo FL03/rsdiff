@@ -37,11 +37,16 @@ hkt!(Vec);
 mod tests {
 
     use super::functor::Functor;
+    use super::monad::Monad;
 
     #[test]
-    fn test_functor() {
+    fn test_hkt_vec() {
         let v = Vec::from_iter(0..9);
-        let v2 = v.map(|x| (x + 1).to_string());
+        let v2 = v.fmap(|x| (x + 1).to_string());
         assert_eq!(v2, vec!["1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+
+        let v = Vec::return_(0);
+        let v2 = v.bind(|x| vec![x + 1]);
+        assert_eq!(v2, vec![1]);
     }
 }

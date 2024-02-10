@@ -6,6 +6,7 @@ use super::applicative::Applicative;
 use super::HKT;
 
 use std::rc::Rc;
+use std::sync::Arc;
 
 pub trait Monad<U>: Applicative<U> {
     fn return_(x: U) -> Self::T
@@ -25,6 +26,15 @@ pub trait Monad<U>: Applicative<U> {
         T: Clone,
     {
         self.bind(|x| x.clone())
+    }
+}
+
+impl<T, U> Monad<U> for Arc<T> {
+    fn bind<F>(&self, mut fs: F) -> Arc<U>
+    where
+        F: FnMut(&T) -> Arc<U>,
+    {
+        fs(self)
     }
 }
 

@@ -11,13 +11,13 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 pub trait Functor<U>: HKT<U> {
-    fn map<F>(&self, f: F) -> Self::T
+    fn fmap<F>(&self, f: F) -> Self::T
     where
         F: Fn(&Self::C) -> U;
 }
 
 impl<T, U> Functor<U> for Arc<T> {
-    fn map<F>(&self, f: F) -> Arc<U>
+    fn fmap<F>(&self, f: F) -> Arc<U>
     where
         F: Fn(&T) -> U,
     {
@@ -26,7 +26,7 @@ impl<T, U> Functor<U> for Arc<T> {
 }
 
 impl<T, U> Functor<U> for Box<T> {
-    fn map<F>(&self, f: F) -> Box<U>
+    fn fmap<F>(&self, f: F) -> Box<U>
     where
         F: Fn(&T) -> U,
     {
@@ -35,7 +35,7 @@ impl<T, U> Functor<U> for Box<T> {
 }
 
 impl<T, U> Functor<U> for Option<T> {
-    fn map<F>(&self, f: F) -> Option<U>
+    fn fmap<F>(&self, f: F) -> Option<U>
     where
         F: Fn(&T) -> U,
     {
@@ -47,7 +47,7 @@ impl<T, U> Functor<U> for Option<T> {
 }
 
 impl<T, U> Functor<U> for Rc<T> {
-    fn map<F>(&self, f: F) -> Rc<U>
+    fn fmap<F>(&self, f: F) -> Rc<U>
     where
         F: Fn(&T) -> U,
     {
@@ -56,7 +56,7 @@ impl<T, U> Functor<U> for Rc<T> {
 }
 
 impl<T, U> Functor<U> for Vec<T> {
-    fn map<F>(&self, f: F) -> Vec<U>
+    fn fmap<F>(&self, f: F) -> Vec<U>
     where
         F: Fn(&T) -> U,
     {

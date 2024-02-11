@@ -31,6 +31,18 @@ impl Shape {
         Self(Vec::new())
     }
 
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(Vec::with_capacity(capacity))
+    }
+
+    pub fn zero() -> Self {
+        Self::default()
+    }
+
+    pub fn zeros(rank: usize) -> Self {
+        Self(vec![0; rank])
+    }
+
     pub fn dims(&self) -> &[usize] {
         &self.0
     }
@@ -79,18 +91,6 @@ impl Shape {
             .collect();
         stride.reverse();
         stride
-    }
-
-    pub fn with_capacity(capacity: usize) -> Self {
-        Self(Vec::with_capacity(capacity))
-    }
-
-    pub fn zero() -> Self {
-        Self::default()
-    }
-
-    pub fn zeros(rank: usize) -> Self {
-        Self(vec![0; rank])
     }
 }
 

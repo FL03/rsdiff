@@ -96,7 +96,6 @@ macro_rules! impl_dual_op {
     };
 }
 
-
 use std::ops::{Add, Div, Mul, Rem, Sub};
 
 impl_const_op!(Constant, Add, add, |a, b| a + b);

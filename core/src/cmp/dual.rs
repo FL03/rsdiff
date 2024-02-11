@@ -4,8 +4,8 @@
 */
 //! # Dual
 //!
-//! Dual numbers are a type of hypercomplex number which are expressions of 
-//! the form: 
+//! Dual numbers are a type of hypercomplex number which are expressions of
+//! the form:
 //!     Dual => z = a + be
 //!     where
 //!         a, b, e are real numbers

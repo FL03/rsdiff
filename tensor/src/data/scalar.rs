@@ -9,32 +9,71 @@ use std::iter::{Product, Sum};
 use std::ops::Neg;
 
 pub trait Scalar:
-    Copy + Default + FromPrimitive + Neg<Output = Self> + NumAssign + NumCast + NumOps + Product + Sum + 'static
+    Copy
+    + Default
+    + FromPrimitive
+    + Neg<Output = Self>
+    + NumAssign
+    + NumCast
+    + NumOps
+    + Product
+    + Sum
+    + 'static
 {
     type Complex: Scalar<Complex = Self::Complex, Real = Self::Real> + NumOps<Self::Real>;
     type Real: Scalar<Complex = Self::Complex, Real = Self::Real>
         + NumOps<Self::Complex, Self::Complex>
         + Real;
 
-    fn abs(self) -> Self::Real {
-        let re = self.real();
-        let im = self.imag();
-        <<Self as Scalar>::Real as Real>::sqrt(re * re + im * im)
-    }
-
     fn conj(&self) -> Self::Complex;
 
-    fn imag(&self) -> Self::Real {
+    fn im(&self) -> Self::Real {
         Default::default()
     }
 
-    fn real(&self) -> Self::Real;
+    fn re(&self) -> Self::Real;
 
+    fn abs(self) -> Self::Real {
+        let re = self.re();
+        let im = self.im();
+        <<Self as Scalar>::Real as Real>::sqrt(re * re + im * im)
+    }
 
+    fn cos(self) -> Self;
+
+    fn cosh(self) -> Self;
+
+    fn exp(self) -> Self;
+
+    fn ln(self) -> Self;
+
+    fn pow(self, exp: Self) -> Self;
+
+    fn powc(self, exp: Self::Complex) -> Self::Complex;
+
+    fn powf(self, exp: Self::Real) -> Self;
+
+    fn powi(self, exp: i32) -> Self {
+        let exp = Self::Real::from_i32(exp).unwrap();
+        self.powf(exp)
+    }
+
+    fn recip(self) -> Self {
+        Self::one() / self
+    }
+
+    fn sin(self) -> Self;
+
+    fn sinh(self) -> Self;
 
     fn sqrt(self) -> Self;
-}
 
+    fn square(self) -> Self::Real;
+
+    fn tan(self) -> Self;
+
+    fn tanh(self) -> Self;
+}
 
 impl<T> Scalar for Complex<T>
 where
@@ -48,16 +87,68 @@ where
         Complex::conj(self)
     }
 
-    fn real(&self) -> Self::Real {
+    fn re(&self) -> Self::Real {
         self.re
     }
 
-    fn imag(&self) -> Self::Real {
+    fn im(&self) -> Self::Real {
         self.im
+    }
+
+    fn cos(self) -> Self {
+        Complex::cos(self)
+    }
+
+    fn cosh(self) -> Self {
+        Complex::cosh(self)
+    }
+
+    fn exp(self) -> Self {
+        Complex::exp(self)
+    }
+
+    fn ln(self) -> Self {
+        Complex::ln(self)
+    }
+
+    fn pow(self, exp: Self) -> Self {
+        Complex::powc(self, exp)
+    }
+
+    fn powc(self, exp: Self::Complex) -> Self::Complex {
+        Complex::powc(self, exp)
+    }
+
+    fn powf(self, exp: T) -> Self {
+        Complex::powf(self, exp)
+    }
+
+    fn powi(self, exp: i32) -> Self {
+        Complex::powi(&self, exp)
+    }
+
+    fn sin(self) -> Self {
+        Complex::sin(self)
+    }
+
+    fn sinh(self) -> Self {
+        Complex::sinh(self)
     }
 
     fn sqrt(self) -> Self {
         Complex::sqrt(self)
+    }
+
+    fn square(self) -> Self::Real {
+        Complex::norm_sqr(&self)
+    }
+
+    fn tan(self) -> Self {
+        Complex::tan(self)
+    }
+
+    fn tanh(self) -> Self {
+        Complex::tanh(self)
     }
 }
 
@@ -71,12 +162,64 @@ macro_rules! impl_scalar {
                 Complex::new(*self, -<$t>::default())
             }
 
-            fn real(&self) -> Self::Real {
+            fn re(&self) -> Self::Real {
                 *self
+            }
+
+            fn cos(self) -> Self {
+                <$t>::cos(self)
+            }
+
+            fn cosh(self) -> Self {
+                <$t>::cosh(self)
+            }
+
+            fn exp(self) -> Self {
+                <$t>::exp(self)
+            }
+
+            fn ln(self) -> Self {
+                <$t>::ln(self)
+            }
+
+            fn pow(self, exp: Self) -> Self {
+                <$t>::powf(self, exp)
+            }
+
+            fn powc(self, exp: Self::Complex) -> Self::Complex {
+                Complex::new(self, <$t>::default()).powc(exp)
+            }
+
+            fn powf(self, exp: Self::Real) -> Self {
+                <$t>::powf(self, exp)
+            }
+
+            fn powi(self, exp: i32) -> Self {
+                <$t>::powi(self, exp)
+            }
+
+            fn sin(self) -> Self {
+                <$t>::sin(self)
+            }
+
+            fn sinh(self) -> Self {
+                <$t>::sinh(self)
             }
 
             fn sqrt(self) -> Self {
                 <$t>::sqrt(self)
+            }
+
+            fn square(self) -> Self::Real {
+                self * self
+            }
+
+            fn tan(self) -> Self {
+                <$t>::tan(self)
+            }
+
+            fn tanh(self) -> Self {
+                <$t>::tanh(self)
             }
         }
     };

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Node;
-use crate::prelude::{BinaryOp, Ops, Result};
+use crate::prelude::{BinaryOp, BinaryOperation, Ops, Result};
 use daggy::petgraph::algo::toposort;
 use daggy::{Dag, NodeIndex};
 use num::traits::{NumAssign, NumOps, Signed};
@@ -44,7 +44,7 @@ impl<T> Graph<T> {
     pub fn operation(
         &mut self,
         inputs: impl IntoIterator<Item = NodeIndex>,
-        operation: Ops,
+        operation: impl Into<Ops>,
         result: Option<T>,
     ) -> Result<NodeIndex>
     where
@@ -87,15 +87,15 @@ where
         // iterate through the nodes in reverse topological order
         while let Some((i, grad)) = stack.pop() {
             // get the current node
-            let node = self.graph[i].clone();
+            let node = &self.graph[i];
             // iterate through the inputs of the current node
             for (j, input) in node.inputs().iter().enumerate() {
                 // calculate the gradient of each input w.r.t. the current node
                 let dt = if let Some(op) = node.operation() {
                     match op {
                         Ops::Binary(op) => match op {
-                            BinaryOp::Add => grad,
-                            BinaryOp::Div => {
+                            BinaryOp::Add(_) => grad,
+                            BinaryOp::Div(_) => {
                                 let out = self.vals[&i];
                                 let val = self.vals[input];
                                 if j % 2 == 0 {
@@ -113,7 +113,7 @@ where
                                 if j % 2 == 0 {
                                     grad
                                 } else {
-                                    -grad
+                                    grad.neg()
                                 }
                             }
                             _ => T::default(),
@@ -131,20 +131,19 @@ where
         }
         Ok(gradients)
     }
-
 }
 
 impl<T> Graph<T>
 where
-    T: Copy + Default + NumOps,
+    T: Copy + Default + NumOps + PartialOrd,
 {
     pub fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
         let x = self.vals[&a];
         let y = self.vals[&b];
-        let res = x + y;
+        let op = BinaryOp::add();
+        let res = op.eval(x, y);
 
-        let c = self.operation([a, b], BinaryOp::Add.into(), Some(res))?;
-
+        let c = self.operation([a, b], op, Some(res))?;
         Ok(c)
     }
 
@@ -152,7 +151,9 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x / y;
-        let c = self.operation([a, b], BinaryOp::Div.into(), Some(res))?;
+
+        let op = BinaryOp::div();
+        let c = self.operation([a, b], op, Some(res))?;
 
         Ok(c)
     }
@@ -161,7 +162,7 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x * y;
-        let c = self.operation([a, b], BinaryOp::Mul.into(), Some(res))?;
+        let c = self.operation([a, b], BinaryOp::mul(), Some(res))?;
 
         Ok(c)
     }
@@ -170,7 +171,7 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x - y;
-        let c = self.operation([a, b], BinaryOp::Sub.into(), Some(res))?;
+        let c = self.operation([a, b], BinaryOp::sub(), Some(res))?;
 
         Ok(c)
     }

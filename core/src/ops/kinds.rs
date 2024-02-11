@@ -2,6 +2,8 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::arithmetic::*;
+use super::BinaryOperation;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
@@ -68,8 +70,8 @@ pub enum CompareOp {
 #[strum(serialize_all = "snake_case")]
 pub enum BinaryOp {
     #[default]
-    Add,
-    Div,
+    Add(Addition),
+    Div(Division),
     Maximum,
     Minimum,
     Mul,
@@ -77,11 +79,77 @@ pub enum BinaryOp {
 }
 
 impl BinaryOp {
+    pub fn add() -> Self {
+        Self::Add(Addition)
+    }
+
+    pub fn div() -> Self {
+        Self::Div(Division)
+    }
+
+    pub fn maximum() -> Self {
+        Self::Maximum
+    }
+
+    pub fn minimum() -> Self {
+        Self::Minimum
+    }
+
+    pub fn mul() -> Self {
+        Self::Mul
+    }
+
+    pub fn sub() -> Self {
+        Self::Sub
+    }
+
     pub fn is_commutative(&self) -> bool {
         match self {
-            Self::Add | Self::Mul => true,
+            Self::Add(_) | Self::Mul => true,
             _ => false,
         }
+    }
+}
+
+impl<T> BinaryOperation<T> for BinaryOp
+where
+    T: Copy + Default + PartialOrd + num::traits::NumOps,
+{
+    type Output = T;
+
+    fn eval(&self, lhs: T, rhs: T) -> Self::Output {
+        match self {
+            Self::Add(_) => lhs + rhs,
+            Self::Div(_) => lhs / rhs,
+            Self::Maximum => {
+                if lhs > rhs {
+                    lhs
+                } else {
+                    rhs
+                }
+            }
+            Self::Minimum => {
+                if lhs < rhs {
+                    lhs
+                } else {
+                    rhs
+                }
+            }
+            Self::Mul => lhs * rhs,
+            Self::Sub => lhs - rhs,
+        }
+    }
+}
+
+impl From<Addition> for BinaryOp {
+    fn from(_: Addition) -> Self {
+        Self::Add(Addition)
+    }
+}
+
+impl From<Division> for BinaryOp {
+    fn from(_: Division) -> Self {
+        Self::Div(Division)
     }
 }
 
@@ -167,9 +235,7 @@ impl Ops {
     }
     /// A functional constructor for [Ops::Custom]
     pub fn custom(name: impl Into<String>) -> Self {
-        Self::Custom {
-            name: name.into(),
-        }
+        Self::Custom { name: name.into() }
     }
     /// A functional constructor for [Ops::Unary]
     pub fn unary(op: UnaryOp) -> Self {

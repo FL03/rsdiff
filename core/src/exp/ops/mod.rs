@@ -27,8 +27,8 @@ mod tests {
         let y = Variable::new("y").with_value(2.0);
         let add = Addition::new(x.clone(), y.clone());
         assert_eq!(add.clone().eval(), 3.0);
-        assert_eq!(add.grad(x.clone()), Addition::new(1.0, 0.0));
-        assert_eq!(add.grad(y.clone()), Addition::new(0.0, 1.0));
+        assert_eq!(add.grad(x.clone()), 1.0);
+        assert_eq!(add.grad(y.clone()), 1.0);
         assert_eq!(add.grad(x.clone()).eval(), add.grad(y.clone()).eval());
     }
 
@@ -40,6 +40,6 @@ mod tests {
         let y = Variable::new("y").with_value(2.0);
         let mul = Multiply::new(x.clone(), y.clone());
         assert_eq!(mul.clone().eval(), 4.0);
-        // assert_eq!(mul.grad(x.clone()).eval(), 2.0);
+        assert_eq!(mul.grad(x.clone()).eval(), 2.0);
     }
 }

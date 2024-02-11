@@ -27,11 +27,12 @@ where
 
 impl<T> Gradient<T> for Addition<T>
 where
-    T: Clone + Gradient<T> + std::ops::Add<Output = T>,
+    T: Clone + Gradient<T>,
+    T::Gradient: std::ops::Add<Output = T::Gradient>,
 {
-    type Gradient = Addition<T::Gradient>;
+    type Gradient = T::Gradient;
 
     fn grad(&self, args: T) -> Self::Gradient {
-        Addition(self.0.grad(args.clone()), self.1.grad(args))
+        self.0.grad(args.clone()) + self.1.grad(args)
     }
 }

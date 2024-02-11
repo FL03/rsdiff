@@ -2,7 +2,6 @@
     Appellation: addition <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Addition;
 use crate::ops::{Evaluate, Gradient};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -29,17 +28,16 @@ where
 
 impl<T> Gradient<T> for Multiply<T>
 where
-    T: Clone
-        + Evaluate<Output = T>
-        + Gradient<T, Gradient = T>
-        + std::ops::Add<Output = T>
-        + std::ops::Mul<Output = T>,
+    T: Clone + Evaluate + Gradient<T> + std::ops::Mul<Output = T>,
+    <T as Evaluate>::Output: std::ops::Mul<T::Gradient, Output = T::Gradient>,
+    <T as Gradient<T>>::Gradient:
+        std::ops::Add<Output = T::Gradient> + std::ops::Mul<Output = T::Gradient>,
 {
-    type Gradient = T;
+    type Gradient = T::Gradient;
 
     fn grad(&self, args: T) -> Self::Gradient {
-        let a = Multiply(self.0.grad(args.clone()).eval(), self.1.clone().eval()).eval();
-        let b = Multiply(self.0.clone().eval(), self.1.grad(args).eval()).eval();
-        Addition::new(a, b).eval()
+        let a = self.1.clone().eval() * self.0.grad(args.clone());
+        let b = self.0.clone().eval() * self.1.grad(args);
+        a + b
     }
 }

@@ -28,11 +28,7 @@ impl<T> TensorBase<T> {
 
     // Function to get the index of the data based on coordinates
     fn position(&self, coords: impl AsRef<[usize]>) -> usize {
-        let mut index = self.layout().offset();
-        for (i, &coord) in coords.as_ref().iter().enumerate() {
-            index += coord * self.layout.stride[i];
-        }
-        index
+        self.layout.position(coords.as_ref())
     }
 
     pub fn id(&self) -> usize {
@@ -64,9 +60,7 @@ where
     where
         T: Default,
     {
-        let shape = shape.into_shape();
-        let store = vec![T::default(); shape.elements()];
-        Self::from_vec(shape, store)
+        Self::fill(shape, T::default())
     }
 
     pub fn fill(shape: impl IntoShape, value: T) -> Self {

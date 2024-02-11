@@ -5,7 +5,9 @@
 use crate::cmp::id::{GradientId, Id};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct Edge<T> {
     id: Option<GradientId<T>>,
     data: T,

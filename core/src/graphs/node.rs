@@ -17,7 +17,6 @@ pub struct Node {
     inputs: Vec<NodeIndex>,
     name: String,
     op: Option<Ops>,
-    
 }
 
 impl Node {
@@ -40,8 +39,8 @@ impl Node {
         self
     }
 
-    pub fn with_op(mut self, op: Ops) -> Self {
-        self.op = Some(op);
+    pub fn with_op(mut self, op: impl Into<Ops>) -> Self {
+        self.op = Some(op.into());
         self
     }
 
@@ -65,6 +64,4 @@ impl Node {
     pub fn operation(&self) -> Option<&Ops> {
         self.op.as_ref()
     }
-
-    
 }

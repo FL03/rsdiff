@@ -41,6 +41,14 @@ impl Layout {
         }
     }
 
+    pub(crate) fn position(&self, coords: &[usize]) -> usize {
+        let mut index = self.offset;
+        for (i, &coord) in coords.iter().enumerate() {
+            index += coord * self.stride[i];
+        }
+        index
+    }
+
     pub fn elements(&self) -> usize {
         self.shape.elements()
     }

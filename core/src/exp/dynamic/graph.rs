@@ -37,7 +37,7 @@ where
         let nodes = toposort(&self.graph, None)?;
 
         let mut gradients = GradientStore::new();
-        gradients.insert(target, self.get(target).unwrap().clone());
+        gradients.insert(target, self.graph[target].clone());
         Ok(())
     }
 }

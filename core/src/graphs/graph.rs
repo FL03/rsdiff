@@ -36,7 +36,7 @@ impl<T> Graph<T> {
     }
 
     pub fn constant(&mut self, value: T) -> NodeIndex {
-        let v = self.graph.add_node(Node::new(vec![], None));
+        let v = self.graph.add_node(Node::default());
         self.vals.insert(v, value);
         v
     }
@@ -50,7 +50,7 @@ impl<T> Graph<T> {
     where
         T: Default,
     {
-        let node = Node::new(inputs, Some(operation));
+        let node = Node::default().with_inputs(inputs).with_op(operation);
         let v = self.graph.add_node(node.clone());
         let edges = node.inputs().iter().map(|i| (*i, v));
         let _val = self.vals.insert(v, result.unwrap_or_default());
@@ -59,7 +59,7 @@ impl<T> Graph<T> {
     }
 
     pub fn variable(&mut self, value: T) -> NodeIndex {
-        let v = self.graph.add_node(Node::new(vec![], None));
+        let v = self.graph.add_node(Node::default());
         self.vals.insert(v, value);
         v
     }
@@ -81,7 +81,7 @@ where
         let mut gradients = HashMap::new();
         // initialize the stack
         let mut stack = Vec::<(NodeIndex, T)>::new();
-        // initialize the gradients
+        // start by computing the gradient of the target w.r.t. itself
         gradients.insert(target, T::one());
         stack.push((target, T::one()));
         // iterate through the nodes in reverse topological order
@@ -131,6 +131,7 @@ where
         }
         Ok(gradients)
     }
+
 }
 
 impl<T> Graph<T>

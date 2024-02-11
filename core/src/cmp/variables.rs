@@ -14,18 +14,21 @@ pub struct Variable<T> {
 }
 
 impl<T> Variable<T> {
-    pub fn new(name: impl ToString, value: Option<T>) -> Self {
-        Self {
-            name: name.to_string(),
-            value,
-        }
-    }
-
-    pub fn symbolic(name: impl ToString) -> Self {
+    pub fn new(name: impl ToString) -> Self {
         Self {
             name: name.to_string(),
             value: None,
         }
+    }
+
+    pub fn with_name(mut self, name: impl ToString) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    pub fn with_value(mut self, value: T) -> Self {
+        self.value = Some(value);
+        self
     }
 
     pub fn name(&self) -> &str {
@@ -38,11 +41,6 @@ impl<T> Variable<T> {
 
     pub fn set(&mut self, value: T) {
         self.value = Some(value);
-    }
-
-    pub fn with_value(mut self, value: T) -> Self {
-        self.value = Some(value);
-        self
     }
 }
 
@@ -90,7 +88,7 @@ where
     fn add(self, rhs: Self) -> Self::Output {
         let name = format!("{} + {}", self.name, rhs.name);
         let value = self.eval() + rhs.eval();
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -103,7 +101,7 @@ where
     fn add(self, rhs: T) -> Self::Output {
         let name = format!("{} + {}", self.name, rhs);
         let value = self.eval() + rhs;
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -116,7 +114,7 @@ where
     fn div(self, rhs: Self) -> Self::Output {
         let name = format!("{} / {}", self.name, rhs.name);
         let value = self.eval() / rhs.eval();
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -129,7 +127,7 @@ where
     fn div(self, rhs: T) -> Self::Output {
         let name = format!("{} / {}", self.name, rhs);
         let value = self.eval() / rhs;
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -142,7 +140,7 @@ where
     fn mul(self, rhs: Self) -> Self::Output {
         let name = format!("{} * {}", self.name, rhs.name);
         let value = self.eval() * rhs.eval();
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -155,7 +153,7 @@ where
     fn mul(self, rhs: T) -> Self::Output {
         let name = format!("{} * {}", self.name, rhs);
         let value = self.eval() * rhs;
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -168,7 +166,7 @@ where
     fn sub(self, rhs: Self) -> Self::Output {
         let name = format!("{} - {}", self.name, rhs.name);
         let value = self.eval() - rhs.eval();
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -181,7 +179,7 @@ where
     fn sub(self, rhs: T) -> Self::Output {
         let name = format!("{} - {}", self.name, rhs);
         let value = self.eval() - rhs;
-        Variable::new(name, Some(value))
+        Variable::new(name).with_value(value)
     }
 }
 
@@ -190,7 +188,7 @@ where
     T: Clone + Default + One,
 {
     fn one() -> Self {
-        Variable::new("1", Some(T::one()))
+        Variable::new("one").with_value(T::one())
     }
 }
 
@@ -199,7 +197,7 @@ where
     T: Clone + Default + Zero,
 {
     fn zero() -> Self {
-        Variable::new("0", Some(T::zero()))
+        Variable::new("0").with_value(T::zero())
     }
 
     fn is_zero(&self) -> bool {

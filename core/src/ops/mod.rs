@@ -46,10 +46,7 @@ impl Evaluate for f64 {
     }
 }
 
-pub trait Gradient<T>
-where
-    T: Gradient<T>,
-{
+pub trait Gradient<T> {
     type Gradient;
 
     fn grad(&self, args: T) -> Self::Gradient;

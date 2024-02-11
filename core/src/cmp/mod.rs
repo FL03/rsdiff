@@ -35,7 +35,7 @@ impl<T> FnNode<T> {
     }
 
     pub fn variable(name: impl ToString) -> Self {
-        Self::Var(Variable::symbolic(name))
+        Self::Var(Variable::new(name))
     }
 }
 
@@ -65,6 +65,11 @@ macro_rules! impl_op {
     };
 }
 
+macro_rules! impl_const_op {
+    ($name:ident, $bound:ident, $fn:ident, $e:expr) => {
+        impl_op!($name, $bound, $fn, 0, |a, b| $name::new($e(a, b)));
+    };
+}
 macro_rules! impl_dual_op {
     ($name:ident, $bound:ident, $fn:ident, $val:tt, $e:expr) => {
         impl<T> $bound for $name<T>
@@ -94,11 +99,11 @@ macro_rules! impl_dual_op {
 
 use std::ops::{Add, Div, Mul, Rem, Sub};
 
-impl_op!(Constant, Add, add, 0, |a, b| Constant::new(a + b));
-impl_op!(Constant, Div, div, 0, |a, b| Constant::new(a / b));
-impl_op!(Constant, Mul, mul, 0, |a, b| Constant::new(a * b));
-impl_op!(Constant, Rem, rem, 0, |a, b| Constant::new(a % b));
-impl_op!(Constant, Sub, sub, 0, |a, b| Constant::new(a - b));
+impl_const_op!(Constant, Add, add, |a, b| a + b);
+impl_const_op!(Constant, Div, div, |a, b| a / b);
+impl_const_op!(Constant, Mul, mul, |a, b| a * b);
+impl_const_op!(Constant, Rem, rem, |a, b| a % b);
+impl_const_op!(Constant, Sub, sub, |a, b| a - b);
 
 #[cfg(test)]
 mod tests {

@@ -19,6 +19,16 @@ impl AtomicId {
     pub fn get(&self) -> usize {
         self.0
     }
+
+    pub fn into_inner(self) -> usize {
+        self.0
+    }
+}
+
+impl Default for AtomicId {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl std::fmt::Display for AtomicId {
@@ -36,12 +46,6 @@ impl AsRef<usize> for AtomicId {
 impl AsMut<usize> for AtomicId {
     fn as_mut(&mut self) -> &mut usize {
         &mut self.0
-    }
-}
-
-impl Default for AtomicId {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

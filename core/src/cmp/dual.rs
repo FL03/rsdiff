@@ -4,11 +4,14 @@
 */
 //! # Dual
 //!
-//! Dual numbers are a type of hypercomplex number which are expressions of the form:
-//! z = a + be
+//! Dual numbers are a type of hypercomplex number which are expressions of 
+//! the form: 
+//!     Dual => z = a + be
 //!     where
+//!         a, b, e are real numbers
 //!         e != 0
 //!         e^2 = 0
+
 use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 use serde::{Deserialize, Serialize};

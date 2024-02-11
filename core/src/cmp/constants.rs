@@ -84,7 +84,7 @@ impl<T> Evaluate for Constant<T> {
 
 impl<T> Gradient<T> for Constant<T>
 where
-    T: Default + Gradient<T>,
+    T: Default,
 {
     type Gradient = Constant<T>;
 

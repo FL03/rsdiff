@@ -45,7 +45,7 @@ where
     type Real = T;
 
     fn conj(&self) -> Self::Complex {
-        Complex::new(self.re, -self.im)
+        Complex::conj(self)
     }
 
     fn real(&self) -> Self::Real {
@@ -68,7 +68,7 @@ macro_rules! impl_scalar {
             type Real = $t;
 
             fn conj(&self) -> Self::Complex {
-                Complex::new(*self, 0.0)
+                Complex::new(*self, -<$t>::default())
             }
 
             fn real(&self) -> Self::Real {

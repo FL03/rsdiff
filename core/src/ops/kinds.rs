@@ -156,6 +156,27 @@ pub enum Ops {
     },
 }
 
+impl Ops {
+    /// A functional constructor for [Ops::Binary]
+    pub fn binary(op: BinaryOp) -> Self {
+        Self::Binary(op)
+    }
+    /// A functional constructor for [Ops::Compare]
+    pub fn compare(op: CompareOp) -> Self {
+        Self::Compare(op)
+    }
+    /// A functional constructor for [Ops::Custom]
+    pub fn custom(name: impl Into<String>) -> Self {
+        Self::Custom {
+            name: name.into(),
+        }
+    }
+    /// A functional constructor for [Ops::Unary]
+    pub fn unary(op: UnaryOp) -> Self {
+        Self::Unary(op)
+    }
+}
+
 impl From<BinaryOp> for Ops {
     fn from(op: BinaryOp) -> Self {
         Self::Binary(op)

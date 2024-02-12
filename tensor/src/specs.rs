@@ -6,8 +6,17 @@ use crate::core::cmp::id::AtomicId;
 use crate::shape::{Rank, Shape};
 use crate::store::Layout;
 
+pub trait Matmul<Rhs = Self> {
+    type Output;
+
+    fn matmul(&self, rhs: &Rhs) -> Self::Output;
+}
+
 pub trait NdTensor {
-    type Data;
+
+    fn elements(&self) -> usize {
+        self.layout().elements()
+    }
 
     fn id(&self) -> AtomicId;
 
@@ -24,6 +33,4 @@ pub trait NdTensor {
     fn stride(&self) -> &[usize] {
         self.layout().stride()
     }
-
-    fn matmul(&self, rhs: &Self) -> Self;
 }

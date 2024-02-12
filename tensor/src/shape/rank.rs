@@ -71,17 +71,3 @@ impl From<Rank> for usize {
 unsafe impl Send for Rank {}
 
 unsafe impl Sync for Rank {}
-
-// impl<T> TryFrom<T> for Rank
-// where
-//     T: NumCast,
-// {
-//     type Error = Box<dyn std::error::Error>;
-
-//     fn try_from(value: T) -> Result<Self, Self::Error> {
-//         if let Some(rank) = <usize as NumCast>::from(value) {
-//             return Ok(Self(rank));
-//         }
-//         Err("Could not convert to Rank".into())
-//     }
-// }

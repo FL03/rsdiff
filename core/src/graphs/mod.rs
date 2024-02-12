@@ -24,12 +24,13 @@ mod tests {
         let mut dag = Graph::new();
         let x = dag.variable(1_f64);
         let y = dag.variable(2_f64);
-
+        // f(x, y) = x + y
         let c = dag.add(x, y).unwrap();
-
-        let d = dag.mul(c, y).unwrap();
-
+        // verify the value of c to be the sum of x and y
         assert_eq!(*dag.get_value(c).unwrap(), 3.0);
+        // f(x, y) = y * (x + y)
+        let d = dag.mul(c, y).unwrap();
+        // verify the value of d to be the product of c and y
         assert_eq!(*dag.get_value(d).unwrap(), 6.0);
 
         let gc = dag.gradient_at(c).unwrap();

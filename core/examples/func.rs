@@ -27,7 +27,7 @@ mod macros {
         ($f:expr) => {
             $f
         };
-        (eval $f:expr, ($($xs:ident),*)) => {
+        (eval $f:expr, ($($xs:literal),*)) => {
             $f($($xs),*)
         }
 
@@ -37,5 +37,5 @@ mod macros {
 fn sample() {
     let (a, b, c) = (1.0, 2.0, 3.0);
     let f = func!(|x, y, z| z * (x + y));
-    println!("{:?}", func!(eval f, (a, b, c)));
+    println!("{:?}", func!(eval f, (1.0, 2.0, 3.0)));
 }

@@ -1,0 +1,32 @@
+[package]
+authors.workspace = true
+categories.workspace = true
+description.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+name = "acme-tensor"
+repository.workspace = true
+readme.workspace = true
+version.workspace = true
+
+[features]
+default = []
+
+[build-dependencies]
+
+[dependencies]
+acme-core = { features = [], path = "../core", version = "0.3" }
+num = "0.4"
+serde = { features = ["derive"], version = "1" }
+strum = { features = ["derive"], version = "0.26" }
+
+[dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

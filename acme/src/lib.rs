@@ -4,7 +4,9 @@
 */
 //! # acme
 //!
-//! Acme is a complete framework for building intelligent agents in Rust
+//! Acme is an autodifferentiaion library for Rust. It is designed to be a
+//! flexible and powerful tool for building machine learning models and
+//! other differentiable programs.
 
 #[cfg(feature = "core")]
 pub use acme_core as core;
@@ -12,12 +14,14 @@ pub use acme_core as core;
 pub use acme_derive::*;
 #[cfg(feature = "macros")]
 pub use acme_macros::*;
-
-pub mod agents;
+#[cfg(feature = "tensor")]
+pub use acme_tensor as tensor;
 
 pub mod prelude {
     #[cfg(feature = "core")]
-    pub use super::core::prelude::*;
+    pub use crate::core::prelude::*;
+    #[cfg(feature = "tensor")]
+    pub use crate::tensor::prelude::*;
     #[cfg(feature = "derive")]
     pub use acme_derive::*;
     #[cfg(feature = "macros")]

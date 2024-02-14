@@ -1,7 +1,7 @@
 [package]
 authors.workspace = true
 categories.workspace = true
-description = "Acme is a complete development toolkit for extending platform functionality"
+description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
@@ -10,9 +10,6 @@ readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
-[features]
-default = []
-
 [lib]
 proc-macro = true
 test = true
@@ -20,8 +17,9 @@ test = true
 [build-dependencies]
 
 [dependencies]
-syn = { features = [], version = "2" }
 proc-macro2 = "1"
+quote = "1"
+syn = { features = ["full"], version = "2" }
 
 [dev-dependencies]
 

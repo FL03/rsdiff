@@ -10,6 +10,7 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as Ts;
 use quote::quote;
 use syn::{parse_macro_input, Expr, Ident};
+use syn::{Data, DeriveInput, Fields};
 
 pub(crate) mod cmp;
 
@@ -155,6 +156,7 @@ fn match_partial_differentiate(expr: &Expr, variable: &Ident) -> proc_macro2::To
         }
         // Differentiate variable expressions
         Expr::Path(expr_path)
+        
             if expr_path.path.segments.len() == 1
                 && expr_path.path.segments[0].ident == *variable =>
         {
@@ -226,4 +228,69 @@ fn generate_gradient(expr: &Expr, gradient_values: &mut Vec<Ts>) {
         }
         _ => panic!("Unsupported expression!"),
     }
+}
+#[proc_macro]
+pub fn param(input: TokenStream) -> TokenStream {
+    // Parse the input tokens into a syntax tree
+    let input = parse_macro_input!(input as DeriveInput);
+
+    // Get the name of the struct
+    let struct_name = &input.ident;
+
+    // Generate the parameter struct definition
+    let param_struct = match &input.data {
+        Data::Struct(s) => match &s.fields {
+            Fields::Named(fields) => {
+                let field_names = fields.named.iter().map(|f| f.ident.clone());
+                let fn2 = field_names.clone();
+
+                quote! {
+                    impl #struct_name {
+                        pub fn new(#(#field_names: Parameter),*) -> Self {
+                            #struct_name {
+                                #(
+                                    #fn2,
+                                )*
+                            }
+                        }
+                    }
+                }
+            }
+            _ => panic!("Only named fields are supported"),
+        },
+        _ => panic!("Only structs are supported"),
+    };
+
+    // Generate the parameter keys enum
+    let param_keys_enum = match &input.data {
+        Data::Struct(s) => match &s.fields {
+            Fields::Named(fields) => {
+                let field_names = fields.named.iter().map(|f| &f.ident);
+                let field_names_str = field_names.clone().map(|ident| {
+                    let ident_str = ident.as_ref().unwrap().to_string();
+                    quote! { #ident_str }
+                });
+
+                quote! {
+                    #[derive(Debug, PartialEq, Eq, Hash)]
+                    pub enum #struct_name.keys {
+                        #(
+                            #field_names,
+                        )*
+                    }
+                }
+            }
+            _ => panic!("Only named fields are supported"),
+        },
+        _ => panic!("Only structs are supported"),
+    };
+
+    // Combine the generated code
+    let generated_code = quote! {
+        #param_struct
+        #param_keys_enum
+    };
+
+    // Return the generated code as a TokenStream
+    generated_code.into()
 }

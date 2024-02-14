@@ -13,4 +13,6 @@ fn test_partial() {
     let y = 2.0;
     assert_eq!(partial!(x: x + y;), 1.0);
     assert_eq!(partial!(y: x + y;), 1.0);
+    assert_eq!(partial!(x: x * y;), 2.0);
+    assert_eq!(partial!(y: x * y;), 1.0);
 }

@@ -6,7 +6,6 @@ extern crate acme_core as acme;
 
 use acme::prelude::BoxResult;
 
-
 fn main() -> BoxResult {
     sample();
     Ok(())
@@ -20,7 +19,7 @@ mod macros {
         };
         (grad $df:expr) => {
             $df()
-        }
+        };
     }
 
     macro_rules! func {
@@ -35,7 +34,6 @@ mod macros {
 }
 
 fn sample() {
-    let (a, b, c) = (1.0, 2.0, 3.0);
     let f = func!(|x, y, z| z * (x + y));
     println!("{:?}", func!(eval f, (1.0, 2.0, 3.0)));
 }

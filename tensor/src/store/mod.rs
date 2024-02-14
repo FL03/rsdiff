@@ -11,6 +11,5 @@ use std::sync::{Arc, RwLock};
 
 pub type ArcTensor<T> = Arc<RwLock<Vec<T>>>;
 
-
 #[cfg(test)]
 mod tests {}

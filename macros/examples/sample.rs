@@ -4,29 +4,14 @@
 */
 extern crate acme_macros as macros;
 
-use macros::show_streams;
-
-macro_rules! autodiff {
-    (eval $f:expr) => {
-        $f()
-    };
-    (grad $df:expr) => {
-        $df()
-    }
-}
-
-macro_rules! func {
-    ($f:expr) => {
-        $f
-    };
-    (eval $f:expr, ($($xs:ident),*)) => {
-        $f($($xs),*)
-    }
-
-}
+use macros::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     foo();
+    let x = 1.0;
+    let y = 2.0;
+    let z = partial!(y: x + y;);
+    println!("Partial Derivative: {:?}", z);
     Ok(())
 }
 

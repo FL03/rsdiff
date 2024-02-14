@@ -13,7 +13,6 @@ pub trait Matmul<Rhs = Self> {
 }
 
 pub trait NdTensor {
-
     fn elements(&self) -> usize {
         self.layout().elements()
     }

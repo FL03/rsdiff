@@ -5,7 +5,7 @@
 #[cfg(test)]
 extern crate acme_macros as macros;
 
-use macros::gradient;
+use macros::{grad, gradient};
 
 #[test]
 fn test_gradient() {
@@ -14,4 +14,11 @@ fn test_gradient() {
     assert_eq!(gradient!(x + y), [1.0; 2]);
     // assert_eq!(gradient!(x * y), [2.0, 1.0]);
     assert_eq!(gradient!(x + y + 1.0), [1.0, 1.0, 0.0]);
+}
+
+#[test]
+fn test_grad() {
+    let x = 1.0;
+    let y = 2.0;
+    assert_eq!(grad!(x + y), [1.0; 2]);
 }

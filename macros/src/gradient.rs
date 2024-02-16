@@ -27,13 +27,13 @@ pub fn compute_grad(expr: &Expr) -> TokenStream {
             quote! { (#k, #v) }
         })
         .collect::<Vec<_>>();
-    let s = HashMap::<TokenStream, TokenStream>::new();
     // Convert the gradient values into a token stream
     quote! { [#(#values),*] }
 }
 
 pub fn handle_expr(expr: &Expr, store: &mut HashMap<Expr, TokenStream>) -> Option<TokenStream> {
     let node = expr.clone();
+
     match expr {
         Expr::Binary(binary) => {
             let df = binary_grad(binary, store);
@@ -61,12 +61,6 @@ pub fn handle_expr(expr: &Expr, store: &mut HashMap<Expr, TokenStream>) -> Optio
             store.insert(node, grad.clone());
             Some(grad)
         }
-        Expr::Tuple(expr_tuple) => {
-            for e in expr_tuple.elems.iter() {
-                handle_expr(e, store);
-            }
-            None
-        }
         // Handle unary expressions (e.g., negation, natural log, etc.)
         Expr::Unary(unary) => {
             // Compute the gradient of the expression
@@ -79,15 +73,13 @@ pub fn handle_expr(expr: &Expr, store: &mut HashMap<Expr, TokenStream>) -> Optio
     }
 }
 
-pub fn binary_grad(expr: &ExprBinary, store: &mut HashMap<Expr, TokenStream>) -> TokenStream {
+fn binary_grad(expr: &ExprBinary, store: &mut HashMap<Expr, TokenStream>) -> TokenStream {
     use syn::BinOp;
     // create a cloned reference to the expression
     let node: Expr = expr.clone().into();
     // let grad = store.entry(node).or_insert(quote! { 0.0 }).clone();
     let grad = store.remove(&node).unwrap_or(quote! { 0.0 });
-    let left = &expr.left;
-    let right = &expr.right;
-    let op = &expr.op;
+    let ExprBinary { left, op, right, .. } = expr;
 
     // Recursivley compute the gradient of the left and right children
     let dl = handle_expr(left, store).unwrap_or(quote! { 0.0 }); 
@@ -98,23 +90,19 @@ pub fn binary_grad(expr: &ExprBinary, store: &mut HashMap<Expr, TokenStream>) ->
             *gl = quote! { #grad + #dl };
             let gr = store.entry(*right.clone()).or_insert(quote! { 0.0 });
             *gr = quote! { #grad + #dr };
-            // quote! { #gl + #gr }
         }
         BinOp::Mul(_) => {
             let gl = store.entry(*left.clone()).or_insert(quote! { 0.0 });
-            *gl = quote! { #grad + #right * #dl };
+            *gl = quote! { #right * #dl + #grad };
             let gr = store.entry(*right.clone()).or_insert(quote! { 0.0 });
             *gr = quote! { #grad + #left * #dr };
-            // quote! { #gl + #gr }
         }
         _ => panic!("Unsupported binary operator!"),
     };
-    let dl = store.get(left).unwrap_or(&quote! { 0.0 }).clone();
-    let dr = store.get(right).unwrap_or(&quote! { 0.0 }).clone();
-    quote! { #dl + #dr }
+    grad
 }
 
-pub fn handle_unary(expr: &ExprUnary, store: &mut HashMap<Expr, TokenStream>) -> TokenStream {
+fn handle_unary(expr: &ExprUnary, store: &mut HashMap<Expr, TokenStream>) -> TokenStream {
     use syn::UnOp;
     handle_expr(&expr.expr, store);
     let dv = store.get(&expr.expr).unwrap_or(&quote! { 0.0 }).clone();

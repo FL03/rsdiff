@@ -29,18 +29,25 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn autodiff(input: TokenStream) -> TokenStream {
+pub fn compute(input: TokenStream) -> TokenStream {
     use graph::Context;
     // Parse the input expression into a syntax tree
     let expr = parse_macro_input!(input as Expr);
 
     // Build a computational graph representing the expression
     let mut graph = Context::new();
-    graph.build_computational_graph(&expr);
+    graph.traverse(&expr);
 
     // Generate code to compute gradients and return as a HashMap
-    let grad = graph.compute_gradients();
-    TokenStream::from(grad)
+    let grad = graph.backward();
+    let grads = grad
+        .into_iter()
+        .map(|(k, v)| {
+            let k = k.index();
+            quote! { (#k, #v) }
+        })
+        .collect::<Vec<_>>();
+    quote! { [#(#grads),*] }.into()
 }
 
 #[proc_macro]
@@ -66,4 +73,3 @@ pub fn partial(input: TokenStream) -> TokenStream {
     // Return the generated code as a token stream
     TokenStream::from(result)
 }
-

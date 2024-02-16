@@ -11,6 +11,7 @@ use proc_macro2::TokenStream as Ts;
 use quote::quote;
 use syn::{parse_macro_input, Expr};
 
+pub(crate) mod ast;
 pub(crate) mod cmp;
 
 pub(crate) mod autodiff;
@@ -29,26 +30,17 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn autodiff(input: TokenStream) -> TokenStream {
-    use graph::{build_computational_graph, compute_gradients};
+    use graph::Context;
     // Parse the input expression into a syntax tree
     let expr = parse_macro_input!(input as Expr);
 
     // Build a computational graph representing the expression
-    let graph = build_computational_graph(&expr);
-
-    // Compute gradients using the computational graph
-    let gradients = compute_gradients(&graph);
+    let mut graph = Context::new();
+    graph.build_computational_graph(&expr);
 
     // Generate code to compute gradients and return as a HashMap
-    let output = quote! {
-        {
-            let mut gradients = std::collections::HashMap::new();
-            #gradients
-            gradients
-        }
-    };
-
-    output.into()
+    let grad = graph.compute_gradients();
+    TokenStream::from(grad)
 }
 
 #[proc_macro]

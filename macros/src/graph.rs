@@ -65,26 +65,61 @@ fn get_node_id(expr: &Expr, graph: &ComputeGraph) -> NodeIndex {
         .unwrap()
 }
 
-// Function to compute gradients using the computational graph
-pub fn compute_gradients(graph: &ComputeGraph) -> TokenStream {
-    let sorted = toposort(graph, None).expect("The graph is cyclic");
-    let nodes = sorted.iter().rev().copied().collect::<Vec<_>>();
-    // Generate code to compute gradients based on the graph structure
-    let mut gradient_code = quote! {};
+pub struct Context {
+    graph: DiGraph<Expr, ()>,
+}
 
-    // Iterate through the edges of the graph to compute gradients
-    for edge in graph.raw_edges() {
-        // Implement gradient computation logic based on the edge
-        // For binary operations, compute gradients using the chain rule
-        if let (Some(src), Some(target)) = (
-            graph.node_weight(edge.source()),
-            graph.node_weight(edge.target()),
-        ) {
-            gradient_code = quote! {
-                // Implement gradient computation logic here
-            };
+impl Context {
+    pub fn new() -> Self {
+        Context {
+            graph: DiGraph::new(),
         }
     }
 
-    gradient_code
+    pub fn add_node(&mut self, expr: Expr) -> NodeIndex {
+        self.graph.add_node(expr)
+    }
+
+    pub fn add_edge(&mut self, src: NodeIndex, target: NodeIndex) {
+        self.graph.add_edge(src, target, ());
+    }
+
+    pub fn compute_gradients(&self) -> TokenStream {
+        let sorted = toposort(&self.graph, None).expect("The graph is cyclic");
+        let nodes = sorted.iter().rev().copied().collect::<Vec<_>>();
+        // Generate code to compute gradients based on the graph structure
+        let mut gradient_code = quote! {};
+
+        // Iterate through the edges of the graph to compute gradients
+        for edge in self.graph.raw_edges() {
+            // Implement gradient computation logic based on the edge
+            // For binary operations, compute gradients using the chain rule
+            if let (Some(src), Some(target)) = (
+                self.graph.node_weight(edge.source()),
+                self.graph.node_weight(edge.target()),
+            ) {
+                gradient_code = quote! {
+                    // Implement gradient computation logic here
+                };
+            }
+        }
+
+        gradient_code
+    }
+
+    pub fn build_computational_graph(&mut self, expr: &Expr) {
+        let c = self.add_node(expr.clone());
+        // Recursive traversal for binary expressions
+        if let Expr::Binary(binary_expr) = expr {
+            // Add edges for left and right children
+            let left_id = self.add_node(*binary_expr.left.clone());
+            let right_id = self.add_node(*binary_expr.right.clone());
+            self.add_edge(left_id, c);
+            self.add_edge(right_id, c);
+
+            // Recursive traversal for left and right children
+            self.build_computational_graph(&binary_expr.left);
+            self.build_computational_graph(&binary_expr.right);
+        }
+    }
 }

@@ -11,7 +11,6 @@ pub(crate) type GradientStack = Vec<(Expr, TokenStream)>;
 pub(crate) type GradientStore = HashMap<Expr, TokenStream>;
 
 pub fn compute_grad(expr: &Expr) -> TokenStream {
-    println!("Expression: {:?}", expr);
     // Initialize an empty HashMap to hold the gradient values
     let mut store = HashMap::new();
     // begin by computing the gradient of the expression w.r.t. itself
@@ -25,14 +24,15 @@ pub fn compute_grad(expr: &Expr) -> TokenStream {
         _ => false,
     });
 
-    println!("Gradient Store:\n{:?}\n", &store);
-
-    let values = store.values().cloned().collect::<Vec<_>>();
+    let values = store
+        .into_iter()
+        .map(|(k, v)| {
+            quote! { (#k, #v) }
+        })
+        .collect::<Vec<_>>();
+    let s = HashMap::<TokenStream, TokenStream>::new();
     // Convert the gradient values into a token stream
-    let gradient_array = quote! { [#(#values),*] };
-
-    // Return the generated code as a token stream
-    gradient_array
+    quote! { [#(#values),*] }
 }
 
 pub fn handle_expr(expr: &Expr, store: &mut HashMap<Expr, TokenStream>) -> Option<TokenStream> {
@@ -54,7 +54,6 @@ pub fn handle_expr(expr: &Expr, store: &mut HashMap<Expr, TokenStream>) -> Optio
                 panic!("Unsupported path!");
             }
             let _path = &expr_path.path;
-            println!("Path: {:?}", _path);
             let grad = quote! { 1.0 };
             store.insert(node, grad.clone());
             Some(grad)

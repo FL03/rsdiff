@@ -2,7 +2,7 @@
     Appellation: partial <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use crate::cmp::PartialDerivative;
+pub use crate::ast::PartialDerivative;
 
 use proc_macro2::TokenStream;
 use quote::quote;

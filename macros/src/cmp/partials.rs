@@ -15,7 +15,6 @@ impl Parse for PartialDerivative {
         let variable = input.parse()?;
         input.parse::<Token![:]>()?;
         let expr = input.parse()?;
-        input.parse::<Token![;]>()?;
         Ok(PartialDerivative { expr, variable })
     }
 }

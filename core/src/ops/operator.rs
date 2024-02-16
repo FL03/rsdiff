@@ -4,7 +4,6 @@
 */
 use std::marker::Tuple;
 
-
 pub trait Operand<Args>
 where
     Args: Tuple,

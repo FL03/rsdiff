@@ -48,7 +48,6 @@ impl Evaluate for f64 {
     }
 }
 
-
 pub trait BinaryOperation<T> {
     type Output;
 

@@ -4,20 +4,20 @@
 */
 extern crate acme;
 
-use acme::prelude::{Graph, Result};
+use acme::prelude::{Result, Scg};
 
 fn main() -> Result<()> {
-    let mut dcg = Graph::new();
-    let x = dcg.variable(1.0);
-    let y = dcg.variable(2.0);
+    let mut scg = Scg::new();
+    let x = scg.variable(1.0);
+    let y = scg.variable(2.0);
 
-    let z = dcg.add(x, y)?;
-    let w = dcg.mul(z, y)?;
+    let z = scg.add(x, y)?;
+    let w = scg.mul(z, y)?;
 
-    let eval = dcg.get_value(w).unwrap();
+    let eval = scg.get_value(w).unwrap();
     println!("{:?}", *eval);
 
-    let grad = dcg.backward();
+    let grad = scg.backward();
     println!("{:?}", grad);
 
     Ok(())

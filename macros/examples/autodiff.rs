@@ -15,6 +15,6 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 fn sample_partial() {
     let x = 1.0;
     let y = 2.0;
-    let z = partial!(y: y * (x + y););
+    let z = partial!(y: y * (x + y));
     println!("Partial Derivative: {:?}", z);
 }

@@ -2,9 +2,10 @@
     Appellation: stores <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::gradient::*;
+pub use self::{gradient::*, stack::*};
 
 pub(crate) mod gradient;
+pub(crate) mod stack;
 
 use std::collections::{BTreeMap, HashMap};
 
@@ -20,7 +21,7 @@ pub trait Store<K, V> {
 
 macro_rules! impl_store {
     ($t:ty, where $($preds:tt)* ) => {
-        
+
         impl<K, V> Store<K, V> for $t where $($preds)* {
             fn get(&self, key: &K) -> Option<&V> {
                 <$t>::get(self, &key)
@@ -38,7 +39,7 @@ macro_rules! impl_store {
                 <$t>::remove(self, &key)
             }
         }
-        
+
     };
 }
 

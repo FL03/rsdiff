@@ -10,12 +10,12 @@ use num::traits::{NumAssign, NumOps, Signed};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
-pub struct Graph<T> {
+pub struct Scg<T> {
     graph: Dag<Node, usize>,
     vals: HashMap<NodeIndex, T>,
 }
 
-impl<T> Graph<T> {
+impl<T> Scg<T> {
     pub fn new() -> Self {
         Self {
             graph: Dag::new(),
@@ -65,7 +65,7 @@ impl<T> Graph<T> {
     }
 }
 
-impl<T> Graph<T>
+impl<T> Scg<T>
 where
     T: Copy + Default + NumAssign + NumOps + Signed + 'static,
 {
@@ -133,7 +133,7 @@ where
     }
 }
 
-impl<T> Graph<T>
+impl<T> Scg<T>
 where
     T: Copy + Default + NumOps + PartialOrd,
 {

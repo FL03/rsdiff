@@ -30,6 +30,7 @@ pub mod prelude {
 
     pub use crate::cmp::*;
     pub use crate::errors::*;
+    pub use crate::graphs::scg::Scg;
     pub use crate::graphs::*;
     pub use crate::ops::*;
     pub use crate::stores::*;

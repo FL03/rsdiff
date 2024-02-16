@@ -10,60 +10,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Expr;
 
-pub(crate) type ComputeGraph<V = ()> = DiGraph<Expr, V>;
 
-// Function to build a computational graph from the expression
-pub fn build_computational_graph(expr: &Expr) -> ComputeGraph {
-    // Initialize a graph
-    let mut graph = DiGraph::new();
-
-    // Assign IDs to each node in the expression tree
-    let mut id_counter = 0;
-    assign_node_ids(expr, &mut graph, &mut id_counter);
-
-    // Traverse the expression and add edges to the graph
-    traverse_expr(expr, &mut graph);
-
-    graph
-}
-
-// Recursive function to assign IDs to each node in the expression tree
-fn assign_node_ids(expr: &Expr, graph: &mut ComputeGraph, id_counter: &mut usize) {
-    // Assign an ID to the current node
-    graph.add_node(expr.clone());
-    let current_id = *id_counter;
-    *id_counter += 1;
-
-    // Recursive traversal for binary expressions
-    if let Expr::Binary(binary_expr) = expr {
-        assign_node_ids(&binary_expr.left, graph, id_counter);
-        assign_node_ids(&binary_expr.right, graph, id_counter);
-    }
-}
-
-// Recursive function to traverse the expression and add edges to the graph
-fn traverse_expr(expr: &Expr, graph: &mut ComputeGraph) {
-    // Recursive traversal for binary expressions
-    if let Expr::Binary(binary_expr) = expr {
-        // Add edges for left and right children
-        let left_id = get_node_id(&binary_expr.left, graph);
-        let right_id = get_node_id(&binary_expr.right, graph);
-        graph.add_edge(left_id, right_id, ());
-
-        // Recursive traversal for left and right children
-        traverse_expr(&binary_expr.left, graph);
-        traverse_expr(&binary_expr.right, graph);
-    }
-}
-
-// Function to get the node ID of an expression node
-fn get_node_id(expr: &Expr, graph: &ComputeGraph) -> NodeIndex {
-    graph
-        .node_indices()
-        .filter(|&node| graph[node] == *expr)
-        .next()
-        .unwrap()
-}
 
 pub struct Context {
     graph: DiGraph<Expr, ()>,
@@ -109,17 +56,17 @@ impl Context {
 
     pub fn build_computational_graph(&mut self, expr: &Expr) {
         let c = self.add_node(expr.clone());
-        // Recursive traversal for binary expressions
-        if let Expr::Binary(binary_expr) = expr {
+
+        if let Expr::Binary(expr_binary) = expr {
             // Add edges for left and right children
-            let left_id = self.add_node(*binary_expr.left.clone());
-            let right_id = self.add_node(*binary_expr.right.clone());
+            let left_id = self.add_node(*expr_binary.left.clone());
+            let right_id = self.add_node(*expr_binary.right.clone());
             self.add_edge(left_id, c);
             self.add_edge(right_id, c);
 
             // Recursive traversal for left and right children
-            self.build_computational_graph(&binary_expr.left);
-            self.build_computational_graph(&binary_expr.right);
+            self.build_computational_graph(&expr_binary.left);
+            self.build_computational_graph(&expr_binary.right);
         }
     }
 }

@@ -18,11 +18,8 @@ pub fn compute_grad(expr: &Expr) -> TokenStream {
 
     // Generate code to compute the gradient of the expression w.r.t. each variable
     handle_expr(expr, &mut store);
-    store.retain(|k, _v| match k {
-        Expr::Path(_) => true,
-        Expr::Reference(_) => true,
-        _ => false,
-    });
+
+    store.retain(|k, _v| matches!(k, Expr::Path(_) | Expr::Reference(_)));
 
     let values = store
         .into_iter()
@@ -86,26 +83,28 @@ pub fn binary_grad(expr: &ExprBinary, store: &mut HashMap<Expr, TokenStream>) ->
     use syn::BinOp;
     // create a cloned reference to the expression
     let node: Expr = expr.clone().into();
+    // let grad = store.entry(node).or_insert(quote! { 0.0 }).clone();
+    let grad = store.remove(&node).unwrap_or(quote! { 0.0 });
     let left = &expr.left;
     let right = &expr.right;
     let op = &expr.op;
 
-    let dl = handle_expr(left, store).unwrap_or(quote! { 0.0 });
+    // Recursivley compute the gradient of the left and right children
+    let dl = handle_expr(left, store).unwrap_or(quote! { 0.0 }); 
     let dr = handle_expr(right, store).unwrap_or(quote! { 0.0 });
-
     match op {
         BinOp::Add(_) => {
             let gl = store.entry(*left.clone()).or_insert(quote! { 0.0 });
-            *gl = quote! { #dl };
+            *gl = quote! { #grad + #dl };
             let gr = store.entry(*right.clone()).or_insert(quote! { 0.0 });
-            *gr = quote! { #dr };
+            *gr = quote! { #grad + #dr };
             // quote! { #gl + #gr }
         }
         BinOp::Mul(_) => {
             let gl = store.entry(*left.clone()).or_insert(quote! { 0.0 });
-            *gl = quote! { #dl * #right };
+            *gl = quote! { #grad + #right * #dl };
             let gr = store.entry(*right.clone()).or_insert(quote! { 0.0 });
-            *gr = quote! { #dr * #left };
+            *gr = quote! { #grad + #left * #dr };
             // quote! { #gl + #gr }
         }
         _ => panic!("Unsupported binary operator!"),

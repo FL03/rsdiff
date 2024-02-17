@@ -6,9 +6,7 @@ use super::handle_expr;
 use crate::kw;
 use proc_macro2::TokenStream;
 use quote::quote;
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use strum::{Display, EnumCount, EnumIs, EnumIter, IntoStaticStr, VariantNames,};
 use syn::{Expr, ExprCall, ExprMethodCall, Ident};
 use syn::parse::{Parse, ParseStream, Result};
 
@@ -25,23 +23,25 @@ pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
 
 pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
     let ExprMethodCall {
-        receiver,
         args,
         method,
+        receiver,
         ..
     } = expr;
     let method_name = method.clone().to_string();
-    let dr = handle_expr(&receiver, var);
-    let mut da = quote! { 0.0 };
-    for arg in args {
-        let arg = handle_expr(&arg, var);
-        da = quote! { #da + #arg };
-    }
-    if let Ok(method) = UnaryMethod::from_str(&method_name) {
-        return handle_unary_method(&method, &receiver,);
-    }
 
-    quote! { #dr + #da }
+    match UnaryMethod::from_str(&method_name) {
+        Ok(method) => handle_unary_method(&method, &receiver),
+        Err(_) => {
+            let dr = handle_expr(&receiver, var);
+            let mut da = quote! { 0.0 };
+            for arg in args {
+                let arg = handle_expr(&arg, var);
+                da = quote! { #da + #arg };
+            }
+            quote! { #dr + #da }
+        }
+    }
 }
 
 pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr) -> TokenStream {
@@ -69,47 +69,40 @@ pub enum Methods {
 }
 
 
-#[derive(Clone, Copy, Debug, Deserialize, Display, EnumCount, EnumIs, EnumIter, Eq, Hash, IntoStaticStr, Ord, PartialEq, PartialOrd, Serialize, VariantNames)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,)]
 pub enum UnaryMethod {
     Abs,
-    #[serde(alias = "cosine")]
     Cos,
     Cosh,
     Exp,
-    #[serde(alias = "inv")]
     Inverse,
     Ln,
     Recip,
-    #[serde(alias = "sine")]
     Sin,
     Sinh,
-    #[serde(alias = "square_root")]
     Sqrt,
-    #[serde(alias = "tangent")]
     Tan,
     Tanh,
 }
 
 impl FromStr for UnaryMethod {
-    type Err = ();
+    type Err = Box<dyn std::error::Error>;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
             "abs" => Ok(UnaryMethod::Abs),
-            "cos" => Ok(UnaryMethod::Cos),
+            "cos" | "cosine" => Ok(UnaryMethod::Cos),
             "cosh" => Ok(UnaryMethod::Cosh),
             "exp" => Ok(UnaryMethod::Exp),
-            "inv" => Ok(UnaryMethod::Inverse),
+            "inv" | "inverse" => Ok(UnaryMethod::Inverse),
             "ln" => Ok(UnaryMethod::Ln),
             "recip" => Ok(UnaryMethod::Recip),
-            "sin" => Ok(UnaryMethod::Sin),
+            "sin" | "sine" => Ok(UnaryMethod::Sin),
             "sinh" => Ok(UnaryMethod::Sinh),
-            "sqrt" => Ok(UnaryMethod::Sqrt),
-            "tan" => Ok(UnaryMethod::Tan),
+            "sqrt" | "square_root"=> Ok(UnaryMethod::Sqrt),
+            "tan" | "tangent" => Ok(UnaryMethod::Tan),
             "tanh" => Ok(UnaryMethod::Tanh),
-            _ => Err(()),
+            _ => Err("Method not found".into()),
         }
     }
 }

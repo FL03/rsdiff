@@ -103,6 +103,7 @@ fn test_mixed_order() {
 fn test_complex() {
     let x: f64 = 2.0;
     assert_eq!(autodiff!(x: x.ln()), 2_f64.recip());
+    assert_eq!(autodiff!(x: (x + 1.0).ln()), 3_f64.recip());
     assert_eq!(autodiff!(x: x.cos()), -x.sin());
     assert_eq!(autodiff!(x: x.sin()), x.cos());
     assert_eq!(autodiff!(x: x.tan()), x.cos().square().recip());

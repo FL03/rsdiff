@@ -153,13 +153,13 @@ where
 }
 
 macro_rules! impl_scalar {
-    ($t:ty) => {
-        impl Scalar for $t {
-            type Complex = Complex<$t>;
-            type Real = $t;
+    ($re:ty) => {
+        impl Scalar for $re {
+            type Complex = Complex<$re>;
+            type Real = $re;
 
             fn conj(&self) -> Self::Complex {
-                Complex::new(*self, -<$t>::default())
+                Complex::new(*self, -<$re>::default())
             }
 
             fn re(&self) -> Self::Real {
@@ -167,47 +167,47 @@ macro_rules! impl_scalar {
             }
 
             fn cos(self) -> Self {
-                <$t>::cos(self)
+                <$re>::cos(self)
             }
 
             fn cosh(self) -> Self {
-                <$t>::cosh(self)
+                <$re>::cosh(self)
             }
 
             fn exp(self) -> Self {
-                <$t>::exp(self)
+                <$re>::exp(self)
             }
 
             fn ln(self) -> Self {
-                <$t>::ln(self)
+                <$re>::ln(self)
             }
 
             fn pow(self, exp: Self) -> Self {
-                <$t>::powf(self, exp)
+                <$re>::powf(self, exp)
             }
 
             fn powc(self, exp: Self::Complex) -> Self::Complex {
-                Complex::new(self, <$t>::default()).powc(exp)
+                Complex::new(self, <$re>::default()).powc(exp)
             }
 
             fn powf(self, exp: Self::Real) -> Self {
-                <$t>::powf(self, exp)
+                <$re>::powf(self, exp)
             }
 
             fn powi(self, exp: i32) -> Self {
-                <$t>::powi(self, exp)
+                <$re>::powi(self, exp)
             }
 
             fn sin(self) -> Self {
-                <$t>::sin(self)
+                <$re>::sin(self)
             }
 
             fn sinh(self) -> Self {
-                <$t>::sinh(self)
+                <$re>::sinh(self)
             }
 
             fn sqrt(self) -> Self {
-                <$t>::sqrt(self)
+                <$re>::sqrt(self)
             }
 
             fn square(self) -> Self::Real {
@@ -215,11 +215,11 @@ macro_rules! impl_scalar {
             }
 
             fn tan(self) -> Self {
-                <$t>::tan(self)
+                <$re>::tan(self)
             }
 
             fn tanh(self) -> Self {
-                <$t>::tanh(self)
+                <$re>::tanh(self)
             }
         }
     };

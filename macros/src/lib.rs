@@ -19,13 +19,25 @@ pub(crate) mod gradient;
 pub(crate) mod graph;
 pub(crate) mod partial;
 
-use partial::Partial;
+use ast::partials::*;
 
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
     println!("attr: \"{}\"", attr.to_string());
     println!("item: \"{}\"", item.to_string());
     item
+}
+
+#[proc_macro]
+pub fn autodiff(input: TokenStream) -> TokenStream {
+    // Parse the input expression into a syntax tree
+    let expr = parse_macro_input!(input as PartialAst);
+
+    // Generate code to compute the gradient
+    let result = autodiff::generate_autodiff(&expr);
+
+    // Return the generated code as a token stream
+    TokenStream::from(result)
 }
 
 #[proc_macro]

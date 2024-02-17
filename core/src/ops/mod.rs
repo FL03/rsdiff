@@ -14,6 +14,12 @@ pub(crate) mod operator;
 
 use crate::prelude::Result;
 
+pub trait Expressive {
+    type Graph;
+
+    fn expand(&self) -> Self::Graph;
+}
+
 pub trait Backward {
     type Store;
 
@@ -24,14 +30,6 @@ pub trait Compute<T> {
     type Output;
 
     fn compute(&self, args: T) -> Self::Output;
-}
-
-pub trait Derivative<T> {
-    type Params;
-    type Derivative;
-
-    fn eval(&self, at: Self::Params) -> T;
-    fn derivative(&self, at: T) -> Self::Derivative;
 }
 
 pub trait Evaluate {

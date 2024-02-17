@@ -2,13 +2,12 @@
     Appellation: partial <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use crate::ast::Partial;
+use crate::ast::Partial;
 
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::fold::Fold;
-use syn::token::Plus;
-use syn::{Expr, ExprBinary, ExprMethodCall, ExprParen, ExprUnary, Ident, Token};
+use syn::{Expr, ExprBinary, ExprCall, ExprMethodCall, ExprParen, ExprUnary, Ident};
 
 pub fn generate_partial(partial: &Partial) -> TokenStream {
     let Partial { expr, var } = partial;
@@ -16,7 +15,7 @@ pub fn generate_partial(partial: &Partial) -> TokenStream {
     grad
 }
 
-fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
+pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     match expr {
         Expr::Binary(inner) => handle_binary(inner, variable),
         // Differentiate constants

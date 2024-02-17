@@ -17,9 +17,12 @@ test = true
 [build-dependencies]
 
 [dependencies]
+# acme-core = { path = "../core", version = "0.3.0" }
 petgraph = { features = [], version = "0.6" }
 proc-macro2 = "1"
 quote = "1"
+serde = { features = ["derive"], version = "1" }
+strum = { features = ["derive"], version = "0.26" }
 syn = { features = ["extra-traits", "fold", "full"], version = "2" }
 
 [dev-dependencies]

@@ -19,6 +19,10 @@ pub trait Store<K, V> {
     fn remove(&mut self, key: &K) -> Option<V>;
 }
 
+pub trait OrInsert<K, V> {
+    fn or_insert(&mut self, key: K, value: V) -> &mut V;
+}
+
 macro_rules! impl_store {
     ($t:ty, where $($preds:tt)* ) => {
 

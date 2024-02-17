@@ -4,21 +4,21 @@
 */
 use super::Node;
 use crate::prelude::{BinaryOp, BinaryOperation, Ops, Result};
-use daggy::petgraph::algo::toposort;
-use daggy::{Dag, NodeIndex};
 use num::traits::{NumAssign, NumOps, Signed};
+use petgraph::algo::toposort;
+use petgraph::prelude::{DiGraph, NodeIndex};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct Scg<T> {
-    graph: Dag<Node, usize>,
+    graph: DiGraph<Node, usize>,
     vals: HashMap<NodeIndex, T>,
 }
 
 impl<T> Scg<T> {
     pub fn new() -> Self {
         Self {
-            graph: Dag::new(),
+            graph: DiGraph::new(),
             vals: HashMap::new(),
         }
     }
@@ -54,7 +54,7 @@ impl<T> Scg<T> {
         let v = self.graph.add_node(node.clone());
         let edges = node.inputs().iter().map(|i| (*i, v));
         let _val = self.vals.insert(v, result.unwrap_or_default());
-        self.graph.extend_with_edges(edges)?;
+        self.graph.extend_with_edges(edges);
         Ok(v)
     }
 
@@ -104,12 +104,12 @@ where
                                     -grad * out / (val * val)
                                 }
                             }
-                            BinaryOp::Mul => {
+                            BinaryOp::Mul(_) => {
                                 let out = self.vals[&i];
                                 let val = self.vals[input];
                                 grad * out / val
                             }
-                            BinaryOp::Sub => {
+                            BinaryOp::Sub(_) => {
                                 if j % 2 == 0 {
                                     grad
                                 } else {

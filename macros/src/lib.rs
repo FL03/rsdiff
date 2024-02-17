@@ -19,7 +19,7 @@ pub(crate) mod gradient;
 pub(crate) mod graph;
 pub(crate) mod partial;
 
-use partial::PartialAst;
+use partial::Partial;
 
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -65,10 +65,10 @@ pub fn grad(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn partial(input: TokenStream) -> TokenStream {
     // Parse the input token stream into a structured syntax tree
-    let PartialAst { expr, variable } = parse_macro_input!(input as PartialAst);
+    let partial = parse_macro_input!(input as Partial);
 
     // Generate code to perform partial differentiation
-    let result = partial::handle_partial(&expr, &variable);
+    let result = partial::generate_partial(&partial);
 
     // Return the generated code as a token stream
     TokenStream::from(result)

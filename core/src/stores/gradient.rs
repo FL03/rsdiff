@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Store;
-use daggy::NodeIndex;
+use petgraph::prelude::NodeIndex;
 use std::any::Any;
 use std::collections::BTreeMap;
 

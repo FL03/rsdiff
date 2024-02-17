@@ -26,7 +26,7 @@ mod tests {
 
         // let e = dag.add(c, a).unwrap();
 
-        assert_eq!(*dag.get(a).unwrap(), 1.0);
+        assert_eq!(*dag.get(a).unwrap().value().unwrap(), 1.0);
         // assert_eq!(*dag.get(e).unwrap(), 2.0);
     }
 }

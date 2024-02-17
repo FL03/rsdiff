@@ -7,7 +7,7 @@ use petgraph::{
     prelude::{DiGraph, NodeIndex},
 };
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{quote, ToTokens};
 use std::collections::HashMap;
 use syn::{Expr, ExprBinary};
 
@@ -86,25 +86,26 @@ impl Context {
         let c = self.add_node(expr.clone());
 
         match expr {
-            Expr::Binary(expr_binary) => {
+            Expr::Binary(inner) => {
+                let ExprBinary { left, right, .. } = inner;
                 // Add edges for left and right children
-                let a = self.add_node(*expr_binary.left.clone());
-                let b = self.add_node(*expr_binary.right.clone());
+                let a = self.add_node(*left.clone());
+                let b = self.add_node(*right.clone());
                 self.add_edge(a, c);
                 self.add_edge(b, c);
 
                 // Recursive traversal for left and right children
-                self.traverse(&expr_binary.left);
-                self.traverse(&expr_binary.right);
+                self.traverse(left);
+                self.traverse(right);
             }
 
-            Expr::Unary(expr_unary) => {
+            Expr::Unary(inner) => {
                 // Add an edge for the child
-                let a = self.add_node(*expr_unary.expr.clone());
+                let a = self.add_node(*inner.expr.clone());
                 self.add_edge(a, c);
 
                 // Recursive traversal for the child
-                self.traverse(&expr_unary.expr);
+                self.traverse(&inner.expr);
             }
             _ => {}
         }
@@ -113,29 +114,32 @@ impl Context {
 
 fn handle_expr(expr: &Expr) -> Grad {
     match expr {
-        Expr::Binary(inner) => handle_binary(inner, quote! { 1.0 }).into(),
+        Expr::Binary(inner) => handle_binary(inner).into(),
         _ => panic!("Unsupported expression!"),
     }
 }
 
-fn handle_binary(expr: &ExprBinary, grad: TokenStream) -> BinaryGrad {
+fn handle_binary(expr: &ExprBinary) -> BinaryGrad {
     use syn::BinOp;
     let ExprBinary {
         left, op, right, ..
     } = expr.clone();
+
+    let dl = handle_expr(&left);
+    let dr = handle_expr(&right);
     match op {
         BinOp::Add(_) => {
             // Implement addition handling
             BinaryGrad {
-                left: quote! { #grad },
-                right: quote! { #grad },
+                left: quote! { #dl },
+                right: quote! { #dr },
             }
         }
         BinOp::Mul(_) => {
             // Implement multiplication handling
             BinaryGrad {
-                left: quote! { #grad * #right },
-                right: quote! { #grad * #left },
+                left: quote! { #dl * #right },
+                right: quote! { #dr * #left },
             }
         }
         _ => panic!("Unsupported binary operator!"),
@@ -147,13 +151,43 @@ pub struct BinaryGrad {
     pub right: TokenStream,
 }
 
+impl ToTokens for BinaryGrad {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.left.to_tokens(tokens);
+        self.right.to_tokens(tokens);
+    }
+}
+
 pub enum Grad {
     Binary(BinaryGrad),
     Unary(TokenStream),
+    Verbatim(TokenStream),
 }
 
 impl From<BinaryGrad> for Grad {
     fn from(grad: BinaryGrad) -> Self {
         Grad::Binary(grad)
+    }
+}
+
+impl From<TokenStream> for Grad {
+    fn from(grad: TokenStream) -> Self {
+        Grad::Verbatim(grad)
+    }
+}
+
+impl ToTokens for Grad {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match self {
+            Grad::Binary(grad) => {
+                grad.to_tokens(tokens);
+            }
+            Grad::Unary(grad) => {
+                grad.to_tokens(tokens);
+            }
+            Grad::Verbatim(grad) => {
+                grad.to_tokens(tokens);
+            }
+        }
     }
 }

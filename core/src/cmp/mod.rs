@@ -14,7 +14,7 @@ pub(crate) mod variables;
 
 pub mod id;
 
-use daggy::NodeIndex;
+use petgraph::prelude::NodeIndex;
 
 pub trait NodeConfig {
     type Eval;

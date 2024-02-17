@@ -2,10 +2,10 @@
     Appellation: operators <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use daggy::NodeIndex;
+use super::id::Id;
 
 pub struct Operator {
-    inputs: Vec<NodeIndex>,
+    inputs: Vec<Id>,
     name: String,
 }
 
@@ -22,7 +22,7 @@ impl Operator {
         self
     }
 
-    pub fn inputs(&self) -> &[NodeIndex] {
+    pub fn inputs(&self) -> &[Id] {
         &self.inputs
     }
 

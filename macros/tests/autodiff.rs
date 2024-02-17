@@ -25,14 +25,20 @@ fn add(x: f64, y: f64) -> f64 {
 #[test]
 fn test_autodiff() {
     let (x, y) = (1.0, 2.0);
+    // differentiating a function item w.r.t. a
     assert_eq!(
         autodiff!(a: fn addition(a: f64, b: f64) -> f64 { a + b }),
         1.0
     );
+    // differentiating a closure item w.r.t. x
     assert_eq!(autodiff!(x: | x: f64, y: f64 | x * y ), 2.0);
+    // differentiating a function call w.r.t. x
     assert_eq!(autodiff!(x: add(x, y)), 1.0);
-    assert_eq!(autodiff!(x: x.add(y)), 1.0);
+    // differentiating a function call w.r.t. a
     assert_eq!(autodiff!(a: add(x, y)), 0.0);
+    // differentiating a method call w.r.t. the reciever (x)
+    assert_eq!(autodiff!(x: x.add(y)), 1.0);
+    // differentiating an expression w.r.t. x
     assert_eq!(autodiff!(x: x + y), 1.0);
     assert_eq!(autodiff!(y: x += y), 1.0);
 }

@@ -20,4 +20,3 @@ fn handle_input(input: &PartialFn, var: &Ident) -> TokenStream {
         PartialFn::Item(inner) => handle_item(&inner.clone().into(), var),
     }
 }
-

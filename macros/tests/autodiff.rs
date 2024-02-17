@@ -2,24 +2,62 @@
     Appellation: gradient <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![allow(unused_variables)]
 #[cfg(test)]
 extern crate acme_macros as macros;
 
 use macros::autodiff;
-// use std::ops::Add;
+use num::traits::Float;
+use std::ops::{Add, Neg};
 
+pub fn add<A, B, C>(x: A, y: B) -> C
+where
+    A: Add<B, Output = C>,
+{
+    x + y
+}
+
+pub fn mixed(x: f64, y: f64) -> f64 {
+    y * (x + y)
+}
+
+pub fn sigmoid<T>(x: T) -> T
+where
+    T: Float,
+{
+    (T::one() + x.neg().exp()).recip()
+}
+
+pub fn sigmoid_prime<T>(x: T) -> T
+where
+    T: Float,
+{
+    x.neg().exp() / (T::one() + x.neg().exp()).powi(2)
+}
+
+pub trait Sigmoid {
+    fn sigmoid(self) -> Self;
+}
+
+impl<T> Sigmoid for T
+where
+    T: Float,
+{
+    fn sigmoid(self) -> Self {
+        (T::one() + self.neg().exp()).recip()
+    }
+}
 trait Square {
     fn square(self) -> Self;
 }
 
-impl Square for f64 {
+impl<T> Square for T
+where
+    T: Copy + std::ops::Mul<Output = T>,
+{
     fn square(self) -> Self {
         self * self
     }
-}
-
-fn add(x: f64, y: f64) -> f64 {
-    x + y
 }
 
 #[test]
@@ -34,7 +72,7 @@ fn test_autodiff() {
     assert_eq!(autodiff!(x: | x: f64, y: f64 | x * y ), 2.0);
     // differentiating a function call w.r.t. x
     assert_eq!(autodiff!(x: add(x, y)), 1.0);
-    // differentiating a function call w.r.t. a
+    // differentiating a function call w.r.t. some variable
     assert_eq!(autodiff!(a: add(x, y)), 0.0);
     // differentiating a method call w.r.t. the reciever (x)
     assert_eq!(autodiff!(x: x.add(y)), 1.0);
@@ -107,4 +145,20 @@ fn test_complex() {
     assert_eq!(autodiff!(x: x.cos()), -x.sin());
     assert_eq!(autodiff!(x: x.sin()), x.cos());
     assert_eq!(autodiff!(x: x.tan()), x.cos().square().recip());
+}
+
+#[ignore = "Needs to be fixed"]
+#[test]
+fn test_sigmoid() {
+    let x: f64 = 2.0;
+    assert_eq!(autodiff!(x: 1.0 / (1.0 + x.neg().exp())), sigmoid_prime(x));
+    assert_eq!(
+        autodiff!(
+            x:
+            fn sigmoid(x: f64) -> f64 {
+                1.0 / (1.0 + (-x).exp())
+            }
+        ),
+        sigmoid_prime(2.0)
+    );
 }

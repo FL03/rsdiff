@@ -4,14 +4,8 @@
 */
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::{Expr, ExprCall, ExprMethodCall, Ident, ItemFn, Token, Type};
+use syn::{Expr, Ident, ItemFn, Token, Type};
 
-mod kw {
-
-    syn::custom_keyword!(ExprMethodCall);
-    syn::custom_keyword!(partial);
-    syn::custom_keyword!(partials);
-}
 pub struct Partial {
     pub expr: Expr,
     pub var: Ident,

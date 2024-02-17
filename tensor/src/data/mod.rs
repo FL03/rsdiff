@@ -6,8 +6,6 @@ pub use self::scalar::*;
 
 pub(crate) mod scalar;
 
-
-
 #[cfg(test)]
 mod tests {
     // use super::*;

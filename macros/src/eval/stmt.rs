@@ -1,4 +1,3 @@
-
 /*
     Appellation: item <module>
     Contrib: FL03 <jo3mccain@icloud.com>
@@ -17,12 +16,8 @@ pub fn handle_stmt(stmt: &Stmt, var: &Ident) -> TokenStream {
             }
             panic!("Local variable not initialized!")
         }
-        Stmt::Item(item) => {
-            handle_item(item, var)
-        }
-        Stmt::Expr(expr, _) => {
-            handle_expr(expr, var)
-        }
+        Stmt::Item(item) => handle_item(item, var),
+        Stmt::Expr(expr, _) => handle_expr(expr, var),
         _ => panic!("Unsupported statement!"),
     }
 }

@@ -54,4 +54,3 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
         _ => panic!("Unsupported expression!"),
     }
 }
-

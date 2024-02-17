@@ -17,6 +17,7 @@ test = true
 [build-dependencies]
 
 [dependencies]
+num = "0.4"
 petgraph = { features = [], version = "0.6" }
 proc-macro2 = "1"
 quote = "1"

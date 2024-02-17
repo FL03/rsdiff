@@ -7,11 +7,15 @@ use crate::kw;
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
-use syn::{Expr, ExprCall, ExprMethodCall, Ident};
 use syn::parse::{Parse, ParseStream, Result};
+use syn::{Expr, ExprCall, ExprMethodCall, Ident};
 
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
     let ExprCall { func, args, .. } = expr;
+    println!(
+        "\t\t********\n\nHandling call: {:?}\n\n\t\t********\n\n",
+        func
+    );
     let func = handle_expr(&func, var);
     let mut grad = quote! { 0.0 };
     for arg in args {
@@ -49,10 +53,17 @@ pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr) -> TokenStream {
         UnaryMethod::Abs => quote! { #recv / #recv.abs() },
         UnaryMethod::Cos => quote! { -#recv.sin() },
         UnaryMethod::Cosh => quote! { #recv.sinh() },
-        UnaryMethod::Exp => quote! { #recv.exp() },
-        UnaryMethod::Inverse => quote! { -#recv.powi(-2) },
+        UnaryMethod::Exp => {
+            quote! {
+                if #recv.is_sign_negative() {
+                    -#recv.exp()
+                } else {
+                    #recv.exp()
+                }
+            }
+        }
+        UnaryMethod::Inverse | UnaryMethod::Recip => quote! { -#recv.powi(-2) },
         UnaryMethod::Ln => quote! { 1.0 / #recv },
-        UnaryMethod::Recip => quote! { -#recv.powi(-2) },
         UnaryMethod::Sin => quote! { #recv.cos() },
         UnaryMethod::Sinh => quote! { #recv.cosh() },
         UnaryMethod::Sqrt => quote! { 1.0 / (2.0 * #recv.sqrt()) },
@@ -61,15 +72,11 @@ pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr) -> TokenStream {
     }
 }
 
-
-
 pub enum Methods {
-
     Unary(UnaryMethod),
 }
 
-
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum UnaryMethod {
     Abs,
     Cos,
@@ -99,7 +106,7 @@ impl FromStr for UnaryMethod {
             "recip" => Ok(UnaryMethod::Recip),
             "sin" | "sine" => Ok(UnaryMethod::Sin),
             "sinh" => Ok(UnaryMethod::Sinh),
-            "sqrt" | "square_root"=> Ok(UnaryMethod::Sqrt),
+            "sqrt" | "square_root" => Ok(UnaryMethod::Sqrt),
             "tan" | "tangent" => Ok(UnaryMethod::Tan),
             "tanh" => Ok(UnaryMethod::Tanh),
             _ => Err("Method not found".into()),
@@ -130,7 +137,6 @@ impl Parse for UnaryOps {
             } else {
                 Err(input.error("Expected a method call"))
             }
-            
         } else {
             input.parse::<syn::UnOp>().map(UnaryOps::Std)
         }

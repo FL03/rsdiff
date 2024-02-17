@@ -89,6 +89,7 @@ pub(crate) mod kw {
     syn::custom_keyword!(grad);
 
     syn::custom_keyword!(cos);
+    syn::custom_keyword!(e);
     syn::custom_keyword!(ln);
     syn::custom_keyword!(sin);
     syn::custom_keyword!(tan);

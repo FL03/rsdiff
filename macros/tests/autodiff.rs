@@ -38,8 +38,15 @@ fn test_autodiff() {
 }
 
 #[test]
+fn test_array() {
+    let x = [1.0, 2.0];
+    let y = [2.0, 2.0];
+    assert_eq!(autodiff!(x: x + y), 1.0);
+}
+
+#[test]
 fn test_add() {
-    let x = 1.0;
+    let x = [1.0];
     let y = 2.0;
     assert_eq!(autodiff!(x: x + y), 1.0);
     assert_eq!(autodiff!(y: x += y), 1.0);

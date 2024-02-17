@@ -14,6 +14,12 @@ use syn::{Expr, Ident};
 
 pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     match expr {
+        // Handle differentiable arrays
+        Expr::Array(inner) => {
+            let grad = inner.elems.iter().map(|e| handle_expr(e, variable));
+            quote! { [#(#grad),*] }
+        }
+        // Handle differentiable binary operations
         Expr::Binary(inner) => handle_binary(inner, variable),
         // Handle differentiable function calls
         Expr::Call(inner) => handle_call(inner, variable),

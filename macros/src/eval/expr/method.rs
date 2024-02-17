@@ -6,7 +6,10 @@ use super::handle_expr;
 use crate::kw;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{ExprCall, ExprMethodCall, Ident};
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use strum::{Display, EnumCount, EnumIs, EnumIter, IntoStaticStr, VariantNames,};
+use syn::{Expr, ExprCall, ExprMethodCall, Ident};
 use syn::parse::{Parse, ParseStream, Result};
 
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
@@ -34,35 +37,89 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
         let arg = handle_expr(&arg, var);
         da = quote! { #da + #arg };
     }
-
-    if method_name == "ln" {
-        return quote! { 1.0 / #receiver };
-    }
-    if method_name == "cos" {
-        return quote! { -#receiver.sin() };
-    }
-    if method_name == "sin" {
-        return quote! { #receiver.cos() };
-    }
-    if method_name == "tan" {
-        return quote! { 1.0 / #receiver.cos().powi(2)};
+    if let Ok(method) = UnaryMethod::from_str(&method_name) {
+        return handle_unary_method(&method, &receiver,);
     }
 
     quote! { #dr + #da }
 }
 
+pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr) -> TokenStream {
+    match method {
+        UnaryMethod::Abs => quote! { #recv / #recv.abs() },
+        UnaryMethod::Cos => quote! { -#recv.sin() },
+        UnaryMethod::Cosh => quote! { #recv.sinh() },
+        UnaryMethod::Exp => quote! { #recv.exp() },
+        UnaryMethod::Inverse => quote! { -#recv.powi(-2) },
+        UnaryMethod::Ln => quote! { 1.0 / #recv },
+        UnaryMethod::Recip => quote! { -#recv.powi(-2) },
+        UnaryMethod::Sin => quote! { #recv.cos() },
+        UnaryMethod::Sinh => quote! { #recv.cosh() },
+        UnaryMethod::Sqrt => quote! { 1.0 / (2.0 * #recv.sqrt()) },
+        UnaryMethod::Tan => quote! { 1.0 / #recv.cos().powi(2) },
+        UnaryMethod::Tanh => quote! { 1.0 / #recv.cosh().powi(2) },
+    }
+}
 
 
-pub enum Ops {
 
-    Unary(UnaryOps),
+pub enum Methods {
+
+    Unary(UnaryMethod),
+}
+
+
+#[derive(Clone, Copy, Debug, Deserialize, Display, EnumCount, EnumIs, EnumIter, Eq, Hash, IntoStaticStr, Ord, PartialEq, PartialOrd, Serialize, VariantNames)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
+pub enum UnaryMethod {
+    Abs,
+    #[serde(alias = "cosine")]
+    Cos,
+    Cosh,
+    Exp,
+    #[serde(alias = "inv")]
+    Inverse,
+    Ln,
+    Recip,
+    #[serde(alias = "sine")]
+    Sin,
+    Sinh,
+    #[serde(alias = "square_root")]
+    Sqrt,
+    #[serde(alias = "tangent")]
+    Tan,
+    Tanh,
+}
+
+impl FromStr for UnaryMethod {
+    type Err = ();
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "abs" => Ok(UnaryMethod::Abs),
+            "cos" => Ok(UnaryMethod::Cos),
+            "cosh" => Ok(UnaryMethod::Cosh),
+            "exp" => Ok(UnaryMethod::Exp),
+            "inv" => Ok(UnaryMethod::Inverse),
+            "ln" => Ok(UnaryMethod::Ln),
+            "recip" => Ok(UnaryMethod::Recip),
+            "sin" => Ok(UnaryMethod::Sin),
+            "sinh" => Ok(UnaryMethod::Sinh),
+            "sqrt" => Ok(UnaryMethod::Sqrt),
+            "tan" => Ok(UnaryMethod::Tan),
+            "tanh" => Ok(UnaryMethod::Tanh),
+            _ => Err(()),
+        }
+    }
 }
 
 pub enum UnaryOps {
     Cosine(kw::cos),
+    Exp(kw::e),
+    Ln(kw::ln),
     Sine(kw::sin),
     Tan(kw::tan),
-    Ln(kw::ln),
     Std(syn::UnOp),
 }
 

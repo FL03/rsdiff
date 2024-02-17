@@ -12,6 +12,10 @@ readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[[example]]
+name = "autodiff"
+required-features = ["derive"]
+
 
 
 [features]
@@ -24,19 +28,20 @@ full = [
 ]
 
 core = [
-    "acme-core"
+    "dep:acme-core"
 ]
 
 derive = [
-    "acme-derive"
+    "dep:acme-derive",
+    "macros"
 ]
 
 macros = [
-    "acme-macros"
+    "dep:acme-macros"
 ]
 
 tensor = [
-    "acme-tensor"
+    "dep:acme-tensor"
 ]
 
 [lib]

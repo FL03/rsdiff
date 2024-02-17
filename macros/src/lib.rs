@@ -7,17 +7,16 @@
 //!
 extern crate proc_macro;
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as Ts;
 use quote::quote;
 use syn::{parse_macro_input, Expr};
 
 pub(crate) mod ast;
 pub(crate) mod cmp;
+pub(crate) mod eval;
 
 pub(crate) mod autodiff;
 pub(crate) mod gradient;
 pub(crate) mod graph;
-pub(crate) mod partial;
 
 use ast::partials::*;
 
@@ -80,8 +79,17 @@ pub fn partial(input: TokenStream) -> TokenStream {
     let partial = parse_macro_input!(input as Partial);
 
     // Generate code to perform partial differentiation
-    let result = partial::generate_partial(&partial);
+    let result = eval::expr::handle_expr(&partial.expr, &partial.var);
 
     // Return the generated code as a token stream
     TokenStream::from(result)
+}
+
+pub(crate) mod kw {
+    syn::custom_keyword!(grad);
+
+    syn::custom_keyword!(cos);
+    syn::custom_keyword!(ln);
+    syn::custom_keyword!(sin);
+    syn::custom_keyword!(tan);
 }

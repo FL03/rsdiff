@@ -17,7 +17,6 @@ test = true
 [build-dependencies]
 
 [dependencies]
-# acme-core = { path = "../core", version = "0.3.0" }
 petgraph = { features = [], version = "0.6" }
 proc-macro2 = "1"
 quote = "1"

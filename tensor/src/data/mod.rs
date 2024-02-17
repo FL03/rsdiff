@@ -6,31 +6,33 @@ pub use self::scalar::*;
 
 pub(crate) mod scalar;
 
-macro_rules! Scalar {
-    (complex) => {
-        Scalar!(cf64)
-    };
-    (float) => {
-        Scalar!(f64)
-    };
-    (cf64) => {
-        Complex<f64>
-    };
-    (cf32) => {
-        Complex<f32>
-    };
-    (f64) => {
-        f64
-    };
-    (f32) => {
-        f32
-    };
 
-}
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
+
+    macro_rules! Scalar {
+        (complex) => {
+            Scalar!(cf64)
+        };
+        (float) => {
+            Scalar!(f64)
+        };
+        (cf64) => {
+            Complex<f64>
+        };
+        (cf32) => {
+            Complex<f32>
+        };
+        (f64) => {
+            f64
+        };
+        (f32) => {
+            f32
+        };
+
+    }
 
     #[test]
     fn test_scalar() {

@@ -18,12 +18,7 @@ pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
         let arg = handle_expr(&arg, var);
         grad = quote! { #grad + #arg };
     }
-    if let Expr::Path(path) = &**func {
-        println!("{:?}", expr.span().unwrap().source_file().path());
-        if let Some(block) = expr.span().source_text() {
-            println!("********\n\n\t\tFunction\n{:?}\nArgs:\n{:?}\n{:?}\n\n********", func, args, &block);
-        }
-    }
+    
     // 
     let df = handle_expr(&func, var);
 

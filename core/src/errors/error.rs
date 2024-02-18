@@ -56,7 +56,7 @@ where
 }
 
 impl From<petgraph::algo::NegativeCycle> for Error {
-    fn from(err: petgraph::algo::NegativeCycle) -> Self {
+    fn from(_err: petgraph::algo::NegativeCycle) -> Self {
         Self::new(ErrorKind::Graph, "Negative Cycle detected")
     }
 }

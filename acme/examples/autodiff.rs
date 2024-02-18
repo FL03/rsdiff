@@ -2,6 +2,7 @@
     Appellation: autodiff <example>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![allow(dead_code, unused_variables)]
 #![feature(fn_traits)]
 extern crate acme;
 
@@ -16,18 +17,21 @@ macro_rules! eval {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let x: f64 = 2.0;
+    let x = 2_f64;
+    // samples(x);
 
+
+    show_item!(acme::prelude::sigmoid::<f64>(x));
+    println!("{:?}", sigmoid::<f64>(2_f64));
+    
+
+    Ok(())
+}
+
+fn samples(x: f64) {
     eval!(x: x.tan());
 
     eval!(x: x.sin());
 
     eval!(x: x.cos().sin());
-    // show_item!(sigmoid::<f64>);
-    unsafe {
-        println!("{:?}", sigmoid::<f64>.call((2_f64,)));
-    }
-    
-
-    Ok(())
 }

@@ -5,6 +5,7 @@
 //! # Experimental
 //!
 //!
+#![allow(dead_code, unused_imports, unused_variables)]
 pub mod basic;
 pub mod dynamic;
 pub mod ops;

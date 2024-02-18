@@ -19,7 +19,8 @@ pub(crate) mod graph;
 use ast::partials::*;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Expr};
+use syn::{parse_macro_input, Expr,};
+use syn::spanned::Spanned;
 
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -30,7 +31,13 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn show_item(item: TokenStream) -> TokenStream {
-    println!("item: \"{:?}\"", syn::parse_macro_input!(item as syn::ItemFn));
+    let expr = parse_macro_input!(item as Expr);
+    // let item = item.to_string();
+    let span = expr.span();
+    println!("Span Bytes: {:?}", span.byte_range());
+    println!("Span (start, end): ({:?}, {:?})", span.start(), span.end());
+    println!("Source File: {:?}", span.unwrap().source_file());
+    println!("Source Text: {:?}", span.source_text());
     quote! { }.into()
 }
 

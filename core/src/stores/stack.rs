@@ -4,5 +4,5 @@
 */
 
 pub struct Stack<K, V> {
-    pub(crate) store: Vec<(K, V)>,
+    pub store: Vec<(K, V)>,
 }

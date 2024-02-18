@@ -38,7 +38,7 @@ jobs:
         run: cargo build -F full -r -v --workspace
       - name: Cache build
         id: rust-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry

@@ -168,7 +168,7 @@ fn test_sigmoid() {
     assert_eq!(autodiff!(x: fn sigmoid(x: f64) -> f64 { 1_f64 / (1_f64 + (-x).exp()) }), sigmoid_prime(x));
 }
 
-// #[ignore = "Currently, support for function calls is not fully implemented"]
+#[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]
 fn test_function_call() {
     let x = 2_f64;

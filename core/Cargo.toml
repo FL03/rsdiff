@@ -26,9 +26,10 @@ test = true
 
 [dependencies]
 anyhow.workspace = true
-daggy = { features = ["serde-1"], version = "0.8" }
+# daggy = { features = ["serde-1"], version = "0.8" }
 lazy_static = "1"
 num = "0.4"
+petgraph = { features = ["serde-1"], version = "0.6" }
 serde.workspace = true
 serde_json.workspace = true
 strum.workspace = true

@@ -13,13 +13,14 @@ version = "0.3.0" # TODO - Update cargo package version
 default-members = [
     "acme"
 ]
-exclude = [ "xtask" ]
+exclude = [ ]
 members = [
     "acme", 
     "core",
     "derive",
-    "macros"
-, "tensor"]
+    "macros", 
+    "tensor"
+]
 resolver = "2"
 
 [workspace.dependencies]

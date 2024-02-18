@@ -8,7 +8,7 @@
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
 use crate::cmp::id::AtomicId;
 use crate::ops::Ops;
-use daggy::NodeIndex;
+use petgraph::prelude::NodeIndex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

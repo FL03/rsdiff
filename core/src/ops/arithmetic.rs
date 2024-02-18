@@ -5,6 +5,11 @@
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
 
+pub trait Trig {
+    fn sin(self) -> Self;
+    fn cos(self) -> Self;
+    fn tan(self) -> Self;
+}
 #[derive(
     Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]

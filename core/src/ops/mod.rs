@@ -5,13 +5,20 @@
 //! # Operations
 //!
 //!
-pub use self::{arithmetic::*, kinds::*};
+pub use self::{arithmetic::*, gradient::*, kinds::*, operator::*};
 
 pub(crate) mod arithmetic;
+pub(crate) mod gradient;
 pub(crate) mod kinds;
+pub(crate) mod operator;
 
 use crate::prelude::Result;
-use std::marker::Tuple;
+
+pub trait Expressive {
+    type Graph;
+
+    fn expand(&self) -> Self::Graph;
+}
 
 pub trait Backward {
     type Store;
@@ -23,13 +30,6 @@ pub trait Compute<T> {
     type Output;
 
     fn compute(&self, args: T) -> Self::Output;
-}
-
-pub trait Differentiable<T> {
-    type Derivative;
-
-    fn eval(&self, at: T) -> T;
-    fn derivative(&self, at: T) -> Self::Derivative;
 }
 
 pub trait Evaluate {
@@ -44,25 +44,6 @@ impl Evaluate for f64 {
     fn eval(self) -> Self::Output {
         self
     }
-}
-
-pub trait Gradient<T> {
-    type Gradient;
-
-    fn grad(&self, args: T) -> Self::Gradient;
-}
-
-pub trait Operand<Args>
-where
-    Args: Tuple,
-{
-    type Output;
-
-    fn name(&self) -> &str;
-
-    fn eval(&self, args: Args) -> Self::Output;
-
-    fn grad(&self, args: Self::Output) -> Option<Self::Output>;
 }
 
 pub trait BinaryOperation<T> {

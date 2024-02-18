@@ -7,8 +7,10 @@
 //!
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
 use crate::prelude::Ops;
-use daggy::NodeIndex;
+use petgraph::prelude::NodeIndex;
+use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Node<T> {
     inputs: Vec<NodeIndex>,
     operation: Option<Ops>,

@@ -5,23 +5,21 @@
 //! # acme-macros
 //!
 //!
+#![feature(proc_macro_span,)]
 extern crate proc_macro;
-use proc_macro::TokenStream;
-use proc_macro2::TokenStream as Ts;
-use quote::quote;
-use syn::{parse_macro_input, Expr, Ident};
 
+
+pub(crate) mod ad;
+pub(crate) mod ast;
 pub(crate) mod cmp;
 
-use cmp::PartialDerivative;
+pub(crate) mod gradient;
+pub(crate) mod graph;
 
-#[proc_macro]
-pub fn express(item: TokenStream) -> TokenStream {
-    let input = Ts::from(item);
-    // let output = parse!(input as Expr);
-    println!("item: \"{:?}\"", &input.to_string());
-    TokenStream::from(quote! { #input })
-}
+use ast::partials::*;
+use proc_macro::TokenStream;
+use quote::quote;
+use syn::{parse_macro_input, Expr};
 
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -31,199 +29,75 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn differentiate(input: TokenStream) -> TokenStream {
+pub fn show_item(item: TokenStream) -> TokenStream {
+    println!("item: \"{:?}\"", syn::parse_macro_input!(item as syn::ItemFn));
+    quote! { }.into()
+}
+
+#[proc_macro]
+pub fn autodiff(input: TokenStream) -> TokenStream {
+    // Parse the input expression into a syntax tree
+    let expr = parse_macro_input!(input as PartialAst);
+
+    // Generate code to compute the gradient
+    let result = ad::generate_autodiff(&expr);
+
+    // Return the generated code as a token stream
+    TokenStream::from(result)
+}
+
+#[proc_macro]
+pub fn compute(input: TokenStream) -> TokenStream {
+    use graph::Context;
     // Parse the input expression into a syntax tree
     let expr = parse_macro_input!(input as Expr);
 
-    // Generate code to perform automatic differentiation
-    let result = match_differentiate(&expr);
+    // Build a computational graph representing the expression
+    let mut graph = Context::new();
+    graph.traverse(&expr);
 
-    // Return the generated code as a token stream
-    TokenStream::from(result)
-}
-
-fn match_differentiate(expr: &Expr) -> Ts {
-    match expr {
-        Expr::Assign(expr_assign) => {
-            let left = &expr_assign.left;
-            let right = &expr_assign.right;
-
-            // Differentiate the right subexpression
-            let right_diff = match_differentiate(right);
-
-            // Return the differentiated expression
-            quote! {
-                {
-                    let right_diff = #right_diff;
-                    #left = right_diff;
-                }
-            }
-        }
-        Expr::Binary(expr_binary) => {
-            let left = &expr_binary.left;
-            let right = &expr_binary.right;
-            let op = &expr_binary.op;
-
-            // Differentiate left and right subexpressions
-            let left_diff = match_differentiate(left);
-            let right_diff = match_differentiate(right);
-
-            // Apply the chain rule based on the operator
-            match op {
-                // Differentiate addition and subtraction
-                syn::BinOp::Add(_plus) => {
-                    quote! {
-                        {
-                            let left_diff = #left_diff;
-                            let right_diff = #right_diff;
-                            left_diff + right_diff
-                        }
-                    }
-                }
-                // Differentiate multiplication and division
-                syn::BinOp::Mul(_) => {
-                    quote! {
-                        {
-                            let left_diff = #left_diff;
-                            let right_diff = #right_diff;
-                            left_diff * #right + #left * right_diff
-                        }
-                    }
-                }
-                _ => panic!("Unsupported operator!"),
-            }
-        }
-        // Differentiate literal expressions (constants)
-        Expr::Const(_) => quote! { 0.0 },
-        // Differentiate literal expressions (constants)
-        Expr::Lit(_) => quote! { 0.0 },
-        Expr::Reference(_) => quote! { 1.0 },
-        Expr::Path(_) => quote! { 1.0 },
-        _ => panic!("Unsupported expression!"),
-    }
+    // Generate code to compute gradients and return as a HashMap
+    let grad = graph.backward();
+    let grads = grad
+        .into_iter()
+        .map(|(k, v)| {
+            let k = k.index();
+            quote! { (#k, #v) }
+        })
+        .collect::<Vec<_>>();
+    quote! { [#(#grads),*] }.into()
 }
 
 #[proc_macro]
-pub fn partial(input: TokenStream) -> TokenStream {
-    // Parse the input token stream into a syntax tree representing the expression and variable
-    let PartialDerivative { expr, variable } = parse_macro_input!(input as PartialDerivative);
-
-    // Generate code to perform partial differentiation
-    let result = match_partial_differentiate(&expr, &variable);
-
-    // Return the generated code as a token stream
-    TokenStream::from(result)
-}
-
-fn match_partial_differentiate(expr: &Expr, variable: &Ident) -> proc_macro2::TokenStream {
-    match expr {
-        Expr::Binary(expr_binary) => {
-            let left = &expr_binary.left;
-            let right = &expr_binary.right;
-            let op = &expr_binary.op;
-
-            // Differentiate left and right subexpressions
-            let left_diff = match_partial_differentiate(left, variable);
-            let right_diff = match_partial_differentiate(right, variable);
-
-            // Apply the chain rule based on the operator
-            match op {
-                // Differentiate addition
-                syn::BinOp::Add(_) => {
-                    quote! {
-                        {
-                            if #left == #variable {
-                                #left_diff
-                            } else {
-                                #right_diff
-                            }
-                        }
-                    }
-                }
-                // Differentiate multiplication
-                syn::BinOp::Mul(_) => {
-                    quote! {
-                        {
-                            let left_diff = #left_diff;
-                            let right_diff = #right_diff;
-                            #left * right_diff + left_diff * #right
-                        }
-                    }
-                }
-                _ => panic!("Unsupported operation!"),
-            }
-        }
-        // Differentiate variable expressions
-        Expr::Path(expr_path)
-            if expr_path.path.segments.len() == 1
-                && expr_path.path.segments[0].ident == *variable =>
-        {
-            quote! { 1.0 } // The derivative of the variable with respect to itself is 1
-        }
-        // Differentiate other expressions
-        _ => quote! { 0.0 }, // The derivative of anything else is 0
-    }
-}
-
-#[proc_macro]
-pub fn gradient(input: TokenStream) -> TokenStream {
+pub fn grad(input: TokenStream) -> TokenStream {
     // Parse the input expression into a syntax tree
     let expr = parse_macro_input!(input as Expr);
 
     // Generate code to compute the gradient
-    let result = compute_gradient(&expr);
+    let result = gradient::compute_grad(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)
 }
 
-fn compute_gradient(expr: &Expr) -> Ts {
-    // Initialize an empty Vec to hold the gradient values
-    let mut gradient_values = Vec::new();
+#[proc_macro]
+pub fn partial(input: TokenStream) -> TokenStream {
+    // Parse the input token stream into a structured syntax tree
+    let partial = parse_macro_input!(input as Partial);
 
-    // Generate code to compute the gradient of the expression with respect to each variable
-    generate_gradient(expr, &mut gradient_values);
-
-    // Convert the gradient values into a token stream
-    let gradient_array = quote! { [#(#gradient_values),*] };
+    // Generate code to perform partial differentiation
+    let result = ad::handle::expr::handle_expr(&partial.expr, &partial.var);
 
     // Return the generated code as a token stream
-    gradient_array
+    TokenStream::from(result)
 }
 
-fn generate_gradient(expr: &Expr, gradient_values: &mut Vec<Ts>) {
-    match expr {
-        // Handle binary expressions (e.g., addition, multiplication)
-        Expr::Binary(expr_binary) => {
-            let left = &expr_binary.left;
-            let right = &expr_binary.right;
+pub(crate) mod kw {
+    syn::custom_keyword!(grad);
 
-            // Recursively compute gradient for left and right subexpressions
-            generate_gradient(left, gradient_values);
-            generate_gradient(right, gradient_values);
-        }
-
-        // Handle literals (constants)
-        Expr::Const(_) => {
-            // For constants, add 0 to the gradient vector
-            gradient_values.push(quote! { 0.0 });
-        }
-        Expr::Lit(_) => {
-            // For literals, add 0 to the gradient vector
-            gradient_values.push(quote! { 0.0 });
-        }
-        // Handle variables (identifiers)
-        Expr::Path(expr_path) => {
-            if expr_path.path.segments.len() != 1 {
-                panic!("Unsupported path!");
-            }
-            let _path = &expr_path.path;
-            // For variables, add 1 to the gradient vector
-            gradient_values.push(quote! { 1.0 });
-        }
-        Expr::Reference(_) => {
-            gradient_values.push(quote! { 1.0 });
-        }
-        _ => panic!("Unsupported expression!"),
-    }
+    syn::custom_keyword!(cos);
+    syn::custom_keyword!(e);
+    syn::custom_keyword!(ln);
+    syn::custom_keyword!(sin);
+    syn::custom_keyword!(tan);
 }

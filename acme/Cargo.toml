@@ -12,7 +12,13 @@ readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[[example]]
+name = "autodiff"
+required-features = ["macros"]
 
+[[test]]
+name = "autodiff"
+required-features = ["macros"]
 
 [features]
 default = ["core", "tensor"]
@@ -24,19 +30,20 @@ full = [
 ]
 
 core = [
-    "acme-core"
+    "dep:acme-core"
 ]
 
 derive = [
-    "acme-derive"
+    "dep:acme-derive",
+    "macros"
 ]
 
 macros = [
-    "acme-macros"
+    "dep:acme-macros"
 ]
 
 tensor = [
-    "acme-tensor"
+    "dep:acme-tensor"
 ]
 
 [lib]
@@ -54,6 +61,8 @@ acme-macros = { features = [], optional = true, path = "../macros", version = "0
 acme-tensor = { features = [], optional = true, path = "../tensor", version = "0.3.0" }
 
 [dev-dependencies]
+approx = "0.5"
+num = "0.4"
 
 [package.metadata.docs.rs]
 all-features = true

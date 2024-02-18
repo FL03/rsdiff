@@ -3,25 +3,25 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::AtomicId;
-use daggy::NodeIndex;
+use petgraph::prelude::NodeIndex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Id {
-    id: usize,
+    id: AtomicId,
     index: NodeIndex,
 }
 
 impl Id {
     pub fn new(index: NodeIndex) -> Self {
         Self {
-            id: *AtomicId::new(),
+            id: AtomicId::new(),
             index,
         }
     }
 
     pub fn id(&self) -> usize {
-        self.id
+        *self.id
     }
 
     pub fn index(&self) -> NodeIndex {

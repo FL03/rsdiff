@@ -2,9 +2,12 @@
     Appellation: stores <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::gradient::*;
+pub use self::{gradient::*, stack::*};
 
 pub(crate) mod gradient;
+pub(crate) mod stack;
+
+use std::collections::{BTreeMap, HashMap};
 
 pub trait Store<K, V> {
     fn get(&self, key: &K) -> Option<&V>;
@@ -16,38 +19,33 @@ pub trait Store<K, V> {
     fn remove(&mut self, key: &K) -> Option<V>;
 }
 
-// impl<K, V> Store<K, V> for BTreeMap<K, V> where K: Ord {
-//     fn get(&self, key: &K) -> Option<&V> {
-//         BTreeMap::get(self, &key)
-//     }
+pub trait OrInsert<K, V> {
+    fn or_insert(&mut self, key: K, value: V) -> &mut V;
+}
 
-//     fn get_mut(&mut self, key: &K) -> Option<&mut V> {
-//         BTreeMap::get_mut(self, &key)
-//     }
+macro_rules! impl_store {
+    ($t:ty, where $($preds:tt)* ) => {
 
-//     fn insert(&mut self, key: K, value: V) {
-//         BTreeMap::insert(self, key, value);
-//     }
+        impl<K, V> Store<K, V> for $t where $($preds)* {
+            fn get(&self, key: &K) -> Option<&V> {
+                <$t>::get(self, &key)
+            }
 
-//     fn remove(&mut self, key: &K) -> Option<V> {
-//         BTreeMap::remove(self, &key)
-//     }
-// }
+            fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+                <$t>::get_mut(self, &key)
+            }
 
-// impl<K, V> Store<K, V> for HashMap<K, V> where K: Eq + std::hash::Hash {
-//     fn get(&self, key: &K) -> Option<&V> {
-//         HashMap::get(self, &key)
-//     }
+            fn insert(&mut self, key: K, value: V) -> Option<V> {
+                <$t>::insert(self, key, value)
+            }
 
-//     fn get_mut(&mut self, key: &K) -> Option<&mut V> {
-//         HashMap::get_mut(self, &key)
-//     }
+            fn remove(&mut self, key: &K) -> Option<V> {
+                <$t>::remove(self, &key)
+            }
+        }
 
-//     fn insert(&mut self, key: K, value: V) {
-//         HashMap::insert(self, key, value);
-//     }
+    };
+}
 
-//     fn remove(&mut self, key: &K) -> Option<V> {
-//         HashMap::remove(self, &key)
-//     }
-// }
+impl_store!(BTreeMap<K, V>, where K: Ord);
+impl_store!(HashMap<K, V>, where K: Eq + std::hash::Hash);

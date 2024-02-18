@@ -40,23 +40,23 @@ impl From<Box<dyn std::error::Error>> for Error {
     }
 }
 
-impl<E> From<daggy::WouldCycle<E>> for Error {
-    fn from(err: daggy::WouldCycle<E>) -> Self {
-        Self::new(ErrorKind::Graph, err.to_string())
-    }
-}
-
-impl<E> From<daggy::petgraph::algo::Cycle<E>> for Error
-where
-    E: Copy + std::fmt::Debug,
-{
-    fn from(err: daggy::petgraph::algo::Cycle<E>) -> Self {
-        Self::new(ErrorKind::Graph, format!("{:?}", err.node_id()))
-    }
-}
-
 impl<T> From<std::sync::TryLockError<T>> for Error {
     fn from(err: std::sync::TryLockError<T>) -> Self {
         Self::new(ErrorKind::Sync, err.to_string())
+    }
+}
+
+impl<E> From<petgraph::algo::Cycle<E>> for Error
+where
+    E: Copy + std::fmt::Debug,
+{
+    fn from(err: petgraph::algo::Cycle<E>) -> Self {
+        Self::new(ErrorKind::Graph, format!("Cycle: {:?}", err.node_id()))
+    }
+}
+
+impl From<petgraph::algo::NegativeCycle> for Error {
+    fn from(err: petgraph::algo::NegativeCycle) -> Self {
+        Self::new(ErrorKind::Graph, "Negative Cycle detected")
     }
 }

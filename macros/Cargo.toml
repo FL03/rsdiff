@@ -17,11 +17,15 @@ test = true
 [build-dependencies]
 
 [dependencies]
-proc-macro2 = "1"
+num = "0.4"
+petgraph = { features = [], version = "0.6" }
+proc-macro2 = { features = ["nightly", "span-locations"], version = "1" }
 quote = "1"
-syn = { features = ["full"], version = "2" }
+
+syn = { features = ["extra-traits", "fold", "full"], version = "2" }
 
 [dev-dependencies]
+approx = "0.5"
 
 [package.metadata.docs.rs]
 all-features = true

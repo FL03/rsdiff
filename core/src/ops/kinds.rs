@@ -74,8 +74,8 @@ pub enum BinaryOp {
     Div(Division),
     Maximum,
     Minimum,
-    Mul,
-    Sub,
+    Mul(Multiplication),
+    Sub(Subtraction),
 }
 
 impl BinaryOp {
@@ -96,16 +96,16 @@ impl BinaryOp {
     }
 
     pub fn mul() -> Self {
-        Self::Mul
+        Self::Mul(Multiplication)
     }
 
     pub fn sub() -> Self {
-        Self::Sub
+        Self::Sub(Subtraction)
     }
 
     pub fn is_commutative(&self) -> bool {
         match self {
-            Self::Add(_) | Self::Mul => true,
+            Self::Add(_) | Self::Mul(_) => true,
             _ => false,
         }
     }
@@ -135,8 +135,8 @@ where
                     rhs
                 }
             }
-            Self::Mul => lhs * rhs,
-            Self::Sub => lhs - rhs,
+            Self::Mul(_) => lhs * rhs,
+            Self::Sub(_) => lhs - rhs,
         }
     }
 }

@@ -26,10 +26,11 @@ pub mod stores;
 pub mod prelude {
     pub use crate::primitives::*;
     // pub use crate::specs::*;
-    // pub use crate::utils::*;
+    pub use crate::utils::*;
 
     pub use crate::cmp::*;
     pub use crate::errors::*;
+    pub use crate::graphs::scg::Scg;
     pub use crate::graphs::*;
     pub use crate::ops::*;
     pub use crate::stores::*;

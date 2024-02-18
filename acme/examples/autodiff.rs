@@ -20,9 +20,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let x = 2_f64;
     // samples(x);
 
-
-    show_item!(acme::prelude::sigmoid::<f64>(x));
-    println!("{:?}", sigmoid::<f64>(2_f64));
+    // let z = sigmoid(x);
+    show_item!(sigmoid(x));
     
 
     Ok(())

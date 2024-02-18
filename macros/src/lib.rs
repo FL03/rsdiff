@@ -33,10 +33,11 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn show_item(item: TokenStream) -> TokenStream {
     let expr = parse_macro_input!(item as Expr);
     // let item = item.to_string();
-    let span = expr.span();
+    let span_expr = expr.span();
+    let span = expr.span().unwrap().parent().expect("");
     println!("Span Bytes: {:?}", span.byte_range());
     println!("Span (start, end): ({:?}, {:?})", span.start(), span.end());
-    println!("Source File: {:?}", span.unwrap().source_file());
+    println!("Source File: {:?}", span.source_file());
     println!("Source Text: {:?}", span.source_text());
     quote! { }.into()
 }

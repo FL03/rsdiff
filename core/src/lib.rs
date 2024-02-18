@@ -19,13 +19,12 @@ pub(crate) mod exp;
 pub mod cmp;
 pub mod errors;
 pub mod graphs;
-pub mod hkt;
 pub mod ops;
 pub mod stores;
 
 pub mod prelude {
     pub use crate::primitives::*;
-    // pub use crate::specs::*;
+    pub use crate::specs::*;
     pub use crate::utils::*;
 
     pub use crate::cmp::*;

@@ -19,7 +19,7 @@ test = true
 [dependencies]
 num = "0.4"
 petgraph = { features = [], version = "0.6" }
-proc-macro2 = "1"
+proc-macro2 = { features = ["nightly", "span-locations"], version = "1" }
 quote = "1"
 
 syn = { features = ["extra-traits", "fold", "full"], version = "2" }

@@ -6,19 +6,28 @@ use super::handle_expr;
 use crate::ad::ops::{Methods, UnaryMethod};
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::spanned::Spanned;
 use std::str::FromStr;
 use syn::{Expr, ExprCall, ExprMethodCall, Ident};
+use syn::ExprPath;
 
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
-    let ExprCall { func, args, .. } = expr;
-    // 
-    let df = handle_expr(&func, var);
-
+    let ExprCall { args, func, .. } = expr;
     let mut grad = quote! { 0.0 };
     for arg in args {
         let arg = handle_expr(&arg, var);
         grad = quote! { #grad + #arg };
     }
+    if let Expr::Path(path) = &**func {
+        println!("{:?}", expr.span().unwrap().source_file().path());
+        if let Some(block) = expr.span().source_text() {
+            println!("********\n\n\t\tFunction\n{:?}\nArgs:\n{:?}\n{:?}\n\n********", func, args, &block);
+        }
+    }
+    // 
+    let df = handle_expr(&func, var);
+
+    
     quote! { #df + #grad }
 }
 
@@ -68,4 +77,21 @@ pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr, _var: &Ident) -> T
         UnaryMethod::Tan => quote! { #recv.cos().powi(2).recip() },
         UnaryMethod::Tanh => quote! { #recv.cosh().powi(2).recip() },
     }
+}
+
+pub fn extract_block_logic(expr: &ExprCall) -> Option<TokenStream> {
+    // Get the span of the function call expression
+    let span = expr.span();
+    let source = span.clone().unwrap().source_file();
+
+    if let Expr::Path(inner) = &*expr.func {
+        let ExprPath { path, .. } = inner;
+        // Get the span of the last segment of the path
+        let span = path.segments.last().unwrap().ident.span();
+        
+        
+        
+    }
+    
+    None
 }

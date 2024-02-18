@@ -26,7 +26,7 @@ pub mod stores;
 pub mod prelude {
     pub use crate::primitives::*;
     // pub use crate::specs::*;
-    // pub use crate::utils::*;
+    pub use crate::utils::*;
 
     pub use crate::cmp::*;
     pub use crate::errors::*;

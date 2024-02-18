@@ -7,7 +7,6 @@
 //! Acme is an autodifferentiaion library for Rust. It is designed to be a
 //! flexible and powerful tool for building machine learning models and
 //! other differentiable programs.
-
 #[cfg(feature = "core")]
 pub use acme_core as core;
 #[cfg(feature = "derive")]

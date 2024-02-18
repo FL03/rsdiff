@@ -22,18 +22,17 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Build
     strategy:
       matrix:
         platform: [ ubuntu-latest ]
-        toolchain: [ stable, nightly ]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
       - name: setup (langspace)
         run: |
           rustup update
-          rustup default ${{ matrix.toolchain }}
+          rustup default nightly
       - name: Build
         id: rust-build
         run: cargo build -F full -r -v --workspace
@@ -51,7 +50,7 @@ jobs:
     strategy:
       matrix:
         platform: [ ubuntu-latest ]
-        toolchain: [ stable, nightly ]
+        toolchain: [ nightly ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -63,7 +62,7 @@ jobs:
         id: rust-test
         run: cargo test --all -F full -r -v
   bench:
-    name: Build and Test
+    name: Bench
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

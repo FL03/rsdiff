@@ -14,7 +14,11 @@ version.workspace = true
 
 [[example]]
 name = "autodiff"
-required-features = ["derive"]
+required-features = ["macros"]
+
+[[test]]
+name = "autodiff"
+required-features = ["macros"]
 
 [features]
 default = ["core", "tensor"]
@@ -57,6 +61,8 @@ acme-macros = { features = [], optional = true, path = "../macros", version = "0
 acme-tensor = { features = [], optional = true, path = "../tensor", version = "0.3.0" }
 
 [dev-dependencies]
+approx = "0.5"
+num = "0.4"
 
 [package.metadata.docs.rs]
 all-features = true

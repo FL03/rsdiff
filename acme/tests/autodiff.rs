@@ -3,30 +3,20 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![allow(unused_variables)]
-#[cfg(test)]
-extern crate acme_macros as macros;
 
+#[cfg(test)]
+extern crate acme;
+
+use acme::prelude::{autodiff, sigmoid};
 use approx::assert_abs_diff_eq;
-use macros::autodiff;
 use num::traits::Float;
 use std::ops::Add;
 
-pub fn add<A, B, C>(x: A, y: B) -> C
+pub fn add<A, B, C>(a: A, b: B) -> C
 where
-    A: Add<B, Output = C>,
+    A: std::ops::Add<B, Output = C>,
 {
-    x + y
-}
-
-pub fn mixed(x: f64, y: f64) -> f64 {
-    y * (x + y)
-}
-
-pub fn sigmoid<T>(x: T) -> T
-where
-    T: Float,
-{
-    (T::one() + x.neg().exp()).recip()
+    a + b
 }
 
 pub fn sigmoid_prime<T>(x: T) -> T
@@ -137,9 +127,9 @@ fn test_foil() {
 }
 
 #[test]
-fn test_mixed_order() {
-    let x = 1.0;
-    let y = 2.0;
+fn test_chain_rule() {
+    let (x, y) = (1_f64, 2_f64);
+
     assert_eq!(autodiff!(x: y * (x + y)), 2.0);
     assert_eq!(autodiff!(y: y * (x + y)), 5.0);
     assert_eq!(autodiff!(x: (x + y) * y), 2.0);
@@ -162,8 +152,6 @@ fn test_log() {
     assert_eq!(autodiff!(x: (x + 1.0).ln()), 3_f64.recip());
 }
 
-
-
 #[test]
 fn test_chained() {
     let x: f64 = 2.0;
@@ -177,18 +165,21 @@ fn test_sigmoid() {
     let x = 2_f64;
     assert_eq!(autodiff!(x: 1.0 / (1.0 + (-x).exp())), sigmoid_prime(x));
     assert_eq!(autodiff!(x: | x: f64 | 1.0 / (1.0 + (-x).exp())), sigmoid_prime(x));
+    assert_eq!(autodiff!(x: fn sigmoid(x: f64) -> f64 { 1_f64 / (1_f64 + (-x).exp()) }), sigmoid_prime(x));
 }
 
-#[ignore = "Currently, support for function calls is not fully implemented"]
+// #[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]
 fn test_function_call() {
     let x = 2_f64;
-    assert_eq!(autodiff!(x: sigmoid(x)), sigmoid_prime(x));
+    assert_eq!(autodiff!(x: sigmoid::<f64>(x)), sigmoid_prime(x));
 }
 
 #[ignore = "Custom trait methods are not yet supported"]
 #[test]
 fn test_method() {
-    let x = 2_f64;
+    let (x, y) = (1_f64, 2_f64);
+    assert_eq!(autodiff!(x: x.mul(y)), 2.0);
+
     assert_eq!(autodiff!(x: x.sigmoid()), sigmoid_prime(x));
 }

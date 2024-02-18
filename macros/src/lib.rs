@@ -5,10 +5,9 @@
 //! # acme-macros
 //!
 //!
+#![feature(proc_macro_span,)]
 extern crate proc_macro;
-use proc_macro::TokenStream;
-use quote::quote;
-use syn::{parse_macro_input, Expr};
+
 
 pub(crate) mod ad;
 pub(crate) mod ast;
@@ -18,12 +17,21 @@ pub(crate) mod gradient;
 pub(crate) mod graph;
 
 use ast::partials::*;
+use proc_macro::TokenStream;
+use quote::quote;
+use syn::{parse_macro_input, Expr};
 
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
     println!("attr: \"{}\"", attr.to_string());
     println!("item: \"{}\"", item.to_string());
     item
+}
+
+#[proc_macro]
+pub fn show_item(item: TokenStream) -> TokenStream {
+    println!("item: \"{:?}\"", syn::parse_macro_input!(item as syn::ItemFn));
+    quote! { }.into()
 }
 
 #[proc_macro]

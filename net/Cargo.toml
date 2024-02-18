@@ -24,7 +24,7 @@ async-trait = "0.1.60"
 axum = "0.6.1"
 http = "0.2.8"
 http-body = "0.4.5"
-hyper = { features = ["full"], version = "0.14.23" }
+hyper = { features = ["full"], version = "1.1.0" }
 mio = "0.8.4"
 scsys.workspace = true
 serde.workspace = true

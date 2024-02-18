@@ -22,6 +22,8 @@ use quote::quote;
 use syn::{parse_macro_input, Expr,};
 use syn::spanned::Spanned;
 
+
+
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
     println!("attr: \"{}\"", attr.to_string());
@@ -31,15 +33,14 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn show_item(item: TokenStream) -> TokenStream {
+    
     let expr = parse_macro_input!(item as Expr);
-    // let item = item.to_string();
-    let span_expr = expr.span();
-    let span = expr.span().unwrap().parent().expect("");
+    let span = expr.span();
     println!("Span Bytes: {:?}", span.byte_range());
     println!("Span (start, end): ({:?}, {:?})", span.start(), span.end());
-    println!("Source File: {:?}", span.source_file());
+    println!("Source File: {:?}", span.unwrap().source_file());
     println!("Source Text: {:?}", span.source_text());
-    quote! { }.into()
+    quote! { #expr }.into()
 }
 
 #[proc_macro]

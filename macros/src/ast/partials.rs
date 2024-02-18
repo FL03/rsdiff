@@ -39,10 +39,6 @@ impl Parse for Partials {
     }
 }
 
-pub struct StructuredPartial {
-
-}
-
 pub struct PartialFnCall {
     pub attrs: Vec<Attribute>,
     pub body: Box<Block>,
@@ -51,6 +47,7 @@ pub struct PartialFnCall {
 
 impl Parse for PartialFnCall {
     fn parse(input: ParseStream) -> Result<Self> {
+        
         let attrs = input.call(Attribute::parse_outer)?;
         let sig: Signature = input.parse()?;
         let body: Block = input.parse()?;

@@ -46,8 +46,31 @@ jobs:
             ~/.cargo/git
             target/release
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+  test:
+    name: Test
+    strategy:
+      matrix:
+        platform: [ ubuntu-latest ]
+        toolchain: [ stable, nightly ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup (langspace)
+        run: |
+          rustup update
+          rustup default ${{ matrix.toolchain }}
       - name: Test
+        id: rust-test
         run: cargo test --all -F full -r -v
+  bench:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup (langspace)
+        run: |
+          rustup update
+          rustup default nightly
       - name: Bench
-        if: matrix.toolchain == 'nightly'
+        id: rust-bench
         run: cargo bench --all -F full -r -v

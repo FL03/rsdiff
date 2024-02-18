@@ -16,8 +16,6 @@ version.workspace = true
 name = "autodiff"
 required-features = ["derive"]
 
-
-
 [features]
 default = ["core", "tensor"]
 full = [

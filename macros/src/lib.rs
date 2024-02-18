@@ -10,11 +10,10 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Expr};
 
+pub(crate) mod ad;
 pub(crate) mod ast;
 pub(crate) mod cmp;
-pub(crate) mod eval;
 
-pub(crate) mod autodiff;
 pub(crate) mod gradient;
 pub(crate) mod graph;
 
@@ -33,7 +32,7 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
     let expr = parse_macro_input!(input as PartialAst);
 
     // Generate code to compute the gradient
-    let result = autodiff::generate_autodiff(&expr);
+    let result = ad::generate_autodiff(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)
@@ -79,7 +78,7 @@ pub fn partial(input: TokenStream) -> TokenStream {
     let partial = parse_macro_input!(input as Partial);
 
     // Generate code to perform partial differentiation
-    let result = eval::expr::handle_expr(&partial.expr, &partial.var);
+    let result = ad::handle::expr::handle_expr(&partial.expr, &partial.var);
 
     // Return the generated code as a token stream
     TokenStream::from(result)

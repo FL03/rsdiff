@@ -37,10 +37,10 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
         Expr::Paren(inner) => handle_expr(&inner.expr, variable),
         // Differentiate variable expressions
         Expr::Path(inner) => {
-            if inner.path.segments.len() != 1 {
+            let syn::ExprPath { path, .. } = inner;
+            if path.segments.len() != 1 {
                 panic!("Unsupported path!");
             }
-            let path = &inner.path;
             if path.segments[0].ident == *variable {
                 quote! { 1.0 }
             } else {

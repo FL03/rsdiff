@@ -25,6 +25,7 @@ quote = "1"
 syn = { features = ["extra-traits", "fold", "full"], version = "2" }
 
 [dev-dependencies]
+approx = "0.5"
 
 [package.metadata.docs.rs]
 all-features = true

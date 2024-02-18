@@ -2,9 +2,9 @@
     Appellation: autodiff <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::handle::expr::handle_expr;
+use super::handle::item::handle_item;
 use crate::ast::partials::*;
-use crate::eval::expr::handle_expr;
-use crate::eval::item::handle_item;
 use proc_macro2::TokenStream;
 use syn::Ident;
 

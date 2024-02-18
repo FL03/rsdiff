@@ -6,9 +6,10 @@
 #[cfg(test)]
 extern crate acme_macros as macros;
 
+use approx::assert_abs_diff_eq;
 use macros::autodiff;
 use num::traits::Float;
-use std::ops::{Add, Neg};
+use std::ops::Add;
 
 pub fn add<A, B, C>(x: A, y: B) -> C
 where
@@ -128,6 +129,14 @@ fn test_sub() {
 }
 
 #[test]
+fn test_foil() {
+    let (x, y) = (1_f64, 2_f64);
+
+    assert_eq!(autodiff!(x: (x + y) * (x + y)), 2_f64 * (x + y));
+    assert_eq!(autodiff!(x: (x + y) * (x + y)), autodiff!(y: (x + y) * (x + y)));
+}
+
+#[test]
 fn test_mixed_order() {
     let x = 1.0;
     let y = 2.0;
@@ -138,27 +147,48 @@ fn test_mixed_order() {
 }
 
 #[test]
-fn test_complex() {
+fn test_trig() {
     let x: f64 = 2.0;
-    assert_eq!(autodiff!(x: x.ln()), 2_f64.recip());
-    assert_eq!(autodiff!(x: (x + 1.0).ln()), 3_f64.recip());
     assert_eq!(autodiff!(x: x.cos()), -x.sin());
     assert_eq!(autodiff!(x: x.sin()), x.cos());
     assert_eq!(autodiff!(x: x.tan()), x.cos().square().recip());
 }
 
-#[ignore = "Needs to be fixed"]
+#[test]
+fn test_log() {
+    let x: f64 = 2.0;
+
+    assert_eq!(autodiff!(x: x.ln()), 2_f64.recip());
+    assert_eq!(autodiff!(x: (x + 1.0).ln()), 3_f64.recip());
+}
+
+
+
+#[test]
+fn test_chained() {
+    let x: f64 = 2.0;
+    assert_abs_diff_eq!(autodiff!(x: x.sin() * x.cos()), 2_f64 * x.cos().square() - 1_f64, epsilon = 1e-8);
+    assert_eq!(autodiff!(x: x.sin().cos()), -x.cos() * x.sin().sin());
+    assert_eq!(autodiff!(x: x.ln().ln()), (x * x.ln()).recip());
+}
+
 #[test]
 fn test_sigmoid() {
-    let x: f64 = 2.0;
-    assert_eq!(autodiff!(x: 1.0 / (1.0 + x.neg().exp())), sigmoid_prime(x));
-    assert_eq!(
-        autodiff!(
-            x:
-            fn sigmoid(x: f64) -> f64 {
-                1.0 / (1.0 + (-x).exp())
-            }
-        ),
-        sigmoid_prime(2.0)
-    );
+    let x = 2_f64;
+    assert_eq!(autodiff!(x: 1.0 / (1.0 + (-x).exp())), sigmoid_prime(x));
+    assert_eq!(autodiff!(x: | x: f64 | 1.0 / (1.0 + (-x).exp())), sigmoid_prime(x));
+}
+
+#[ignore = "Currently, support for function calls is not fully implemented"]
+#[test]
+fn test_function_call() {
+    let x = 2_f64;
+    assert_eq!(autodiff!(x: sigmoid(x)), sigmoid_prime(x));
+}
+
+#[ignore = "Custom trait methods are not yet supported"]
+#[test]
+fn test_method() {
+    let x = 2_f64;
+    assert_eq!(autodiff!(x: x.sigmoid()), sigmoid_prime(x));
 }

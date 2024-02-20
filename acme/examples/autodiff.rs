@@ -7,7 +7,7 @@
 extern crate acme;
 
 use acme::prelude::sigmoid;
-use acme::{autodiff, partial, show_item, show_streams};
+use acme::{autodiff, show_item, show_streams};
 
 macro_rules! eval {
     ($var:ident: $ex:expr) => {

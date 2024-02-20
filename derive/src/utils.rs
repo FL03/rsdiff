@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-
+/// A function for capitalizing the first letter of a string.
 pub fn capitalize_first(s: &str) -> String {
     s.chars()
         .take(1)

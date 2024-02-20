@@ -27,7 +27,7 @@ pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as syn::ItemFn);
     println!("attr: \"{:?}\"", &attr);
     println!("item: \"{:?}\"", &input);
-    quote! { #input }.into()
+    (quote! { #input }).into()
 }
 
 #[proc_macro]
@@ -38,7 +38,7 @@ pub fn show_item(item: TokenStream) -> TokenStream {
     println!("Span (start, end): ({:?}, {:?})", span.start(), span.end());
     println!("Source File: {:?}", span.unwrap().source_file());
     println!("Source Text: {:?}", span.source_text());
-    quote! { #expr }.into()
+    (quote! { #expr }).into()
 }
 
 #[proc_macro_attribute]
@@ -47,7 +47,7 @@ pub fn partial(attr: TokenStream, item: TokenStream) -> TokenStream {
     println!("attr: \"{}\"", attr.to_string());
     // let result = ad::handle::item::handle_item(&input);
     // TokenStream::from(result)
-    quote! { #input }.into()
+    (quote! { #input }).into()
 }
 
 #[proc_macro]

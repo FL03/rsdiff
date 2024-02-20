@@ -8,7 +8,6 @@
 #![feature(proc_macro_span)]
 extern crate proc_macro;
 
-
 pub(crate) mod ast;
 pub(crate) mod cmp;
 pub(crate) mod diff;
@@ -64,7 +63,7 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn grad(input: TokenStream) -> TokenStream {
+pub fn gradient(input: TokenStream) -> TokenStream {
     // Parse the input expression into a syntax tree
     let expr = parse_macro_input!(input as Expr);
 

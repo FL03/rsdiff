@@ -2,10 +2,10 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::core::cmp::id::AtomicId;
 use crate::data::Scalar;
 use crate::shape::{IntoShape, Rank, Shape};
 use crate::store::Layout;
+use acme::cmp::id::AtomicId;
 // use std::ops::{Index, IndexMut};
 // use std::sync::{Arc, RwLock};
 

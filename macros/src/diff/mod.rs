@@ -7,9 +7,9 @@
 
 pub mod handle;
 
+use crate::ast::partials::{PartialAst, PartialFn};
 use handle::expr::handle_expr;
 use handle::item::handle_item;
-use crate::ast::partials::{PartialAst, PartialFn};
 use proc_macro2::TokenStream;
 use syn::Ident;
 

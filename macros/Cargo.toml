@@ -20,7 +20,6 @@ test = true
 num = "0.4"
 proc-macro2 = { features = ["nightly", "span-locations"], version = "1" }
 quote = "1"
-
 syn = { features = ["extra-traits", "fold", "full"], version = "2" }
 
 [dev-dependencies]

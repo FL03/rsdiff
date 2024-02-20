@@ -12,8 +12,6 @@ version.workspace = true
 [features]
 default = []
 
-
-
 [lib]
 bench = false
 crate-type = ["cdylib", "rlib"]
@@ -26,7 +24,6 @@ test = true
 
 [dependencies]
 anyhow.workspace = true
-# daggy = { features = ["serde-1"], version = "0.8" }
 lazy_static = "1"
 num = "0.4"
 petgraph = { features = ["serde-1"], version = "0.6" }

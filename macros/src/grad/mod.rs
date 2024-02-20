@@ -3,22 +3,17 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-
 use crate::ast::gradient::GradientAst;
 use crate::diff::handle::block::handle_block;
-use quote::quote;
 use proc_macro2::TokenStream;
+use quote::quote;
 use syn::{ItemFn, Signature};
 
 pub fn gradient(grad: &GradientAst) -> TokenStream {
     let GradientAst { attrs, item } = grad;
-    let attrs = attrs;
+    let _attrs = attrs;
     let item = item;
-    let output = quote! {
-        #(#attrs)*
-        #item
-    };
-    output
+    handle_item_fn(&item)
 }
 
 fn handle_item_fn(item: &ItemFn) -> TokenStream {
@@ -34,7 +29,10 @@ fn handle_item_fn(item: &ItemFn) -> TokenStream {
         }
     }
 
-    let grad = vars.iter().map(|var| handle_block(&block, &var)).collect::<Vec<_>>();
+    let grad = vars
+        .iter()
+        .map(|var| handle_block(&block, &var))
+        .collect::<Vec<_>>();
 
     quote! {
         [#(#grad)*]

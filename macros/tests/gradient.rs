@@ -22,7 +22,7 @@ fn test_grad_addition() {
         [(y, 1.0)]
     );
     let z = 3.0;
-    let df = grad!(x + y + z);
+    let df = gradient!(x + y + z);
     assert_eq!(
         df.into_iter().filter(|(k, _v)| k == &x).collect::<Vec<_>>(),
         [(x, 1.0)]
@@ -50,7 +50,7 @@ fn test_grad_multiply() {
         df.into_iter().filter(|(k, _v)| k == &y).collect::<Vec<_>>(),
         [(y, 1.0)]
     );
-    let df = grad!(x * y + 3.0);
+    let df = gradient!(x * y + 3.0);
     assert_eq!(
         df.into_iter().filter(|(k, _v)| k == &x).collect::<Vec<_>>(),
         [(x, 2.0)]

@@ -6,6 +6,8 @@
 //!
 //!
 #![feature(array_chunks)]
+
+extern crate acme_core as acme;
 pub use self::{specs::*, tensor::*};
 
 pub(crate) mod specs;
@@ -15,8 +17,6 @@ pub mod data;
 pub mod ops;
 pub mod shape;
 pub mod store;
-
-pub(crate) use acme_core as core;
 
 pub mod prelude {
     pub use crate::specs::*;

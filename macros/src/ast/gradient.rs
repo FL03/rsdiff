@@ -2,8 +2,8 @@
     Appellation: gradient <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use syn::{Attribute, ItemFn};
 use syn::parse::{Parse, ParseStream, Result};
+use syn::{Attribute, ItemFn};
 
 pub struct GradientAst {
     pub attrs: Vec<Attribute>,

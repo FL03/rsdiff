@@ -38,7 +38,7 @@ pub fn params(input: TokenStream) -> TokenStream {
     let store_name = format_ident!("{}Key", struct_name);
 
     // Generate the parameter struct definition
-    let param_struct = match &input.data {
+    let _param_struct = match &input.data {
         Data::Struct(s) => match &s.fields {
             _ => {}
         },
@@ -60,7 +60,7 @@ pub fn params(input: TokenStream) -> TokenStream {
                         discriminant: None,
                     }
                 });
-                let varaints_str = varaints.clone().map(|v| v.ident);
+                let _varaints_str = varaints.clone().map(|v| v.ident);
 
                 quote! {
                     #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,)]

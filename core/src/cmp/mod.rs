@@ -70,31 +70,6 @@ macro_rules! impl_const_op {
         impl_op!($name, $bound, $fn, 0, |a, b| $name::new($e(a, b)));
     };
 }
-macro_rules! impl_dual_op {
-    ($name:ident, $bound:ident, $fn:ident, $val:tt, $e:expr) => {
-        impl<T> $bound for $name<T>
-        where
-            T: $bound<Output = T>,
-        {
-            type Output = Self;
-
-            fn $fn(self, rhs: $name<T>) -> Self::Output {
-                $e(self.$val, rhs.$val)
-            }
-        }
-
-        impl<T> $bound<T> for $name<T>
-        where
-            T: $bound<Output = T>,
-        {
-            type Output = Self;
-
-            fn $fn(self, rhs: T) -> Self::Output {
-                $e(self.$val, rhs)
-            }
-        }
-    };
-}
 
 use std::ops::{Add, Div, Mul, Rem, Sub};
 

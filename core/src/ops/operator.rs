@@ -14,5 +14,5 @@ where
 
     fn eval(&self, args: Args) -> Self::Output;
 
-    fn grad(&self, args: Self::Output) -> Option<Self::Output>;
+    fn grad(&self, args: Args) -> Vec<Self::Output>;
 }

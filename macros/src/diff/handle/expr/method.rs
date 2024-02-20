@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::handle_expr;
-use crate::ad::ops::{Methods, UnaryMethod};
+use crate::ops::{Methods, UnaryMethod};
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;

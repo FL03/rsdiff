@@ -1,10 +1,15 @@
 /*
-    Appellation: autodiff <module>
+    Appellation: ad <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::handle::expr::handle_expr;
-use super::handle::item::handle_item;
-use crate::ast::partials::*;
+//! # Autodifferentiation (AD)
+//!
+
+pub mod handle;
+
+use handle::expr::handle_expr;
+use handle::item::handle_item;
+use crate::ast::partials::{PartialAst, PartialFn};
 use proc_macro2::TokenStream;
 use syn::Ident;
 

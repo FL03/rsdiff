@@ -15,17 +15,3 @@ pub trait Gradient<T> {
     fn grad(&self, args: T) -> Self::Gradient;
 }
 
-// Mathematically, the gradient of a function is a vector of partial derivatives.
-
-pub struct Derivative<T> {
-    pub wrt: T,
-    pub f: Box<dyn Fn(T) -> T>,
-}
-
-impl<T> Differentiable<T> for Derivative<T> {
-    type Derivative = T;
-
-    fn diff(&self, args: T) -> Self::Derivative {
-        (self.f)(args)
-    }
-}

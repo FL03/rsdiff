@@ -5,13 +5,13 @@
 #[cfg(test)]
 extern crate acme_macros as macros;
 
-use macros::grad;
+use macros::gradient;
 
 #[test]
 fn test_grad_addition() {
     let x = 1.0;
     let y = 2.0;
-    let df = grad!(x + y);
+    let df = gradient!(x + y);
     // let df = BTreeMap::from_iter(df);
     assert_eq!(
         df.into_iter().filter(|(k, _v)| k == &x).collect::<Vec<_>>(),
@@ -41,7 +41,7 @@ fn test_grad_addition() {
 fn test_grad_multiply() {
     let x = 1.0;
     let y = 2.0;
-    let df = grad!(x * y);
+    let df = gradient!(x * y);
     assert_eq!(
         df.into_iter().filter(|(k, _v)| k == &x).collect::<Vec<_>>(),
         [(x, 2.0)]
@@ -66,7 +66,7 @@ fn test_grad_multiply() {
 fn test_grad_mixed() {
     let x = 1.0;
     let y = 2.0;
-    let df = grad!(y * (x + y));
+    let df = gradient!(y * (x + y));
     // assert_eq!(df.into_iter().filter(|(k, _v)| k == &x).collect::<Vec<_>>(), [(x, 2.0)]);
     assert_eq!(
         df.into_iter().filter(|(k, _v)| k == &y).collect::<Vec<_>>(),

@@ -8,9 +8,12 @@
 #![feature(proc_macro_span)]
 extern crate proc_macro;
 
-pub(crate) mod ad;
+
 pub(crate) mod ast;
 pub(crate) mod cmp;
+pub(crate) mod diff;
+pub(crate) mod grad;
+pub(crate) mod ops;
 
 pub(crate) mod gradient;
 
@@ -23,7 +26,7 @@ use syn::{parse_macro_input, Expr};
 #[proc_macro_attribute]
 pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as syn::ItemFn);
-    println!("attr: \"{}\"", attr.to_string());
+    println!("attr: \"{:?}\"", &attr);
     println!("item: \"{:?}\"", &input);
     quote! { #input }.into()
 }
@@ -54,7 +57,7 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
     let expr = parse_macro_input!(input as PartialAst);
 
     // Generate code to compute the gradient
-    let result = ad::generate_autodiff(&expr);
+    let result = diff::generate_autodiff(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)
@@ -73,6 +76,7 @@ pub fn grad(input: TokenStream) -> TokenStream {
 }
 
 pub(crate) mod kw {
+    syn::custom_keyword!(eval);
     syn::custom_keyword!(grad);
 
     syn::custom_keyword!(cos);

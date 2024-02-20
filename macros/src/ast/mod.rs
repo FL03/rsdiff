@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
+pub mod gradient;
 pub mod partials;
 
 use proc_macro2::Span;

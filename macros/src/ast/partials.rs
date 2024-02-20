@@ -4,8 +4,7 @@
 */
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::{Attribute, Block, Expr, Ident, ItemFn, Signature, Token, Type, Visibility};
-use syn::braced;
+use syn::{Attribute, Block, Expr, Ident, ItemFn, Signature, Token, Type};
 
 pub struct Partial {
     pub expr: Expr,
@@ -47,7 +46,6 @@ pub struct PartialFnCall {
 
 impl Parse for PartialFnCall {
     fn parse(input: ParseStream) -> Result<Self> {
-        
         let attrs = input.call(Attribute::parse_outer)?;
         let sig: Signature = input.parse()?;
         let body: Block = input.parse()?;

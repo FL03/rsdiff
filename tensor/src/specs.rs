@@ -6,6 +6,12 @@ use crate::core::cmp::id::AtomicId;
 use crate::shape::{Rank, Shape};
 use crate::store::Layout;
 
+pub trait Affine<T> {
+    type Output;
+
+    fn affine(&self, mul: &T, add: &T) -> Self::Output;
+}
+
 pub trait Matmul<Rhs = Self> {
     type Output;
 

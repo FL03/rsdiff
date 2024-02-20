@@ -7,9 +7,9 @@ pub mod partials;
 
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
-use syn::Expr;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::spanned::Spanned;
+use syn::Expr;
 
 pub struct Ast {
     pub expr: Expr,
@@ -22,7 +22,7 @@ impl Parse for Ast {
 
         let expr: Expr = input.parse()?;
         let span = expr.span();
-        Ok(Self { expr, span, })
+        Ok(Self { expr, span })
     }
 }
 

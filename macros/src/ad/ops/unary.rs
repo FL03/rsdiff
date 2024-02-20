@@ -46,7 +46,7 @@ impl Parse for UnaryMethod {
         if input.peek(syn::Token![.]) {
             if input.peek2(syn::Ident) {
                 let method = input.parse::<syn::Ident>()?;
-                if let Ok(method) =  UnaryMethod::from_str(method.to_string().as_str()) {
+                if let Ok(method) = UnaryMethod::from_str(method.to_string().as_str()) {
                     return Ok(method);
                 }
             }

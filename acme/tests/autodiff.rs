@@ -123,7 +123,10 @@ fn test_foil() {
     let (x, y) = (1_f64, 2_f64);
 
     assert_eq!(autodiff!(x: (x + y) * (x + y)), 2_f64 * (x + y));
-    assert_eq!(autodiff!(x: (x + y) * (x + y)), autodiff!(y: (x + y) * (x + y)));
+    assert_eq!(
+        autodiff!(x: (x + y) * (x + y)),
+        autodiff!(y: (x + y) * (x + y))
+    );
 }
 
 #[test]
@@ -155,7 +158,11 @@ fn test_log() {
 #[test]
 fn test_chained() {
     let x: f64 = 2.0;
-    assert_abs_diff_eq!(autodiff!(x: x.sin() * x.cos()), 2_f64 * x.cos().square() - 1_f64, epsilon = 1e-8);
+    assert_abs_diff_eq!(
+        autodiff!(x: x.sin() * x.cos()),
+        2_f64 * x.cos().square() - 1_f64,
+        epsilon = 1e-8
+    );
     assert_eq!(autodiff!(x: x.sin().cos()), -x.cos() * x.sin().sin());
     assert_eq!(autodiff!(x: x.ln().ln()), (x * x.ln()).recip());
 }
@@ -164,8 +171,14 @@ fn test_chained() {
 fn test_sigmoid() {
     let x = 2_f64;
     assert_eq!(autodiff!(x: 1.0 / (1.0 + (-x).exp())), sigmoid_prime(x));
-    assert_eq!(autodiff!(x: | x: f64 | 1.0 / (1.0 + (-x).exp())), sigmoid_prime(x));
-    assert_eq!(autodiff!(x: fn sigmoid(x: f64) -> f64 { 1_f64 / (1_f64 + (-x).exp()) }), sigmoid_prime(x));
+    assert_eq!(
+        autodiff!(x: | x: f64 | 1.0 / (1.0 + (-x).exp())),
+        sigmoid_prime(x)
+    );
+    assert_eq!(
+        autodiff!(x: fn sigmoid(x: f64) -> f64 { 1_f64 / (1_f64 + (-x).exp()) }),
+        sigmoid_prime(x)
+    );
 }
 
 #[ignore = "Currently, support for function calls is not fully implemented"]

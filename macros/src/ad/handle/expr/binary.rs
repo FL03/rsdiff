@@ -142,7 +142,7 @@ fn foil(a: &ExprParen, b: &ExprParen, var: &Ident) -> TokenStream {
             let dr = handle_expr(&pright.into(), var);
             return quote! {
                 #dl + #dr
-            }
+            };
         }
     }
     panic!("FOILER")

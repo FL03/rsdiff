@@ -5,6 +5,6 @@
 
 pub trait StructuralFn {
     type Output;
-    
+
     fn eval(&self) -> Self::Output;
 }

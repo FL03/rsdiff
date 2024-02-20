@@ -13,6 +13,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 
 #[derive(Params)]
-pub struct LinearParams {
-    pub weight: f64,
+pub struct LinearParams<T> {
+    #[param]
+    pub weight: T,
 }

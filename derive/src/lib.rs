@@ -8,15 +8,11 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Variant};
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput,};
 
-fn capitalize_first(s: &str) -> String {
-    s.chars()
-        .take(1)
-        .flat_map(|f| f.to_uppercase())
-        .chain(s.chars().skip(1))
-        .collect()
-}
+pub(crate) mod ast;
+pub(crate) mod cmp;
+pub(crate) mod utils;
 
 #[proc_macro_derive(AnswerFn)]
 pub fn derive_answer_fn(_item: TokenStream) -> TokenStream {
@@ -47,41 +43,21 @@ pub fn params(input: TokenStream) -> TokenStream {
 
     // Generate the parameter keys enum
     let param_keys_enum = match &input.data {
-        Data::Struct(s) => match &s.fields {
-            Fields::Named(fields) => {
-                let field_names = fields.named.iter().map(|f| &f.ident);
-                let varaints = field_names.clone().map(|ident| {
-                    let ident_str = ident.as_ref().unwrap().to_string();
-                    let ident_str = format_ident!("{}", capitalize_first(&ident_str));
-                    Variant {
-                        attrs: vec![],
-                        ident: ident_str,
-                        fields: Fields::Unit,
-                        discriminant: None,
-                    }
-                });
-                let _varaints_str = varaints.clone().map(|v| v.ident);
+        Data::Struct(s) => {
+            let DataStruct { fields, .. } = s;
 
-                quote! {
-                    #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,)]
-                    pub enum #store_name {
-                        #(
-                            #varaints,
-                        )*
-                    }
-                }
-            }
-            _ => panic!("Only named fields are supported"),
+            crate::cmp::params::generate_keys(fields, &store_name)
         },
         _ => panic!("Only structs are supported"),
     };
 
     // Combine the generated code
     let generated_code = quote! {
-        // #param_struct
+        
         #param_keys_enum
     };
 
     // Return the generated code as a TokenStream
     generated_code.into()
 }
+

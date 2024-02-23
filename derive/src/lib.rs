@@ -8,7 +8,7 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Data, DataStruct, DeriveInput,};
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput};
 
 pub(crate) mod ast;
 pub(crate) mod cmp;
@@ -47,17 +47,16 @@ pub fn params(input: TokenStream) -> TokenStream {
             let DataStruct { fields, .. } = s;
 
             crate::cmp::params::generate_keys(fields, &store_name)
-        },
+        }
         _ => panic!("Only structs are supported"),
     };
 
     // Combine the generated code
     let generated_code = quote! {
-        
+
         #param_keys_enum
     };
 
     // Return the generated code as a TokenStream
     generated_code.into()
 }
-

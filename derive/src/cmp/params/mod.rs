@@ -16,10 +16,8 @@ pub fn generate_keys(fields: &Fields, name: &Ident) -> TokenStream {
 
 fn handle_named_fields(fields: &FieldsNamed, name: &Ident) -> TokenStream {
     let FieldsNamed { named, .. } = fields;
-    let fields_str = named.iter().cloned().map(|field| {
-        field.ident.unwrap()
-    });
-    let variants = named.iter().cloned().map(|field | {
+    let fields_str = named.iter().cloned().map(|field| field.ident.unwrap());
+    let variants = named.iter().cloned().map(|field| {
         let ident = field.ident.unwrap();
         let variant_ident = format_ident!("{}", capitalize_first(&ident.to_string()));
         Variant {
@@ -30,10 +28,9 @@ fn handle_named_fields(fields: &FieldsNamed, name: &Ident) -> TokenStream {
         }
     });
 
-
     quote! {
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        
+
         pub enum #name {
             #(#variants),*
         }

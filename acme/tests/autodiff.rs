@@ -7,7 +7,7 @@
 #[cfg(test)]
 extern crate acme;
 
-use acme::prelude::{autodiff, sigmoid};
+use acme::prelude::{autodiff, sigmoid, Sigmoid};
 use approx::assert_abs_diff_eq;
 use num::traits::Float;
 use std::ops::Add;
@@ -26,18 +26,6 @@ where
     x.neg().exp() / (T::one() + x.neg().exp()).powi(2)
 }
 
-pub trait Sigmoid {
-    fn sigmoid(self) -> Self;
-}
-
-impl<T> Sigmoid for T
-where
-    T: Float,
-{
-    fn sigmoid(self) -> Self {
-        (T::one() + self.neg().exp()).recip()
-    }
-}
 trait Square {
     fn square(self) -> Self;
 }
@@ -54,17 +42,8 @@ where
 #[test]
 fn test_autodiff() {
     let (x, y) = (1.0, 2.0);
-    // differentiating a function item w.r.t. a
-    assert_eq!(
-        autodiff!(a: fn addition(a: f64, b: f64) -> f64 { a + b }),
-        1.0
-    );
     // differentiating a closure item w.r.t. x
     assert_eq!(autodiff!(x: | x: f64, y: f64 | x * y ), 2.0);
-    // differentiating a function call w.r.t. x
-    assert_eq!(autodiff!(x: add(x, y)), 1.0);
-    // differentiating a function call w.r.t. some variable
-    assert_eq!(autodiff!(a: add(x, y)), 0.0);
     // differentiating a method call w.r.t. the reciever (x)
     assert_eq!(autodiff!(x: x.add(y)), 1.0);
     // differentiating an expression w.r.t. x
@@ -181,11 +160,28 @@ fn test_sigmoid() {
     );
 }
 
+#[ignore = "Function items are currently not supported"]
+#[test]
+fn test_fn_item() {
+    let (x, y) = (1_f64, 2_f64);
+    // differentiating a function item w.r.t. a
+    // assert_eq!(
+    //     autodiff!(y: fn mul<A, B, C>(x: A, y: B) -> C where A: std::ops::Mul<B, Output = C> { x * y }),
+    //     2_f64
+    // );
+
+    assert_eq!(autodiff!(y: fn mul(x: f64, y: f64) -> f64 { x * y }), 2_f64);
+}
+
 #[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]
 fn test_function_call() {
-    let x = 2_f64;
-    assert_eq!(autodiff!(x: sigmoid::<f64>(x)), sigmoid_prime(x));
+    let (x, y) = (1_f64, 2_f64);
+    // differentiating a function call w.r.t. x
+    assert_eq!(autodiff!(x: add(x, y)), 1.0);
+    // differentiating a function call w.r.t. some variable
+    assert_eq!(autodiff!(a: add(x, y)), 0.0);
+    assert_eq!(autodiff!(y: sigmoid::<f64>(y)), sigmoid_prime(y));
 }
 
 #[ignore = "Custom trait methods are not yet supported"]

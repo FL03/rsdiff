@@ -49,6 +49,7 @@ fn test_autodiff() {
     assert_eq!(autodiff!(x: x.add(y)), 1.0);
     // differentiating an expression w.r.t. x
     assert_eq!(autodiff!(x: x + y), 1.0);
+    assert_eq!(autodiff!(x: x + x), 2.0);
     assert_eq!(autodiff!(y: x += y), 1.0);
 }
 

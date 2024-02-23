@@ -16,7 +16,7 @@ pub fn generate_keys(fields: &Fields, name: &Ident) -> TokenStream {
 
 fn handle_named_fields(fields: &FieldsNamed, name: &Ident) -> TokenStream {
     let FieldsNamed { named, .. } = fields;
-    let fields_str = named.clone().map(|field| {
+    let fields_str = named.iter().cloned().map(|field| {
         field.ident.unwrap()
     });
     let variants = named.iter().cloned().map(|field | {

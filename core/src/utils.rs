@@ -10,3 +10,16 @@ where
 {
     (T::one() + x.neg().exp()).recip()
 }
+
+pub trait Sigmoid {
+    fn sigmoid(self) -> Self;
+}
+
+impl<T> Sigmoid for T
+where
+    T: Float,
+{
+    fn sigmoid(self) -> Self {
+        (T::one() + self.neg().exp()).recip()
+    }
+}

@@ -41,14 +41,25 @@ where
 
 #[test]
 fn test_autodiff() {
-    let (x, y) = (1.0, 2.0);
+    let (x, y) = (1_f64, 2_f64);
     // differentiating a closure item w.r.t. x
-    assert_eq!(autodiff!(x: | x: f64, y: f64 | x * y ), 2.0);
-    // differentiating a method call w.r.t. the reciever (x)
+    assert_eq!(autodiff!(x: | x: f64, y: f64 | x * y ), y);
+    assert_eq!(autodiff!(y: | x: f64, y: f64 | x * y ), x);
+    // differentiating a known method call w.r.t. the reciever (x)
     assert_eq!(autodiff!(x: x.add(y)), 1.0);
     // differentiating an expression w.r.t. x
     assert_eq!(autodiff!(x: x + y), 1.0);
     assert_eq!(autodiff!(y: x += y), 1.0);
+}
+
+#[test]
+fn test_item_function() {
+    let (x, y) = (1_f64, 2_f64);
+    assert_eq!(
+        autodiff!(x: fn mul<A, B, C>(x: A, y: B) -> C where A: std::ops::Mul<B, Output = C> { x * y }),
+        y
+    );
+    assert_eq!(autodiff!(y: fn mul(x: f64, y: f64) -> f64 { x * y }), x);
 }
 
 #[test]
@@ -160,18 +171,7 @@ fn test_sigmoid() {
     );
 }
 
-#[ignore = "Function items are currently not supported"]
-#[test]
-fn test_fn_item() {
-    let (x, y) = (1_f64, 2_f64);
-    // differentiating a function item w.r.t. a
-    // assert_eq!(
-    //     autodiff!(y: fn mul<A, B, C>(x: A, y: B) -> C where A: std::ops::Mul<B, Output = C> { x * y }),
-    //     2_f64
-    // );
 
-    assert_eq!(autodiff!(y: fn mul(x: f64, y: f64) -> f64 { x * y }), 2_f64);
-}
 
 #[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]

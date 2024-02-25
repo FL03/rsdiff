@@ -8,7 +8,9 @@ use acme::Params;
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _params = LinearParams { weight: 1.0 };
-    let _wk = LinearParamsKey::Weight;
+    let wk = LinearParamsKey::Weight;
+    println!("{:?}", &wk);
+    // let _key = wk.key();
     Ok(())
 }
 

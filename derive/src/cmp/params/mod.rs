@@ -30,7 +30,6 @@ fn handle_named_fields(fields: &FieldsNamed, name: &Ident) -> TokenStream {
 
     quote! {
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-
         pub enum #name {
             #(#variants),*
         }

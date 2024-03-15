@@ -6,8 +6,11 @@
 //!
 //!
 #![feature(array_chunks)]
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 extern crate acme_core as acme;
+
 pub use self::{specs::*, tensor::*};
 
 pub(crate) mod specs;

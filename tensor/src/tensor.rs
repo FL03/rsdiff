@@ -2,7 +2,7 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::data::Scalar;
+use crate::prelude::Scalar;
 use crate::shape::{IntoShape, Rank, Shape};
 use crate::store::Layout;
 use acme::prelude::AtomicId;

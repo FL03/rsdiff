@@ -12,37 +12,25 @@ pub trait Trig {
     fn tan(self) -> Self;
 }
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Addition;
-
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Division;
-
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Multiplication;
-
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Subtraction;
-
 macro_rules! impl_binary_op {
     ($op:ident, $bound:ident, $exp:expr) => {
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+        pub struct $op;
+
         impl $op {
             pub fn new() -> Self {
                 Self
             }
         }
 
-        impl<T> crate::ops::BinaryOperation<T> for $op
+        impl<A, B, C> crate::ops::BinaryOperation<A, B> for $op
         where
-            T: $bound<T, Output = T>,
+            A: $bound<B, Output = C>,
         {
-            type Output = T;
+            type Output = C;
 
-            fn eval(&self, lhs: T, rhs: T) -> Self::Output {
+            fn eval(&self, lhs: A, rhs: B) -> Self::Output {
                 $exp(lhs, rhs)
             }
         }

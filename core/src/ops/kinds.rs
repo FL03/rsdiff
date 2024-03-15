@@ -116,7 +116,7 @@ impl BinaryOp {
     }
 }
 
-impl<T> BinaryOperation<T> for BinaryOp
+impl<T> BinaryOperation<T, T> for BinaryOp
 where
     T: Copy + Default + PartialOrd + num::traits::NumOps,
 {

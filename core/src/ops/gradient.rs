@@ -23,6 +23,17 @@ pub trait Grad<T> {
     fn grad(&self, at: T, wrt: &str) -> Self::Output;
 }
 
+pub trait Partial {
+    type Args;
+    type Output;
+
+    fn partial(&self) -> fn(Self::Args) -> Self::Output;
+
+    fn partial_at(&self, args: Self::Args) -> Self::Output {
+        (self.partial())(args)
+    }
+}
+
 pub trait Parameter {
     type Key;
     type Value;

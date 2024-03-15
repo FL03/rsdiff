@@ -46,10 +46,10 @@ impl Evaluate for f64 {
     }
 }
 
-pub trait BinaryOperation<T> {
+pub trait BinaryOperation<A, B> {
     type Output;
 
-    fn eval(&self, lhs: T, rhs: T) -> Self::Output;
+    fn eval(&self, lhs: A, rhs: B) -> Self::Output;
 }
 
 pub trait UnaryOperation {

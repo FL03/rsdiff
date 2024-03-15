@@ -5,6 +5,7 @@
 pub use self::backprop::*;
 
 pub(crate) mod backprop;
+pub(crate) mod kinds;
 
 #[cfg(test)]
 mod tests {}

@@ -9,6 +9,15 @@ use acme::cmp::id::AtomicId;
 // use std::ops::{Index, IndexMut};
 // use std::sync::{Arc, RwLock};
 
+pub(crate) fn from_vec<T>(shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
+    let layout = Layout::contiguous(shape);
+    TensorBase {
+        id: AtomicId::new(),
+        layout,
+        store, //Arc::new(RwLock::new(store)),
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct TensorBase<T> {
     id: AtomicId,
@@ -18,12 +27,7 @@ pub struct TensorBase<T> {
 
 impl<T> TensorBase<T> {
     pub fn from_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
-        let layout = Layout::contiguous(shape);
-        Self {
-            id: AtomicId::new(),
-            layout,
-            store, //Arc::new(RwLock::new(store)),
-        }
+        from_vec(shape, store)
     }
 
     // Function to get the index of the data based on coordinates

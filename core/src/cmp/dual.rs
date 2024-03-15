@@ -14,24 +14,13 @@
 
 use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::marker::ConstParamTy;
 use std::ops::{self, Neg, Not};
 
-#[derive(
-    Clone,
-    ConstParamTy,
-    Copy,
-    Debug,
-    Default,
-    Deserialize,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
+#[derive(Clone, ConstParamTy, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 pub struct Dual<T> {
     dual: T,
     real: T,

@@ -2,6 +2,7 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
 
@@ -10,24 +11,21 @@ pub trait Trig {
     fn cos(self) -> Self;
     fn tan(self) -> Self;
 }
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
+
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Addition;
 
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Division;
 
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Multiplication;
 
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Subtraction;
 
 macro_rules! impl_binary_op {

@@ -11,5 +11,7 @@ pub(crate) mod atomic;
 pub(crate) mod gradient;
 pub(crate) mod id;
 
+pub trait Identifier {}
+
 #[cfg(test)]
 mod tests {}

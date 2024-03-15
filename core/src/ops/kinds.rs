@@ -4,6 +4,7 @@
 */
 use super::arithmetic::*;
 use super::BinaryOperation;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
@@ -16,12 +17,16 @@ pub enum Op<T> {
     Unary(T, UnaryOp),
 }
 
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize,),
+    serde(rename_all = "lowercase", untagged)
+)]
 #[derive(
     Clone,
     Copy,
     Debug,
     Default,
-    Deserialize,
     Display,
     EnumCount,
     EnumIs,
@@ -31,12 +36,10 @@ pub enum Op<T> {
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize,
     VariantNames,
 )]
 #[repr(u8)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum CompareOp {
     #[default]
     Eq,
@@ -51,7 +54,6 @@ pub enum CompareOp {
     Clone,
     Copy,
     Debug,
-    Deserialize,
     Display,
     EnumCount,
     EnumIs,
@@ -61,13 +63,16 @@ pub enum CompareOp {
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize,
     SmartDefault,
     VariantNames,
 )]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize,),
+    serde(rename_all = "lowercase", untagged)
+)]
 #[repr(u8)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum BinaryOp {
     #[default]
     Add(Addition),
@@ -157,7 +162,7 @@ impl From<Division> for BinaryOp {
     Clone,
     Copy,
     Debug,
-    Deserialize,
+    Default,
     Display,
     EnumCount,
     EnumIs,
@@ -167,13 +172,15 @@ impl From<Division> for BinaryOp {
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize,
-    SmartDefault,
     VariantNames,
 )]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize,),
+    serde(rename_all = "lowercase", untagged)
+)]
 #[repr(u8)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum UnaryOp {
     #[default]
     Abs,
@@ -197,7 +204,6 @@ pub enum UnaryOp {
 #[derive(
     Clone,
     Debug,
-    Deserialize,
     Display,
     EnumCount,
     EnumIs,
@@ -207,13 +213,16 @@ pub enum UnaryOp {
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize,
     SmartDefault,
     VariantNames,
 )]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize,),
+    serde(rename_all = "lowercase", untagged)
+)]
 #[repr(u8)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum Ops {
     Binary(BinaryOp),
     Compare(CompareOp),

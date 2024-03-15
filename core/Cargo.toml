@@ -12,6 +12,16 @@ version.workspace = true
 [features]
 default = []
 
+serde = [
+    "dep:serde",
+    "serde-ext",
+]
+
+serde-ext = [
+    "dep:serde_json",
+    "petgraph/serde-1",
+]
+
 [lib]
 bench = false
 crate-type = ["cdylib", "rlib"]
@@ -26,11 +36,11 @@ test = true
 anyhow.workspace = true
 lazy_static = "1"
 num = "0.4"
-petgraph = { features = ["serde-1"], version = "0.6" }
-serde.workspace = true
-serde_json.workspace = true
-strum.workspace = true
+petgraph = "0.6"
+serde = { optional = true, features = ["derive"], version = "1" }
+serde_json = { optional = true, version = "1" }
 smart-default.workspace = true
+strum.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true

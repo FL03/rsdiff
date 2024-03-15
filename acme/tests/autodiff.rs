@@ -172,8 +172,6 @@ fn test_sigmoid() {
     );
 }
 
-
-
 #[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]
 fn test_function_call() {

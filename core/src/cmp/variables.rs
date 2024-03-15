@@ -4,10 +4,12 @@
 */
 use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Div, Mul, Sub};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Variable<T> {
     name: String,
     pub(crate) value: Option<T>,

@@ -2,7 +2,7 @@
     Appellation: operators <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::id::Id;
+use crate::id::Id;
 
 pub struct Operator {
     inputs: Vec<Id>,

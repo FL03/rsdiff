@@ -4,7 +4,7 @@
 */
 use crate::shape::{Rank, Shape};
 use crate::store::Layout;
-use acme::cmp::id::AtomicId;
+use acme::prelude::AtomicId;
 
 pub trait Affine<T> {
     type Output;

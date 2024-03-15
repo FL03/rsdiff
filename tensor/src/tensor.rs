@@ -5,7 +5,7 @@
 use crate::data::Scalar;
 use crate::shape::{IntoShape, Rank, Shape};
 use crate::store::Layout;
-use acme::cmp::id::AtomicId;
+use acme::prelude::AtomicId;
 // use std::ops::{Index, IndexMut};
 // use std::sync::{Arc, RwLock};
 

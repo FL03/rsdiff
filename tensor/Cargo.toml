@@ -13,12 +13,16 @@ version.workspace = true
 [features]
 default = []
 
+serde = [
+    "dep:serde"
+]
+
 [build-dependencies]
 
 [dependencies]
 acme-core = { features = [], path = "../core", version = "0.3" }
 num = "0.4"
-serde = { features = ["derive"], version = "1" }
+serde = { optional = true, features = ["derive"], version = "1" }
 strum = { features = ["derive"], version = "0.26" }
 
 [dev-dependencies]

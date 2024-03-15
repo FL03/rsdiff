@@ -5,13 +5,12 @@
 //! # Rank
 //!
 //! The rank of a n-dimensional array describes the number of dimensions
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
-#[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Rank(pub usize);
 
 impl Rank {

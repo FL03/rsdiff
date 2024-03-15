@@ -3,11 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Id;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
 use std::ops::Deref;
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 pub struct GradientId<T> {
     pub(crate) inner: Id,
     ptr: PhantomData<T>,

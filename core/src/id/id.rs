@@ -4,9 +4,11 @@
 */
 use super::AtomicId;
 use petgraph::prelude::NodeIndex;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 pub struct Id {
     id: AtomicId,
     index: NodeIndex,

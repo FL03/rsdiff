@@ -2,12 +2,12 @@
     Appellation: edge <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::cmp::id::{GradientId, Id};
+use crate::id::{GradientId, Id};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Edge<T> {
     id: Option<GradientId<T>>,
     data: T,

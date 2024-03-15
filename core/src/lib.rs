@@ -25,6 +25,7 @@ pub(crate) mod exp;
 pub mod cmp;
 pub mod errors;
 pub mod graphs;
+pub mod id;
 pub mod ops;
 pub mod stores;
 
@@ -37,6 +38,7 @@ pub mod prelude {
     pub use crate::errors::*;
     pub use crate::graphs::scg::Scg;
     pub use crate::graphs::*;
+    pub use crate::id::*;
     pub use crate::ops::*;
     pub use crate::stores::*;
 }

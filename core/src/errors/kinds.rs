@@ -2,6 +2,7 @@
     Appellation: error <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
@@ -10,7 +11,6 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Copy,
     Debug,
     Default,
-    Deserialize,
     Display,
     EnumCount,
     EnumIs,
@@ -20,11 +20,14 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize,
     VariantNames,
 )]
-#[serde(rename_all = "camelCase")]
-#[strum(serialize_all = "camelCase")]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize,),
+    serde(rename_all = "snake_case")
+)]
+#[strum(serialize_all = "snake_case")]
 pub enum ErrorKind {
     Func(FuncError),
     Graph,
@@ -44,7 +47,6 @@ impl From<FuncError> for ErrorKind {
     Copy,
     Debug,
     Default,
-    Deserialize,
     Display,
     EnumCount,
     EnumIs,
@@ -54,11 +56,14 @@ impl From<FuncError> for ErrorKind {
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize,
     VariantNames,
 )]
-#[serde(rename_all = "camelCase")]
-#[strum(serialize_all = "camelCase")]
+#[cfg_attr(
+    feature = "serde",
+    derive(Deserialize, Serialize,),
+    serde(rename_all = "snake_case")
+)]
+#[strum(serialize_all = "snake_case")]
 pub enum FuncError {
     #[default]
     ArgCount,

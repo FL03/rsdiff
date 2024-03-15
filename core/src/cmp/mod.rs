@@ -12,8 +12,6 @@ pub(crate) mod dual;
 pub(crate) mod operators;
 pub(crate) mod variables;
 
-pub mod id;
-
 use petgraph::prelude::NodeIndex;
 
 pub trait NodeConfig {

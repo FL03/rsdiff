@@ -9,59 +9,43 @@ env:
 
 on:
   push:
-    tags: [ "nightly*",  "v*.*.*" ]
+    tags: [ v*.*.* ]
   release:
-    types: [ "created" ]
+    types: [ created ]
   repository_dispatch:
-    types: [ "publish" ]
+    types: [ publish ]
   workflow_dispatch:
 
 jobs:
-  build:
-    name: build
+  core:
+    name: Publish (core)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features: [ core ]
     steps:
-      - uses: actions/checkout@v3
-      - name: setup (langspace)
-        run: |
-          rustup update
-          rustup default nightly
-      - id: rust-build
-        name: Build
-        run: cargo build -r -v --workspace
-      - uses: actions/cache@v2
-        id: rust-cache
-        name: Cache build
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions/checkout@v4
+      - name: Publish (${{ github.ref.name }}-${{ matrix.features }})
+        run: cargo publish --all-features -v -p ${{ github.ref.name }}-${{ matrix.features }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
   sdk:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-sdk
       cancel-in-progress: false
-    env:
-        SDK_NAME: fluidity
     name: Publish (sdk)
-    needs: build
+    needs: core
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: [ core, derive, macros ]
+        features: [ derive, macros, tensor ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Publish (${{ github.ref.name }}-${{ matrix.features }})
         run: cargo publish --all-features -v -p ${{ github.ref.name }}-${{ matrix.features }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
   publish:
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-publish
-      cancel-in-progress: false
     name: Publish (${{ github.ref.name }})
     needs: sdk
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Publish (${{ github.ref.name }})
         run: cargo publish --all-features -v -p ${{ github.ref.name }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

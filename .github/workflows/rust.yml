@@ -9,15 +9,15 @@ env:
 
 on:
   pull_request:
-    branches-ignore: [ "beta*", "dev*", "next*" ]
+    branches: [ main ]
   push:
-    branches-ignore: [ "beta*", "dev*", "next*" ]
-    tags: [ "nightly*",  "v*.*.*" ]
+    branches: [ main ]
+    tags: [ nightly*, v*.*.* ]
   release:
   repository_dispatch:
-    types: [ "publish" ]
+    types: [ rust ]
   schedule:
-    - cron: "30 21 * * *" # 9:30pm UTC
+    - cron: "30 21 * * 0" # Every Sunday at 21:30 UTC
   workflow_dispatch:
 
 jobs:
@@ -26,19 +26,20 @@ jobs:
     strategy:
       matrix:
         platform: [ ubuntu-latest ]
+        toolchain: [ stable, nightly ]
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: setup (langspace)
         run: |
           rustup update
-          rustup default nightly
+          rustup default ${{ matrix.toolchain }}
       - name: Build
         id: rust-build
-        run: cargo build -F full -r -v --workspace
+        run: cargo build --features full -r -v --workspace
       - name: Cache build
         id: rust-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -49,27 +50,28 @@ jobs:
     name: Test
     strategy:
       matrix:
-        platform: [ ubuntu-latest ]
         toolchain: [ nightly ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: setup (langspace)
-        run: |
-          rustup update
-          rustup default ${{ matrix.toolchain }}
+      - uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1 #@v1
+        with:
+          override: true
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
       - name: Test
         id: rust-test
-        run: cargo test --all -F full -r -v
+        run: cargo test --all-features -r -v --workspace
   bench:
     name: Bench
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: setup (langspace)
         run: |
           rustup update
           rustup default nightly
       - name: Bench
         id: rust-bench
-        run: cargo bench --all -F full -r -v
+        run: cargo bench --features full -v --workspace

@@ -8,3 +8,5 @@ pub trait StructuralFn {
 
     fn eval(&self) -> Self::Output;
 }
+
+pub trait StructuredArgs {}

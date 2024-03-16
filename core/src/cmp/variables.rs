@@ -23,14 +23,8 @@ impl<T> Variable<T> {
         }
     }
 
-    pub fn with_name(mut self, name: impl ToString) -> Self {
-        self.name = name.to_string();
-        self
-    }
-
-    pub fn with_value(mut self, value: T) -> Self {
-        self.value = Some(value);
-        self
+    pub fn is_none(&self) -> bool {
+        self.value.is_none()
     }
 
     pub fn name(&self) -> &str {
@@ -43,6 +37,16 @@ impl<T> Variable<T> {
 
     pub fn set(&mut self, value: T) {
         self.value = Some(value);
+    }
+
+    pub fn with_name(mut self, name: impl ToString) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    pub fn with_value(mut self, value: T) -> Self {
+        self.value = Some(value);
+        self
     }
 }
 
@@ -88,7 +92,7 @@ where
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        let name = format!("{} + {}", self.name, rhs.name);
+        let name = "+".to_string();
         let value = self.eval() + rhs.eval();
         Variable::new(name).with_value(value)
     }

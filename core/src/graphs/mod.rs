@@ -22,7 +22,10 @@ pub trait ComputeGraph {
     type Edge: GraphEntry;
     type Node: GraphEntry;
 
-    fn add_node(&mut self, node: <Self::Node as GraphEntry>::Weight) -> <Self::Node as GraphEntry>::Idx;
+    fn add_node(
+        &mut self,
+        node: <Self::Node as GraphEntry>::Weight,
+    ) -> <Self::Node as GraphEntry>::Idx;
 
     fn add_edge(
         &mut self,

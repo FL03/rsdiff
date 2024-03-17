@@ -87,6 +87,8 @@ mod tests {
         let add = a + 3;
         assert_eq!(add, Constant(6));
 
+        // let b = Constant(3_f64).ln();
+
         let a = Constant::new(3);
         let b = Constant::new(3);
         assert_eq!(a + b, Constant(6));

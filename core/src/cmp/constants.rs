@@ -6,6 +6,7 @@ use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::borrow::{Borrow, BorrowMut};
 use std::marker::ConstParamTy;
 use std::ops::{Deref, DerefMut, Neg, Not};
 
@@ -148,5 +149,17 @@ where
 
     fn is_zero(&self) -> bool {
         self.0.is_zero()
+    }
+}
+
+impl<T> Borrow<T> for Constant<T> {
+    fn borrow(&self) -> &T {
+        &self.0
+    }
+}
+
+impl<T> BorrowMut<T> for Constant<T> {
+    fn borrow_mut(&mut self) -> &mut T {
+        &mut self.0
     }
 }

@@ -7,8 +7,25 @@ pub use self::{gradient::*, stack::*};
 pub(crate) mod gradient;
 pub(crate) mod stack;
 
+use std::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
 
+pub trait Get<Q, K, V>
+where
+    K: Borrow<Q>,
+{
+    fn get(&self, key: &Q) -> Option<&V>;
+}
+
+impl<Q, K, V> Get<Q, K, V> for BTreeMap<K, V>
+where
+    K: Borrow<Q> + Ord,
+    Q: Ord,
+{
+    fn get(&self, key: &Q) -> Option<&V> {
+        BTreeMap::get(self, key)
+    }
+}
 pub trait Store<K, V> {
     fn get(&self, key: &K) -> Option<&V>;
 

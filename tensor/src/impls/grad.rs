@@ -2,7 +2,7 @@
     Appellation: grad <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{BinaryOp, Op,};
+use crate::ops::{BinaryOp, Op};
 use crate::prelude::Scalar;
 use crate::tensor::*;
 use acme::prelude::AtomicId;

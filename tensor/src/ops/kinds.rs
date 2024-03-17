@@ -37,13 +37,6 @@ pub enum UnaryOp {
     Tanh,
 }
 
-pub enum Expr<T> {
-    Binary(BinaryOp),
-    Unary(UnaryOp),
-    Scalar(T),
-    Tensor(TensorBase<T>),
-}
-
 pub struct BinOp<T> {
     pub lhs: TensorBase<T>,
     pub rhs: TensorBase<T>,

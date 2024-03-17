@@ -9,7 +9,6 @@ pub unsafe trait RawData {
 
 pub trait Data: RawData {}
 
-
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::ptr::NonNull;

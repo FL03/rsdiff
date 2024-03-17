@@ -247,6 +247,16 @@ macro_rules! impl_arith {
 
 macro_rules! impl_scalar_arith {
     ($trait:ident, $method:ident, $op:tt) => {
+        // impl<T> TensorBase<T>
+        // where
+        //     T: Copy + std::ops::$trait<Output = T>,
+        // {
+        //     pub fn $method(self, other: T) -> TensorBase<T> {
+        //         let store = self.store.iter().map(|a| *a $op other).collect();
+        //         from_vec(self.shape().clone(), store)
+        //     }
+        // }
+
         impl<T> std::ops::$trait<T> for TensorBase<T>
         where
             T: Copy + std::ops::$trait<Output = T>,

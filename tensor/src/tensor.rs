@@ -292,3 +292,4 @@ impl_scalar_arith!(Add, add, +);
 impl_scalar_arith!(Div, div, /);
 impl_scalar_arith!(Mul, mul, *);
 impl_scalar_arith!(Sub, sub, -);
+

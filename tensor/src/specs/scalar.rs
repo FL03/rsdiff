@@ -231,3 +231,25 @@ macro_rules! impl_scalar {
 }
 impl_scalar!(f32);
 impl_scalar!(f64);
+
+macro_rules! unary_op_trait {
+    ($trait:ident, $method:ident) => {
+        pub trait $trait {
+            fn $method(self) -> Self;
+        }
+    };
+}
+
+
+unary_op_trait!(Cos, cos);
+unary_op_trait!(Cosh, cosh);
+unary_op_trait!(Exp, exp);
+unary_op_trait!(Ln, ln);
+unary_op_trait!(Recip, recip);
+unary_op_trait!(Sin, sin);
+unary_op_trait!(Sinh, sinh);
+unary_op_trait!(Sqrt, sqrt);
+unary_op_trait!(Square, square);
+unary_op_trait!(Tan, tan);
+unary_op_trait!(Tanh, tanh);
+

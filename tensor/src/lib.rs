@@ -21,12 +21,18 @@ pub mod shape;
 pub mod specs;
 pub mod store;
 
-pub mod prelude {
-    pub use crate::tensor::TensorBase;
 
+pub mod prelude {
+    #[doc(inline)]
+    pub use crate::tensor::TensorBase;
+    #[doc(inline)]
     pub use crate::data::*;
+    #[doc(inline)]
     pub use crate::ops::*;
+    #[doc(inline)]
     pub use crate::shape::*;
+    #[doc(inline)]
     pub use crate::specs::prelude::*;
+    #[doc(inline)]
     pub use crate::store::*;
 }

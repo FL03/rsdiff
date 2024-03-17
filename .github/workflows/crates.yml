@@ -8,8 +8,6 @@ env:
   CARGO_TERM_COLOR: always
 
 on:
-  push:
-    tags: [ v*.*.* ]
   release:
     types: [ created ]
   repository_dispatch:

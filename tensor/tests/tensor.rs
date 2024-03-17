@@ -1,4 +1,8 @@
-#[cfg(test)]
+/*
+    Appellation: tensor <test>
+    Contrib: FL03 <jo3mccain@icloud.com>
+*/
+#![cfg(test)]
 extern crate acme_tensor as tensor;
 
 use tensor::TensorBase;

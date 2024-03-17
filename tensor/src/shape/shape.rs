@@ -3,6 +3,7 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Rank;
+use acme::prelude::Result;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{self, Deref};
@@ -43,6 +44,16 @@ impl Shape {
 
     pub fn zeros(rank: usize) -> Self {
         Self(vec![0; rank])
+    }
+
+    pub fn matmul_shape(&self, other: &Self) -> Result<Self> {
+        if *self.rank() != 2 || *other.rank() != 2 {
+            return Err("Both shapes must be rank 2".into());
+        }
+        if self[1] != other[0] {
+            return Err("Incompatible shapes".into());
+        }
+        Ok(Self::from((self[0], other[1])))
     }
 
     pub fn dims(&self) -> &[usize] {

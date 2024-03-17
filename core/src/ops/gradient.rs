@@ -3,6 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
+use crate::prelude::Store;
+
 pub trait Differentiable<T> {
     type Derivative;
 
@@ -16,11 +18,9 @@ pub trait Gradient<T> {
 }
 
 pub trait Grad<T> {
-    type Output;
+    type Gradient: Store<usize, T>;
 
-    /// Compute the gradient of a function at a given point, with respect to a given variable.
-    // TODO: Create a macro for generating parameter keys
-    fn grad(&self, at: T, wrt: &str) -> Self::Output;
+    fn grad(&self) -> Self::Gradient;
 }
 
 pub trait Partial {

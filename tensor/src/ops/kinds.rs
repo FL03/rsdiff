@@ -26,10 +26,13 @@ pub enum UnaryOp {
     Cosh,
     Exp,
     Log,
+    Ln,
     Neg,
     Reciprocal,
     Sin,
     Sinh,
+    Sqrt,
+    Square,
     Tan,
     Tanh,
 }

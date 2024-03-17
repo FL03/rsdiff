@@ -21,10 +21,15 @@ pub mod shape;
 pub mod specs;
 pub mod store;
 
+mod impls {
+    mod arith;
+    mod grad;
+    mod linalg;
+}
+
+pub type Tensor<T = f64> = tensor::TensorBase<T>;
 
 pub mod prelude {
-    #[doc(inline)]
-    pub use crate::tensor::TensorBase;
     #[doc(inline)]
     pub use crate::data::*;
     #[doc(inline)]
@@ -35,4 +40,6 @@ pub mod prelude {
     pub use crate::specs::prelude::*;
     #[doc(inline)]
     pub use crate::store::*;
+    #[doc(inline)]
+    pub use crate::Tensor;
 }

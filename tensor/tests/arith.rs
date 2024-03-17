@@ -49,9 +49,19 @@ fn test_sub() {
 
 #[test]
 fn test_matmul() {
-    let a = TensorBase::<f64>::fill((3, 2), 2.0);
+    let a = TensorBase::<f64>::fill((3, 2), 2_f64);
     let b = TensorBase::<f64>::ones((2, 3));
     let c = a.matmul(&b);
 
     assert_eq!(c, TensorBase::<f64>::fill((3, 3), 4.0));
+}
+
+#[test]
+fn test_trig() {
+    let a = TensorBase::<f64>::ones((2, 2));
+    let b = a.clone().sin();
+    let c = a.cos();
+
+    assert_eq!(b[&[0, 0]], 1_f64.sin());
+    assert_eq!(c[&[0, 0]], 1_f64.cos());
 }

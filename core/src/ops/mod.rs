@@ -12,26 +12,6 @@ pub(crate) mod gradient;
 pub(crate) mod kinds;
 pub(crate) mod operator;
 
-use crate::prelude::Result;
-
-pub trait Expressive {
-    type Graph;
-
-    fn expand(&self) -> Self::Graph;
-}
-
-pub trait Backward {
-    type Store;
-
-    fn backward(&self) -> Result<Self::Store>;
-}
-
-pub trait Compute<T> {
-    type Output;
-
-    fn compute(&self, args: T) -> Self::Output;
-}
-
 pub trait Evaluate {
     type Output;
 

@@ -80,19 +80,22 @@ impl<T> Dcg<T> {
 
             if let Node::Op { inputs, op } = node_op {
                 match op {
-                    Ops::Binary(BinaryOp::Add(_)) => {
-                        for arg in self.store.neighbors_directed(*node, Direction::Incoming) {
-                            *gradients.entry(arg).or_default() += node_grad;
+                    Ops::Binary(inner) => match *inner {
+                        BinaryOp::Add(_) => {
+                            for arg in self.store.neighbors_directed(*node, Direction::Incoming) {
+                                *gradients.entry(arg).or_default() += node_grad;
+                            }
                         }
-                    }
-                    Ops::Binary(BinaryOp::Mul(_)) => {
-                        let lhs = inputs[0];
-                        let rhs = inputs[1];
-                        let lhs_val = self.get(lhs).unwrap().get_value();
-                        let rhs_val = self.get(rhs).unwrap().get_value();
-                        *gradients.entry(lhs).or_default() += node_grad * rhs_val;
-                        *gradients.entry(rhs).or_default() += node_grad * lhs_val;
-                    }
+                        BinaryOp::Mul(_) => {
+                            let lhs = inputs[0];
+                            let rhs = inputs[1];
+                            let lhs_val = self.get(lhs).unwrap().get_value();
+                            let rhs_val = self.get(rhs).unwrap().get_value();
+                            *gradients.entry(lhs).or_default() += node_grad * rhs_val;
+                            *gradients.entry(rhs).or_default() += node_grad * lhs_val;
+                        }
+                        _ => {}
+                    },
                     // Handle other operations as needed
                     _ => {}
                 }

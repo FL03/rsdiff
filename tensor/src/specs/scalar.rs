@@ -240,7 +240,6 @@ macro_rules! unary_op_trait {
     };
 }
 
-
 unary_op_trait!(Cos, cos);
 unary_op_trait!(Cosh, cosh);
 unary_op_trait!(Exp, exp);
@@ -252,4 +251,3 @@ unary_op_trait!(Sqrt, sqrt);
 unary_op_trait!(Square, square);
 unary_op_trait!(Tan, tan);
 unary_op_trait!(Tanh, tanh);
-

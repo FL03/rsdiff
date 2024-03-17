@@ -11,11 +11,16 @@ use acme::prelude::AtomicId;
 // use std::sync::{Arc, RwLock};
 
 pub(crate) fn from_vec<T>(shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
-    from_vec_with_op(None, shape, store)
+    TensorBase {
+        id: AtomicId::new(),
+        layout: Layout::contiguous(shape),
+        op: None,
+        store, //Arc::new(RwLock::new(store)),
+    }
 }
 
 pub(crate) fn from_vec_with_op<T>(
-    op: Option<Op<T>>,
+    op: Op<T>,
     shape: impl IntoShape,
     store: Vec<T>,
 ) -> TensorBase<T> {
@@ -23,17 +28,17 @@ pub(crate) fn from_vec_with_op<T>(
     TensorBase {
         id: AtomicId::new(),
         layout,
-        op,
+        op: Some(op),
         store, //Arc::new(RwLock::new(store)),
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct TensorBase<T> {
-    id: AtomicId,
-    layout: Layout,
-    op: Option<Op<T>>,
-    store: Vec<T>,
+    pub(crate) id: AtomicId,
+    pub(crate) layout: Layout,
+    pub(crate) op: Option<Op<T>>,
+    pub(crate) store: Vec<T>,
 }
 
 impl<T> TensorBase<T> {
@@ -114,8 +119,16 @@ where
         Self::fill(shape, T::one())
     }
 
+    pub fn ones_like(tensor: &TensorBase<T>) -> Self {
+        Self::ones(tensor.shape().clone())
+    }
+
     pub fn zeros(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::zero())
+    }
+
+    pub fn zeros_like(tensor: &TensorBase<T>) -> Self {
+        Self::zeros(tensor.shape().clone())
     }
 }
 
@@ -140,7 +153,7 @@ where
             Box::new(other.clone()),
             BinaryOp::Matmul,
         );
-        from_vec_with_op(Some(op), shape, result)
+        from_vec_with_op(op, shape, result)
     }
 }
 
@@ -158,138 +171,22 @@ impl<T> std::ops::Index<&[usize]> for TensorBase<T> {
 //     }
 // }
 
+impl<T> Eq for TensorBase<T> where T: Eq {}
+
 impl<T> PartialEq for TensorBase<T>
 where
     T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id || self.store == other.store
+        self.store == other.store
     }
 }
 
-macro_rules! cmp {
-    (ne: $lhs:expr, $rhs:expr) => {
-        if $lhs != $rhs {
-            panic!("Shape Mismatch: {:?} != {:?}", $lhs, $rhs);
-        }
-    };
+impl<T> num::traits::One for TensorBase<T>
+where
+    T: Scalar,
+{
+    fn one() -> Self {
+        Self::fill(1, T::one())
+    }
 }
-
-macro_rules! impl_arith {
-    ($trait:ident, $method:ident, $op:tt) => {
-        impl<T> std::ops::$trait for TensorBase<T>
-        where
-            T: Scalar + std::ops::$trait<Output = T>,
-        {
-            type Output = Self;
-
-            fn $method(self, other: Self) -> Self::Output {
-                cmp!(ne: self.shape(), other.shape());
-                let shape = self.shape().clone();
-                let store = self.store.iter().zip(other.store.iter()).map(|(a, b)| *a $op *b).collect();
-                let op = Op::Binary(Box::new(self), Box::new(other), BinaryOp::$trait);
-                from_vec_with_op(Some(op), shape, store)
-            }
-        }
-
-        impl<'a, T> std::ops::$trait<&'a TensorBase<T>> for TensorBase<T>
-        where
-            T: Scalar + std::ops::$trait<Output = T>,
-        {
-            type Output = TensorBase<T>;
-
-            fn $method(self, other: &'a TensorBase<T>) -> Self::Output {
-                if self.shape() != other.shape() {
-                    panic!("shapes must be equal");
-                }
-                let shape = self.shape().clone();
-                let store = self.store.iter().zip(other.store.iter()).map(|(a, b)| *a $op *b).collect();
-                let op = Op::Binary(Box::new(self), Box::new(other.clone()), BinaryOp::$trait);
-                from_vec_with_op(Some(op), shape, store)
-            }
-        }
-
-        impl<'a, T> std::ops::$trait<TensorBase<T>> for &'a TensorBase<T>
-        where
-            T: Scalar + std::ops::$trait<Output = T>,
-        {
-            type Output = TensorBase<T>;
-
-            fn $method(self, other: TensorBase<T>) -> Self::Output {
-                if self.shape() != other.shape() {
-                    panic!("shapes must be equal");
-                }
-                let shape = self.shape().clone();
-                let store = self.store.iter().zip(other.store.iter()).map(|(a, b)| *a $op *b).collect();
-                let op = Op::Binary(Box::new(self.clone()), Box::new(other), BinaryOp::$trait);
-                from_vec_with_op(Some(op), shape, store)
-            }
-        }
-
-        impl<'a, 'b, T> std::ops::$trait<&'b TensorBase<T>> for &'a TensorBase<T>
-        where
-            T: Scalar + std::ops::$trait<Output = T>,
-        {
-            type Output = TensorBase<T>;
-
-            fn $method(self, other: &'b TensorBase<T>) -> Self::Output {
-                if self.shape() != other.shape() {
-                    panic!("shapes must be equal");
-                }
-                let shape = self.shape().clone();
-                let store = self.store.iter().zip(other.store.iter()).map(|(a, b)| *a $op *b).collect();
-                let op = Op::Binary(Box::new(self.clone()), Box::new(other.clone()), BinaryOp::$trait);
-                from_vec_with_op(Some(op), shape, store)
-            }
-        }
-    };
-}
-
-macro_rules! impl_scalar_arith {
-    ($trait:ident, $method:ident, $op:tt) => {
-        // impl<T> TensorBase<T>
-        // where
-        //     T: Copy + std::ops::$trait<Output = T>,
-        // {
-        //     pub fn $method(self, other: T) -> TensorBase<T> {
-        //         let store = self.store.iter().map(|a| *a $op other).collect();
-        //         from_vec(self.shape().clone(), store)
-        //     }
-        // }
-
-        impl<T> std::ops::$trait<T> for TensorBase<T>
-        where
-            T: Copy + std::ops::$trait<Output = T>,
-        {
-            type Output = Self;
-
-            fn $method(self, other: T) -> Self::Output {
-                let store = self.store.iter().map(|a| *a $op other).collect();
-                Self::Output::from_vec(self.shape().clone(), store)
-            }
-        }
-
-        impl<'a, T> std::ops::$trait<T> for &'a TensorBase<T>
-        where
-            T: Copy + std::ops::$trait<Output = T>,
-        {
-            type Output = TensorBase<T>;
-
-            fn $method(self, other: T) -> Self::Output {
-                let store = self.store.iter().map(|a| *a $op other).collect();
-                Self::Output::from_vec(self.shape().clone(), store)
-            }
-        }
-    };
-}
-
-impl_arith!(Add, add, +);
-impl_arith!(Div, div, /);
-impl_arith!(Mul, mul, *);
-impl_arith!(Sub, sub, -);
-
-impl_scalar_arith!(Add, add, +);
-impl_scalar_arith!(Div, div, /);
-impl_scalar_arith!(Mul, mul, *);
-impl_scalar_arith!(Sub, sub, -);
-

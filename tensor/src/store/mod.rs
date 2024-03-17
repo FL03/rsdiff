@@ -11,5 +11,9 @@ use std::sync::{Arc, RwLock};
 
 pub type ArcTensor<T> = Arc<RwLock<Vec<T>>>;
 
+pub trait TensorStore {
+    type Elem;
+}
+
 #[cfg(test)]
 mod tests {}

@@ -11,6 +11,7 @@ extern crate alloc;
 
 extern crate acme_core as acme;
 
+#[doc(inline)]
 pub use self::tensor::*;
 
 pub(crate) mod tensor;
@@ -25,6 +26,7 @@ mod impls {
     mod arith;
     mod grad;
     mod linalg;
+    mod num;
 }
 
 pub type Tensor<T = f64> = tensor::TensorBase<T>;
@@ -35,7 +37,7 @@ pub mod prelude {
     #[doc(inline)]
     pub use crate::ops::*;
     #[doc(inline)]
-    pub use crate::shape::*;
+    pub use crate::shape::prelude::*;
     #[doc(inline)]
     pub use crate::specs::prelude::*;
     #[doc(inline)]

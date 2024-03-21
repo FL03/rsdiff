@@ -3,9 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![cfg(test)]
-extern crate acme_tensor as tensor;
+extern crate acme_tensor as acme;
 
-use tensor::TensorBase;
+use acme::TensorBase;
+// use acme::prelude::Matmul;
 
 #[test]
 fn test_add() {

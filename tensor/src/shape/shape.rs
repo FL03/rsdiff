@@ -46,7 +46,7 @@ impl Shape {
         Self(vec![0; rank])
     }
 
-    pub fn matmul_shape(&self, other: &Self) -> Result<Self> {
+    pub(crate) fn matmul_shape(&self, other: &Self) -> Result<Self> {
         if *self.rank() != 2 || *other.rank() != 2 {
             return Err("Both shapes must be rank 2".into());
         }
@@ -296,3 +296,18 @@ impl ops::Index<ops::RangeToInclusive<usize>> for Shape {
 unsafe impl Send for Shape {}
 
 unsafe impl Sync for Shape {}
+
+macro_rules! impl_from_tuple {
+    ($($n:tt: $name:ident),+) => {
+        impl<$($name),+> From<($($name,)+)> for Shape
+        where
+            $($name: Into<usize>,)+
+        {
+            fn from(shape: ($($name,)+)) -> Self {
+                Self(vec![$($name.into(),)+])
+            }
+        }
+    };
+}
+
+// impl_from_tuple!(A: A);

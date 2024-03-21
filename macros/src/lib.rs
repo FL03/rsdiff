@@ -19,27 +19,7 @@ pub(crate) mod gradient;
 use ast::partials::*;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::spanned::Spanned;
 use syn::{parse_macro_input, Expr};
-
-#[proc_macro_attribute]
-pub fn show_streams(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(item as syn::ItemFn);
-    println!("attr: \"{:?}\"", &attr);
-    println!("item: \"{:?}\"", &input);
-    (quote! { #input }).into()
-}
-
-#[proc_macro]
-pub fn show_item(item: TokenStream) -> TokenStream {
-    let expr = parse_macro_input!(item as Expr);
-    let span = expr.span();
-    println!("Span Bytes: {:?}", span.byte_range());
-    println!("Span (start, end): ({:?}, {:?})", span.start(), span.end());
-    println!("Source File: {:?}", span.unwrap().source_file());
-    println!("Source Text: {:?}", span.source_text());
-    (quote! { #expr }).into()
-}
 
 #[proc_macro_attribute]
 pub fn partial(attr: TokenStream, item: TokenStream) -> TokenStream {

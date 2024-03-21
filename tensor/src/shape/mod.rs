@@ -10,6 +10,26 @@ pub(crate) mod rank;
 pub(crate) mod shape;
 pub(crate) mod stride;
 
+pub trait IntoShape {
+    fn into_shape(self) -> Shape;
+}
+
+impl<S> IntoShape for S
+where
+    S: Into<Shape>,
+{
+    fn into_shape(self) -> Shape {
+        self.into()
+    }
+}
+
+pub(crate) mod prelude {
+    pub use super::dimension::*;
+    pub use super::rank::*;
+    pub use super::shape::*;
+    pub use super::stride::*;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

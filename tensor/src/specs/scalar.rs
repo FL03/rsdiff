@@ -235,11 +235,29 @@ impl_scalar!(f64);
 macro_rules! unary_op_trait {
     ($trait:ident, $method:ident) => {
         pub trait $trait {
-            fn $method(self) -> Self;
+            type Output;
+
+            fn $method(self) -> Self::Output;
         }
     };
 }
 
+macro_rules! impl_unary_trait {
+    ($trait:ident, $method:ident, $op:tt) => {
+        impl<T> $trait for T
+        where
+            T: Scalar,
+        {
+            type Output = T;
+
+            fn $method(self) -> Self::Output {
+                <T>::$op(self)
+            }
+        }
+    };
+}
+
+unary_op_trait!(Abs, abs);
 unary_op_trait!(Cos, cos);
 unary_op_trait!(Cosh, cosh);
 unary_op_trait!(Exp, exp);
@@ -251,3 +269,25 @@ unary_op_trait!(Sqrt, sqrt);
 unary_op_trait!(Square, square);
 unary_op_trait!(Tan, tan);
 unary_op_trait!(Tanh, tanh);
+
+impl<T> Abs for T
+where
+    T: num::Signed,
+{
+    type Output = T;
+
+    fn abs(self) -> Self::Output {
+        <T>::abs(&self)
+    }
+}
+
+impl<T> Cos for T
+where
+    T: Scalar,
+{
+    type Output = T;
+
+    fn cos(self) -> Self::Output {
+        <T>::cos(self)
+    }
+}

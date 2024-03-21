@@ -6,8 +6,8 @@
 #![feature(fn_traits)]
 extern crate acme;
 
+use acme::autodiff;
 use acme::prelude::sigmoid;
-use acme::{autodiff, show_item, show_streams};
 
 macro_rules! eval {
     ($var:ident: $ex:expr) => {
@@ -21,14 +21,13 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // samples(x);
 
     // let z = sigmoid(x);
-    show_item!(sigmoid(x));
+    // show_item!(sigmoid(x));
 
     multiply(x, x);
 
     Ok(())
 }
 
-#[show_streams(x)]
 pub fn multiply<A, B, C>(x: A, y: B) -> C
 where
     A: std::ops::Mul<B, Output = C>,

@@ -28,14 +28,17 @@ pub struct Dual<T> {
 
 impl<T> Dual<T> {
     pub fn new(real: T, dual: T) -> Self {
-        Self { real, dual }
+        Self { dual, real }
     }
 
-    pub fn real(value: T) -> Self
+    pub fn real(real: T) -> Self
     where
         T: Default,
     {
-        Self::new(value, T::default())
+        Self {
+            dual: T::default(),
+            real,
+        }
     }
 
     pub fn value(&self) -> &T {
@@ -109,28 +112,6 @@ where
 unsafe impl<T> Send for Dual<T> {}
 
 unsafe impl<T> Sync for Dual<T> {}
-
-impl<T> ops::Add for Dual<T>
-where
-    T: ops::Add<Output = T>,
-{
-    type Output = Dual<T>;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Dual::new(self.real + rhs.real, self.dual + rhs.dual)
-    }
-}
-
-impl<T> ops::Add<T> for Dual<T>
-where
-    T: ops::Add<Output = T>,
-{
-    type Output = Dual<T>;
-
-    fn add(self, rhs: T) -> Self::Output {
-        Dual::new(self.real + rhs, self.dual)
-    }
-}
 
 impl<T> ops::Div for Dual<T>
 where
@@ -262,3 +243,32 @@ where
         self.real.is_zero()
     }
 }
+
+macro_rules! impl_dual_op {
+    ($trait:ident, $method:ident) => {
+        impl<T> $trait for Dual<T>
+        where
+            T: $trait<Output = T>,
+        {
+            type Output = Dual<T>;
+
+            fn $method(self, rhs: Self) -> Self::Output {
+                Dual::new(self.real.$method(rhs.real), self.dual.$method(rhs.dual))
+            }
+        }
+
+        impl<T> $trait<T> for Dual<T>
+        where
+            T: Copy + $trait<Output = T>,
+        {
+            type Output = Dual<T>;
+
+            fn $method(self, rhs: T) -> Self::Output {
+                Dual::new(self.real.$method(rhs), self.dual.$method(rhs))
+            }
+        }
+    };
+}
+use std::ops::Add;
+
+impl_dual_op!(Add, add);

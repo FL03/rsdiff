@@ -34,6 +34,7 @@ pub(crate) fn from_vec_with_op<T>(
 }
 
 #[derive(Clone, Debug)]
+// #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct TensorBase<T> {
     pub(crate) id: AtomicId,
     pub(crate) layout: Layout,
@@ -73,6 +74,23 @@ impl<T> TensorBase<T> {
 
     pub fn stride(&self) -> &[usize] {
         self.layout.stride()
+    }
+}
+
+impl<T> TensorBase<T> {
+    pub(crate) fn data(&self) -> &Vec<T> {
+        &self.store
+    }
+
+    pub(crate) fn into_store(self) -> Vec<T> {
+        self.store
+    }
+
+    pub(crate) fn snapshot(&self) -> Vec<T>
+    where
+        T: Clone,
+    {
+        self.store.clone()
     }
 }
 
@@ -179,14 +197,5 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self.store == other.store
-    }
-}
-
-impl<T> num::traits::One for TensorBase<T>
-where
-    T: Scalar,
-{
-    fn one() -> Self {
-        Self::fill(1, T::one())
     }
 }

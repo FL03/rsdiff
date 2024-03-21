@@ -15,7 +15,7 @@ pub(crate) fn from_vec<T>(shape: impl IntoShape, store: Vec<T>) -> TensorBase<T>
         id: AtomicId::new(),
         layout: Layout::contiguous(shape),
         op: None,
-        store, //Arc::new(RwLock::new(store)),
+        store,
     }
 }
 
@@ -29,7 +29,7 @@ pub(crate) fn from_vec_with_op<T>(
         id: AtomicId::new(),
         layout,
         op: Some(op),
-        store, //Arc::new(RwLock::new(store)),
+        store,
     }
 }
 
@@ -109,6 +109,17 @@ where
         let shape = shape.into_shape();
         let store = vec![value; shape.elements()];
         Self::from_vec(shape, store)
+    }
+}
+
+impl<T> TensorBase<T>
+where
+    T: Clone + Default,
+{
+    pub fn broadcast(&self, shape: impl IntoShape) -> Self {
+        let shape = shape.into_shape();
+
+        self.clone()
     }
 }
 

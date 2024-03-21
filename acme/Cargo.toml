@@ -21,17 +21,20 @@ default = [
 full = [
     "core",
     "derive",
+    "graph",
     "serde",
     "tensor"
 ]
 
-core = [
-    "dep:acme-core"
-]
+core = []
 
 derive = [
     "dep:acme-derive",
     "macros"
+]
+
+graph = [
+    "dep:acme-graphs"
 ]
 
 macros = [
@@ -44,6 +47,7 @@ tensor = [
 
 serde = [
     "acme-core/serde",
+    "acme-graphs/serde",
     "acme-tensor/serde"
 ]
 
@@ -58,6 +62,10 @@ test = true
 name = "autodiff"
 required-features = ["macros"]
 
+[[example]]
+name = "cgraph"
+required-features = ["graph"]
+
 [[test]]
 name = "autodiff"
 required-features = ["macros"]
@@ -65,10 +73,11 @@ required-features = ["macros"]
 [build-dependencies]
 
 [dependencies]
-acme-core = { optional = true, path = "../core", version = "0.3.0" }
-acme-derive = { optional = true, path = "../derive", version = "0.3.0" }
-acme-macros = { optional = true, path = "../macros", version = "0.3.0" }
-acme-tensor = { optional = true, path = "../tensor", version = "0.3.0" }
+acme-core = { path = "../core", version = "0.3.0-nightly" }
+acme-derive = { optional = true, path = "../derive", version = "0.3.0-nightly" }
+acme-graphs = { optional = true, path = "../graphs", version = "0.3.0-nightly" }
+acme-macros = { optional = true, path = "../macros", version = "0.3.0-nightly" }
+acme-tensor = { optional = true, path = "../tensor", version = "0.3.0-nightly" }
 
 [dev-dependencies]
 approx = "0.5"

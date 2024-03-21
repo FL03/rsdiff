@@ -2,16 +2,23 @@
     Appellation: node <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::Ops;
+use acme::ops::Operations;
 use petgraph::prelude::NodeIndex;
 
+#[derive(Clone, Debug)]
 pub enum Node<T> {
-    Op { inputs: Vec<NodeIndex>, op: Ops },
-    Input { param: bool, value: T },
+    Op {
+        inputs: Vec<NodeIndex>,
+        op: Operations,
+    },
+    Input {
+        param: bool,
+        value: T,
+    },
 }
 
 impl<T> Node<T> {
-    pub fn op(inputs: impl IntoIterator<Item = NodeIndex>, op: impl Into<Ops>) -> Self {
+    pub fn op(inputs: impl IntoIterator<Item = NodeIndex>, op: impl Into<Operations>) -> Self {
         Node::Op {
             inputs: Vec::from_iter(inputs),
             op: op.into(),

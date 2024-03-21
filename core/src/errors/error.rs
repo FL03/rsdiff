@@ -20,6 +20,18 @@ impl Error {
             message: msg.to_string(),
         }
     }
+
+    pub fn kind(&self) -> ErrorKind {
+        self.kind
+    }
+
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+
+    pub fn into_message(self) -> String {
+        self.message
+    }
 }
 
 impl std::fmt::Display for Error {
@@ -64,6 +76,16 @@ macro_rules! error_from {
         )*
     };
     ($kind:expr, $t:ty) => {
+        impl From<$t> for Error {
+            fn from(err: $t) -> Self {
+                Self::new($kind, err.to_string())
+            }
+        }
+    };
+}
+
+macro_rules! into_error {
+    (kind $kind:expr, $t:ty) => {
         impl From<$t> for Error {
             fn from(err: $t) -> Self {
                 Self::new($kind, err.to_string())

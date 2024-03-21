@@ -2,7 +2,8 @@
     Appellation: edge <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::id::{GradientId, Id};
+use crate::grad::GradientId;
+use acme::prelude::Id;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 

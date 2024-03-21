@@ -6,6 +6,17 @@
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
+pub trait ErrorType {
+    type Kind;
+
+    fn kind(&self) -> Self::Kind;
+}
+
+pub enum Errors<T> {
+    Specific(Box<dyn ErrorType<Kind = T>>),
+    Unknown,
+}
+
 #[derive(
     Clone,
     Copy,
@@ -29,17 +40,11 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum ErrorKind {
-    Func(FuncError),
+    Func,
     Graph,
     Sync,
     #[default]
     Unknown,
-}
-
-impl From<FuncError> for ErrorKind {
-    fn from(e: FuncError) -> Self {
-        ErrorKind::Func(e)
-    }
 }
 
 #[derive(
@@ -50,7 +55,6 @@ impl From<FuncError> for ErrorKind {
     Display,
     EnumCount,
     EnumIs,
-    EnumIter,
     Eq,
     Hash,
     Ord,
@@ -64,8 +68,18 @@ impl From<FuncError> for ErrorKind {
     serde(rename_all = "snake_case")
 )]
 #[strum(serialize_all = "snake_case")]
-pub enum FuncError {
+pub enum ExternalError<E> {
+    Known(E),
     #[default]
-    ArgCount,
-    ArgType,
+    Unknown,
+}
+
+impl<E> ExternalError<E> {
+    pub fn new(error: E) -> Self {
+        Self::Known(error)
+    }
+
+    pub fn unknown() -> Self {
+        Self::Unknown
+    }
 }

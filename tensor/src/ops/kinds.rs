@@ -89,3 +89,8 @@ pub struct BinOp<T> {
     pub rhs: TensorBase<T>,
     pub op: BinaryOp,
 }
+
+pub enum OpInput<T> {
+    Scalar(T),
+    Tensor(TensorBase<T>),
+}

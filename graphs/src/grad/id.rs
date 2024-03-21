@@ -1,8 +1,8 @@
 /*
-    Appellation: gradient <module>
+    Appellation: id <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Id;
+use acme::id::Id;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;

@@ -2,15 +2,13 @@
     Appellation: gradient <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#![allow(unused_variables)]
 
 #[cfg(test)]
 extern crate acme;
 
-use acme::prelude::{autodiff, sigmoid, Sigmoid};
+use acme::prelude::autodiff;
 use approx::assert_abs_diff_eq;
 use num::traits::Float;
-use std::ops::Add;
 
 pub fn add<A, B, C>(a: A, b: B) -> C
 where
@@ -175,6 +173,7 @@ fn test_sigmoid() {
 #[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]
 fn test_function_call() {
+    use acme::prelude::sigmoid;
     let (x, y) = (1_f64, 2_f64);
     // differentiating a function call w.r.t. x
     assert_eq!(autodiff!(x: add(x, y)), 1.0);

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Node;
-use crate::prelude::{BinaryOp, BinaryOperation, Ops, Result};
+use acme::prelude::{BinaryExpr, BinaryOperation, Operations, Result};
 use num::traits::{NumAssign, NumOps, Signed};
 use petgraph::algo::toposort;
 use petgraph::prelude::{DiGraph, NodeIndex};
@@ -44,7 +44,7 @@ impl<T> Scg<T> {
     pub fn operation(
         &mut self,
         inputs: impl IntoIterator<Item = NodeIndex>,
-        operation: impl Into<Ops>,
+        operation: impl Into<Operations>,
         result: Option<T>,
     ) -> Result<NodeIndex>
     where
@@ -93,9 +93,9 @@ where
                 // calculate the gradient of each input w.r.t. the current node
                 let dt = if let Some(op) = node.operation() {
                     match op {
-                        Ops::Binary(op) => match op {
-                            BinaryOp::Add(_) => grad,
-                            BinaryOp::Div(_) => {
+                        Operations::Binary(op) => match op {
+                            BinaryExpr::Add(_) => grad,
+                            BinaryExpr::Div(_) => {
                                 let out = self.vals[&i];
                                 let val = self.vals[input];
                                 if j % 2 == 0 {
@@ -104,12 +104,12 @@ where
                                     -grad * out / (val * val)
                                 }
                             }
-                            BinaryOp::Mul(_) => {
+                            BinaryExpr::Mul(_) => {
                                 let out = self.vals[&i];
                                 let val = self.vals[input];
                                 grad * out / val
                             }
-                            BinaryOp::Sub(_) => {
+                            BinaryExpr::Sub(_) => {
                                 if j % 2 == 0 {
                                     grad
                                 } else {
@@ -140,7 +140,7 @@ where
     pub fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
         let x = self.vals[&a];
         let y = self.vals[&b];
-        let op = BinaryOp::add();
+        let op = BinaryExpr::add();
         let res = op.eval(x, y);
 
         let c = self.operation([a, b], op, Some(res))?;
@@ -152,7 +152,7 @@ where
         let y = self.vals[&b];
         let res = x / y;
 
-        let op = BinaryOp::div();
+        let op = BinaryExpr::div();
         let c = self.operation([a, b], op, Some(res))?;
 
         Ok(c)
@@ -162,7 +162,7 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x * y;
-        let c = self.operation([a, b], BinaryOp::mul(), Some(res))?;
+        let c = self.operation([a, b], BinaryExpr::mul(), Some(res))?;
 
         Ok(c)
     }
@@ -171,7 +171,7 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x - y;
-        let c = self.operation([a, b], BinaryOp::sub(), Some(res))?;
+        let c = self.operation([a, b], BinaryExpr::sub(), Some(res))?;
 
         Ok(c)
     }

@@ -5,12 +5,11 @@
 //! # Operations
 //!
 //!
-pub use self::{arithmetic::*, gradient::*, kinds::*, operator::*};
+pub use self::{arithmetic::*, gradient::*, kinds::*};
 
 pub(crate) mod arithmetic;
 pub(crate) mod gradient;
 pub(crate) mod kinds;
-pub(crate) mod operator;
 
 pub trait Evaluate {
     type Output;

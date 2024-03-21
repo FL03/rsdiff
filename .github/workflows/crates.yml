@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: [ derive, macros, tensor ]
+        features: [ derive, graphs, macros, tensor ]
     steps:
       - uses: actions/checkout@v4
       - name: Publish (${{ github.ref.name }}-${{ matrix.features }})

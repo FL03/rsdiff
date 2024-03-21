@@ -10,11 +10,11 @@ use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 #[derive(Clone)]
-pub enum Op<T> {
-    Binary(T, T, BinaryOp),
-    Compare(T, T, CompareOp),
+pub enum Expr<T> {
+    Binary(T, T, BinaryExpr),
+    Compare(T, T, CompareExpr),
     Custom(String),
-    Unary(T, UnaryOp),
+    Unary(T, UnaryExpr),
 }
 
 #[cfg_attr(
@@ -40,7 +40,7 @@ pub enum Op<T> {
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
-pub enum CompareOp {
+pub enum CompareExpr {
     #[default]
     Eq,
     Ge,
@@ -73,7 +73,7 @@ pub enum CompareOp {
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
-pub enum BinaryOp {
+pub enum BinaryExpr {
     #[default]
     Add(Addition),
     Div(Division),
@@ -83,7 +83,7 @@ pub enum BinaryOp {
     Sub(Subtraction),
 }
 
-impl BinaryOp {
+impl BinaryExpr {
     pub fn add() -> Self {
         Self::Add(Addition)
     }
@@ -116,7 +116,7 @@ impl BinaryOp {
     }
 }
 
-impl<T> BinaryOperation<T, T> for BinaryOp
+impl<T> BinaryOperation<T, T> for BinaryExpr
 where
     T: Copy + Default + PartialOrd + num::traits::NumOps,
 {
@@ -146,13 +146,13 @@ where
     }
 }
 
-impl From<Addition> for BinaryOp {
+impl From<Addition> for BinaryExpr {
     fn from(_: Addition) -> Self {
         Self::Add(Addition)
     }
 }
 
-impl From<Division> for BinaryOp {
+impl From<Division> for BinaryExpr {
     fn from(_: Division) -> Self {
         Self::Div(Division)
     }
@@ -181,7 +181,7 @@ impl From<Division> for BinaryOp {
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
-pub enum UnaryOp {
+pub enum UnaryExpr {
     #[default]
     Abs,
     Ceil,
@@ -223,23 +223,23 @@ pub enum UnaryOp {
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
-pub enum Ops {
-    Binary(BinaryOp),
-    Compare(CompareOp),
+pub enum Operations {
+    Binary(BinaryExpr),
+    Compare(CompareExpr),
     #[default]
-    Unary(UnaryOp),
+    Unary(UnaryExpr),
     Custom {
         name: String,
     },
 }
 
-impl Ops {
+impl Operations {
     /// A functional constructor for [Ops::Binary]
-    pub fn binary(op: BinaryOp) -> Self {
+    pub fn binary(op: BinaryExpr) -> Self {
         Self::Binary(op)
     }
     /// A functional constructor for [Ops::Compare]
-    pub fn compare(op: CompareOp) -> Self {
+    pub fn compare(op: CompareExpr) -> Self {
         Self::Compare(op)
     }
     /// A functional constructor for [Ops::Custom]
@@ -247,25 +247,25 @@ impl Ops {
         Self::Custom { name: name.into() }
     }
     /// A functional constructor for [Ops::Unary]
-    pub fn unary(op: UnaryOp) -> Self {
+    pub fn unary(op: UnaryExpr) -> Self {
         Self::Unary(op)
     }
 }
 
-impl From<BinaryOp> for Ops {
-    fn from(op: BinaryOp) -> Self {
+impl From<BinaryExpr> for Operations {
+    fn from(op: BinaryExpr) -> Self {
         Self::Binary(op)
     }
 }
 
-impl From<CompareOp> for Ops {
-    fn from(op: CompareOp) -> Self {
+impl From<CompareExpr> for Operations {
+    fn from(op: CompareExpr) -> Self {
         Self::Compare(op)
     }
 }
 
-impl From<UnaryOp> for Ops {
-    fn from(op: UnaryOp) -> Self {
+impl From<UnaryExpr> for Operations {
+    fn from(op: UnaryExpr) -> Self {
         Self::Unary(op)
     }
 }

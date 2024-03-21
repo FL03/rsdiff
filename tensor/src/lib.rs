@@ -17,6 +17,8 @@ pub use self::tensor::*;
 pub(crate) mod tensor;
 
 pub mod data;
+pub mod errors;
+pub mod linalg;
 pub mod ops;
 pub mod shape;
 pub mod specs;
@@ -34,6 +36,8 @@ pub type Tensor<T = f64> = tensor::TensorBase<T>;
 pub mod prelude {
     #[doc(inline)]
     pub use crate::data::*;
+    #[doc(inline)]
+    pub use crate::errors::*;
     #[doc(inline)]
     pub use crate::ops::*;
     #[doc(inline)]

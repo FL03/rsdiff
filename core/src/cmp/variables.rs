@@ -6,6 +6,7 @@ use crate::ops::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::borrow::{Borrow, BorrowMut};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
@@ -47,6 +48,18 @@ impl<T> Variable<T> {
     pub fn with_value(mut self, value: T) -> Self {
         self.value = Some(value);
         self
+    }
+}
+
+impl<T> Borrow<T> for Variable<T> {
+    fn borrow(&self) -> &T {
+        self.value.as_ref().unwrap()
+    }
+}
+
+impl<T> BorrowMut<T> for Variable<T> {
+    fn borrow_mut(&mut self) -> &mut T {
+        self.value.as_mut().unwrap()
     }
 }
 

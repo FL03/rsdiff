@@ -4,7 +4,8 @@
 */
 extern crate acme;
 
-use acme::prelude::{Result, Scg};
+use acme::graph::scg::Scg;
+use acme::prelude::Result;
 
 fn main() -> Result<()> {
     let mut scg = Scg::new();

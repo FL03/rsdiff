@@ -5,8 +5,8 @@
 use super::edge::Edge;
 use super::node::Node;
 use super::DynamicGraph;
-use crate::ops::*;
-use crate::prelude::Result;
+use acme::ops::*;
+use acme::prelude::Result;
 use num::traits::{Num, NumAssignOps, NumOps};
 use petgraph::algo::toposort;
 use petgraph::prelude::{Direction, NodeIndex};
@@ -43,7 +43,7 @@ impl<T> Dcg<T> {
     pub fn op(
         &mut self,
         inputs: impl IntoIterator<Item = NodeIndex>,
-        op: impl Into<Ops>,
+        op: impl Into<Operations>,
     ) -> NodeIndex {
         let args = Vec::from_iter(inputs);
 
@@ -57,11 +57,11 @@ impl<T> Dcg<T> {
 
 impl<T> Dcg<T> {
     pub fn add(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.op([lhs, rhs], BinaryOp::add())
+        self.op([lhs, rhs], BinaryExpr::add())
     }
 
     pub fn mul(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.op([lhs, rhs], BinaryOp::mul())
+        self.op([lhs, rhs], BinaryExpr::mul())
     }
 
     pub fn backward(&self) -> Result<HashMap<NodeIndex, T>>
@@ -80,13 +80,13 @@ impl<T> Dcg<T> {
 
             if let Node::Op { inputs, op } = node_op {
                 match op {
-                    Ops::Binary(inner) => match *inner {
-                        BinaryOp::Add(_) => {
+                    Operations::Binary(inner) => match *inner {
+                        BinaryExpr::Add(_) => {
                             for arg in self.store.neighbors_directed(*node, Direction::Incoming) {
                                 *gradients.entry(arg).or_default() += node_grad;
                             }
                         }
-                        BinaryOp::Mul(_) => {
+                        BinaryExpr::Mul(_) => {
                             let lhs = inputs[0];
                             let rhs = inputs[1];
                             let lhs_val = self.get(lhs).unwrap().get_value();
@@ -120,12 +120,12 @@ impl<T> Dcg<T> {
 
             if let Node::Op { inputs, op } = node_op {
                 match op {
-                    Ops::Binary(BinaryOp::Add(_)) => {
+                    Operations::Binary(BinaryExpr::Add(_)) => {
                         for arg in self.store.neighbors_directed(*node, Direction::Incoming) {
                             *gradients.entry(arg).or_default() += node_grad;
                         }
                     }
-                    Ops::Binary(BinaryOp::Mul(_)) => {
+                    Operations::Binary(BinaryExpr::Mul(_)) => {
                         let lhs = inputs[0];
                         let rhs = inputs[1];
                         let lhs_val = self[lhs].get_value();

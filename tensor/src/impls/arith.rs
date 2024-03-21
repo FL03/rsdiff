@@ -14,7 +14,7 @@ where
 
     fn neg(self) -> Self::Output {
         let shape = self.shape().clone();
-        let store = self.data().iter().map(|a| -*a).collect();
+        let store = self.data().iter().copied().map(|a| -a).collect();
         let op = Op::Unary(Box::new(self), UnaryOp::Neg);
         from_vec_with_op(op, shape, store)
     }
@@ -28,7 +28,7 @@ where
 
     fn neg(self) -> Self::Output {
         let shape = self.shape().clone();
-        let store = self.data().iter().map(|a| -*a).collect();
+        let store = self.data().iter().copied().map(|a| -a).collect();
         let op = Op::Unary(Box::new(self.clone()), UnaryOp::Neg);
         from_vec_with_op(op, shape, store)
     }
@@ -114,15 +114,6 @@ macro_rules! impl_arith {
 
 macro_rules! impl_scalar_arith {
     ($trait:ident, $method:ident, $op:tt) => {
-        // impl<T> TensorBase<T>
-        // where
-        //     T: Copy + std::ops::$trait<Output = T>,
-        // {
-        //     pub fn $method(self, other: T) -> TensorBase<T> {
-        //         let store = self.store.iter().map(|a| *a $op other).collect();
-        //         from_vec(self.shape().clone(), store)
-        //     }
-        // }
 
         impl<T> std::ops::$trait<T> for TensorBase<T>
         where

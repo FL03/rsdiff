@@ -3,7 +3,8 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Rank;
-use acme::prelude::Result;
+use crate::errors::ShapeError;
+use crate::prelude::Result;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{self, Deref};
@@ -48,10 +49,10 @@ impl Shape {
 
     pub(crate) fn matmul_shape(&self, other: &Self) -> Result<Self> {
         if *self.rank() != 2 || *other.rank() != 2 {
-            return Err("Both shapes must be rank 2".into());
+            return Err(ShapeError::IncompatibleShapes.into());
         }
         if self[1] != other[0] {
-            return Err("Incompatible shapes".into());
+            return Err(ShapeError::IncompatibleShapes.into());
         }
         Ok(Self::from((self[0], other[1])))
     }

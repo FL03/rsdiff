@@ -5,7 +5,6 @@
 //! # acme-core
 //!
 //!
-#![feature(tuple_trait,)]
 
 pub use self::{primitives::*, utils::*};
 

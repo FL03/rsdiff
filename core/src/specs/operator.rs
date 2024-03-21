@@ -2,12 +2,8 @@
     Appellation: operator <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use std::marker::Tuple;
 
-pub trait Operand<Args>
-where
-    Args: Tuple,
-{
+pub trait Operand<Args> {
     type Output;
 
     fn name(&self) -> &str;

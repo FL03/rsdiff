@@ -119,6 +119,8 @@ where
     pub fn broadcast(&self, shape: impl IntoShape) -> Self {
         let shape = shape.into_shape();
 
+        let _diff = *self.shape().rank() - *shape.rank();
+
         self.clone()
     }
 }

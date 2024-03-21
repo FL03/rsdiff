@@ -4,7 +4,7 @@
 */
 use super::Rank;
 use crate::errors::ShapeError;
-use crate::prelude::Result;
+use crate::prelude::TensorResult;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{self, Deref};
@@ -47,7 +47,7 @@ impl Shape {
         Self(vec![0; rank])
     }
 
-    pub(crate) fn matmul_shape(&self, other: &Self) -> Result<Self> {
+    pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
         if *self.rank() != 2 || *other.rank() != 2 {
             return Err(ShapeError::IncompatibleShapes.into());
         }
@@ -298,17 +298,17 @@ unsafe impl Send for Shape {}
 
 unsafe impl Sync for Shape {}
 
-macro_rules! impl_from_tuple {
-    ($($n:tt: $name:ident),+) => {
-        impl<$($name),+> From<($($name,)+)> for Shape
-        where
-            $($name: Into<usize>,)+
-        {
-            fn from(shape: ($($name,)+)) -> Self {
-                Self(vec![$($name.into(),)+])
-            }
-        }
-    };
-}
+// macro_rules! impl_from_tuple {
+//     ($($n:tt: $name:ident),+) => {
+//         impl<$($name),+> From<($($name,)+)> for Shape
+//         where
+//             $($name: Into<usize>,)+
+//         {
+//             fn from(shape: ($($name,)+)) -> Self {
+//                 Self(vec![$($name.into(),)+])
+//             }
+//         }
+//     };
+// }
 
 // impl_from_tuple!(A: A);

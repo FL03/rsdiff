@@ -2,7 +2,8 @@
     Appellation: constants <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{Evaluate, Gradient};
+
+use crate::prelude::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -26,6 +27,10 @@ impl<T> Constant<T> {
 
     pub fn value_mut(&mut self) -> &mut T {
         &mut self.0
+    }
+
+    pub fn into_value(self) -> T {
+        self.0
     }
 }
 

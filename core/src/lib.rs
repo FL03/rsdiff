@@ -27,6 +27,7 @@ pub mod prelude {
 
     pub use crate::cmp::*;
     pub use crate::errors::*;
+    pub use crate::eval::*;
     pub use crate::id::*;
     pub use crate::ops::*;
     pub use crate::specs::prelude::*;

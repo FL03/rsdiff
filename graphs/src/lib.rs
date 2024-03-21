@@ -14,12 +14,15 @@ pub use self::graph::*;
 pub(crate) mod graph;
 
 pub mod dcg;
+pub mod errors;
 pub mod grad;
 pub mod scg;
 
 pub mod prelude {
     #[doc(inline)]
     pub use crate::dcg::Dcg;
+    #[doc(inline)]
+    pub use crate::errors::*;
     #[doc(inline)]
     pub use crate::grad::prelude::*;
     #[doc(inline)]

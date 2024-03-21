@@ -2,7 +2,7 @@
     Appellation: variables <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{Evaluate, Gradient};
+use crate::prelude::{Evaluate, Gradient};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

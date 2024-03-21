@@ -7,6 +7,7 @@
 //! The rank of a n-dimensional array describes the number of dimensions
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
@@ -38,6 +39,12 @@ impl AsRef<usize> for Rank {
 impl AsMut<usize> for Rank {
     fn as_mut(&mut self) -> &mut usize {
         &mut self.0
+    }
+}
+
+impl Borrow<usize> for Rank {
+    fn borrow(&self) -> &usize {
+        &self.0
     }
 }
 

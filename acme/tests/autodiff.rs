@@ -2,8 +2,8 @@
     Appellation: gradient <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![cfg(all(test, feature = "macros"))]
 
-#[cfg(test)]
 extern crate acme;
 
 use acme::prelude::autodiff;

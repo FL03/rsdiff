@@ -54,21 +54,6 @@ impl<T> From<std::sync::TryLockError<T>> for Error {
     }
 }
 
-impl<E> From<petgraph::algo::Cycle<E>> for Error
-where
-    E: Copy + std::fmt::Debug,
-{
-    fn from(err: petgraph::algo::Cycle<E>) -> Self {
-        Self::new(ErrorKind::Graph, format!("Cycle: {:?}", err.node_id()))
-    }
-}
-
-impl From<petgraph::algo::NegativeCycle> for Error {
-    fn from(_err: petgraph::algo::NegativeCycle) -> Self {
-        Self::new(ErrorKind::Graph, "Negative Cycle detected")
-    }
-}
-
 macro_rules! error_from {
     (shared $kind:expr, ($($t:ty),*)) => {
         $(
@@ -84,14 +69,14 @@ macro_rules! error_from {
     };
 }
 
-macro_rules! into_error {
-    (kind $kind:expr, $t:ty) => {
-        impl From<$t> for Error {
-            fn from(err: $t) -> Self {
-                Self::new($kind, err.to_string())
-            }
-        }
-    };
-}
+// macro_rules! into_error {
+//     (kind $kind:expr, $t:ty) => {
+//         impl From<$t> for Error {
+//             fn from(err: $t) -> Self {
+//                 Self::new($kind, err.to_string())
+//             }
+//         }
+//     };
+// }
 
 error_from!(shared ErrorKind::Unknown, (&str, String, Box<dyn std::error::Error>));

@@ -5,34 +5,16 @@
 //! # Operations
 //!
 //!
-pub use self::{arithmetic::*, gradient::*, kinds::*};
+pub use self::{arithmetic::*, kinds::*};
 
 pub(crate) mod arithmetic;
-pub(crate) mod gradient;
 pub(crate) mod kinds;
 
-pub trait Evaluate {
-    type Output;
-
-    fn eval(self) -> Self::Output;
-}
-
-impl Evaluate for f64 {
-    type Output = f64;
-
-    fn eval(self) -> Self::Output {
-        self
-    }
-}
+pub mod binary;
+pub mod unary;
 
 pub trait BinaryOperation<A, B> {
     type Output;
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output;
-}
-
-pub trait UnaryOperation {
-    type Output;
-
-    fn eval(self) -> Self::Output;
 }

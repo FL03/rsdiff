@@ -5,6 +5,10 @@
 
 use crate::prelude::Store;
 
+pub trait IsDifferentiable {
+    fn differentiable(&self) -> bool;
+}
+
 pub trait Differentiable<T> {
     type Derivative;
 

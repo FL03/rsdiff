@@ -5,8 +5,8 @@
 use super::edge::Edge;
 use super::node::Node;
 use super::DynamicGraph;
+use crate::prelude::GraphResult as Result;
 use acme::ops::*;
-use acme::prelude::Result;
 use num::traits::{Num, NumAssignOps, NumOps};
 use petgraph::algo::toposort;
 use petgraph::prelude::{Direction, NodeIndex};

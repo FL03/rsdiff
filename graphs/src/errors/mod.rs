@@ -6,4 +6,4 @@ pub use self::error::*;
 
 pub(crate) mod error;
 
-pub type TensorResult<T = ()> = std::result::Result<T, TensorError>;
+pub type GraphResult<T = ()> = std::result::Result<T, GraphError>;

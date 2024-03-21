@@ -10,6 +10,8 @@ pub trait ErrorType {
     type Kind;
 
     fn kind(&self) -> Self::Kind;
+
+    fn name(&self) -> &str;
 }
 
 pub enum Errors<T> {

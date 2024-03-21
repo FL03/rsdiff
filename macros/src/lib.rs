@@ -5,8 +5,7 @@
 //! # acme-macros
 //!
 //!
-#![feature(proc_macro_span)]
-extern crate proc_macro;
+extern crate proc_macro as pm;
 
 pub(crate) mod ast;
 pub(crate) mod cmp;
@@ -16,18 +15,19 @@ pub(crate) mod ops;
 
 pub(crate) mod gradient;
 
-use ast::partials::*;
-use proc_macro::TokenStream;
-use quote::quote;
+use ast::gradient::GradientAst;
+use ast::partials::PartialAst;
+use pm::TokenStream;
 use syn::{parse_macro_input, Expr};
 
 #[proc_macro_attribute]
-pub fn partial(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(item as syn::ItemFn);
-    println!("attr: \"{}\"", attr.to_string());
-    // let result = ad::handle::item::handle_item(&input);
-    // TokenStream::from(result)
-    (quote! { #input }).into()
+pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    // let attr = parse_macro_input!(attr as syn::Attribute);
+    // let item = parse_macro_input!(item as syn::ItemFn);
+    // let ast = ast::gradient::GradientAst::new(attr, item);
+    let ast = parse_macro_input!(item as GradientAst);
+    let result = grad::gradient(&ast);
+    TokenStream::from(result)
 }
 
 #[proc_macro]

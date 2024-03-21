@@ -20,6 +20,7 @@ serde = [
 serde-ext = [
     "dep:serde_json",
     "petgraph/serde-1",
+    "acme-core/serde",
 ]
 
 [lib]

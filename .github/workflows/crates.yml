@@ -23,7 +23,7 @@ jobs:
       matrix:
         features: [ core ]
     env:
-      CARGO_PACKAGE_NAME: ${{ github.repository.name }}-${{ matrix.features }}
+      CARGO_PACKAGE_NAME: ${{ github.event.repository.name }}-${{ matrix.features }}
     steps:
       - uses: actions/checkout@v4
       - name: Publish (${{ env.CARGO_PACKAGE_NAME }})
@@ -39,7 +39,7 @@ jobs:
       matrix:
         features: [ derive, graphs, macros, tensor ]
     env:
-      CARGO_PACKAGE_NAME: ${{ github.repository.name }}-${{ matrix.features }}
+      CARGO_PACKAGE_NAME: ${{ github.event.repository.name }}-${{ matrix.features }}
     steps:
       - uses: actions/checkout@v4
       - name: Publish (${{ env.CARGO_PACKAGE_NAME }})
@@ -50,5 +50,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Publish (${{ github.repository.name }})
-        run: cargo publish --all-features -v -p ${{ github.repository.name }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish (${{ github.event.repository.name }})
+        run: cargo publish --all-features -v -p ${{ github.event.repository.name }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

@@ -5,8 +5,7 @@
 //! # acme-core
 //!
 //!
-#![allow(incomplete_features)]
-#![feature(adt_const_params, fn_traits, tuple_trait, unboxed_closures)]
+#![feature(tuple_trait,)]
 
 pub use self::{primitives::*, utils::*};
 

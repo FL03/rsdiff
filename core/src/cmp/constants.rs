@@ -8,10 +8,9 @@ use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::borrow::{Borrow, BorrowMut};
-use std::marker::ConstParamTy;
 use std::ops::{Deref, DerefMut, Neg, Not};
 
-#[derive(Clone, ConstParamTy, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[repr(transparent)]
 pub struct Constant<T>(pub T);

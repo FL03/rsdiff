@@ -5,7 +5,6 @@
 //! # acme-tensor
 //!
 //!
-#![feature(array_chunks)]
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 

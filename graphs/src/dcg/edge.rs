@@ -2,7 +2,7 @@
     Appellation: edge <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use petgraph::graph::NodeIndex;
+use crate::NodeIndex;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 

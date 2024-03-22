@@ -5,12 +5,11 @@
 use super::BinaryOperation;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::ops::{Add, Div, Mul, Sub};
-
-pub trait ArithmeticOp<S, T = Self>: Add<S, Output = T> {}
+use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 macro_rules! operator {
     ($op:ident) => {
+
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
         pub struct $op;
@@ -25,12 +24,51 @@ macro_rules! operator {
             }
         }
     };
+    ($($op:ident),*) => {
+        $(
+            operator!($op);
+        )*
+    };
+
+}
+
+macro_rules! operators {
+    (class $group:ident; {$($op:ident: $variant:ident),*}) => {
+        $(
+            operator!($op);
+        )*
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            Display,
+            EnumCount,
+            EnumIs,
+            EnumIter,
+            Eq,
+            Hash,
+            Ord,
+            PartialEq,
+            PartialOrd,
+            VariantNames,
+        )]
+        #[cfg_attr(
+            feature = "serde",
+            derive(Deserialize, Serialize,),
+            serde(rename_all = "lowercase", untagged)
+        )]
+        #[repr(u8)]
+        #[strum(serialize_all = "lowercase")]
+        pub enum $group {
+            $(
+                $variant($op),
+            )*
+        }
+    };
 }
 
 macro_rules! impl_binary_op {
     ($op:ident, $bound:ident, $operator:tt) => {
-        operator!($op);
-
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
             A: $bound<B, Output = C>,
@@ -43,8 +81,6 @@ macro_rules! impl_binary_op {
         }
     };
     (expr $op:ident, $bound:ident, $exp:expr) => {
-        operator!($op);
-
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
             A: $bound<B, Output = C>,
@@ -58,6 +94,11 @@ macro_rules! impl_binary_op {
     };
 }
 
+// operator!(Addition, Division, Multiplication, Subtraction);
+operators!(class Arithmetic; {Addition: Add, Division: Div, Multiplication: Mul, Subtraction: Sub});
+
+use std::ops::{Add, Div, Mul, Sub};
+
 impl_binary_op!(Addition, Add, +);
 
 impl_binary_op!(Division, Div, /);
@@ -65,14 +106,6 @@ impl_binary_op!(Division, Div, /);
 impl_binary_op!(Multiplication, Mul, *);
 
 impl_binary_op!(Subtraction, Sub, -);
-
-#[derive(Clone)]
-pub enum Arithmetic {
-    Add(Addition),
-    Div(Division),
-    Mul(Multiplication),
-    Sub(Subtraction),
-}
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {

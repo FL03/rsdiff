@@ -16,7 +16,10 @@ pub(crate) mod graph;
 pub mod dcg;
 pub mod errors;
 pub mod grad;
+pub mod ops;
 pub mod scg;
+
+pub use petgraph::graph::{EdgeIndex, GraphIndex, NodeIndex};
 
 pub mod prelude {
     #[doc(inline)]

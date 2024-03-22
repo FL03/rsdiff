@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Node;
+use crate::ops::{BinaryExpr, BinaryOperation, Operations};
 use crate::prelude::GraphResult as Result;
-use acme::prelude::{BinaryExpr, BinaryOperation, Operations};
 use num::traits::{NumAssign, NumOps, Signed};
 use petgraph::algo::toposort;
 use petgraph::prelude::{DiGraph, NodeIndex};

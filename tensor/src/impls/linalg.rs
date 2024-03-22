@@ -3,14 +3,20 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! Implementations for linear algebra operations.
-use crate::ops::{BinaryOp, TensorOp};
-use crate::prelude::{Matmul, Scalar};
+//!
+//!
+use crate::prelude::{Matmul, Scalar, TensorOp, TensorResult};
+use crate::shape::ShapeError;
 use crate::tensor::*;
 
-pub(crate) fn matmul<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) -> TensorBase<T>
+pub(crate) fn matmul<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) -> TensorResult<TensorBase<T>>
 where
     T: Scalar,
 {
+    if lhs.shape().rank() != rhs.shape().rank() {
+        return Err(ShapeError::IncompatibleShapes.into());
+    }
+
     let lhs_shape = lhs.shape().clone();
     let rhs_shape = rhs.shape().clone();
 
@@ -27,12 +33,8 @@ where
             }
         }
     }
-    let op = TensorOp::Binary(
-        Box::new(lhs.clone()),
-        Box::new(rhs.clone()),
-        BinaryOp::Matmul,
-    );
-    from_vec_with_op(op, shape, result)
+    let op = TensorOp::Matmul(Box::new(lhs.clone()), Box::new(rhs.clone()));
+    Ok(from_vec_with_op(op, shape, result))
 }
 
 impl<T> Matmul<TensorBase<T>> for TensorBase<T>
@@ -52,11 +54,7 @@ where
                 }
             }
         }
-        let op = TensorOp::Binary(
-            Box::new(self.clone()),
-            Box::new(other.clone()),
-            BinaryOp::Matmul,
-        );
+        let op = TensorOp::Matmul(Box::new(self.clone()), Box::new(other.clone()));
         from_vec_with_op(op, shape, result)
     }
 }

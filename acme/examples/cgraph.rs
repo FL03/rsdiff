@@ -1,13 +1,15 @@
 /*
-    Appellation: simple <example>
+    Appellation: compute_graph <example>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![cfg(feature = "graph")]
+
 extern crate acme;
 
+use acme::graph::prelude::GraphResult;
 use acme::graph::scg::Scg;
-use acme::prelude::Result;
 
-fn main() -> Result<()> {
+fn main() -> GraphResult<()> {
     let mut scg = Scg::new();
     let x = scg.variable(1.0);
     let y = scg.variable(2.0);

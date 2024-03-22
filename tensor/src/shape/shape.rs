@@ -2,25 +2,12 @@
    Appellation: shape <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Rank;
-use crate::errors::ShapeError;
+use super::dim::Rank;
+use super::error::ShapeError;
 use crate::prelude::TensorResult;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::ops::{self, Deref};
-
-pub trait IntoShape {
-    fn into_shape(self) -> Shape;
-}
-
-impl<S> IntoShape for S
-where
-    S: Into<Shape>,
-{
-    fn into_shape(self) -> Shape {
-        self.into()
-    }
-}
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]

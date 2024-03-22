@@ -44,3 +44,18 @@ impl MajorOrder {
         Self::Row
     }
 }
+
+impl From<MajorOrder> for usize {
+    fn from(order: MajorOrder) -> Self {
+        order as usize
+    }
+}
+
+impl From<usize> for MajorOrder {
+    fn from(order: usize) -> Self {
+        match order % Self::COUNT {
+            0 => Self::Column,
+            _ => Self::Row,
+        }
+    }
+}

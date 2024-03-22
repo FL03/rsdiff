@@ -19,8 +19,23 @@ fn test_tensor() {
 #[test]
 fn test_arange() {
     let exp = Shape::from(10);
-    let a = Tensor::arange(0_f64, 1_f64, 0.1);
+    let a = Tensor::arange(0_f64, 10_f64, 1_f64);
     assert_eq!(a.shape(), &exp);
+
+    for i in 0..10 {
+        assert_eq!(a[&[i]], i as f64);
+    }
+}
+
+#[test]
+fn test_linstep() {
+    let exp = Shape::from(10);
+    let a = Tensor::linstep(0_f64, 10_f64, 10);
+    assert_eq!(a.shape(), &exp);
+    let b = Tensor::arange(0_f64, 10_f64, 1_f64);
+    for i in 0..10 {
+        assert_eq!(a[&[i]], b[&[i]]);
+    }
 }
 
 #[test]

@@ -3,12 +3,15 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # Shapes
-pub use self::{dimension::*, rank::*, shape::*, stride::*};
+//!
+//!
+pub use self::{error::*, shape::*, stride::*};
 
-pub(crate) mod dimension;
-pub(crate) mod rank;
+pub(crate) mod error;
 pub(crate) mod shape;
 pub(crate) mod stride;
+
+pub mod dim;
 
 pub trait IntoShape {
     fn into_shape(self) -> Shape;
@@ -24,10 +27,10 @@ where
 }
 
 pub(crate) mod prelude {
-    pub use super::dimension::*;
-    pub use super::rank::*;
+    pub use super::dim::*;
     pub use super::shape::*;
     pub use super::stride::*;
+    pub use super::IntoShape;
 }
 
 #[cfg(test)]

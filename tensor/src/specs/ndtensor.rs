@@ -2,7 +2,7 @@
     Appellation: ndtensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::shape::{Rank, Shape};
+use crate::shape::prelude::{Rank, Shape};
 use crate::store::Layout;
 use acme::prelude::AtomicId;
 

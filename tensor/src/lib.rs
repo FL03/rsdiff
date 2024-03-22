@@ -12,13 +12,13 @@ extern crate alloc;
 extern crate acme_core as acme;
 
 #[doc(inline)]
-pub use self::tensor::*;
+pub use self::{error::*, tensor::*};
 
+pub(crate) mod error;
 pub(crate) mod tensor;
 
 pub mod actions;
 pub mod data;
-pub mod errors;
 pub mod linalg;
 pub mod ops;
 pub mod shape;
@@ -31,9 +31,11 @@ mod impls {
         mod binary;
         mod unary;
     }
+    mod create;
     mod grad;
     mod linalg;
     mod num;
+    mod reshape;
 }
 
 pub type Tensor<T = f64> = tensor::TensorBase<T>;
@@ -42,7 +44,7 @@ pub mod prelude {
     #[doc(inline)]
     pub use crate::data::*;
     #[doc(inline)]
-    pub use crate::errors::*;
+    pub use crate::error::*;
     #[doc(inline)]
     pub use crate::ops::*;
     #[doc(inline)]

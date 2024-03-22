@@ -2,8 +2,8 @@
     Appellation: gradient <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::NodeIndex;
 use acme::stores::Store;
-use petgraph::prelude::NodeIndex;
 use std::any::Any;
 use std::collections::BTreeMap;
 

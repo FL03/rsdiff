@@ -2,9 +2,9 @@
     Appellation: arith <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{BinaryOp, TensorOp};
-use crate::prelude::Scalar;
+use crate::prelude::{Scalar, TensorOp};
 use crate::tensor::*;
+use acme::ops::binary::BinaryOp;
 
 macro_rules! cmp {
     (ne: $lhs:expr, $rhs:expr) => {

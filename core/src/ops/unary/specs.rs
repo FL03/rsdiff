@@ -2,9 +2,8 @@
     Appellation: specs <unary>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use num::traits::{Inv, Num};
+use num::traits::Inv;
 use num::Complex;
-use std::ops::Neg;
 
 macro_rules! unary_op_trait {
     ($trait:ident, $method:ident) => {
@@ -14,12 +13,28 @@ macro_rules! unary_op_trait {
             fn $method(self) -> Self::Output;
         }
     };
+    (owned $trait:ident, $method:ident) => {
+        pub trait $trait {
+            type Output;
+
+            fn $method(&self) -> Self::Output;
+        }
+    };
 }
 
 macro_rules! impl_unary_op {
     ($trait:ident, $method:ident, $t:ty) => {
         impl $trait for $t {
             type Output = $t;
+
+            fn $method(self) -> Self::Output {
+                <$t>::$method(self)
+            }
+        }
+    };
+    (generic $trait:ident, $method:ident, s => $s:tt, t => $t:tt) => {
+        impl<S, T> $trait for S where S: $s, T: $t {
+            type Output = T;
 
             fn $method(self) -> Self::Output {
                 <$t>::$method(self)
@@ -67,20 +82,15 @@ where
     type Output = T;
 
     fn abs(self) -> Self::Output {
-        let re = self.re.clone();
-        let im = self.im.clone();
-        let re = re * re;
-        let im = im * im;
-        let abs = re + im;
-        abs.sqrt()
+        self.norm()
     }
 }
 
-impl<T> Recip for Complex<T>
+impl<T> Recip for T
 where
-    T: Clone + Num + Neg<Output = T>,
+    T: Inv,
 {
-    type Output = Complex<T>;
+    type Output = <T as Inv>::Output;
 
     fn recip(self) -> Self::Output {
         self.inv()
@@ -103,7 +113,6 @@ impl_unary_op!(Cos, cos; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Cosh, cosh; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Exp, exp; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Ln, ln; [f64, f32, Complex<f64>, Complex<f32>]);
-impl_unary_op!(alts Recip, recip, inv; [f64, f32]);
 impl_unary_op!(Sin, sin; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Sinh, sinh; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Sqrt, sqrt; [f64, f32, Complex<f64>, Complex<f32>]);

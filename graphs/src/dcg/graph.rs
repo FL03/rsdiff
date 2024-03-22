@@ -5,11 +5,12 @@
 use super::edge::Edge;
 use super::node::Node;
 use super::DynamicGraph;
+use crate::ops::*;
 use crate::prelude::GraphResult as Result;
-use acme::ops::*;
+use crate::NodeIndex;
 use num::traits::{Num, NumAssignOps, NumOps};
 use petgraph::algo::toposort;
-use petgraph::prelude::{Direction, NodeIndex};
+use petgraph::prelude::Direction;
 use std::collections::HashMap;
 use std::ops::Index;
 

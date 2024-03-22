@@ -7,6 +7,7 @@
 //!
 
 pub mod arange;
+pub mod index;
 
 #[cfg(test)]
 mod tests {}

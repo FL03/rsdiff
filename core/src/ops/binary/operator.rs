@@ -4,7 +4,7 @@
 */
 use super::BinaryOp;
 
-pub struct BinaryArgs<A, B> {
+pub struct BinaryArgs<A, B = A> {
     pub lhs: A,
     pub rhs: B,
 }
@@ -59,7 +59,7 @@ where
     }
 }
 
-pub struct BinaryOperator<A, B> {
+pub struct BinaryOperator<A, B = A> {
     pub args: BinaryArgs<A, B>,
     pub communitative: bool,
     pub op: BinaryOp,

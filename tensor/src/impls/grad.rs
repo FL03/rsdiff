@@ -2,12 +2,11 @@
     Appellation: grad <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{BinaryOp, TensorOp};
-use crate::prelude::Scalar;
+use crate::prelude::{Scalar, TensorId, TensorOp};
 use crate::tensor::*;
-use acme::prelude::AtomicId;
+use acme::ops::binary::BinaryOp;
 
-pub(crate) type GradStore<T> = std::collections::BTreeMap<AtomicId, T>;
+pub(crate) type GradStore<T> = std::collections::BTreeMap<TensorId, T>;
 
 impl<T> TensorBase<T>
 where

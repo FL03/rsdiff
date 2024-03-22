@@ -2,9 +2,9 @@
     Appellation: arith <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{TensorOp, UnaryOp};
-use crate::prelude::Scalar;
+use crate::prelude::{Scalar, TensorOp};
 use crate::tensor::*;
+use acme::ops::unary::UnaryOp;
 
 impl<T> std::ops::Neg for TensorBase<T>
 where

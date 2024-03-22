@@ -6,8 +6,8 @@
 //!
 //! A computational graph relies on weighted nodes to represent constants, operations, and variables.
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
+use crate::ops::Operations;
 use acme::id::AtomicId;
-use acme::ops::Operations;
 use petgraph::prelude::NodeIndex;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

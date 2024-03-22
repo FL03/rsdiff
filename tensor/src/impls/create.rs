@@ -21,7 +21,7 @@ where
     pub fn fill(shape: impl IntoShape, value: T) -> Self {
         let shape = shape.into_shape();
         let store = vec![value; shape.elements()];
-        Self::from_vec(shape, store)
+        from_vec(false.into(), shape, store)
     }
 }
 
@@ -41,7 +41,7 @@ where
             store.push(value);
             value += step;
         }
-        from_vec((store.len(),), store)
+        from_vec(false.into(), (store.len(),), store)
     }
 
     /// Create a tensor within a range of values
@@ -57,7 +57,7 @@ where
             store.push(value);
             value += step;
         }
-        from_vec((store.len(),), store)
+        from_vec(false.into(), (store.len(),), store)
     }
 
     pub fn logstep(start: T, end: T, steps: usize) -> Self
@@ -73,7 +73,7 @@ where
             store.push(value.exp2());
             value += step;
         }
-        from_vec((store.len(),), store)
+        from_vec(false.into(), (store.len(),), store)
     }
 
     pub fn geomspace(start: T, end: T, steps: usize) -> Self
@@ -89,7 +89,7 @@ where
             store.push(value.exp());
             value += step;
         }
-        from_vec((store.len(),), store)
+        from_vec(false.into(), (store.len(),), store)
     }
 }
 impl<T> TensorBase<T>

@@ -31,14 +31,10 @@ where
             } else if let Some(op) = node.op() {
                 match op {
                     TensorOp::Binary(a, b, _kind) => {
-                        let (track_a, nodes) = walk(a, nodes, visited);
-                        let (track_b, nodes) = walk(b, nodes, visited);
-                        track_grad = track_a || track_b;
-                        nodes
-                    }
-                    TensorOp::Unary(a, _kind) => {
-                        let (track, nodes) = walk(a, nodes, visited);
-                        track_grad = track;
+                        let (tg, nodes) = walk(a, nodes, visited);
+                        track_grad |= tg;
+                        let (tg, nodes) = walk(b, nodes, visited);
+                        track_grad |= tg;
                         nodes
                     }
                     _ => nodes,
@@ -65,7 +61,7 @@ where
         let sorted = self.sorted_nodes();
         // initialize a new gradient store
         let mut store = GradStore::new();
-        store.insert(sorted.first().unwrap().id(), self.ones_like());
+        store.insert(self.id(), self.ones_like());
 
         for node in sorted.iter() {
             if node.is_variable() {
@@ -74,18 +70,19 @@ where
             let grad = store.get(&node.id()).unwrap().clone();
             if let Some(op) = &self.op {
                 match op {
-                    TensorOp::Binary(a, b, kind) => match kind {
+                    TensorOp::Binary(lhs, rhs, kind) => match kind {
                         BinaryOp::Add => {
-                            *store.entry(a.id()).or_insert(a.zeros_like()) += &grad;
-                            *store.entry(b.id()).or_insert(b.zeros_like()) += &grad;
+                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) += &grad;
+                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) += &grad;
                         }
                         BinaryOp::Mul => {
-                            *store.entry(a.id()).or_insert(a.zeros_like()) += &grad * b.as_ref();
-                            *store.entry(b.id()).or_insert(b.zeros_like()) += &grad * a.as_ref();
+                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) += &grad * rhs.as_ref();
+                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) += &grad * lhs.as_ref();
                         }
                         _ => todo!(),
                     },
                     TensorOp::Unary(_a, kind) => match kind {
+                        
                         _ => todo!(),
                     },
                     _ => {}

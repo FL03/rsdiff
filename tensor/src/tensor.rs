@@ -3,14 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 // use crate::ops::TrackedOp;
-use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorOp};
+use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorMode, TensorOp};
 use crate::store::Layout;
 use std::ops::Index;
 // use std::sync::{Arc, RwLock};
 
-pub(crate) fn from_vec<T>(shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
+pub(crate) fn from_vec<T>(kind: TensorMode, shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
     TensorBase {
         id: TensorId::new(),
+        kind,
         layout: Layout::contiguous(shape),
         op: None,
         store,
@@ -18,6 +19,7 @@ pub(crate) fn from_vec<T>(shape: impl IntoShape, store: Vec<T>) -> TensorBase<T>
 }
 
 pub(crate) fn from_vec_with_op<T>(
+    kind: impl Into<TensorMode>,
     op: TensorOp<T>,
     shape: impl IntoShape,
     store: Vec<T>,
@@ -25,6 +27,7 @@ pub(crate) fn from_vec_with_op<T>(
     let layout = Layout::contiguous(shape);
     TensorBase {
         id: TensorId::new(),
+        kind: kind.into(),
         layout,
         op: Some(op),
         store,
@@ -35,23 +38,25 @@ pub(crate) fn from_vec_with_op<T>(
 // #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct TensorBase<T> {
     pub(crate) id: TensorId,
+    pub(crate) kind: TensorMode,
     pub(crate) layout: Layout,
     pub(crate) op: Option<TensorOp<T>>,
     pub(crate) store: Vec<T>,
 }
 
 impl<T> TensorBase<T> {
-    pub fn new(shape: impl IntoShape) -> Self {
+    pub fn new(kind: TensorMode, shape: impl IntoShape) -> Self {
         Self {
             id: TensorId::new(),
+            kind,
             layout: Layout::contiguous(shape),
             op: None,
             store: Vec::new(),
         }
     }
 
-    pub fn from_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
-        from_vec(shape, store)
+    pub fn from_vec(kind: TensorMode, shape: impl IntoShape, store: Vec<T>) -> Self {
+        from_vec(kind, shape, store)
     }
     /// Returns the unique identifier of the tensor.
     pub fn id(&self) -> TensorId {
@@ -79,9 +84,13 @@ impl<T> TensorBase<T> {
     }
 
     pub fn is_variable(&self) -> bool {
-        self.op.is_none()
+        self.kind.is_variable()
     }
 
+    pub fn variable(mut self) -> Self {
+        self.kind = TensorMode::Variable;
+        self
+    }
     pub fn to_vec(&self) -> Vec<T>
     where
         T: Clone,

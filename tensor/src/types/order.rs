@@ -4,7 +4,7 @@
 */
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[cfg_attr(
     feature = "serde",
@@ -18,6 +18,7 @@ use strum::{Display, EnumCount, EnumIter, EnumString, VariantNames};
     Default,
     Display,
     EnumCount,
+    EnumIs,
     EnumIter,
     EnumString,
     Eq,

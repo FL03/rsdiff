@@ -4,9 +4,11 @@
 */
 
 pub mod id;
+pub mod mode;
 pub mod order;
 
 pub(crate) mod prelude {
     pub use super::id::TensorId;
+    pub use super::mode::TensorMode;
     pub use super::order::MajorOrder;
 }

@@ -29,7 +29,7 @@ macro_rules! impl_arithmetic {
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
                 let op = TensorOp::Binary(Box::new(self), Box::new(other), BinaryOp::$trait);
-                from_vec_with_op(op, shape, store)
+                from_vec_with_op(false, op, shape, store)
             }
         }
 
@@ -46,7 +46,7 @@ macro_rules! impl_arithmetic {
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
                 let op = TensorOp::Binary(Box::new(self), Box::new(other.clone()), BinaryOp::$trait);
-                from_vec_with_op(op, shape, store)
+                from_vec_with_op(false, op, shape, store)
             }
         }
 
@@ -63,7 +63,7 @@ macro_rules! impl_arithmetic {
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
                 let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other), BinaryOp::$trait);
-                from_vec_with_op(op, shape, store)
+                from_vec_with_op(false, op, shape, store)
             }
         }
 
@@ -80,7 +80,7 @@ macro_rules! impl_arithmetic {
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
                 let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other.clone()), BinaryOp::$trait);
-                from_vec_with_op(op, shape, store)
+                from_vec_with_op(false, op, shape, store)
             }
         }
     };
@@ -99,7 +99,7 @@ macro_rules! impl_scalar_arith {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
                 let op = TensorOp::BinaryScalar(Box::new(self), other, BinaryOp::$trait);
-                from_vec_with_op(op, shape, store)
+                from_vec_with_op(false, op, shape, store)
             }
         }
 
@@ -113,7 +113,7 @@ macro_rules! impl_scalar_arith {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
                 let op = TensorOp::BinaryScalar(Box::new(self.clone()), other, BinaryOp::$trait);
-                from_vec_with_op(op, shape, store)
+                from_vec_with_op(false, op, shape, store)
             }
         }
     };
@@ -131,7 +131,7 @@ macro_rules! impl_assign_op {
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
                 let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other), BinaryOp::$inner);
 
-                *self = from_vec_with_op(op, shape, store);
+                *self = from_vec_with_op(false, op, shape, store);
             }
         }
 
@@ -145,7 +145,7 @@ macro_rules! impl_assign_op {
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
                 let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other.clone()), BinaryOp::$inner);
 
-                *self = from_vec_with_op(op, shape, store);
+                *self = from_vec_with_op(false, op, shape, store);
             }
         }
     };

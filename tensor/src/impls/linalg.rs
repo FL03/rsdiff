@@ -36,7 +36,7 @@ where
         }
     }
     let op = TensorOp::Matmul(Box::new(lhs.clone()), Box::new(rhs.clone()));
-    Ok(from_vec_with_op(op, shape, result))
+    Ok(from_vec_with_op(false, op, shape, result))
 }
 
 impl<T> Matmul<TensorBase<T>> for TensorBase<T>
@@ -58,6 +58,6 @@ where
             }
         }
         let op = TensorOp::Matmul(Box::new(self.clone()), Box::new(other.clone()));
-        from_vec_with_op(op, shape, result)
+        from_vec_with_op(false, op, shape, result)
     }
 }

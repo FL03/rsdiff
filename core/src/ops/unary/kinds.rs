@@ -36,6 +36,10 @@ pub enum UnaryOp {
     Cosh,
     Exp,
     Floor,
+    #[cfg_attr(
+        feature = "serde",
+        serde(alias = "inverse", alias = "recip", alias = "reciprocal")
+    )]
     Inv,
     Ln,
     Neg,
@@ -45,4 +49,13 @@ pub enum UnaryOp {
     Square,
     Tan,
     Tanh,
+}
+
+impl UnaryOp {
+    pub fn differentiable(&self) -> bool {
+        match self {
+            UnaryOp::Floor | UnaryOp::Inv => false,
+            _ => true,
+        }
+    }
 }

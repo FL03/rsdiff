@@ -7,8 +7,6 @@ pub use self::{backprop::*, kinds::*};
 pub(crate) mod backprop;
 pub(crate) mod kinds;
 
-pub mod op;
-
 pub trait TensorExpr {}
 
 #[cfg(test)]

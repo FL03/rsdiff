@@ -2,7 +2,9 @@
     Appellation: layout <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
+//! # Layout
+//!
+//!
 use crate::shape::{IntoShape, Shape};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

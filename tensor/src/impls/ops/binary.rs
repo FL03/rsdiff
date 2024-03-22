@@ -97,8 +97,9 @@ macro_rules! impl_scalar_arith {
 
             fn $method(self, other: T) -> Self::Output {
                 let shape = self.shape().clone();
-                let store = self.into_store().iter().map(|a| *a $op other).collect();
-                Self::Output::from_vec(shape, store)
+                let store = self.data().iter().map(|a| *a $op other).collect();
+                let op = TensorOp::BinaryScalar(Box::new(self), other, BinaryOp::$trait);
+                from_vec_with_op(op, shape, store)
             }
         }
 
@@ -111,7 +112,8 @@ macro_rules! impl_scalar_arith {
             fn $method(self, other: T) -> Self::Output {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
-                Self::Output::from_vec(shape, store)
+                let op = TensorOp::BinaryScalar(Box::new(self.clone()), other, BinaryOp::$trait);
+                from_vec_with_op(op, shape, store)
             }
         }
     };
@@ -125,7 +127,11 @@ macro_rules! impl_assign_op {
         {
             fn $method(&mut self, other: Self) {
                 cmp!(ne: self.shape(), other.shape());
-                self.store = self.store.iter().zip(other.store.iter()).map(|(a, b)| *a $op *b).collect();
+                let shape = self.shape().clone();
+                let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
+                let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other), BinaryOp::$inner);
+
+                *self = from_vec_with_op(op, shape, store);
             }
         }
 
@@ -135,7 +141,11 @@ macro_rules! impl_assign_op {
         {
             fn $method(&mut self, other: &'a TensorBase<T>) {
                 cmp!(ne: self.shape(), other.shape());
-                self.store = self.store.iter().zip(other.store.iter()).map(|(a, b)| *a $op *b).collect();
+                let shape = self.shape().clone();
+                let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
+                let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other.clone()), BinaryOp::$inner);
+
+                *self = from_vec_with_op(op, shape, store);
             }
         }
     };

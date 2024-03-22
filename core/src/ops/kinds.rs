@@ -9,14 +9,6 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
-#[derive(Clone)]
-pub enum Expr<T> {
-    Binary(T, T, BinaryExpr),
-    Compare(T, T, CompareExpr),
-    Custom(String),
-    Unary(T, UnaryExpr),
-}
-
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize,),

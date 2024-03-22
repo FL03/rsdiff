@@ -30,6 +30,8 @@ pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
     TokenStream::from(result)
 }
 
+/// Compute the gradient of an expression
+///
 #[proc_macro]
 pub fn autodiff(input: TokenStream) -> TokenStream {
     // Parse the input expression into a syntax tree

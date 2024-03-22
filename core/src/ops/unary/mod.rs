@@ -5,9 +5,10 @@
 //! # Unary Operations
 //!
 //!
-pub use self::kinds::*;
+pub use self::{kinds::*, specs::*};
 
 pub(crate) mod kinds;
+pub(crate) mod specs;
 
 pub trait UnaryOperation {
     type Output;

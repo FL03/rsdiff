@@ -21,9 +21,6 @@ where
 
         if let Some(op) = &self.op {
             match op {
-                TensorOp::Unary(_a, kind) => match kind {
-                    _ => todo!(),
-                },
                 TensorOp::Binary(a, b, kind) => match kind {
                     BinaryOp::Add => {
                         *store
@@ -35,7 +32,10 @@ where
                     }
                     _ => todo!(),
                 },
-                // _ => {}
+                TensorOp::Unary(_a, kind) => match kind {
+                    _ => todo!(),
+                },
+                _ => {}
             }
         }
         store

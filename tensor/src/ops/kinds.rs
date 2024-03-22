@@ -10,6 +10,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 #[derive(Clone, Debug)]
 pub enum TensorOp<T> {
     Binary(Box<TensorBase<T>>, Box<TensorBase<T>>, BinaryOp),
+    BinaryScalar(Box<TensorBase<T>>, T, BinaryOp),
     Unary(Box<TensorBase<T>>, UnaryOp),
 }
 
@@ -84,13 +85,7 @@ pub enum UnaryOp {
     Tanh,
 }
 
-pub struct BinOp<T> {
-    pub lhs: TensorBase<T>,
-    pub rhs: TensorBase<T>,
-    pub op: BinaryOp,
-}
-
-pub enum OpInput<T> {
+pub enum Inputs<T> {
     Scalar(T),
     Tensor(TensorBase<T>),
 }

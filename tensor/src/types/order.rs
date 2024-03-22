@@ -1,10 +1,10 @@
 /*
-    Appellation: kinds <mod>
+    Appellation: order <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{Display, EnumCount, EnumIter, EnumString, VariantNames};
 
 #[cfg_attr(
     feature = "serde",
@@ -18,8 +18,8 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Default,
     Display,
     EnumCount,
-    EnumIs,
     EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,
@@ -29,28 +29,18 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
-pub enum BinaryOp {
+pub enum MajorOrder {
+    Column,
     #[default]
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Pow,
-    Rem,
-    Max,
-    Min,
-    And,
-    Or,
-    Xor,
-    Shl,
-    Shr,
+    Row,
 }
 
-impl BinaryOp {
-    pub fn differentiable(&self) -> bool {
-        match self {
-            BinaryOp::Add | BinaryOp::Sub | BinaryOp::Mul | BinaryOp::Div | BinaryOp::Pow => true,
-            _ => false,
-        }
+impl MajorOrder {
+    pub fn column() -> Self {
+        Self::Column
+    }
+
+    pub fn row() -> Self {
+        Self::Row
     }
 }

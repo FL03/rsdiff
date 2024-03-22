@@ -4,6 +4,7 @@
 */
 
 pub trait StructuralFn {
+    type Args: StructuredArgs;
     type Output;
 
     fn eval(&self) -> Self::Output;

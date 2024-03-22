@@ -18,3 +18,9 @@ pub trait BinaryOperation<A, B> {
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output;
 }
+
+pub trait Operator {
+    type Output;
+
+    fn kind(&self) -> String;
+}

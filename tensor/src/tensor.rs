@@ -65,7 +65,7 @@ impl<T> TensorBase<T> {
     pub fn id(&self) -> usize {
         self.id.get()
     }
-
+    /// Get a reference to the layout of the tensor
     pub fn layout(&self) -> &Layout {
         &self.layout
     }
@@ -91,30 +91,20 @@ impl<T> TensorBase<T> {
     pub(crate) fn data(&self) -> &Vec<T> {
         &self.store
     }
-
-    pub(crate) fn into_store(self) -> Vec<T> {
-        self.store
-    }
-
-    pub(crate) fn snapshot(&self) -> Vec<T>
-    where
-        T: Clone,
-    {
-        self.store.clone()
-    }
 }
 
 impl<T> TensorBase<T>
 where
     T: Clone,
 {
+    /// Create an empty tensor from the given shape
     pub fn empty(shape: impl IntoShape) -> Self
     where
         T: Default,
     {
         Self::fill(shape, T::default())
     }
-
+    /// Create a tensor, from the given shape, filled with the given value
     pub fn fill(shape: impl IntoShape, value: T) -> Self {
         let shape = shape.into_shape();
         let store = vec![value; shape.elements()];
@@ -158,10 +148,11 @@ impl<T> TensorBase<T>
 where
     T: Clone + One,
 {
+    /// Create a tensor, filled with ones, from the given shape
     pub fn ones(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::one())
     }
-
+    /// Create a tensor, filled with ones, from the shape of another tensor
     pub fn ones_like(tensor: &TensorBase<T>) -> Self {
         Self::ones(tensor.shape().clone())
     }
@@ -171,10 +162,11 @@ impl<T> TensorBase<T>
 where
     T: Clone + Zero,
 {
+    /// Create a tensor, filled with zeros, from the given shape
     pub fn zeros(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::zero())
     }
-
+    /// Create a tensor, filled with zeros, from the shape of another tensor
     pub fn zeros_like(tensor: &TensorBase<T>) -> Self {
         Self::zeros(tensor.shape().clone())
     }

@@ -59,6 +59,7 @@ doctest = true
 test = true
 
 [[example]]
+doc = true
 name = "autodiff"
 required-features = ["macros"]
 

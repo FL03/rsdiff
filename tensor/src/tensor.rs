@@ -2,11 +2,12 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::kinds::{BinaryOp, Op};
+use crate::ops::kinds::{BinaryOp, TensorOp};
 use crate::prelude::Scalar;
 use crate::shape::{IntoShape, Rank, Shape};
 use crate::store::Layout;
 use acme::prelude::AtomicId;
+use num::traits::{NumAssign, One, Zero};
 // use std::ops::{Index, IndexMut};
 // use std::sync::{Arc, RwLock};
 
@@ -20,7 +21,7 @@ pub(crate) fn from_vec<T>(shape: impl IntoShape, store: Vec<T>) -> TensorBase<T>
 }
 
 pub(crate) fn from_vec_with_op<T>(
-    op: Op<T>,
+    op: TensorOp<T>,
     shape: impl IntoShape,
     store: Vec<T>,
 ) -> TensorBase<T> {
@@ -38,11 +39,20 @@ pub(crate) fn from_vec_with_op<T>(
 pub struct TensorBase<T> {
     pub(crate) id: AtomicId,
     pub(crate) layout: Layout,
-    pub(crate) op: Option<Op<T>>,
+    pub(crate) op: Option<TensorOp<T>>,
     pub(crate) store: Vec<T>,
 }
 
 impl<T> TensorBase<T> {
+    pub fn new(shape: impl IntoShape) -> Self {
+        Self {
+            id: AtomicId::new(),
+            layout: Layout::contiguous(shape),
+            op: None,
+            store: Vec::new(),
+        }
+    }
+
     pub fn from_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
         from_vec(shape, store)
     }
@@ -51,7 +61,7 @@ impl<T> TensorBase<T> {
     fn position(&self, coords: impl AsRef<[usize]>) -> usize {
         self.layout.position(coords.as_ref())
     }
-
+    /// Returns the unique identifier of the tensor.
     pub fn id(&self) -> usize {
         self.id.get()
     }
@@ -60,7 +70,7 @@ impl<T> TensorBase<T> {
         &self.layout
     }
 
-    pub fn op(&self) -> Option<&Op<T>> {
+    pub fn op(&self) -> Option<&TensorOp<T>> {
         self.op.as_ref()
     }
 
@@ -127,12 +137,10 @@ where
 
 impl<T> TensorBase<T>
 where
-    T: Scalar,
+    T: Copy + NumAssign + PartialOrd,
 {
-    pub fn arange(start: T, end: T, step: T) -> Self
-    where
-        T: PartialOrd,
-    {
+    /// Create a tensor within a range of values
+    pub fn arange(start: T, end: T, step: T) -> Self {
         if T::is_zero(&step) {
             panic!("step must be non-zero");
         }
@@ -145,7 +153,11 @@ where
         }
         Self::from_vec(store.len(), store)
     }
-
+}
+impl<T> TensorBase<T>
+where
+    T: Clone + One,
+{
     pub fn ones(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::one())
     }
@@ -153,7 +165,12 @@ where
     pub fn ones_like(tensor: &TensorBase<T>) -> Self {
         Self::ones(tensor.shape().clone())
     }
+}
 
+impl<T> TensorBase<T>
+where
+    T: Clone + Zero,
+{
     pub fn zeros(shape: impl IntoShape) -> Self {
         Self::fill(shape, T::zero())
     }
@@ -179,7 +196,7 @@ where
                 }
             }
         }
-        let op = Op::Binary(
+        let op = TensorOp::Binary(
             Box::new(self.clone()),
             Box::new(other.clone()),
             BinaryOp::Matmul,

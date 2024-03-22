@@ -2,7 +2,7 @@
     Appellation: grad <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{BinaryOp, Op};
+use crate::ops::{BinaryOp, TensorOp};
 use crate::prelude::Scalar;
 use crate::tensor::*;
 use acme::prelude::AtomicId;
@@ -21,10 +21,10 @@ where
 
         if let Some(op) = &self.op {
             match op {
-                Op::Unary(_a, kind) => match kind {
+                TensorOp::Unary(_a, kind) => match kind {
                     _ => todo!(),
                 },
-                Op::Binary(a, b, kind) => match kind {
+                TensorOp::Binary(a, b, kind) => match kind {
                     BinaryOp::Add => {
                         *store
                             .entry(a.id().into())

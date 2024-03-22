@@ -15,6 +15,7 @@ pub use self::tensor::*;
 
 pub(crate) mod tensor;
 
+pub mod actions;
 pub mod data;
 pub mod errors;
 pub mod linalg;
@@ -24,7 +25,10 @@ pub mod specs;
 pub mod store;
 
 mod impls {
-    mod arith;
+    mod ops {
+        mod binary;
+        mod unary;
+    }
     mod grad;
     mod linalg;
     mod num;

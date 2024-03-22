@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::AtomicId;
-use petgraph::prelude::NodeIndex;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -11,11 +10,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 pub struct Id {
     id: AtomicId,
-    index: NodeIndex,
+    index: usize,
 }
 
 impl Id {
-    pub fn new(index: NodeIndex) -> Self {
+    pub fn new(index: usize) -> Self {
         Self {
             id: AtomicId::new(),
             index,
@@ -26,14 +25,14 @@ impl Id {
         *self.id
     }
 
-    pub fn index(&self) -> NodeIndex {
+    pub fn index(&self) -> usize {
         self.index
     }
 
     pub(crate) fn next_index(&self) -> Self {
         Self {
             id: self.id,
-            index: NodeIndex::new(self.index.index() + 1),
+            index: self.index() + 1,
         }
     }
 }
@@ -41,9 +40,9 @@ impl Id {
 impl std::fmt::Display for Id {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         if f.alternate() {
-            write!(f, "{}.{}", self.index.index(), self.id)
+            write!(f, "{}.{}", self.index(), self.id)
         } else {
-            write!(f, "{}", self.index.index())
+            write!(f, "{}", self.index())
         }
     }
 }

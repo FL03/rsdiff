@@ -2,12 +2,12 @@
     Appellation: backprop <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Op;
+use super::TensorOp;
 
-pub struct BackpropOp<T>(Option<Op<T>>);
+pub struct BackpropOp<T>(Option<TensorOp<T>>);
 
 impl<T> BackpropOp<T> {
-    pub fn new(op: Op<T>) -> Self {
+    pub fn new(op: TensorOp<T>) -> Self {
         BackpropOp(Some(op))
     }
 
@@ -15,15 +15,15 @@ impl<T> BackpropOp<T> {
         BackpropOp(None)
     }
 
-    pub fn op(&self) -> Option<&Op<T>> {
+    pub fn op(&self) -> Option<&TensorOp<T>> {
         self.0.as_ref()
     }
 
-    pub fn op_mut(&mut self) -> Option<&mut Op<T>> {
+    pub fn op_mut(&mut self) -> Option<&mut TensorOp<T>> {
         self.0.as_mut()
     }
 
-    pub fn into_inner(self) -> Option<Op<T>> {
+    pub fn into_inner(self) -> Option<TensorOp<T>> {
         self.0
     }
 }

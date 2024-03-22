@@ -3,11 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Store;
-use petgraph::prelude::NodeIndex;
 use std::any::Any;
 use std::collections::BTreeMap;
 
-pub struct GradientStore<K = NodeIndex> {
+pub struct GradientStore<K = usize> {
     store: BTreeMap<K, Box<dyn Any>>,
 }
 

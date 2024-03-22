@@ -9,7 +9,7 @@ pub(crate) mod kinds;
 
 pub mod op;
 
-pub trait TensorOp {}
+pub trait TensorExpr {}
 
 #[cfg(test)]
 mod tests {}

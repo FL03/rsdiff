@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(Clone, Debug)]
-pub enum Op<T> {
+pub enum TensorOp<T> {
     Binary(Box<TensorBase<T>>, Box<TensorBase<T>>, BinaryOp),
     Unary(Box<TensorBase<T>>, UnaryOp),
 }

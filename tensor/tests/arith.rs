@@ -15,7 +15,11 @@ fn test_add() {
     let b = TensorBase::<f64>::ones(shape);
     let c = a + &b;
 
-    assert_eq!(c, TensorBase::<f64>::ones(shape) * 2.0);
+    assert_eq!(c, TensorBase::fill(shape, 2_f64));
+
+    let a = TensorBase::<f64>::ones(shape);
+    let b = a + 1_f64;
+    assert_eq!(b, TensorBase::fill(shape, 2_f64));
 }
 
 #[test]

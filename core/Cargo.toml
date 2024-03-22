@@ -19,7 +19,6 @@ serde = [
 
 serde-ext = [
     "dep:serde_json",
-    "petgraph/serde-1",
 ]
 
 [lib]
@@ -36,7 +35,6 @@ test = true
 anyhow.workspace = true
 lazy_static = "1"
 num = "0.4"
-petgraph = "0.6"
 serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
 smart-default.workspace = true

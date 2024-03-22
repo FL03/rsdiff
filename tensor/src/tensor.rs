@@ -54,8 +54,8 @@ impl<T> TensorBase<T> {
         from_vec(shape, store)
     }
     /// Returns the unique identifier of the tensor.
-    pub fn id(&self) -> usize {
-        self.id.get()
+    pub fn id(&self) -> TensorId {
+        self.id
     }
     /// Get a reference to the layout of the tensor
     pub fn layout(&self) -> &Layout {
@@ -76,6 +76,17 @@ impl<T> TensorBase<T> {
 
     pub fn stride(&self) -> &[usize] {
         self.layout.stride()
+    }
+
+    pub fn is_variable(&self) -> bool {
+        self.op.is_none()
+    }
+
+    pub fn to_vec(&self) -> Vec<T>
+    where
+        T: Clone,
+    {
+        self.store.clone()
     }
 }
 

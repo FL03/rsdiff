@@ -12,7 +12,7 @@ fn test_add() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape);
     let b = Tensor::<f64>::ones(shape);
-    let c = a + &b;
+    let c = &a + &b;
 
     assert_eq!(c, Tensor::fill(shape, 2_f64));
 

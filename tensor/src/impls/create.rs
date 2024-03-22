@@ -37,7 +37,7 @@ where
         // let steps = ((end - start) / step).ceil() as usize;
         let mut store = Vec::new();
         let mut value = start;
-        while value < (end - step) {
+        while value < end {
             store.push(value);
             value += step;
         }
@@ -101,8 +101,12 @@ where
         Self::fill(shape, T::one())
     }
     /// Create a tensor, filled with ones, from the shape of another tensor
-    pub fn ones_like(tensor: &TensorBase<T>) -> Self {
+    pub fn ones_from(tensor: &TensorBase<T>) -> Self {
         Self::ones(tensor.shape().clone())
+    }
+    /// Create a tensor, filled with ones, from the shape of the tensor
+    pub fn ones_like(&self) -> Self {
+        Self::ones(self.shape().clone())
     }
 }
 
@@ -115,7 +119,11 @@ where
         Self::fill(shape, T::zero())
     }
     /// Create a tensor, filled with zeros, from the shape of another tensor
-    pub fn zeros_like(tensor: &TensorBase<T>) -> Self {
+    pub fn zeros_from(tensor: &TensorBase<T>) -> Self {
         Self::zeros(tensor.shape().clone())
+    }
+    /// Create a tensor, filled with zeros, from the shape of the tensor
+    pub fn zeros_like(&self) -> Self {
+        Self::zeros(self.shape().clone())
     }
 }

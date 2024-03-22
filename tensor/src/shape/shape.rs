@@ -79,6 +79,34 @@ impl Shape {
         self.0.len().into()
     }
 
+    pub fn remove(&mut self, index: usize) -> usize {
+        self.0.remove(index)
+    }
+
+    pub fn columns(&self) -> usize {
+        if self.len() >= 2 {
+            *self.last().unwrap()
+        } else if self.len() == 1 {
+            1
+        } else {
+            0
+        }
+    }
+
+    pub fn rows(&self) -> usize {
+        if self.len() >= 2 {
+            self[self.len() - 2]
+        } else if self.len() == 1 {
+            self[0]
+        } else {
+            0
+        }
+    }
+
+    pub fn set(&mut self, index: usize, dim: usize) {
+        self.0[index] = dim
+    }
+
     pub(crate) fn stride_contiguous(&self) -> Vec<usize> {
         let mut stride: Vec<_> = self
             .0

@@ -28,6 +28,7 @@ where
 
 pub(crate) mod prelude {
     pub use super::dim::*;
+    pub use super::error::*;
     pub use super::shape::*;
     pub use super::stride::*;
     pub use super::IntoShape;

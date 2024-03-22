@@ -58,6 +58,9 @@ impl<T> TensorBase<T> {
     pub fn from_vec(kind: TensorMode, shape: impl IntoShape, store: Vec<T>) -> Self {
         from_vec(kind, shape, store)
     }
+    pub fn elements(&self) -> usize {
+        self.layout.elements()
+    }
     /// Returns the unique identifier of the tensor.
     pub fn id(&self) -> TensorId {
         self.id

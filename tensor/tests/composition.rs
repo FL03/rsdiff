@@ -17,6 +17,16 @@ fn test_tensor() {
 }
 
 #[test]
+fn test_reshape() {
+    let shape = (2, 2);
+    let a = Tensor::<f64>::ones(shape);
+    let b = a.clone().reshape((4,)).unwrap();
+
+    assert_ne!(&a.shape(), &b.shape());
+    assert_eq!(&a.elements(), &b.elements());
+}
+
+#[test]
 fn test_arange() {
     let exp = Shape::from(10);
     let a = Tensor::arange(0_f64, 10_f64, 1_f64);

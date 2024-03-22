@@ -76,13 +76,14 @@ where
                             *store.entry(rhs.id()).or_insert(rhs.zeros_like()) += &grad;
                         }
                         BinaryOp::Mul => {
-                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) += &grad * rhs.as_ref();
-                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) += &grad * lhs.as_ref();
+                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) +=
+                                &grad * rhs.as_ref();
+                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) +=
+                                &grad * lhs.as_ref();
                         }
                         _ => todo!(),
                     },
                     TensorOp::Unary(_a, kind) => match kind {
-                        
                         _ => todo!(),
                     },
                     _ => {}

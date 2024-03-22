@@ -15,10 +15,7 @@ fn test_backward() {
     let c = &a + &b;
     let grad = c.grad();
 
-    assert_eq!(
-        grad[&a.id()],
-        Tensor::ones(shape),
-    );
+    assert_eq!(grad[&a.id()], Tensor::ones(shape),);
     assert_eq!(grad[&b.id()], Tensor::ones(shape));
 
     let a = Tensor::<f64>::ones(shape).variable();

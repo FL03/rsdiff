@@ -2,7 +2,7 @@
     Appellation: reshape <impls>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::IntoShape;
+use crate::prelude::{IntoShape, ShapeError, TensorResult};
 use crate::tensor::TensorBase;
 
 impl<T> TensorBase<T>
@@ -17,9 +17,14 @@ where
         unimplemented!()
     }
 
-    pub fn reshape(&self, shape: impl IntoShape) -> Self {
-        let _shape = shape.into_shape();
+    pub fn reshape(self, shape: impl IntoShape) -> TensorResult<Self> {
+        let mut tensor = self;
+        let shape = shape.into_shape();
+        if tensor.elements() != shape.elements() {
+            return Err(ShapeError::MismatchedElements.into());
+        }
 
-        unimplemented!()
+        tensor.layout.shape = shape;
+        Ok(tensor)
     }
 }

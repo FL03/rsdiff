@@ -9,6 +9,7 @@
 pub mod arange;
 pub mod grad;
 pub mod index;
+pub mod iter;
 
 pub(crate) mod prelude {
     pub use super::arange::*;

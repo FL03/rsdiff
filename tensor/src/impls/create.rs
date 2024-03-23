@@ -23,6 +23,13 @@ where
         let store = vec![value; shape.elements()];
         from_vec(false.into(), shape, store)
     }
+
+    pub fn default_like(&self) -> Self
+    where
+        T: Default,
+    {
+        Self::fill(self.shape().clone(), T::default())
+    }
 }
 
 impl<T> TensorBase<T>

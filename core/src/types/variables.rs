@@ -7,10 +7,10 @@ use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::borrow::{Borrow, BorrowMut};
-use std::ops::{Add, Div, Mul, Sub};
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[repr(C)]
 pub struct Variable<T> {
     name: String,
     pub(crate) value: Option<T>,
@@ -24,8 +24,8 @@ impl<T> Variable<T> {
         }
     }
 
-    pub fn is_none(&self) -> bool {
-        self.value.is_none()
+    pub const fn is_initialized(&self) -> bool {
+        self.value.is_some()
     }
 
     pub fn name(&self) -> &str {
@@ -98,110 +98,6 @@ unsafe impl<T> Send for Variable<T> {}
 
 unsafe impl<T> Sync for Variable<T> {}
 
-impl<T> Add for Variable<T>
-where
-    T: Add<Output = T> + Default,
-{
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        let name = "+".to_string();
-        let value = self.eval() + rhs.eval();
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Add<T> for Variable<T>
-where
-    T: Add<Output = T> + Default + std::fmt::Display,
-{
-    type Output = Self;
-
-    fn add(self, rhs: T) -> Self::Output {
-        let name = format!("{} + {}", self.name, rhs);
-        let value = self.eval() + rhs;
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Div for Variable<T>
-where
-    T: Div<Output = T> + Default,
-{
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        let name = format!("{} / {}", self.name, rhs.name);
-        let value = self.eval() / rhs.eval();
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Div<T> for Variable<T>
-where
-    T: Div<Output = T> + Default + std::fmt::Display,
-{
-    type Output = Self;
-
-    fn div(self, rhs: T) -> Self::Output {
-        let name = format!("{} / {}", self.name, rhs);
-        let value = self.eval() / rhs;
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Mul for Variable<T>
-where
-    T: Mul<Output = T> + Default,
-{
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        let name = format!("{} * {}", self.name, rhs.name);
-        let value = self.eval() * rhs.eval();
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Mul<T> for Variable<T>
-where
-    T: Mul<Output = T> + Default + std::fmt::Display,
-{
-    type Output = Self;
-
-    fn mul(self, rhs: T) -> Self::Output {
-        let name = format!("{} * {}", self.name, rhs);
-        let value = self.eval() * rhs;
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Sub for Variable<T>
-where
-    T: Sub<Output = T> + Default,
-{
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        let name = format!("{} - {}", self.name, rhs.name);
-        let value = self.eval() - rhs.eval();
-        Variable::new(name).with_value(value)
-    }
-}
-
-impl<T> Sub<T> for Variable<T>
-where
-    T: Sub<Output = T> + Default + std::fmt::Display,
-{
-    type Output = Self;
-
-    fn sub(self, rhs: T) -> Self::Output {
-        let name = format!("{} - {}", self.name, rhs);
-        let value = self.eval() - rhs;
-        Variable::new(name).with_value(value)
-    }
-}
-
 impl<T> One for Variable<T>
 where
     T: Clone + Default + One,
@@ -223,3 +119,37 @@ where
         self.clone().eval().is_zero()
     }
 }
+
+macro_rules! impl_std_op {
+    ($parent:ident: $trait:ident, $method:ident) => {
+        impl<T> std::ops::$trait for $parent<T>
+        where
+            T: Clone + Default + std::ops::$trait<Output = T>,
+        {
+            type Output = Self;
+
+            fn $method(self, rhs: Self) -> Self::Output {
+                let name = format!("{}", stringify!($method));
+                let value = self.eval().$method(rhs.eval());
+                $parent::new(name).with_value(value)
+            }
+        }
+
+        impl<T> std::ops::$trait<T> for $parent<T>
+        where
+            T: Clone + Default + std::ops::$trait<Output = T>,
+        {
+            type Output = Self;
+
+            fn $method(self, rhs: T) -> Self::Output {
+                let name = format!("{}", stringify!($method));
+                let value = self.eval().$method(rhs);
+                $parent::new(name).with_value(value)
+            }
+        }
+    };
+}
+impl_std_op!(Variable: Add, add);
+impl_std_op!(Variable: Div, div);
+impl_std_op!(Variable: Mul, mul);
+impl_std_op!(Variable: Sub, sub);

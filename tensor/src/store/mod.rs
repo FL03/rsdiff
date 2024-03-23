@@ -10,12 +10,13 @@ pub use self::{layout::*, storage::*};
 pub(crate) mod layout;
 pub(crate) mod storage;
 
-use std::sync::{Arc, RwLock};
-
-pub type ArcTensor<T> = Arc<RwLock<Vec<T>>>;
-
 pub trait TensorStore {
     type Elem;
+}
+
+pub enum TensorData<T> {
+    Scalar(T),
+    Tensor(Vec<TensorData<T>>),
 }
 
 #[cfg(test)]

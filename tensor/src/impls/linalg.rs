@@ -18,15 +18,15 @@ where
     }
 
     let lhs_shape = lhs.shape().clone();
-    let lhs_n = *lhs_shape.last().unwrap();
-    // let lhs_m = lhs_shape.
+    let lhs_m = lhs_shape.rows();
+    let lhs_n = lhs_shape.columns();
     let rhs_shape = rhs.shape().clone();
 
     let shape = lhs_shape.matmul_shape(rhs.shape()).unwrap();
     let mut result = vec![T::zero(); shape.elements()];
 
-    for i in 0..lhs_shape[0] {
-        for j in 0..rhs_shape[1] {
+    for i in 0..lhs_m {
+        for j in 0..rhs_shape.columns() {
             for k in 0..lhs_n {
                 let pos = i * rhs_shape[1] + j;
                 let left = i * lhs_n + k;

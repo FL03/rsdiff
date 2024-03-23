@@ -3,12 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 // use crate::ops::TrackedOp;
-use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorMode, TensorOp};
+use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind, TensorOp};
 use crate::store::Layout;
 use std::ops::Index;
 // use std::sync::{Arc, RwLock};
 
-pub(crate) fn from_vec<T>(kind: TensorMode, shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
+pub(crate) fn from_vec<T>(kind: TensorKind, shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
     TensorBase {
         id: TensorId::new(),
         kind,
@@ -19,7 +19,7 @@ pub(crate) fn from_vec<T>(kind: TensorMode, shape: impl IntoShape, store: Vec<T>
 }
 
 pub(crate) fn from_vec_with_op<T>(
-    kind: impl Into<TensorMode>,
+    kind: impl Into<TensorKind>,
     op: TensorOp<T>,
     shape: impl IntoShape,
     store: Vec<T>,
@@ -38,14 +38,14 @@ pub(crate) fn from_vec_with_op<T>(
 // #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct TensorBase<T> {
     pub(crate) id: TensorId,
-    pub(crate) kind: TensorMode,
+    pub(crate) kind: TensorKind,
     pub(crate) layout: Layout,
     pub(crate) op: Option<TensorOp<T>>,
     pub(crate) store: Vec<T>,
 }
 
 impl<T> TensorBase<T> {
-    pub fn new(kind: TensorMode, shape: impl IntoShape) -> Self {
+    pub fn new(kind: TensorKind, shape: impl IntoShape) -> Self {
         Self {
             id: TensorId::new(),
             kind,
@@ -55,7 +55,7 @@ impl<T> TensorBase<T> {
         }
     }
 
-    pub fn from_vec(kind: TensorMode, shape: impl IntoShape, store: Vec<T>) -> Self {
+    pub fn from_vec(kind: TensorKind, shape: impl IntoShape, store: Vec<T>) -> Self {
         from_vec(kind, shape, store)
     }
     /// Returns the number of elements in the tensor.
@@ -92,7 +92,7 @@ impl<T> TensorBase<T> {
     }
 
     pub fn variable(mut self) -> Self {
-        self.kind = TensorMode::Variable;
+        self.kind = TensorKind::Variable;
         self
     }
     pub fn to_vec(&self) -> Vec<T>

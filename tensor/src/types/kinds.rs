@@ -30,13 +30,13 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
-pub enum TensorMode {
+pub enum TensorKind {
     #[default]
     Normal,
     Variable,
 }
 
-impl TensorMode {
+impl TensorKind {
     pub fn normal() -> Self {
         Self::Normal
     }
@@ -46,13 +46,13 @@ impl TensorMode {
     }
 }
 
-impl From<TensorMode> for usize {
-    fn from(mode: TensorMode) -> Self {
+impl From<TensorKind> for usize {
+    fn from(mode: TensorKind) -> Self {
         mode as usize
     }
 }
 
-impl From<usize> for TensorMode {
+impl From<usize> for TensorKind {
     fn from(mode: usize) -> Self {
         match mode % Self::COUNT {
             0 => Self::Normal,
@@ -61,7 +61,7 @@ impl From<usize> for TensorMode {
     }
 }
 
-impl From<bool> for TensorMode {
+impl From<bool> for TensorKind {
     fn from(is_variable: bool) -> Self {
         if is_variable {
             Self::Variable

@@ -9,7 +9,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 #[cfg_attr(
     feature = "serde",
     derive(Deserialize, Serialize,),
-    serde(rename_all = "lowercase", untagged)
+    serde(rename_all = "snake_case", untagged)
 )]
 #[derive(
     Clone,
@@ -29,14 +29,14 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
     VariantNames,
 )]
 #[repr(u8)]
-#[strum(serialize_all = "lowercase")]
-pub enum MajorOrder {
+#[strum(serialize_all = "snake_case")]
+pub enum Order {
     Column,
     #[default]
     Row,
 }
 
-impl MajorOrder {
+impl Order {
     pub fn column() -> Self {
         Self::Column
     }
@@ -46,13 +46,13 @@ impl MajorOrder {
     }
 }
 
-impl From<MajorOrder> for usize {
-    fn from(order: MajorOrder) -> Self {
+impl From<Order> for usize {
+    fn from(order: Order) -> Self {
         order as usize
     }
 }
 
-impl From<usize> for MajorOrder {
+impl From<usize> for Order {
     fn from(order: usize) -> Self {
         match order % Self::COUNT {
             0 => Self::Column,

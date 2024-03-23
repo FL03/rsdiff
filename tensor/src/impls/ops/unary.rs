@@ -34,11 +34,19 @@ where
     }
 }
 
-macro_rules! impl_unary_arith {
-    ($variant:ident, $method:ident, $e:expr) => {
+macro_rules! impl_unary_op {
+    ($variant:ident, $method:ident) => {
         pub fn $method(self) -> Self {
             let shape = self.shape().clone();
-            let store = self.store.iter().map($e).collect();
+            let store = self.store.iter().copied().map(|v| v.$method()).collect();
+            let op = TensorOp::<T>::Unary(Box::new(self), UnaryOp::$variant);
+            from_vec_with_op(false, op, shape, store)
+        }
+    };
+    (custom $variant:ident, $method:ident, $f:expr) => {
+        pub fn $method(self) -> Self {
+            let shape = self.shape().clone();
+            let store = self.store.iter().copied().map($f).collect();
             let op = TensorOp::<T>::Unary(Box::new(self), UnaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
@@ -49,14 +57,13 @@ impl<T> TensorBase<T>
 where
     T: Scalar,
 {
-    impl_unary_arith!(Exp, exp, |v| v.exp());
-    // impl_unary_arith!(Log, log, |v| v.log());
-
-    impl_unary_arith!(Cos, cos, |v| v.cos());
-    impl_unary_arith!(Cosh, cosh, |v| v.cosh());
-    impl_unary_arith!(Sin, sin, |v| v.sin());
-    impl_unary_arith!(Sinh, sinh, |v| v.sinh());
-    impl_unary_arith!(Sqrt, sqrt, |v| v.sqrt());
-    impl_unary_arith!(Tan, tan, |v| v.tan());
-    impl_unary_arith!(Tanh, tanh, |v| v.tanh());
+    impl_unary_op!(Cos, cos);
+    impl_unary_op!(Cosh, cosh);
+    impl_unary_op!(Exp, exp);
+    impl_unary_op!(Ln, ln);
+    impl_unary_op!(Sin, sin);
+    impl_unary_op!(Sinh, sinh);
+    impl_unary_op!(Sqrt, sqrt);
+    impl_unary_op!(Tan, tan);
+    impl_unary_op!(Tanh, tanh);
 }

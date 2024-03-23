@@ -12,7 +12,7 @@ use std::ops::{Deref, DerefMut, Neg, Not};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-#[repr(transparent)]
+#[repr(C)]
 pub struct Constant<T>(pub T);
 
 impl<T> Constant<T> {

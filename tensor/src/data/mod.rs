@@ -2,7 +2,13 @@
     Appellation: data <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+//! # Data
+//!
+//!
 #![allow(dead_code, unused_imports)]
+
+pub mod repr;
+
 pub unsafe trait RawData {
     type Elem;
 }

@@ -42,6 +42,8 @@ pub type Tensor<T = f64> = tensor::TensorBase<T>;
 
 pub mod prelude {
     #[doc(inline)]
+    pub use crate::actions::prelude::*;
+    #[doc(inline)]
     pub use crate::data::*;
     #[doc(inline)]
     pub use crate::error::*;

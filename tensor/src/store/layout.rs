@@ -6,8 +6,11 @@
 //!
 //!
 use crate::shape::{IntoShape, Shape};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Layout {
     pub(crate) offset: usize,
     pub(crate) shape: Shape,

@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-
 pub trait Logarithm<T> {
     type Output;
 
@@ -35,8 +34,6 @@ macro_rules! impl_log {
         )*
     };
 }
-
-
 
 impl_log!(all [f32, f64]);
 

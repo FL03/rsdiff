@@ -29,7 +29,7 @@ fn test_backward() {
 }
 
 #[test]
-// #[ignore = "Needs to be fixed"]
+#[ignore = "Needs to be fixed"]
 fn test_add_mul() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape).variable();

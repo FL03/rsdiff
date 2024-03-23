@@ -5,9 +5,13 @@
 //! # Gradient
 //!
 //!
-pub use self::store::GradStore;
+pub use self::iterator::Iterator;
 
-pub(crate) mod store;
+pub(crate) mod iterator;
+
+pub trait TensorIter {
+    type Item;
+}
 
 #[cfg(test)]
 mod tests {}

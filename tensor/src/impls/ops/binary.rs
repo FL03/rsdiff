@@ -2,8 +2,8 @@
     Appellation: arith <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{Scalar, TensorOp};
-use crate::tensor::*;
+use crate::prelude::TensorOp;
+use crate::tensor::{from_vec_with_op, TensorBase};
 use acme::ops::binary::BinaryOp;
 
 macro_rules! cmp {
@@ -20,7 +20,7 @@ macro_rules! impl_arithmetic {
 
         impl<T> std::ops::$trait for TensorBase<T>
         where
-            T: Scalar + std::ops::$trait<Output = T>,
+            T: Copy + std::ops::$trait<Output = T>,
         {
             type Output = Self;
 
@@ -35,7 +35,7 @@ macro_rules! impl_arithmetic {
 
         impl<'a, T> std::ops::$trait<&'a TensorBase<T>> for TensorBase<T>
         where
-            T: Scalar + std::ops::$trait<Output = T>,
+            T: Copy + std::ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 
@@ -52,7 +52,7 @@ macro_rules! impl_arithmetic {
 
         impl<'a, T> std::ops::$trait<TensorBase<T>> for &'a TensorBase<T>
         where
-            T: Scalar + std::ops::$trait<Output = T>,
+            T: Copy + std::ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 
@@ -69,7 +69,7 @@ macro_rules! impl_arithmetic {
 
         impl<'a, 'b, T> std::ops::$trait<&'b TensorBase<T>> for &'a TensorBase<T>
         where
-            T: Scalar + std::ops::$trait<Output = T>,
+            T: Copy + std::ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 

@@ -67,7 +67,7 @@ where
         // insert the gradient w.r.t. the current node
         store.insert(self.id(), self.ones_like());
 
-        for node in sorted.iter() {
+        for node in sorted {
             if node.is_variable() {
                 continue;
             }

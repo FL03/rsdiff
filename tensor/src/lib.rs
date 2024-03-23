@@ -48,6 +48,8 @@ pub mod prelude {
     #[doc(inline)]
     pub use crate::error::*;
     #[doc(inline)]
+    pub use crate::linalg::prelude::*;
+    #[doc(inline)]
     pub use crate::ops::*;
     #[doc(inline)]
     pub use crate::shape::prelude::*;

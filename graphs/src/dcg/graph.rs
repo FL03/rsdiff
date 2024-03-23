@@ -69,22 +69,24 @@ impl<T> Dcg<T> {
     where
         T: Copy + Default + Num + NumAssignOps + NumOps,
     {
-        let sorted = toposort(&self.store, None)?;
-        let target = *sorted.last().unwrap();
+        let mut sorted = toposort(&self.store, None)?;
+        sorted.reverse();
+        let target = *sorted.first().unwrap();
 
         let mut gradients = HashMap::<NodeIndex, T>::new();
         gradients.insert(target, T::one());
 
-        for node in sorted.iter().rev() {
-            let node_grad = gradients[node];
-            let node_op = self.get(*node).unwrap();
+        for scope in sorted.iter().copied() {
+            // Get the gradient of the current scope
+            let grad = gradients[&scope];
+            let node = &self[scope];
 
-            if let Node::Op { inputs, op } = node_op {
+            if let Node::Op { inputs, op } = node {
                 match op {
                     Operations::Binary(inner) => match *inner {
                         BinaryExpr::Add(_) => {
-                            for arg in self.store.neighbors_directed(*node, Direction::Incoming) {
-                                *gradients.entry(arg).or_default() += node_grad;
+                            for arg in self.store.neighbors_directed(scope, Direction::Incoming) {
+                                *gradients.entry(arg).or_default() += grad;
                             }
                         }
                         BinaryExpr::Mul(_) => {
@@ -92,8 +94,8 @@ impl<T> Dcg<T> {
                             let rhs = inputs[1];
                             let lhs_val = self.get(lhs).unwrap().get_value();
                             let rhs_val = self.get(rhs).unwrap().get_value();
-                            *gradients.entry(lhs).or_default() += node_grad * rhs_val;
-                            *gradients.entry(rhs).or_default() += node_grad * lhs_val;
+                            *gradients.entry(lhs).or_default() += grad * rhs_val;
+                            *gradients.entry(rhs).or_default() += grad * lhs_val;
                         }
                         _ => {}
                     },

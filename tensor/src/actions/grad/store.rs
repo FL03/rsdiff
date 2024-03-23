@@ -8,6 +8,7 @@ use acme::prelude::Store;
 use std::collections::btree_map::{BTreeMap, Entry};
 use std::ops::{Index, IndexMut};
 
+#[derive(Clone, Debug)]
 pub struct GradStore<T> {
     pub(crate) store: BTreeMap<TensorId, TensorBase<T>>,
 }

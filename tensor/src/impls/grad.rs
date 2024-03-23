@@ -65,7 +65,7 @@ where
         // initialize a new gradient store
         let mut store = GradStore::new();
         // insert the gradient w.r.t. the current node
-        store.insert(self.id(), self.ones_like());
+        store.insert(sorted[0].id(), sorted[0].ones_like());
 
         for node in sorted {
             if node.is_variable() {

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-use crate::prelude::Store;
+use super::store::Store;
 
 pub trait IsDifferentiable {
     fn differentiable(&self) -> bool;

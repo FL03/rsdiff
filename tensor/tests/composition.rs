@@ -40,7 +40,7 @@ fn test_arange() {
 #[test]
 fn test_linstep() {
     let exp = Shape::from(10);
-    let a = Tensor::linstep(0_f64, 10_f64, 10);
+    let a = Tensor::linspace(0_f64, 10_f64, 10);
     assert_eq!(a.shape(), &exp);
     let b = Tensor::arange(0_f64, 10_f64, 1_f64);
     for i in 0..10 {

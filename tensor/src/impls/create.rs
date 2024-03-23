@@ -45,7 +45,7 @@ where
     }
 
     /// Create a tensor within a range of values
-    pub fn linstep(start: T, end: T, steps: usize) -> Self
+    pub fn linspace(start: T, end: T, steps: usize) -> Self
     where
         T: FromPrimitive,
     {
@@ -60,9 +60,9 @@ where
         from_vec(false.into(), (store.len(),), store)
     }
 
-    pub fn logstep(start: T, end: T, steps: usize) -> Self
+    pub fn logspace(start: T, end: T, steps: usize) -> Self
     where
-        T: num::Float,
+        T: num::traits::real::Real,
     {
         let start = start.log2();
         let end = end.log2();

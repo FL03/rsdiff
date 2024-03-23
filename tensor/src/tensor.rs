@@ -58,6 +58,7 @@ impl<T> TensorBase<T> {
     pub fn from_vec(kind: TensorMode, shape: impl IntoShape, store: Vec<T>) -> Self {
         from_vec(kind, shape, store)
     }
+    /// Returns the number of elements in the tensor.
     pub fn elements(&self) -> usize {
         self.layout.elements()
     }

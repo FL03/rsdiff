@@ -16,7 +16,6 @@ pub mod eval;
 pub mod id;
 pub mod ops;
 pub mod specs;
-pub mod stores;
 pub mod types;
 
 pub mod prelude {
@@ -28,6 +27,5 @@ pub mod prelude {
     pub use crate::id::*;
     pub use crate::ops::*;
     pub use crate::specs::prelude::*;
-    pub use crate::stores::*;
     pub use crate::types::*;
 }

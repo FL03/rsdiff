@@ -85,7 +85,7 @@ impl Shape {
 
     pub fn columns(&self) -> usize {
         if self.len() >= 2 {
-            *self.last().unwrap()
+            self.0[1]
         } else if self.len() == 1 {
             1
         } else {
@@ -94,10 +94,8 @@ impl Shape {
     }
 
     pub fn rows(&self) -> usize {
-        if self.len() >= 2 {
-            self[self.len() - 2]
-        } else if self.len() == 1 {
-            self[0]
+        if self.len() >= 1 {
+            *self.0.first().unwrap()
         } else {
             0
         }

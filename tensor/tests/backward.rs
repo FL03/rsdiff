@@ -29,7 +29,7 @@ fn test_backward() {
 }
 
 #[test]
-#[ignore = "Needs to be fixed"]
+// #[ignore = "Needs to be fixed"]
 fn test_add_mul() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape).variable();
@@ -38,6 +38,6 @@ fn test_add_mul() {
     let d = &a * (&a + &b);
     let grad = d.grad();
 
-    assert_eq!(grad[&a.id()], &a * 2.0 + &b);
+    assert_eq!(grad[&a.id()], Tensor::fill(shape, 3_f64));
     assert_eq!(grad[&b.id()], Tensor::ones(shape));
 }

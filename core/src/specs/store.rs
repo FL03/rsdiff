@@ -2,11 +2,6 @@
     Appellation: stores <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{gradient::*, stack::*};
-
-pub(crate) mod gradient;
-pub(crate) mod stack;
-
 use std::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
 

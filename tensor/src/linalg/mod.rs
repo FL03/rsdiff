@@ -6,6 +6,7 @@
 //!
 //!
 pub mod arith;
+pub mod uplo;
 
 pub trait Inverse {
     fn inverse(&self) -> Self;

@@ -2,58 +2,61 @@
     Appellation: grad <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::actions::grad::GradStore;
 use crate::prelude::{Scalar, TensorId, TensorOp};
-use crate::tensor::*;
+use crate::TensorBase;
 use acme::ops::binary::BinaryOp;
+use acme::prelude::Store;
 use std::collections::HashMap;
-pub(crate) type GradStore<T> = std::collections::BTreeMap<TensorId, T>;
+
+// The vec of sorted nodes is passed as an owned value rather than a mutable reference
+// to get around some lifetime limitations.
+fn walk<'a, T>(
+    node: &'a TensorBase<T>,
+    nodes: Vec<&'a TensorBase<T>>,
+    visited: &mut HashMap<TensorId, bool>,
+) -> (bool, Vec<&'a TensorBase<T>>) {
+    if let Some(&tg) = visited.get(&node.id()) {
+        return (tg, nodes);
+    }
+    // track the gradient of the current node
+    let mut track = false;
+    let mut nodes = if node.is_variable() {
+        // Do not call recursively on the "leaf" nodes.
+        track = true;
+        nodes
+    } else if let Some(op) = node.op() {
+        match op {
+            TensorOp::Binary(lhs, rhs, _kind) => {
+                let (tg, nodes) = walk(lhs, nodes, visited);
+                track |= tg;
+                let (tg, nodes) = walk(rhs, nodes, visited);
+                track |= tg;
+                nodes
+            }
+            _ => nodes,
+        }
+    } else {
+        nodes
+    };
+    visited.insert(node.id(), track);
+    if track {
+        nodes.push(node);
+    }
+    (track, nodes)
+}
 
 impl<T> TensorBase<T>
 where
     T: Scalar,
 {
     fn sorted_nodes(&self) -> Vec<&TensorBase<T>> {
-        // The vec of sorted nodes is passed as an owned value rather than a mutable reference
-        // to get around some lifetime limitations.
-        fn walk<'a, T>(
-            node: &'a TensorBase<T>,
-            nodes: Vec<&'a TensorBase<T>>,
-            visited: &mut HashMap<TensorId, bool>,
-        ) -> (bool, Vec<&'a TensorBase<T>>) {
-            if let Some(&tg) = visited.get(&node.id()) {
-                return (tg, nodes);
-            }
-            let mut track_grad = false;
-            let mut nodes = if node.is_variable() {
-                // Do not call recursively on the "leaf" nodes.
-                track_grad = true;
-                nodes
-            } else if let Some(op) = node.op() {
-                match op {
-                    TensorOp::Binary(a, b, _kind) => {
-                        let (tg, nodes) = walk(a, nodes, visited);
-                        track_grad |= tg;
-                        let (tg, nodes) = walk(b, nodes, visited);
-                        track_grad |= tg;
-                        nodes
-                    }
-                    _ => nodes,
-                }
-            } else {
-                nodes
-            };
-            visited.insert(node.id(), track_grad);
-            if track_grad {
-                nodes.push(node);
-            }
-            (track_grad, nodes)
-        }
         let (_tg, mut nodes) = walk(self, vec![], &mut HashMap::new());
         nodes.reverse();
         nodes
     }
 
-    pub fn grad(&self) -> GradStore<TensorBase<T>>
+    pub fn grad(&self) -> GradStore<T>
     where
         T: std::fmt::Debug,
     {
@@ -61,13 +64,16 @@ where
         let sorted = self.sorted_nodes();
         // initialize a new gradient store
         let mut store = GradStore::new();
+        // insert the gradient w.r.t. the current node
         store.insert(self.id(), self.ones_like());
 
         for node in sorted.iter() {
             if node.is_variable() {
                 continue;
             }
-            let grad = store.get(&node.id()).unwrap().clone();
+            // get the gradient of the node
+            let grad = store.remove(&node.id()).expect("Gradient not found");
+            // handle the different types of operations
             if let Some(op) = &self.op {
                 match op {
                     TensorOp::Binary(lhs, rhs, kind) => match kind {

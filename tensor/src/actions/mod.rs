@@ -4,7 +4,12 @@
 */
 //! # Actions
 //!
-//!
+//! This module contains the implementations of the various actions that can be performed on tensors.
+//! The actions include:
+//!     - Composition
+//!     - Differentiation
+//!     - Indexing
+//!     - Iteration
 
 pub mod arange;
 pub mod grad;

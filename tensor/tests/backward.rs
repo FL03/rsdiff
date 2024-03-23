@@ -34,8 +34,9 @@ fn test_add_mul() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape).variable();
     let b = Tensor::<f64>::ones(shape).variable();
-    // let c = &a + &b;
-    let d = &a * (&a + &b);
+    println!("A({}), B({})", a.id(), b.id());
+    let c = &a + &b;
+    let d = &a * &c;
     let grad = d.grad();
 
     assert_eq!(grad[&a.id()], Tensor::fill(shape, 3_f64));

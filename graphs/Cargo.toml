@@ -34,9 +34,8 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.0-nightly.1" }
+acme-core = { path = "../core", version = "0.3.0" }
 
-anyhow.workspace = true
 lazy_static = "1"
 num = "0.4"
 petgraph = "0.6"

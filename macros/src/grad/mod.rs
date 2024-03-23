@@ -16,7 +16,7 @@ pub fn gradient(grad: &GradientAst) -> TokenStream {
     handle_item_fn(&item)
 }
 
-fn handle_item_fn(item: &ItemFn) -> TokenStream {
+pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
     let ItemFn { block, sig, .. } = item;
     let Signature { inputs, .. } = sig;
 

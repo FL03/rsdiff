@@ -58,6 +58,23 @@ impl<T> TensorBase<T> {
     pub fn from_vec(kind: TensorKind, shape: impl IntoShape, store: Vec<T>) -> Self {
         from_vec(kind, shape, store)
     }
+
+    pub fn detach(&self) -> Self
+    where
+        T: Clone,
+    {
+        if self.op.is_none() && !self.is_variable() {
+            self.clone()
+        } else {
+            Self {
+                id: TensorId::new(),
+                kind: TensorKind::Normal,
+                layout: self.layout.clone(),
+                op: None,
+                store: self.store.clone(),
+            }
+        }
+    }
     /// Returns the number of elements in the tensor.
     pub fn elements(&self) -> usize {
         self.layout.elements()
@@ -70,15 +87,15 @@ impl<T> TensorBase<T> {
     pub fn layout(&self) -> &Layout {
         &self.layout
     }
-
+    /// Get a reference to the operation of the tensor
     pub fn op(&self) -> Option<&TensorOp<T>> {
         self.op.as_ref()
     }
-
+    /// Get a reference to the rank of the tensor
     pub fn rank(&self) -> Rank {
         self.layout.shape().rank()
     }
-
+    /// Get a reference to the shape of the tensor
     pub fn shape(&self) -> &Shape {
         self.layout.shape()
     }
@@ -86,15 +103,16 @@ impl<T> TensorBase<T> {
     pub fn stride(&self) -> &[usize] {
         self.layout.stride()
     }
-
+    /// A function to check if the tensor is a variable
     pub fn is_variable(&self) -> bool {
         self.kind.is_variable()
     }
-
+    /// Changes the kind of tensor to a variable
     pub fn variable(mut self) -> Self {
         self.kind = TensorKind::Variable;
         self
     }
+    /// Turn the tensor into a one-dimensional vector
     pub fn to_vec(&self) -> Vec<T>
     where
         T: Clone,

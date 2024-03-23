@@ -5,28 +5,22 @@
 //! # acme-macros
 //!
 //!
-extern crate proc_macro as pm;
+extern crate proc_macro;
 
 pub(crate) mod ast;
-pub(crate) mod cmp;
 pub(crate) mod diff;
 pub(crate) mod grad;
 pub(crate) mod ops;
 
-pub(crate) mod gradient;
-
-use ast::gradient::GradientAst;
+// use ast::gradient::GradientAst;
 use ast::partials::PartialAst;
-use pm::TokenStream;
-use syn::{parse_macro_input, Expr};
+use proc_macro::TokenStream;
+use syn::parse_macro_input;
 
 #[proc_macro_attribute]
 pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    // let attr = parse_macro_input!(attr as syn::Attribute);
-    // let item = parse_macro_input!(item as syn::ItemFn);
-    // let ast = ast::gradient::GradientAst::new(attr, item);
-    let ast = parse_macro_input!(item as GradientAst);
-    let result = grad::gradient(&ast);
+    let ast = parse_macro_input!(item as syn::ItemFn);
+    let result = grad::handle_item_fn(&ast);
     TokenStream::from(result)
 }
 
@@ -39,18 +33,6 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
 
     // Generate code to compute the gradient
     let result = diff::generate_autodiff(&expr);
-
-    // Return the generated code as a token stream
-    TokenStream::from(result)
-}
-
-#[proc_macro]
-pub fn gradient(input: TokenStream) -> TokenStream {
-    // Parse the input expression into a syntax tree
-    let expr = parse_macro_input!(input as Expr);
-
-    // Generate code to compute the gradient
-    let result = gradient::compute_grad(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)

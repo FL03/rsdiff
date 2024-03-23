@@ -29,9 +29,6 @@ jobs:
       - name: Publish (${{ env.CARGO_PACKAGE_NAME }})
         run: cargo publish --all-features -v -p ${{ env.CARGO_PACKAGE_NAME }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
   features:
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-sdk
-      cancel-in-progress: false
     name: Publish (sdk)
     needs: core
     runs-on: ubuntu-latest

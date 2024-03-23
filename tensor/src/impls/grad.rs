@@ -73,6 +73,7 @@ where
             }
             // get the gradient of the node
             let grad = store.remove(&node.id()).expect("Gradient not found");
+            let grad = grad.detach();
             // handle the different types of operations
             if let Some(op) = &self.op {
                 match op {

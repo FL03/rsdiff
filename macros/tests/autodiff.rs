@@ -1,40 +1,19 @@
 /*
-    Appellation: gradient <test>
+    Appellation: autodiff <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#![cfg(all(test, feature = "macros"))]
+#![cfg(test)]
+#![allow(unused_variables)]
+extern crate acme_macros as macros;
 
-extern crate acme;
-
-use acme::prelude::autodiff;
 use approx::assert_abs_diff_eq;
-use num::traits::Float;
-
-pub fn add<A, B, C>(a: A, b: B) -> C
-where
-    A: std::ops::Add<B, Output = C>,
-{
-    a + b
-}
+use macros::autodiff;
 
 pub fn sigmoid_prime<T>(x: T) -> T
 where
-    T: Float,
+    T: num::Float,
 {
     x.neg().exp() / (T::one() + x.neg().exp()).powi(2)
-}
-
-trait Square {
-    fn square(self) -> Self;
-}
-
-impl<T> Square for T
-where
-    T: Copy + std::ops::Mul<Output = T>,
-{
-    fn square(self) -> Self {
-        self * self
-    }
 }
 
 #[test]
@@ -133,7 +112,7 @@ fn test_trig() {
     let x: f64 = 2.0;
     assert_eq!(autodiff!(x: x.cos()), -x.sin());
     assert_eq!(autodiff!(x: x.sin()), x.cos());
-    assert_eq!(autodiff!(x: x.tan()), x.cos().square().recip());
+    assert_eq!(autodiff!(x: x.tan()), x.cos().powi(2).recip());
 }
 
 #[test]
@@ -149,7 +128,7 @@ fn test_chained() {
     let x: f64 = 2.0;
     assert_abs_diff_eq!(
         autodiff!(x: x.sin() * x.cos()),
-        2_f64 * x.cos().square() - 1_f64,
+        2_f64 * x.cos().powi(2) - 1_f64,
         epsilon = 1e-8
     );
     assert_eq!(autodiff!(x: x.sin().cos()), -x.cos() * x.sin().sin());
@@ -168,25 +147,4 @@ fn test_sigmoid() {
         autodiff!(x: fn sigmoid(x: f64) -> f64 { 1_f64 / (1_f64 + (-x).exp()) }),
         sigmoid_prime(x)
     );
-}
-
-#[ignore = "Currently, support for function calls is not fully implemented"]
-#[test]
-fn test_function_call() {
-    use acme::prelude::sigmoid;
-    let (x, y) = (1_f64, 2_f64);
-    // differentiating a function call w.r.t. x
-    assert_eq!(autodiff!(x: add(x, y)), 1.0);
-    // differentiating a function call w.r.t. some variable
-    assert_eq!(autodiff!(a: add(x, y)), 0.0);
-    assert_eq!(autodiff!(y: sigmoid::<f64>(y)), sigmoid_prime(y));
-}
-
-#[ignore = "Custom trait methods are not yet supported"]
-#[test]
-fn test_method() {
-    let (x, y) = (1_f64, 2_f64);
-    assert_eq!(autodiff!(x: x.mul(y)), 2.0);
-
-    assert_eq!(autodiff!(x: x.sigmoid()), sigmoid_prime(x));
 }

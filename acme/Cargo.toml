@@ -78,11 +78,11 @@ required-features = ["macros"]
 [build-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.0" }
-acme-derive = { optional = true, path = "../derive", version = "0.3.0" }
-acme-graphs = { optional = true, path = "../graphs", version = "0.3.0" }
-acme-macros = { optional = true, path = "../macros", version = "0.3.0" }
-acme-tensor = { optional = true, path = "../tensor", version = "0.3.0" }
+acme-core = { path = "../core", version = "0.3.0-nightly.1" }
+acme-derive = { optional = true, path = "../derive", version = "0.3.0-nightly.1" }
+acme-graphs = { optional = true, path = "../graphs", version = "0.3.0-nightly.1" }
+acme-macros = { optional = true, path = "../macros", version = "0.3.0-nightly.1" }
+acme-tensor = { optional = true, path = "../tensor", version = "0.3.0-nightly.1" }
 
 [dev-dependencies]
 approx = "0.5"

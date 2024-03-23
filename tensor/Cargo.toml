@@ -25,7 +25,7 @@ serde-ext = [
 [build-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.0" }
+acme-core = { path = "../core", version = "0.3.0-nightly.1" }
 
 num = "0.4"
 serde = { optional = true, features = ["derive"], version = "1" }

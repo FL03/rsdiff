@@ -36,7 +36,7 @@ pub(crate) fn from_vec_with_op<T>(
 
 #[derive(Clone, Debug)]
 // #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd)]
-pub struct TensorBase<T> {
+pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) kind: TensorKind,
     pub(crate) layout: Layout,

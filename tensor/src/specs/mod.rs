@@ -55,6 +55,12 @@ where
 impl_conj!(i8, i16, i32, i64, i128, isize);
 impl_conj!(f32, f64);
 
+pub trait Pow<T> {
+    type Output;
+
+    fn pow(&self, exp: T) -> Self::Output;
+}
+
 pub(crate) mod prelude {
     pub use super::ndtensor::*;
     pub use super::scalar::*;

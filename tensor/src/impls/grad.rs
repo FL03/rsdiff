@@ -5,9 +5,9 @@
 use crate::actions::grad::GradStore;
 use crate::prelude::{Scalar, TensorId, TensorOp, TensorResult};
 use crate::TensorBase;
-use acme::ops::binary::BinaryOp;
-use acme::prelude::Store;
+use acme::prelude::{BinaryOp, Store};
 use std::collections::HashMap;
+use std::ops::{Add, Mul};
 
 // The vec of sorted nodes is passed as an owned value rather than a mutable reference
 // to get around some lifetime limitations.
@@ -79,8 +79,10 @@ where
                 match op {
                     TensorOp::Binary(lhs, rhs, kind) => match kind {
                         BinaryOp::Add => {
-                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) += &grad;
-                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) += &grad;
+                            let a = store.entry(lhs.id()).or_insert(lhs.zeros_like());
+                            *a = &*a + &grad;
+                            let b = store.entry(rhs.id()).or_insert(rhs.zeros_like());
+                            *b = &*b + &grad;
                         }
                         BinaryOp::Mul => {
                             *store.entry(lhs.id()).or_insert(lhs.zeros_like()) +=

@@ -17,3 +17,10 @@ pub trait Operation {
 
     fn kind(&self) -> String;
 }
+
+pub(crate) mod prelude {
+    pub use super::binary::*;
+    pub use super::kinds::Op;
+    pub use super::unary::*;
+    pub use super::Operation;
+}

@@ -5,15 +5,15 @@
 use super::TensorOp;
 
 #[derive(Clone, Debug)]
-pub struct TrackedOp<T>(Option<TensorOp<T>>);
+pub struct BackpropOp<T>(Option<TensorOp<T>>);
 
-impl<T> TrackedOp<T> {
+impl<T> BackpropOp<T> {
     pub fn new(op: TensorOp<T>) -> Self {
-        TrackedOp(Some(op))
+        BackpropOp(Some(op))
     }
 
     pub fn none() -> Self {
-        TrackedOp(None)
+        BackpropOp(None)
     }
 
     pub fn op(&self) -> Option<&TensorOp<T>> {
@@ -29,26 +29,26 @@ impl<T> TrackedOp<T> {
     }
 }
 
-impl<T> Default for TrackedOp<T> {
+impl<T> Default for BackpropOp<T> {
     fn default() -> Self {
         Self::none()
     }
 }
 
-impl<T> From<Option<TensorOp<T>>> for TrackedOp<T> {
+impl<T> From<Option<TensorOp<T>>> for BackpropOp<T> {
     fn from(op: Option<TensorOp<T>>) -> Self {
-        TrackedOp(op)
+        BackpropOp(op)
     }
 }
 
-impl<T> From<TensorOp<T>> for TrackedOp<T> {
+impl<T> From<TensorOp<T>> for BackpropOp<T> {
     fn from(op: TensorOp<T>) -> Self {
-        TrackedOp(Some(op))
+        BackpropOp(Some(op))
     }
 }
 
-impl<T> From<TrackedOp<T>> for Option<TensorOp<T>> {
-    fn from(op: TrackedOp<T>) -> Option<TensorOp<T>> {
+impl<T> From<BackpropOp<T>> for Option<TensorOp<T>> {
+    fn from(op: BackpropOp<T>) -> Option<TensorOp<T>> {
         op.into_inner()
     }
 }

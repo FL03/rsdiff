@@ -25,7 +25,7 @@ fn test_add() {
 fn test_div() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape);
-    let b = Tensor::<f64>::ones(shape) * 2.0;
+    let b = Tensor::<f64>::fill(shape, 2_f64);
     let c = a / b;
 
     assert_eq!(c, Tensor::<f64>::fill(shape, 0.5));

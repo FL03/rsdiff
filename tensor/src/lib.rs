@@ -12,10 +12,13 @@ extern crate alloc;
 extern crate acme_core as acme;
 
 #[doc(inline)]
-pub use self::{error::*, tensor::*};
+pub use self::{error::*, seal::*, tensor::*, utils::*};
 
 pub(crate) mod error;
+#[macro_use]
+pub(crate) mod seal;
 pub(crate) mod tensor;
+pub(crate) mod utils;
 
 pub mod actions;
 pub mod data;
@@ -59,6 +62,7 @@ pub mod prelude {
     pub use crate::store::*;
     #[doc(inline)]
     pub use crate::types::prelude::*;
+    pub use crate::utils::*;
     #[doc(inline)]
     pub use crate::Tensor;
 }

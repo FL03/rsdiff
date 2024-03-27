@@ -33,7 +33,7 @@ impl<T> GradStore<T> {
     }
     /// Inserts a tensor into the store.
     pub fn insert_tensor(&mut self, tensor: TensorBase<T>) -> Option<TensorBase<T>> {
-        self.insert(tensor.id, tensor)
+        self.insert(tensor.id(), tensor)
     }
     /// Returns true if the store contains no elements.
     pub fn is_empty(&self) -> bool {

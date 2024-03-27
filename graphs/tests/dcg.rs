@@ -28,7 +28,7 @@ fn test_dcg() {
 }
 
 #[test]
-fn test_simple_chained() {
+fn test_composite_expr() {
     let mut dcg = Dcg::<f64>::new();
     let a = dcg.input(true, 2.0);
     let b = dcg.input(true, 1.0);

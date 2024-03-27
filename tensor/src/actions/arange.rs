@@ -2,7 +2,7 @@
     Appellation: arange <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use num::traits::{FromPrimitive, Num, ToPrimitive, Zero};
+use num::traits::{FromPrimitive, Num, ToPrimitive};
 use std::ops;
 
 pub struct Arange<T> {
@@ -21,7 +21,7 @@ impl<T> Arange<T> {
 }
 impl<T> Arange<T>
 where
-    T: Copy + Num,
+    T: Copy + Default + Num,
 {
     pub fn start(&self) -> T {
         self.range.start()
@@ -56,17 +56,14 @@ pub enum Aranged<T> {
 
 impl<T> Aranged<T>
 where
-    T: Copy,
+    T: Copy + Default,
 {
     /// Returns the start value of the range.
-    pub fn start(&self) -> T
-    where
-        T: Zero,
-    {
+    pub fn start(&self) -> T {
         match self {
             Aranged::Range { start, .. } => *start,
             Aranged::Inclusive { start, .. } => *start,
-            Aranged::Until { .. } => T::zero(),
+            Aranged::Until { .. } => T::default(),
         }
     }
     /// Returns the stop value of the range.

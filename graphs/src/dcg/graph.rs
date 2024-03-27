@@ -117,15 +117,15 @@ impl<T> Dcg<T> {
 
         let topo = toposort(&self.store, None)?;
 
-        for node in topo.iter().rev() {
-            let node_grad = gradients[node];
-            let node_op = self.get(*node).unwrap();
+        for scope in topo.iter().rev() {
+            let grad = gradients[scope];
+            let node = self.get(*scope).unwrap();
 
-            if let Node::Op { inputs, op } = node_op {
+            if let Node::Op { inputs, op } = node {
                 match op {
                     Operations::Binary(BinaryExpr::Add(_)) => {
-                        for arg in self.store.neighbors_directed(*node, Direction::Incoming) {
-                            *gradients.entry(arg).or_default() += node_grad;
+                        for arg in self.store.neighbors_directed(*scope, Direction::Incoming) {
+                            *gradients.entry(arg).or_default() += grad;
                         }
                     }
                     Operations::Binary(BinaryExpr::Mul(_)) => {
@@ -133,8 +133,8 @@ impl<T> Dcg<T> {
                         let rhs = inputs[1];
                         let lhs_val = self[lhs].get_value();
                         let rhs_val = self[rhs].get_value();
-                        *gradients.entry(lhs).or_default() += node_grad * rhs_val;
-                        *gradients.entry(rhs).or_default() += node_grad * lhs_val;
+                        *gradients.entry(lhs).or_default() += grad * rhs_val;
+                        *gradients.entry(rhs).or_default() += grad * lhs_val;
                     }
                     // Handle other operations as needed
                     _ => {}

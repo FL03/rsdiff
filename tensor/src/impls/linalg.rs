@@ -5,39 +5,8 @@
 //! Implementations for linear algebra operations.
 //!
 //!
-use crate::prelude::{Matmul, Scalar, TensorOp, TensorResult};
-use crate::shape::ShapeError;
+use crate::prelude::{Matmul, Scalar, TensorOp};
 use crate::tensor::*;
-
-pub(crate) fn matmul<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) -> TensorResult<TensorBase<T>>
-where
-    T: Scalar,
-{
-    if lhs.shape().rank() != rhs.shape().rank() {
-        return Err(ShapeError::IncompatibleShapes.into());
-    }
-
-    let lhs_shape = lhs.shape().clone();
-    let lhs_m = lhs_shape.rows();
-    let lhs_n = lhs_shape.columns();
-    let rhs_shape = rhs.shape().clone();
-
-    let shape = lhs_shape.matmul_shape(rhs.shape()).unwrap();
-    let mut result = vec![T::zero(); shape.elements()];
-
-    for i in 0..lhs_m {
-        for j in 0..rhs_shape.columns() {
-            for k in 0..lhs_n {
-                let pos = i * rhs_shape[1] + j;
-                let left = i * lhs_n + k;
-                let right = k * rhs_shape[1] + j;
-                result[pos] += lhs.store[left] * rhs.store[right];
-            }
-        }
-    }
-    let op = TensorOp::Matmul(Box::new(lhs.clone()), Box::new(rhs.clone()));
-    Ok(from_vec_with_op(false, op, shape, result))
-}
 
 impl<T> Matmul<TensorBase<T>> for TensorBase<T>
 where

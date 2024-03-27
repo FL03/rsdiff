@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::actions::grad::GradStore;
-use crate::prelude::{Scalar, TensorId, TensorOp};
+use crate::prelude::{Scalar, TensorId, TensorOp, TensorResult};
 use crate::TensorBase;
 use acme::ops::binary::BinaryOp;
 use acme::prelude::Store;
@@ -56,7 +56,7 @@ where
         nodes
     }
 
-    pub fn grad(&self) -> GradStore<T>
+    pub fn grad(&self) -> TensorResult<GradStore<T>>
     where
         T: std::fmt::Debug,
     {
@@ -65,7 +65,7 @@ where
         // initialize a new gradient store
         let mut store = GradStore::new();
         // insert the gradient w.r.t. the current node
-        store.insert(sorted[0].id(), sorted[0].ones_like());
+        store.insert(self.id(), self.ones_like());
 
         for node in sorted {
             if node.is_variable() {
@@ -98,6 +98,6 @@ where
             }
         }
 
-        store
+        Ok(store)
     }
 }

@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
+pub mod dtype;
 pub mod id;
 pub mod kinds;
 pub mod order;

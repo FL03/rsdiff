@@ -2,7 +2,8 @@
     Appellation: owned <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::data::nonnull_from_vec_data;
+use crate::data::utils::nonnull_from_vec_data;
+use crate::data::RawData;
 use core::mem::{self, ManuallyDrop};
 use core::ptr::NonNull;
 use core::slice;
@@ -25,6 +26,10 @@ impl<A> OwnedRepr<A> {
         Self { capacity, len, ptr }
     }
 
+    pub(crate) fn as_slice(&self) -> &[A] {
+        unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
+    }
+
     pub fn capacity(&self) -> usize {
         self.capacity
     }
@@ -36,7 +41,6 @@ impl<A> OwnedRepr<A> {
     pub fn ptr(&self) -> NonNull<A> {
         self.ptr
     }
-
     /// Set the valid length of the data
     ///
     /// ## Safety
@@ -59,10 +63,6 @@ impl<A> OwnedRepr<A> {
 
     pub(crate) fn into_vec(self) -> Vec<A> {
         ManuallyDrop::new(self).take_as_vec()
-    }
-
-    pub(crate) fn as_slice(&self) -> &[A] {
-        unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
     }
 }
 
@@ -117,4 +117,17 @@ impl<A> From<Vec<A>> for OwnedRepr<A> {
     fn from(vec: Vec<A>) -> Self {
         Self::from_vec(vec)
     }
+}
+
+unsafe impl<A> RawData for OwnedRepr<A> {
+    type Elem = A;
+
+    fn _is_pointer_inbounds(&self, self_ptr: *const Self::Elem) -> bool {
+        let slc = self.as_slice();
+        let ptr = slc.as_ptr() as *mut A;
+        let end = unsafe { ptr.add(slc.len()) };
+        self_ptr >= ptr && self_ptr <= end
+    }
+
+    private_impl! {}
 }

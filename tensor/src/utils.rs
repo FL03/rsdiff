@@ -20,12 +20,12 @@ where
     let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
     let mut result = vec![T::zero(); shape.elements()];
 
-    for i in 0..lhs.shape().rows() {
-        for j in 0..rhs.shape().columns() {
-            for k in 0..lhs.shape().columns() {
-                let pos = i * rhs.shape().columns() + j;
-                let left = i * lhs.shape().columns() + k;
-                let right = k * rhs.shape().columns() + j;
+    for i in 0..lhs.shape().nrows() {
+        for j in 0..rhs.shape().ncols() {
+            for k in 0..lhs.shape().ncols() {
+                let pos = i * rhs.shape().ncols() + j;
+                let left = i * lhs.shape().ncols() + k;
+                let right = k * rhs.shape().ncols() + j;
                 result[pos] += lhs.store[left] * rhs.store[right];
             }
         }
@@ -46,12 +46,12 @@ where
     let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
     let mut result = vec![T::zero(); shape.elements()];
 
-    for i in 0..lhs.shape().rows() {
-        for j in 0..rhs.shape().columns() {
-            for k in 0..lhs.shape().columns() {
-                let pos = i * rhs.shape().columns() + j;
-                let left = i * lhs.shape().columns() + k;
-                let right = k * rhs.shape().columns() + j;
+    for i in 0..lhs.shape().nrows() {
+        for j in 0..rhs.shape().ncols() {
+            for k in 0..lhs.shape().ncols() {
+                let pos = i * rhs.shape().ncols() + j;
+                let left = i * lhs.shape().ncols() + k;
+                let right = k * rhs.shape().ncols() + j;
                 result[pos] += lhs.store[left] * rhs.store[right];
             }
         }

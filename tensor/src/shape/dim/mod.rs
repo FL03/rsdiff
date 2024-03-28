@@ -11,6 +11,14 @@ pub(crate) mod axis;
 pub(crate) mod dimension;
 pub(crate) mod rank;
 
+pub trait Dimension {
+    type Pattern;
+
+    fn elements(&self) -> usize;
+
+    fn ndim(&self) -> usize;
+}
+
 pub trait IntoAxis {
     fn into_axis(self) -> Axis;
 }
@@ -30,5 +38,3 @@ impl IntoRank for usize {
         Rank::new(self)
     }
 }
-
-pub trait Dimension {}

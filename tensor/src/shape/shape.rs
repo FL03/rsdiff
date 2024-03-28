@@ -83,7 +83,7 @@ impl Shape {
         self.0.remove(index)
     }
 
-    pub fn columns(&self) -> usize {
+    pub fn ncols(&self) -> usize {
         if self.len() >= 2 {
             self.0[1]
         } else if self.len() == 1 {
@@ -93,7 +93,7 @@ impl Shape {
         }
     }
 
-    pub fn rows(&self) -> usize {
+    pub fn nrows(&self) -> usize {
         if self.len() >= 1 {
             *self.0.first().unwrap()
         } else {
@@ -310,6 +310,13 @@ impl ops::Index<ops::RangeToInclusive<usize>> for Shape {
 unsafe impl Send for Shape {}
 
 unsafe impl Sync for Shape {}
+
+// macro_rules! tuple_vec {
+//     ($($n:tt),*) => {
+//         vec![$($n,)*]
+//     };
+
+// }
 
 // macro_rules! impl_from_tuple {
 //     ($($n:tt: $name:ident),+) => {

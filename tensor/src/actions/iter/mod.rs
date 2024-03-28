@@ -1,15 +1,15 @@
 /*
-    Appellation: grad <mod>
+    Appellation: iter <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Gradient
+//! # Iter
 //!
 //!
-pub use self::iterator::Iterator;
+pub use self::iterator::*;
 
 pub(crate) mod iterator;
 
-pub trait TensorIter {
+pub trait IterTensor {
     type Item;
 }
 

@@ -5,11 +5,9 @@
 //! # Dimension
 //!
 
-pub use self::{axis::Axis, dimension::*, rank::Rank};
+pub use self::dimension::Dim;
 
-pub(crate) mod axis;
 pub(crate) mod dimension;
-pub(crate) mod rank;
 
 pub trait Dimension {
     type Pattern;
@@ -17,24 +15,4 @@ pub trait Dimension {
     fn elements(&self) -> usize;
 
     fn ndim(&self) -> usize;
-}
-
-pub trait IntoAxis {
-    fn into_axis(self) -> Axis;
-}
-
-impl IntoAxis for usize {
-    fn into_axis(self) -> Axis {
-        Axis::new(self)
-    }
-}
-
-pub trait IntoRank {
-    fn into_rank(self) -> Rank;
-}
-
-impl IntoRank for usize {
-    fn into_rank(self) -> Rank {
-        Rank::new(self)
-    }
 }

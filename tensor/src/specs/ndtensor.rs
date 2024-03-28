@@ -17,7 +17,7 @@ pub trait NdTensor {
         self.layout().shape().rank()
     }
 
-    fn shape(&self) -> &Shape {
+    fn shape(&self) -> Shape {
         self.layout().shape()
     }
 

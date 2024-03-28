@@ -2,12 +2,13 @@
    Appellation: shape <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::dim::Rank;
 use super::error::ShapeError;
+use super::{Axis, Rank};
 use crate::prelude::TensorResult;
+
+use core::ops::{self, Deref};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::ops::{self, Deref};
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -26,12 +27,12 @@ impl Shape {
         Self(Vec::with_capacity(capacity))
     }
 
-    pub fn zero() -> Self {
-        Self::default()
-    }
-
     pub fn zeros(rank: usize) -> Self {
         Self(vec![0; rank])
+    }
+
+    pub fn as_slice(&self) -> &[usize] {
+        &self.0
     }
 
     pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
@@ -66,6 +67,7 @@ impl Shape {
         }
         true
     }
+
     pub fn ncols(&self) -> usize {
         if self.len() >= 2 {
             self.0[1]
@@ -100,12 +102,34 @@ impl Shape {
         self.0.remove(index)
     }
 
-    pub fn set(&mut self, index: usize, dim: usize) {
-        self.0[index] = dim
+    pub fn reverse(&mut self) {
+        self.0.reverse()
+    }
+
+    pub fn set(&mut self, index: Axis, dim: usize) {
+        self[index] = dim
     }
 
     pub fn size(&self) -> usize {
         self.0.iter().product()
+    }
+
+    pub fn slice(&self) -> &[usize] {
+        &self.0
+    }
+
+    pub fn slice_mut(&mut self) -> &mut [usize] {
+        &mut self.0
+    }
+
+    pub(crate) fn swap(&mut self, a: Axis, b: Axis) {
+        self.0.swap(a.axis(), b.axis())
+    }
+
+    pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {
+        let mut shape = self.clone();
+        shape.swap(swap, with);
+        shape
     }
 
     pub(crate) fn stride_contiguous(&self) -> Vec<usize> {
@@ -242,10 +266,10 @@ impl ops::Index<usize> for Shape {
     }
 }
 
-impl ops::Index<Rank> for Shape {
+impl ops::Index<Axis> for Shape {
     type Output = usize;
 
-    fn index(&self, index: Rank) -> &Self::Output {
+    fn index(&self, index: Axis) -> &Self::Output {
         &self.0[*index]
     }
 }
@@ -256,8 +280,8 @@ impl ops::IndexMut<usize> for Shape {
     }
 }
 
-impl ops::IndexMut<Rank> for Shape {
-    fn index_mut(&mut self, index: Rank) -> &mut Self::Output {
+impl ops::IndexMut<Axis> for Shape {
+    fn index_mut(&mut self, index: Axis) -> &mut Self::Output {
         &mut self.0[*index]
     }
 }

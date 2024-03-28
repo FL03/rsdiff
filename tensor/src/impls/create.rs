@@ -21,7 +21,7 @@ where
     pub fn fill(shape: impl IntoShape, value: T) -> Self {
         let shape = shape.into_shape();
         let store = vec![value; shape.size()];
-        from_vec(false.into(), shape, store)
+        from_vec(false, shape, store)
     }
 
     pub fn default_like(&self) -> Self
@@ -48,7 +48,7 @@ where
             store.push(value);
             value += step;
         }
-        from_vec(false.into(), (store.len(),), store)
+        from_vec(false, store.len(), store)
     }
 
     /// Create a tensor within a range of values
@@ -64,7 +64,7 @@ where
             store.push(value);
             value += step;
         }
-        from_vec(false.into(), (store.len(),), store)
+        from_vec(false, store.len(), store)
     }
 
     pub fn logspace(start: T, end: T, steps: usize) -> Self
@@ -80,7 +80,7 @@ where
             store.push(value.exp2());
             value += step;
         }
-        from_vec(false.into(), (store.len(),), store)
+        from_vec(false, (store.len(),), store)
     }
 
     pub fn geomspace(start: T, end: T, steps: usize) -> Self
@@ -96,7 +96,7 @@ where
             store.push(value.exp());
             value += step;
         }
-        from_vec(false.into(), (store.len(),), store)
+        from_vec(false, (store.len(),), store)
     }
 }
 

@@ -10,6 +10,16 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
 
+pub trait IntoRank {
+    fn into_rank(self) -> Rank;
+}
+
+impl IntoRank for usize {
+    fn into_rank(self) -> Rank {
+        Rank::new(self)
+    }
+}
+
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Rank(pub usize);

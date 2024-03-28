@@ -14,15 +14,5 @@ pub trait TensorStore {
     type Elem;
 }
 
-pub enum TensorData<T> {
-    Scalar(T),
-    Tensor(Vec<TensorData<T>>),
-}
-
-pub enum TensorBackend {
-    Scalar,
-    Tensor,
-}
-
 #[cfg(test)]
 mod tests {}

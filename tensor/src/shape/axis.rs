@@ -9,6 +9,21 @@
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 
+pub trait IntoAxis {
+    fn into_axis(self) -> Axis;
+}
+
+impl IntoAxis for usize {
+    fn into_axis(self) -> Axis {
+        Axis::new(self)
+    }
+}
+
+pub struct Switch {
+    pub swap: Axis,
+    pub with: Axis,
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Axis(pub(crate) usize);

@@ -8,7 +8,7 @@ keywords = ["acme", "autodiff", "mathematics", "tensor"]
 license = "Apache-2.0"
 repository = "https://github.com/FL03/acme"
 readme = "README.md"
-version = "0.3.0-nightly.2" # TODO - Update cargo package version
+version = "0.3.0" # TODO - Update cargo package version
 
 [workspace]
 default-members = [

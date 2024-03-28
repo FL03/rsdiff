@@ -1,5 +1,5 @@
 /*
-    Appellation: tensor <test>
+    Appellation: composition <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![cfg(test)]
@@ -8,29 +8,25 @@ extern crate acme_tensor as acme;
 use acme::prelude::{Shape, Tensor};
 
 #[test]
-fn test_tensor() {
+fn test_ones_and_zeros() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape);
-    let b = Tensor::zeros(shape);
+    let b = a.zeros_like();
 
     assert_ne!(&a, &b);
-}
-
-#[test]
-fn test_reshape() {
-    let shape = (2, 2);
-    let a = Tensor::<f64>::ones(shape);
-    let b = a.clone().reshape((4,)).unwrap();
-
-    assert_ne!(&a.shape(), &b.shape());
-    assert_eq!(&a.elements(), &b.elements());
+    assert_ne!(a.id(), b.id());
+    assert_eq!(a.shape(), b.shape());
+    assert_eq!(a.size(), b.size());
+    assert_eq!(a.stride(), b.stride());
+    assert_eq!(a, Tensor::ones(shape));
+    assert_eq!(b, Tensor::zeros(shape));
 }
 
 #[test]
 fn test_arange() {
     let exp = Shape::from(10);
     let a = Tensor::arange(0_f64, 10_f64, 1_f64);
-    assert_eq!(a.shape(), &exp);
+    assert_eq!(a.shape(), exp);
 
     for i in 0..10 {
         assert_eq!(a[&[i]], i as f64);
@@ -41,7 +37,7 @@ fn test_arange() {
 fn test_linstep() {
     let exp = Shape::from(10);
     let a = Tensor::linspace(0_f64, 10_f64, 10);
-    assert_eq!(a.shape(), &exp);
+    assert_eq!(a.shape(), exp);
     let b = Tensor::arange(0_f64, 10_f64, 1_f64);
     for i in 0..10 {
         assert_eq!(a[&[i]], b[&[i]]);

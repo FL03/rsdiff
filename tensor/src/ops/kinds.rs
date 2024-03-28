@@ -2,16 +2,23 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::shape::Axis;
 use crate::TensorBase;
 use acme::ops::binary::BinaryOp;
 use acme::ops::unary::UnaryOp;
 
+pub type BoxTensor<T = f64> = Box<crate::TensorBase<T>>;
+
 #[derive(Clone, Debug)]
 pub enum TensorOp<T> {
-    Binary(Box<TensorBase<T>>, Box<TensorBase<T>>, BinaryOp),
-    BinaryScalar(Box<TensorBase<T>>, T, BinaryOp),
-    Unary(Box<TensorBase<T>>, UnaryOp),
-    Matmul(Box<TensorBase<T>>, Box<TensorBase<T>>),
+    Binary(BoxTensor<T>, BoxTensor<T>, BinaryOp),
+    BinaryScalar(BoxTensor<T>, T, BinaryOp),
+    Unary(BoxTensor<T>, UnaryOp),
+    Matmul(BoxTensor<T>, BoxTensor<T>),
+    Transpose {
+        tensor: BoxTensor<T>,
+        axes: (Axis, Axis),
+    },
 }
 
 impl<T> TensorOp<T> {
@@ -23,12 +30,19 @@ impl<T> TensorOp<T> {
         TensorOp::BinaryScalar(Box::new(lhs), rhs, op)
     }
 
-    pub fn unary(tensor: TensorBase<T>, op: UnaryOp) -> Self {
-        TensorOp::Unary(Box::new(tensor), op)
-    }
-
     pub fn matmul(lhs: TensorBase<T>, rhs: TensorBase<T>) -> Self {
         TensorOp::Matmul(Box::new(lhs), Box::new(rhs))
+    }
+
+    pub fn transpose(tensor: TensorBase<T>, swap: Axis, with: Axis) -> Self {
+        TensorOp::Transpose {
+            tensor: Box::new(tensor),
+            axes: (swap, with),
+        }
+    }
+
+    pub fn unary(tensor: TensorBase<T>, op: UnaryOp) -> Self {
+        TensorOp::Unary(Box::new(tensor), op)
     }
 
     pub fn lhs(&self) -> &TensorBase<T> {
@@ -37,6 +51,7 @@ impl<T> TensorOp<T> {
             TensorOp::BinaryScalar(lhs, _, _) => lhs,
             TensorOp::Unary(lhs, _) => lhs,
             TensorOp::Matmul(lhs, _) => lhs,
+            TensorOp::Transpose { tensor, .. } => tensor,
         }
     }
 
@@ -47,9 +62,4 @@ impl<T> TensorOp<T> {
             _ => None,
         }
     }
-}
-
-pub enum Inputs<T> {
-    Scalar(T),
-    Tensor(TensorBase<T>),
 }

@@ -29,16 +29,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: setup (rust)
+      - name: Setup the toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           components: clippy
           override: true
-      - name: setup (clippy)
+      - name: Installation
         run: cargo install clippy-sarif sarif-fmt
-      - name: analyze
+      - name: Analyze
         run:
           cargo clippy
           --all-features

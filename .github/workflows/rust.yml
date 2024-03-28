@@ -10,7 +10,6 @@ env:
 on:
   push:
     branches: [ main ]
-    tags: [ nightly*,  v*.*.* ]
   release:
     types: [ created ]
   repository_dispatch:

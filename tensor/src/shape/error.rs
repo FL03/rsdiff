@@ -32,7 +32,9 @@ pub type ShapeResult<T = ()> = std::result::Result<T, ShapeError>;
 #[repr(usize)]
 #[strum(serialize_all = "snake_case")]
 pub enum ShapeError {
+    DimensionMismatch,
     IncompatibleShapes,
+    InvalidAxis,
     InvalidShape,
     MismatchedElements,
 }

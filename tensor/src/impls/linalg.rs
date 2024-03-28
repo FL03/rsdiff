@@ -8,6 +8,8 @@
 use crate::prelude::{Matmul, Scalar, TensorOp};
 use crate::tensor::*;
 
+impl<T> TensorBase<T> where T: Scalar {}
+
 impl<T> Matmul<TensorBase<T>> for TensorBase<T>
 where
     T: Scalar,
@@ -15,7 +17,7 @@ where
     type Output = Self;
 
     fn matmul(&self, other: &Self) -> Self {
-        let shape = self.shape().matmul_shape(other.shape()).unwrap();
+        let shape = self.shape().matmul_shape(&other.shape()).unwrap();
         let mut result = vec![T::zero(); shape.size()];
 
         for i in 0..self.shape()[0] {

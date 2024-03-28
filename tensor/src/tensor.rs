@@ -10,21 +10,25 @@ use std::ops::Index;
 // use std::sync::{Arc, RwLock};
 
 pub(crate) fn new<T>(
-    kind: TensorKind,
-    op: BackpropOp<T>,
+    kind: impl Into<TensorKind>,
+    op: impl Into<BackpropOp<T>>,
     shape: impl IntoShape,
     store: Vec<T>,
 ) -> TensorBase<T> {
     TensorBase {
         id: TensorId::new(),
-        kind,
+        kind: kind.into(),
         layout: Layout::contiguous(shape),
-        op,
+        op: op.into(),
         store,
     }
 }
 
-pub(crate) fn from_vec<T>(kind: TensorKind, shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
+pub(crate) fn from_vec<T>(
+    kind: impl Into<TensorKind>,
+    shape: impl IntoShape,
+    store: Vec<T>,
+) -> TensorBase<T> {
     new(kind, BackpropOp::none(), shape, store)
 }
 
@@ -61,16 +65,16 @@ impl<T> TensorBase<T> {
     }
 
     pub fn from_vec(
-        kind: TensorKind,
-        op: BackpropOp<T>,
+        kind: impl Into<TensorKind>,
+        op: impl Into<BackpropOp<T>>,
         shape: impl IntoShape,
         store: Vec<T>,
     ) -> Self {
         Self {
             id: TensorId::new(),
-            kind,
+            kind: kind.into(),
             layout: Layout::contiguous(shape),
-            op,
+            op: op.into(),
             store,
         }
     }
@@ -91,10 +95,6 @@ impl<T> TensorBase<T> {
             }
         }
     }
-    /// Returns the number of elements in the tensor.
-    pub fn elements(&self) -> usize {
-        self.layout.size()
-    }
     /// Returns the unique identifier of the tensor.
     pub const fn id(&self) -> TensorId {
         self.id
@@ -112,8 +112,12 @@ impl<T> TensorBase<T> {
         self.layout.shape().rank()
     }
     /// An owned reference of the tensors [Shape]
-    pub fn shape(&self) -> &Shape {
+    pub fn shape(&self) -> Shape {
         self.layout.shape()
+    }
+    /// Returns the number of elements in the tensor.
+    pub fn size(&self) -> usize {
+        self.layout.size()
     }
     /// Get a reference to the stride of the tensor
     pub fn stride(&self) -> &[usize] {
@@ -189,11 +193,30 @@ impl<T> TensorBase<T> {
             store,
         }
     }
+
+    pub fn with_layout(mut self, layout: Layout) -> Self {
+        self.layout = layout;
+        self
+    }
+
+    pub fn with_op(mut self, op: BackpropOp<T>) -> Self {
+        self.op = op;
+        self
+    }
+
+    pub fn with_shape(mut self, shape: impl IntoShape) -> Self {
+        self.layout = Layout::contiguous(shape);
+        self
+    }
 }
 
 impl<T> TensorBase<T> {
     pub(crate) fn data(&self) -> &Vec<T> {
         &self.store
+    }
+
+    pub(crate) fn data_mut(&mut self) -> &mut Vec<T> {
+        &mut self.store
     }
 }
 
@@ -201,7 +224,7 @@ impl<T> Index<&[usize]> for TensorBase<T> {
     type Output = T;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
-        let i = self.layout().position(index);
+        let i = self.layout().position(index).unwrap();
         &self.store[i]
     }
 }
@@ -219,6 +242,14 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.store == other.store
+        self.layout == other.layout && self.store == other.store
+    }
+}
+
+impl<T> FromIterator<T> for TensorBase<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let store = Vec::from_iter(iter);
+        let shape = Shape::from(store.len());
+        from_vec(TensorKind::Normal, shape, store)
     }
 }

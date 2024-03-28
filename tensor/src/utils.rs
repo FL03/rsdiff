@@ -17,7 +17,7 @@ where
         return Err(ShapeError::IncompatibleShapes.into());
     }
 
-    let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
+    let shape = lhs.shape().matmul_shape(&rhs.shape()).unwrap();
     let mut result = vec![T::zero(); shape.size()];
 
     for i in 0..lhs.shape().nrows() {
@@ -43,7 +43,7 @@ where
         return Err(ShapeError::IncompatibleShapes.into());
     }
 
-    let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
+    let shape = lhs.shape().matmul_shape(&rhs.shape()).unwrap();
     let mut result = vec![T::zero(); shape.size()];
 
     for i in 0..lhs.shape().nrows() {

@@ -8,6 +8,8 @@
 pub mod arith;
 pub mod uplo;
 
+use crate::shape::Axis;
+
 pub trait Inverse {
     fn inv(self) -> Self;
 }
@@ -20,7 +22,7 @@ pub trait Matmul<Rhs = Self> {
 }
 
 pub trait Transpose {
-    fn transpose(&self) -> Self;
+    fn transpose(&self, swap: Axis, with: Axis) -> Self;
 }
 
 pub(crate) mod prelude {

@@ -5,22 +5,30 @@
 use std::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
 
-pub trait Get<Q, K, V>
-where
-    K: Borrow<Q>,
-{
-    fn get(&self, key: &Q) -> Option<&V>;
+pub trait Get<Q> {
+    type Key: Borrow<Q>;
+    type Value;
+
+    fn get(&self, key: &Q) -> Option<&Self::Value>;
 }
 
-impl<Q, K, V> Get<Q, K, V> for BTreeMap<K, V>
+pub trait GetMut<Q>: Get<Q> {
+    fn get_mut(&mut self, key: &Q) -> Option<&mut Self::Value>;
+}
+
+impl<Q, K, V> Get<Q> for BTreeMap<K, V>
 where
     K: Borrow<Q> + Ord,
     Q: Ord,
 {
-    fn get(&self, key: &Q) -> Option<&V> {
+    type Key = K;
+    type Value = V;
+
+    fn get(&self, key: &Q) -> Option<&Self::Value> {
         BTreeMap::get(self, key)
     }
 }
+
 pub trait Store<K, V> {
     fn get(&self, key: &K) -> Option<&V>;
 
@@ -29,6 +37,12 @@ pub trait Store<K, V> {
     fn insert(&mut self, key: K, value: V) -> Option<V>;
 
     fn remove(&mut self, key: &K) -> Option<V>;
+}
+
+pub trait Cache<K, V> {
+    fn get_or_insert_with<F>(&mut self, key: K, f: F) -> &mut V
+    where
+        F: FnOnce() -> V;
 }
 
 pub trait OrInsert<K, V> {

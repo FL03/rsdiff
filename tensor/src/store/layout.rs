@@ -46,9 +46,9 @@ impl Layout {
         }
     }
 
-    pub(crate) fn position(&self, coords: &[usize]) -> usize {
+    pub(crate) fn position(&self, coords: impl AsRef<[usize]>) -> usize {
         let mut index = self.offset;
-        for (i, &coord) in coords.iter().enumerate() {
+        for (i, &coord) in coords.as_ref().iter().enumerate() {
             index += coord * self.stride[i];
         }
         index
@@ -66,7 +66,7 @@ impl Layout {
         &self.shape
     }
 
-    pub fn stride(&self) -> &Vec<usize> {
+    pub fn stride(&self) -> &[usize] {
         &self.stride
     }
 }

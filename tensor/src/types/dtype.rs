@@ -5,9 +5,28 @@
 
 use std::any::TypeId;
 
+pub enum TypeError {
+    ConversionError,
+}
+
 pub enum DType {
     Float(Float),
     Integer(Integer),
+}
+
+impl DType {
+    pub fn from_type<T>(_value: &T) -> Result<Self, ()>
+    where
+        T: 'static,
+    {
+        if let Ok(float) = Float::from_type(_value) {
+            Ok(DType::Float(float))
+        } else if let Ok(integer) = Integer::from_type(_value) {
+            Ok(DType::Integer(integer))
+        } else {
+            Err(())
+        }
+    }
 }
 
 pub enum Float {
@@ -45,6 +64,67 @@ impl From<f64> for Float {
 pub struct Integer {
     pub bits: NumBits,
     pub signed: bool,
+}
+
+impl Integer {
+    pub fn from_type<T>(_value: &T) -> Result<Self, ()>
+    where
+        T: 'static,
+    {
+        if TypeId::of::<T>() == TypeId::of::<i8>() {
+            Ok(Integer {
+                bits: NumBits::B8,
+                signed: true,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<i16>() {
+            Ok(Integer {
+                bits: NumBits::B16,
+                signed: true,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<i32>() {
+            Ok(Integer {
+                bits: NumBits::B32,
+                signed: true,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<i64>() {
+            Ok(Integer {
+                bits: NumBits::B64,
+                signed: true,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<i128>() {
+            Ok(Integer {
+                bits: NumBits::B128,
+                signed: true,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<u8>() {
+            Ok(Integer {
+                bits: NumBits::B8,
+                signed: false,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<u16>() {
+            Ok(Integer {
+                bits: NumBits::B16,
+                signed: false,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<u32>() {
+            Ok(Integer {
+                bits: NumBits::B32,
+                signed: false,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<u64>() {
+            Ok(Integer {
+                bits: NumBits::B64,
+                signed: false,
+            })
+        } else if TypeId::of::<T>() == TypeId::of::<u128>() {
+            Ok(Integer {
+                bits: NumBits::B128,
+                signed: false,
+            })
+        } else {
+            Err(())
+        }
+    }
 }
 
 #[repr(u8)]

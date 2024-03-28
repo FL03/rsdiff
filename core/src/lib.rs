@@ -14,6 +14,7 @@ pub(crate) mod utils;
 pub mod errors;
 pub mod eval;
 pub mod id;
+pub mod math;
 pub mod ops;
 pub mod specs;
 pub mod types;

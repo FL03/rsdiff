@@ -11,6 +11,8 @@ pub mod repr {
     pub mod owned;
 }
 
+pub trait Data: RawData {}
+
 #[allow(clippy::missing_safety_doc)]
 pub unsafe trait RawData {
     type Elem;
@@ -20,8 +22,6 @@ pub unsafe trait RawData {
 
     private_decl! {}
 }
-
-pub trait Data: RawData {}
 
 pub(crate) mod utils {
     #[cfg(not(feature = "std"))]

@@ -9,6 +9,7 @@ pub mod kinds;
 pub mod order;
 
 pub(crate) mod prelude {
+    pub use super::dtype::DType;
     pub use super::id::TensorId;
     pub use super::kinds::TensorKind;
     pub use super::order::Order;

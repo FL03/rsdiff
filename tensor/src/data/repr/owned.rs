@@ -17,29 +17,35 @@ pub struct OwnedRepr<A> {
 }
 
 impl<A> OwnedRepr<A> {
+    /// Create an [OwnedRepr] from a [Vec]
     pub fn from_vec(vec: Vec<A>) -> Self {
         let mut v = ManuallyDrop::new(vec);
-        let capacity = v.capacity();
-        let len = v.len();
-        let ptr = nonnull_from_vec_data(&mut v);
 
-        Self { capacity, len, ptr }
+        Self {
+            capacity: v.capacity(),
+            len: v.len(),
+            ptr: nonnull_from_vec_data(&mut v),
+        }
+    }
+
+    pub fn as_ptr(&self) -> *const A {
+        self.ptr.as_ptr()
+    }
+
+    pub fn as_ptr_mut(&mut self) -> *mut A {
+        self.ptr.as_ptr()
     }
 
     pub(crate) fn as_slice(&self) -> &[A] {
         unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
     }
 
-    pub fn capacity(&self) -> usize {
+    pub const fn capacity(&self) -> usize {
         self.capacity
     }
 
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.len
-    }
-
-    pub fn ptr(&self) -> NonNull<A> {
-        self.ptr
     }
     /// Set the valid length of the data
     ///

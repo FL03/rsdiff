@@ -5,7 +5,7 @@
 use crate::prelude::TensorId;
 use crate::TensorBase;
 use acme::prelude::Store;
-use std::collections::btree_map::{BTreeMap, Entry};
+use std::collections::btree_map::{BTreeMap, Entry, Keys};
 use std::ops::{Index, IndexMut};
 
 #[derive(Clone, Debug)]
@@ -38,6 +38,10 @@ impl<T> GradStore<T> {
     /// Returns true if the store contains no elements.
     pub fn is_empty(&self) -> bool {
         self.store.is_empty()
+    }
+
+    pub fn keys(&self) -> Keys<'_, TensorId, TensorBase<T>> {
+        self.store.keys()
     }
     /// Returns the number of elements in the store.
     pub fn len(&self) -> usize {

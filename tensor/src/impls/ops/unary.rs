@@ -57,6 +57,16 @@ impl<T> TensorBase<T>
 where
     T: Scalar,
 {
+    pub fn abs(self) -> TensorBase<<T as Scalar>::Real>
+    where
+        T: Scalar<Real = T>,
+    {
+        let shape = self.shape().clone();
+        let store = self.store.iter().copied().map(|v| v.abs()).collect();
+        let op = TensorOp::Unary(Box::new(self), UnaryOp::Abs);
+        from_vec_with_op(false, op, shape, store)
+    }
+
     impl_unary_op!(Cos, cos);
     impl_unary_op!(Cosh, cosh);
     impl_unary_op!(Exp, exp);

@@ -29,6 +29,32 @@ fn test_addition() {
 }
 
 #[test]
+fn test_addition_2() {
+    let shape = (2, 2);
+    let a = Tensor::<f64>::ones(shape).variable();
+    let b = Tensor::<f64>::ones(shape).variable();
+    let c = Tensor::<f64>::ones(shape).variable();
+    let tmp = &a + &b;
+    println!("Tmp: {}", &tmp.id());
+    let d = tmp + &c;
+
+    assert_eq!(&d, &Tensor::fill(shape, 3_f64));
+    println!(
+        "*** Variables ***\nA: {}\nB: {}\nC: {}\n\n",
+        &a.id(),
+        &b.id(),
+        &c.id()
+    );
+    println!("*** Outcomes ***\nD: {}", &d.id());
+    let grad = d.grad().unwrap();
+    println!("{:?}", &grad.keys());
+
+    for i in [a.id(), b.id(), c.id()].iter() {
+        assert_eq!(grad[i], Tensor::ones(shape));
+    }
+}
+
+#[test]
 fn test_multiplication() {
     let shape = (2, 2);
 

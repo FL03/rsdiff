@@ -11,3 +11,12 @@ pub trait StructuralFn {
 }
 
 pub trait StructuredArgs {}
+
+pub struct StructFunc<F, A>
+where
+    F: StructuralFn,
+    A: StructuredArgs,
+{
+    args: A,
+    func: F,
+}

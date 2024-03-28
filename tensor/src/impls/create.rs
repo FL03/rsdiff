@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::IntoShape;
-use crate::tensor::*;
+use crate::tensor::{from_vec, TensorBase};
 use num::traits::{FromPrimitive, NumAssign, One, Zero};
 
 impl<T> TensorBase<T>
@@ -99,6 +99,7 @@ where
         from_vec(false.into(), (store.len(),), store)
     }
 }
+
 impl<T> TensorBase<T>
 where
     T: Clone + One,

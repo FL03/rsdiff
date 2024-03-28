@@ -5,5 +5,10 @@
 //! # Elements
 //!
 //!
+use crate::prelude::DType;
 
-pub trait Element {}
+pub trait Element {
+    type Elem;
+
+    fn dtype(&self) -> DType;
+}

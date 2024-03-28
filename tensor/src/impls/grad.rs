@@ -6,52 +6,52 @@ use crate::actions::grad::GradStore;
 use crate::prelude::{Scalar, TensorId, TensorOp, TensorResult};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, Store};
-use std::collections::HashMap;
-use std::ops::{Add, Mul};
 
-// The vec of sorted nodes is passed as an owned value rather than a mutable reference
-// to get around some lifetime limitations.
-fn walk<'a, T>(
-    node: &'a TensorBase<T>,
-    nodes: Vec<&'a TensorBase<T>>,
-    visited: &mut HashMap<TensorId, bool>,
-) -> (bool, Vec<&'a TensorBase<T>>) {
-    if let Some(&tg) = visited.get(&node.id()) {
-        return (tg, nodes);
-    }
-    // track the gradient of the current node
-    let mut track = false;
-    let mut nodes = if node.is_variable() {
-        // Do not call recursively on the "leaf" nodes.
-        track = true;
-        nodes
-    } else if let Some(op) = node.op() {
-        match op {
-            TensorOp::Binary(lhs, rhs, _kind) => {
-                let (tg, nodes) = walk(lhs, nodes, visited);
-                track |= tg;
-                let (tg, nodes) = walk(rhs, nodes, visited);
-                track |= tg;
-                nodes
-            }
-            _ => nodes,
-        }
-    } else {
-        nodes
-    };
-    visited.insert(node.id(), track);
-    if track {
-        nodes.push(node);
-    }
-    (track, nodes)
-}
+pub(crate) type Visited<K = TensorId> = std::collections::HashMap<K, bool>;
 
 impl<T> TensorBase<T>
 where
     T: Scalar,
 {
     fn sorted_nodes(&self) -> Vec<&TensorBase<T>> {
-        let (_tg, mut nodes) = walk(self, vec![], &mut HashMap::new());
+        // The vec of sorted nodes is passed as an owned value rather than a mutable reference
+        // to get around some lifetime limitations.
+        fn walk<'a, T>(
+            node: &'a TensorBase<T>,
+            nodes: Vec<&'a TensorBase<T>>,
+            visited: &mut Visited<TensorId>,
+        ) -> (bool, Vec<&'a TensorBase<T>>) {
+            if let Some(&tg) = visited.get(&node.id()) {
+                return (tg, nodes);
+            }
+            // track the gradient of the current node
+            let mut track = false;
+            let mut nodes = if node.is_variable() {
+                // Do not call recursively on the "leaf" nodes.
+                track = true;
+                nodes
+            } else if let Some(op) = node.op() {
+                match op {
+                    TensorOp::Binary(lhs, rhs, _kind) => {
+                        let (tg, nodes) = walk(lhs, nodes, visited);
+                        track |= tg;
+                        let (tg, nodes) = walk(rhs, nodes, visited);
+                        track |= tg;
+                        nodes
+                    }
+                    _ => nodes,
+                }
+            } else {
+                nodes
+            };
+            visited.insert(node.id(), track);
+            if track {
+                nodes.push(node);
+            }
+            (track, nodes)
+        }
+
+        let (_tg, mut nodes) = walk(self, Vec::new(), &mut Visited::new());
         nodes.reverse();
         nodes
     }

@@ -19,5 +19,10 @@ pub enum TensorData<T> {
     Tensor(Vec<TensorData<T>>),
 }
 
+pub enum TensorBackend {
+    Scalar,
+    Tensor,
+}
+
 #[cfg(test)]
 mod tests {}

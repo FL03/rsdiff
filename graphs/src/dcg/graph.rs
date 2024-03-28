@@ -121,6 +121,23 @@ impl<T> Dcg<T> {
             let grad = gradients[scope];
             let node = self.get(*scope).unwrap();
 
+            match node {
+                Node::Binary { lhs, rhs, op } => match op {
+                    BinaryExpr::Add(_) => {
+                        *gradients.entry(*lhs).or_default() += grad;
+                        *gradients.entry(*rhs).or_default() += grad;
+                    }
+                    BinaryExpr::Mul(_) => {
+                        let lhs_val = self.get(*lhs).unwrap().get_value();
+                        let rhs_val = self.get(*rhs).unwrap().get_value();
+                        *gradients.entry(*lhs).or_default() += grad * rhs_val;
+                        *gradients.entry(*rhs).or_default() += grad * lhs_val;
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+
             if let Node::Op { inputs, op } = node {
                 match op {
                     Operations::Binary(BinaryExpr::Add(_)) => {

@@ -18,6 +18,27 @@ pub trait Operation {
     fn kind(&self) -> String;
 }
 
+pub trait Pow<T> {
+    type Output;
+
+    fn pow(&self, exp: T) -> Self::Output;
+}
+
+pub trait Powc<T>: Pow<T> {
+    fn powc(&self, exp: T) -> Self::Output;
+}
+
+pub trait Powi<T>: Pow<T> {
+    fn powi(&self, exp: T) -> Self::Output;
+}
+
+pub trait Powf<T>: Pow<T>
+where
+    T: num::Float,
+{
+    fn powf(&self, exp: T) -> Self::Output;
+}
+
 pub(crate) mod prelude {
     pub use super::binary::*;
     pub use super::kinds::Op;

@@ -28,12 +28,12 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
     PartialOrd,
     VariantNames,
 )]
-#[repr(u8)]
+#[repr(C)]
 #[strum(serialize_all = "lowercase")]
 pub enum TensorKind {
     #[default]
-    Normal,
-    Variable,
+    Normal = 0,
+    Variable = 1,
 }
 
 impl TensorKind {

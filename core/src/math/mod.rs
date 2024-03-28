@@ -2,10 +2,11 @@
     Appellation: math <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Linear Algebra
+//! # Mathematics
 //!
-//! This module implements fundamental linear algebra concepts and operations.
-//!
+//! This module contains the core mathematical operations and structures used
+//! throughout the library. It is divided into submodules for each mathematical
+//! operation or structure.
 pub mod linalg;
 
 #[cfg(test)]

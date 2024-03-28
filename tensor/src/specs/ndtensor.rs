@@ -9,10 +9,6 @@ use crate::store::Layout;
 pub trait NdTensor {
     type Elem;
 
-    fn elements(&self) -> usize {
-        self.layout().elements()
-    }
-
     fn id(&self) -> TensorId;
 
     fn layout(&self) -> &Layout;
@@ -23,6 +19,10 @@ pub trait NdTensor {
 
     fn shape(&self) -> &Shape {
         self.layout().shape()
+    }
+
+    fn size(&self) -> usize {
+        self.shape().size()
     }
 
     fn stride(&self) -> &[usize] {

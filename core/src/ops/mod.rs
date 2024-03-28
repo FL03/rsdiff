@@ -39,6 +39,12 @@ where
     fn powf(&self, exp: T) -> Self::Output;
 }
 
+pub trait Squared {
+    type Output;
+
+    fn squared(&self) -> Self::Output;
+}
+
 pub(crate) mod prelude {
     pub use super::binary::*;
     pub use super::kinds::Op;

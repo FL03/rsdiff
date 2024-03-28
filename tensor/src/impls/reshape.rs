@@ -17,10 +17,18 @@ where
         unimplemented!()
     }
 
+    pub fn pad(&self, shape: impl IntoShape, _with: T) -> Self {
+        let shape = shape.into_shape();
+
+        let _diff = *self.shape().rank() - *shape.rank();
+
+        unimplemented!()
+    }
+
     pub fn reshape(self, shape: impl IntoShape) -> TensorResult<Self> {
         let mut tensor = self;
         let shape = shape.into_shape();
-        if tensor.elements() != shape.elements() {
+        if tensor.elements() != shape.size() {
             return Err(ShapeError::MismatchedElements.into());
         }
 

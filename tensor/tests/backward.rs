@@ -6,6 +6,7 @@
 extern crate acme_tensor as acme;
 
 use acme::prelude::Tensor;
+use core::ops::Neg;
 
 #[test]
 fn test_backward() {
@@ -34,24 +35,29 @@ fn test_addition_2() {
     let a = Tensor::<f64>::ones(shape).variable();
     let b = Tensor::<f64>::ones(shape).variable();
     let c = Tensor::<f64>::ones(shape).variable();
-    let tmp = &a + &b;
-    println!("Tmp: {}", &tmp.id());
-    let d = tmp + &c;
+    let d = &a + &b + &c;
 
     assert_eq!(&d, &Tensor::fill(shape, 3_f64));
-    println!(
-        "*** Variables ***\nA: {}\nB: {}\nC: {}\n\n",
-        &a.id(),
-        &b.id(),
-        &c.id()
-    );
-    println!("*** Outcomes ***\nD: {}", &d.id());
+
     let grad = d.grad().unwrap();
-    println!("{:?}", &grad.keys());
 
     for i in [a.id(), b.id(), c.id()].iter() {
         assert_eq!(grad[i], Tensor::ones(shape));
     }
+}
+
+#[test]
+fn test_division() {
+    let shape = (2, 2);
+
+    let a = Tensor::<f64>::ones(shape).variable();
+    let b = Tensor::<f64>::fill(shape, 2_f64).variable();
+    let c = &a / &b;
+
+    let grad = c.grad().unwrap();
+
+    assert_eq!(grad[&a.id()], Tensor::fill(shape, 0.5));
+    assert_eq!(grad[&b.id()], Tensor::fill(shape, -0.25));
 }
 
 #[test]
@@ -69,33 +75,30 @@ fn test_multiplication() {
 }
 
 #[test]
-#[ignore = "Needs to be fixed"]
-fn test_add_chain() {
+fn test_subtraction() {
     let shape = (2, 2);
 
     let a = Tensor::<f64>::ones(shape).variable();
     let b = Tensor::<f64>::fill(shape, 2_f64).variable();
-    let c = &a + &b;
-    let d = &c + &a;
+    let c = &a - &b;
 
-    let grad = d.grad().unwrap();
-    // println!("Gradient:\n\n{:?}\n\n", &grad);
+    let grad = c.grad().unwrap();
 
-    assert_eq!(grad[&a.id()], Tensor::fill(shape, 2_f64));
-    assert_eq!(grad[&b.id()], Tensor::ones(shape));
+    assert_eq!(grad[&a.id()], Tensor::ones(shape));
+    assert_eq!(grad[&b.id()], Tensor::ones(shape).neg());
 }
 
 #[test]
-#[ignore = "Needs to be fixed"]
-fn test_add_mul() {
+fn test_mixed() {
     let shape = (2, 2);
-    let a = Tensor::<f64>::ones(shape).variable();
-    let b = Tensor::<f64>::ones(shape).variable();
-    println!("*** Variables ***\nA: {}\nB: {}", a.id(), b.id());
-    let c = &a + &b;
-    let d = &a * &c;
-    let grad = d.grad().unwrap();
 
-    assert_eq!(grad[&a.id()], Tensor::fill(shape, 3_f64));
-    assert_eq!(grad[&b.id()], Tensor::ones(shape));
+    let a = Tensor::<f64>::ones(shape).variable();
+    let b = Tensor::<f64>::fill(shape, 2_f64).variable();
+
+    let res = &b * (&a + &b);
+
+    let grad = res.grad().unwrap();
+
+    assert_eq!(grad[&a.id()], Tensor::fill(shape, 2_f64));
+    assert_eq!(grad[&b.id()], Tensor::fill(shape, 5_f64));
 }

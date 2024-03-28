@@ -47,7 +47,7 @@ pub mod prelude {
     #[doc(inline)]
     pub use crate::actions::prelude::*;
     #[doc(inline)]
-    pub use crate::data::*;
+    pub use crate::data::prelude::*;
     #[doc(inline)]
     pub use crate::error::*;
     #[doc(inline)]

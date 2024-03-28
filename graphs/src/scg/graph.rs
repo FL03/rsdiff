@@ -125,7 +125,7 @@ where
                     T::default()
                 };
                 // add or insert the gradient of the input
-                *gradients.entry(*input).or_insert(T::default()) += dt;
+                *gradients.entry(*input).or_default() += dt;
                 // push the input and its gradient onto the stack
                 stack.push((*input, dt));
             }

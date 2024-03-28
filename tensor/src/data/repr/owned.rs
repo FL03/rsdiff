@@ -2,11 +2,15 @@
     Appellation: owned <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::data::repr::OwnedArcRepr;
 use crate::data::utils::nonnull_from_vec_data;
-use crate::data::RawData;
-use core::mem::{self, ManuallyDrop};
+use crate::data::{ArcTensor, BaseTensor, Tensor};
+use crate::data::{Data, DataMut, DataOwned, RawData, RawDataClone, RawDataMut, RawDataSubst};
+use core::mem::{self, ManuallyDrop, MaybeUninit};
 use core::ptr::NonNull;
 use core::slice;
+use rawpointer::PointerExt;
+use std::sync::Arc;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -36,10 +40,6 @@ impl<A> OwnedRepr<A> {
         self.ptr.as_ptr()
     }
 
-    pub(crate) fn as_slice(&self) -> &[A] {
-        unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
-    }
-
     pub const fn capacity(&self) -> usize {
         self.capacity
     }
@@ -47,17 +47,50 @@ impl<A> OwnedRepr<A> {
     pub const fn len(&self) -> usize {
         self.len
     }
+}
+
+// Internal methods
+impl<A> OwnedRepr<A> {
+    pub(crate) fn as_nonnull_mut(&mut self) -> NonNull<A> {
+        self.ptr
+    }
+
+    pub(crate) fn as_slice(&self) -> &[A] {
+        unsafe { slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
+    }
+
+    /// Cast self into equivalent repr of other element type
+    ///
+    /// ## Safety
+    ///
+    /// Caller must ensure the two types have the same representation.
+    /// **Panics** if sizes don't match (which is not a sufficient check).
+    pub(crate) unsafe fn data_subst<B>(self) -> OwnedRepr<B> {
+        // necessary but not sufficient check
+        assert_eq!(mem::size_of::<A>(), mem::size_of::<B>());
+        let self_ = ManuallyDrop::new(self);
+        OwnedRepr {
+            ptr: self_.ptr.cast::<B>(),
+            len: self_.len,
+            capacity: self_.capacity,
+        }
+    }
+    #[allow(dead_code)]
+    pub(crate) fn into_vec(self) -> Vec<A> {
+        ManuallyDrop::new(self).take_as_vec()
+    }
     /// Set the valid length of the data
     ///
     /// ## Safety
     ///
     /// The first `new_len` elements of the data should be valid.
+    #[allow(dead_code)]
     pub(crate) unsafe fn set_len(&mut self, new_len: usize) {
         debug_assert!(new_len <= self.capacity);
         self.len = new_len;
     }
 
-    fn take_as_vec(&mut self) -> Vec<A> {
+    pub(crate) fn take_as_vec(&mut self) -> Vec<A> {
         let capacity = self.capacity;
         let len = self.len;
 
@@ -65,10 +98,6 @@ impl<A> OwnedRepr<A> {
         self.len = 0;
 
         unsafe { Vec::from_raw_parts(self.ptr.as_ptr(), len, capacity) }
-    }
-
-    pub(crate) fn into_vec(self) -> Vec<A> {
-        ManuallyDrop::new(self).take_as_vec()
     }
 }
 
@@ -115,13 +144,42 @@ impl<A> Drop for OwnedRepr<A> {
     }
 }
 
-unsafe impl<A> Send for OwnedRepr<A> {}
+unsafe impl<A> Data for OwnedRepr<A> {
+    #[inline]
+    fn into_owned(self_: BaseTensor<Self>) -> Tensor<Self::Elem>
+    where
+        A: Clone,
+    {
+        self_
+    }
 
-unsafe impl<A> Sync for OwnedRepr<A> {}
+    #[inline]
+    fn try_into_owned_nocopy<D>(
+        self_: BaseTensor<Self>,
+    ) -> Result<Tensor<Self::Elem>, BaseTensor<Self>> {
+        Ok(self_)
+    }
 
-impl<A> From<Vec<A>> for OwnedRepr<A> {
-    fn from(vec: Vec<A>) -> Self {
-        Self::from_vec(vec)
+    fn to_shared(self_: &BaseTensor<Self>) -> ArcTensor<Self::Elem>
+    where
+        Self::Elem: Clone,
+    {
+        // clone to shared
+        self_.to_owned().into_shared()
+    }
+}
+
+unsafe impl<A> DataMut for OwnedRepr<A> {}
+
+unsafe impl<A> DataOwned for OwnedRepr<A> {
+    type MaybeUninit = OwnedRepr<MaybeUninit<A>>;
+
+    fn new(elements: Vec<A>) -> Self {
+        OwnedRepr::from(elements)
+    }
+
+    fn into_shared(self) -> OwnedArcRepr<A> {
+        OwnedArcRepr(Arc::new(self))
     }
 }
 
@@ -136,4 +194,64 @@ unsafe impl<A> RawData for OwnedRepr<A> {
     }
 
     private_impl! {}
+}
+
+unsafe impl<A> RawDataMut for OwnedRepr<A> {
+    fn try_ensure_unique(_: &mut BaseTensor<Self>)
+    where
+        Self: Sized,
+    {
+    }
+
+    fn try_is_unique(&mut self) -> Option<bool> {
+        Some(true)
+    }
+}
+
+unsafe impl<A> RawDataClone for OwnedRepr<A>
+where
+    A: Clone,
+{
+    unsafe fn clone_with_ptr(&self, ptr: NonNull<Self::Elem>) -> (Self, NonNull<Self::Elem>) {
+        let mut u = self.clone();
+        let mut new_ptr = u.as_nonnull_mut();
+        if mem::size_of::<A>() != 0 {
+            let our_off =
+                (ptr.as_ptr() as isize - self.as_ptr() as isize) / mem::size_of::<A>() as isize;
+            new_ptr = PointerExt::offset(new_ptr, our_off);
+        }
+        (u, new_ptr)
+    }
+
+    unsafe fn clone_from_with_ptr(
+        &mut self,
+        other: &Self,
+        ptr: NonNull<Self::Elem>,
+    ) -> NonNull<Self::Elem> {
+        let our_off = if mem::size_of::<A>() != 0 {
+            (ptr.as_ptr() as isize - other.as_ptr() as isize) / mem::size_of::<A>() as isize
+        } else {
+            0
+        };
+        self.clone_from(other);
+        PointerExt::offset(self.as_nonnull_mut(), our_off)
+    }
+}
+
+impl<A, B> RawDataSubst<B> for OwnedRepr<A> {
+    type Output = OwnedRepr<B>;
+
+    unsafe fn data_subst(self) -> Self::Output {
+        self.data_subst()
+    }
+}
+
+unsafe impl<A> Send for OwnedRepr<A> {}
+
+unsafe impl<A> Sync for OwnedRepr<A> {}
+
+impl<A> From<Vec<A>> for OwnedRepr<A> {
+    fn from(vec: Vec<A>) -> Self {
+        Self::from_vec(vec)
+    }
 }

@@ -27,21 +27,11 @@ pub trait Grad<T> {
     fn grad(&self) -> Self::Gradient;
 }
 
-pub trait Partial {
-    type Args;
-    type Output;
-
-    fn partial(&self) -> fn(Self::Args) -> Self::Output;
-
-    fn partial_at(&self, args: Self::Args) -> Self::Output {
-        (self.partial())(args)
-    }
-}
-
 pub trait Parameter {
     type Key;
     type Value;
 
-    fn key(&self) -> Self::Key;
-    fn value(&self) -> Self::Value;
+    fn key(&self) -> &Self::Key;
+
+    fn value(&self) -> &Self::Value;
 }

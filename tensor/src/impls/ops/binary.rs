@@ -5,6 +5,7 @@
 use crate::prelude::TensorOp;
 use crate::tensor::{from_vec_with_op, TensorBase};
 use acme::ops::binary::BinaryOp;
+use num::traits::Pow;
 
 macro_rules! cmp {
     (ne: $lhs:expr, $rhs:expr) => {
@@ -12,6 +13,34 @@ macro_rules! cmp {
             panic!("Shape Mismatch: {:?} != {:?}", $lhs, $rhs);
         }
     };
+}
+
+impl<T> Pow<T> for TensorBase<T>
+where
+    T: Copy + Pow<T, Output = T>,
+{
+    type Output = Self;
+
+    fn pow(self, exp: T) -> Self::Output {
+        let shape = self.shape().clone();
+        let store = self.data().iter().map(|a| a.pow(exp)).collect();
+        let op = TensorOp::binary_scalar(self, exp, BinaryOp::Pow);
+        from_vec_with_op(false, op, shape, store)
+    }
+}
+
+impl<'a, T> Pow<T> for &'a TensorBase<T>
+where
+    T: Copy + Pow<T, Output = T>,
+{
+    type Output = TensorBase<T>;
+
+    fn pow(self, exp: T) -> Self::Output {
+        let shape = self.shape().clone();
+        let store = self.data().iter().map(|a| a.pow(exp)).collect();
+        let op = TensorOp::binary_scalar(self.clone(), exp, BinaryOp::Pow);
+        from_vec_with_op(false, op, shape, store)
+    }
 }
 
 macro_rules! impl_arithmetic {
@@ -28,7 +57,7 @@ macro_rules! impl_arithmetic {
                 cmp!(ne: self.shape(), other.shape());
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorOp::Binary(Box::new(self), Box::new(other), BinaryOp::$trait);
+                let op = TensorOp::binary(self, other, BinaryOp::$trait);
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -45,7 +74,7 @@ macro_rules! impl_arithmetic {
                 }
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorOp::Binary(Box::new(self), Box::new(other.clone()), BinaryOp::$trait);
+                let op = TensorOp::binary(self, other.clone(), BinaryOp::$trait);
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -62,7 +91,7 @@ macro_rules! impl_arithmetic {
                 }
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other), BinaryOp::$trait);
+                let op = TensorOp::binary(self.clone(), other, BinaryOp::$trait);
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -79,7 +108,7 @@ macro_rules! impl_arithmetic {
                 }
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other.clone()), BinaryOp::$trait);
+                let op = TensorOp::binary(self.clone(), other.clone(), BinaryOp::$trait);
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -98,7 +127,7 @@ macro_rules! impl_scalar_arith {
             fn $method(self, other: T) -> Self::Output {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
-                let op = TensorOp::BinaryScalar(Box::new(self), other, BinaryOp::$trait);
+                let op = TensorOp::binary_scalar(self, other, BinaryOp::$trait);
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -112,7 +141,7 @@ macro_rules! impl_scalar_arith {
             fn $method(self, other: T) -> Self::Output {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
-                let op = TensorOp::BinaryScalar(Box::new(self.clone()), other, BinaryOp::$trait);
+                let op = TensorOp::binary_scalar(self.clone(), other, BinaryOp::$trait);
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -129,7 +158,7 @@ macro_rules! impl_assign_op {
                 cmp!(ne: self.shape(), other.shape());
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other), BinaryOp::$inner);
+                let op = TensorOp::binary(self.clone(), other, BinaryOp::$inner);
 
                 *self = from_vec_with_op(false, op, shape, store);
             }
@@ -143,7 +172,7 @@ macro_rules! impl_assign_op {
                 cmp!(ne: self.shape(), other.shape());
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorOp::Binary(Box::new(self.clone()), Box::new(other.clone()), BinaryOp::$inner);
+                let op = TensorOp::binary(self.clone(), other.clone(), BinaryOp::$inner);
 
                 *self = from_vec_with_op(false, op, shape, store);
             }

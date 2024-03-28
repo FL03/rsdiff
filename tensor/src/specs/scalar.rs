@@ -4,7 +4,7 @@
 */
 use num::complex::Complex;
 use num::traits::real::Real;
-use num::traits::{Float, FromPrimitive, NumAssign, NumCast, NumOps};
+use num::traits::{Float, FromPrimitive, NumAssign, NumCast, NumOps, Pow};
 use std::iter::{Product, Sum};
 use std::ops::Neg;
 

@@ -8,11 +8,10 @@ use super::DynamicGraph;
 use crate::ops::*;
 use crate::prelude::GraphResult as Result;
 use crate::NodeIndex;
-use num::traits::{Num, NumAssignOps, NumOps};
+use num::traits::NumAssign;
 use petgraph::algo::toposort;
-use petgraph::prelude::Direction;
 use std::collections::HashMap;
-use std::ops::Index;
+use std::ops::{Index, Neg};
 
 pub struct Dcg<T> {
     store: DynamicGraph<T>,
@@ -25,16 +24,28 @@ impl<T> Dcg<T> {
         }
     }
 
+    pub fn binary(
+        &mut self,
+        lhs: NodeIndex,
+        rhs: NodeIndex,
+        op: impl Into<BinaryExpr>,
+    ) -> NodeIndex {
+        let c = self.store.add_node(Node::binary(lhs, rhs, op));
+        self.store.add_edge(lhs, c, Edge::new(lhs));
+        self.store.add_edge(rhs, c, Edge::new(rhs));
+        c
+    }
+
+    pub fn constant(&mut self, value: T) -> NodeIndex {
+        self.input(false, value)
+    }
+
     pub fn get(&self, index: NodeIndex) -> Option<&Node<T>> {
         self.store.node_weight(index)
     }
 
     pub fn include(&mut self, node: impl Into<Node<T>>) -> NodeIndex {
         self.store.add_node(node.into())
-    }
-
-    pub fn remove(&mut self, index: NodeIndex) -> Option<Node<T>> {
-        self.store.remove_node(index)
     }
 
     pub fn input(&mut self, param: bool, value: T) -> NodeIndex {
@@ -54,112 +65,104 @@ impl<T> Dcg<T> {
         }
         c
     }
+
+    pub fn remove(&mut self, index: NodeIndex) -> Option<Node<T>> {
+        self.store.remove_node(index)
+    }
+
+    pub fn unary(&mut self, input: NodeIndex, op: impl Into<UnaryExpr>) -> NodeIndex {
+        let c = self.store.add_node(Node::unary(input, op));
+        self.store.add_edge(input, c, Edge::new(input));
+        c
+    }
+
+    pub fn variable(&mut self, value: T) -> NodeIndex {
+        self.input(true, value)
+    }
 }
 
 impl<T> Dcg<T> {
     pub fn add(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.op([lhs, rhs], BinaryExpr::add())
+        self.binary(lhs, rhs, BinaryExpr::add())
+    }
+
+    pub fn div(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
+        self.binary(lhs, rhs, BinaryExpr::div())
     }
 
     pub fn mul(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.op([lhs, rhs], BinaryExpr::mul())
+        self.binary(lhs, rhs, BinaryExpr::mul())
     }
 
-    pub fn backward(&self) -> Result<HashMap<NodeIndex, T>>
-    where
-        T: Copy + Default + Num + NumAssignOps + NumOps,
-    {
-        let mut sorted = toposort(&self.store, None)?;
-        sorted.reverse();
-        let target = *sorted.first().unwrap();
-
-        let mut gradients = HashMap::<NodeIndex, T>::new();
-        gradients.insert(target, T::one());
-
-        for scope in sorted.iter().copied() {
-            // Get the gradient of the current scope
-            let grad = gradients[&scope];
-            let node = &self[scope];
-
-            if let Node::Op { inputs, op } = node {
-                match op {
-                    Operations::Binary(inner) => match *inner {
-                        BinaryExpr::Add(_) => {
-                            for arg in self.store.neighbors_directed(scope, Direction::Incoming) {
-                                *gradients.entry(arg).or_default() += grad;
-                            }
-                        }
-                        BinaryExpr::Mul(_) => {
-                            let lhs = inputs[0];
-                            let rhs = inputs[1];
-                            let lhs_val = self.get(lhs).unwrap().get_value();
-                            let rhs_val = self.get(rhs).unwrap().get_value();
-                            *gradients.entry(lhs).or_default() += grad * rhs_val;
-                            *gradients.entry(rhs).or_default() += grad * lhs_val;
-                        }
-                        _ => {}
-                    },
-                    // Handle other operations as needed
-                    _ => {}
-                }
-            }
-        }
-
-        Ok(gradients)
+    pub fn sub(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
+        self.binary(lhs, rhs, BinaryExpr::sub())
     }
+}
 
-    pub fn gradient(&self, output: NodeIndex) -> Result<HashMap<NodeIndex, T>>
-    where
-        T: Copy + Default + Num + NumAssignOps + NumOps,
-    {
-        let mut gradients = HashMap::<NodeIndex, T>::new();
-        gradients.insert(output, T::one()); // Initialize output gradient to 1.0
+impl<T> Dcg<T>
+where
+    T: Copy + Default + Neg<Output = T> + NumAssign,
+{
+    pub fn backward(&self) -> Result<HashMap<NodeIndex, T>> {
+        let sorted = toposort(&self.store, None)?;
+        let target = sorted.last().unwrap();
+        self.gradient(*target)
+    }
+    pub fn gradient(&self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {
+        let mut store = HashMap::<NodeIndex, T>::new();
+        // initialize the stack
+        let mut stack = Vec::<(NodeIndex, T)>::new();
+        // start by computing the gradient of the target w.r.t. itself
+        stack.push((target, T::one()));
+        store.insert(target, T::one());
 
-        let topo = toposort(&self.store, None)?;
-
-        for scope in topo.iter().rev() {
-            let grad = gradients[scope];
-            let node = self.get(*scope).unwrap();
+        while let Some((i, grad)) = stack.pop() {
+            let node = &self[i];
 
             match node {
                 Node::Binary { lhs, rhs, op } => match op {
                     BinaryExpr::Add(_) => {
-                        *gradients.entry(*lhs).or_default() += grad;
-                        *gradients.entry(*rhs).or_default() += grad;
+                        *store.entry(*lhs).or_default() += grad;
+                        *store.entry(*rhs).or_default() += grad;
+
+                        stack.push((*lhs, grad));
+                        stack.push((*rhs, grad));
                     }
                     BinaryExpr::Mul(_) => {
-                        let lhs_val = self.get(*lhs).unwrap().get_value();
-                        let rhs_val = self.get(*rhs).unwrap().get_value();
-                        *gradients.entry(*lhs).or_default() += grad * rhs_val;
-                        *gradients.entry(*rhs).or_default() += grad * lhs_val;
+                        let lhs_grad = grad * self[*rhs].value();
+                        let rhs_grad = grad * self[*lhs].value();
+                        *store.entry(*lhs).or_default() += lhs_grad;
+                        *store.entry(*rhs).or_default() += rhs_grad;
+
+                        stack.push((*lhs, lhs_grad));
+                        stack.push((*rhs, rhs_grad));
+                    }
+                    BinaryExpr::Sub(_) => {
+                        *store.entry(*lhs).or_default() += grad;
+                        *store.entry(*rhs).or_default() -= grad;
+
+                        stack.push((*lhs, grad));
+                        stack.push((*rhs, grad.neg()));
                     }
                     _ => {}
                 },
-                _ => {}
-            }
-
-            if let Node::Op { inputs, op } = node {
-                match op {
-                    Operations::Binary(BinaryExpr::Add(_)) => {
-                        for arg in self.store.neighbors_directed(*scope, Direction::Incoming) {
-                            *gradients.entry(arg).or_default() += grad;
-                        }
+                Node::Unary { op, .. } => match op {
+                    _ => {
+                        unimplemented!();
                     }
-                    Operations::Binary(BinaryExpr::Mul(_)) => {
-                        let lhs = inputs[0];
-                        let rhs = inputs[1];
-                        let lhs_val = self[lhs].get_value();
-                        let rhs_val = self[rhs].get_value();
-                        *gradients.entry(lhs).or_default() += grad * rhs_val;
-                        *gradients.entry(rhs).or_default() += grad * lhs_val;
+                },
+                Node::Input { param, .. } => {
+                    if *param {
+                        continue;
                     }
-                    // Handle other operations as needed
-                    _ => {}
+                    *store.entry(i).or_default() += grad;
+                    stack.push((i, grad));
                 }
+                _ => {}
             }
         }
 
-        Ok(gradients)
+        Ok(store)
     }
 }
 

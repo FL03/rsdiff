@@ -38,3 +38,26 @@ pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
         [#(#grad)*]
     }
 }
+
+pub fn item_fn_partial(item: &ItemFn) -> TokenStream {
+    let ItemFn { block, sig, .. } = item;
+    let Signature { inputs, .. } = sig;
+
+    let mut vars = Vec::new();
+    for input in inputs {
+        if let syn::FnArg::Typed(typed) = input {
+            if let syn::Pat::Ident(ident) = &*typed.pat {
+                vars.push(ident.ident.clone());
+            }
+        }
+    }
+
+    let grad = vars
+        .iter()
+        .map(|var| handle_block(&block, &var))
+        .collect::<Vec<_>>();
+
+    quote! {
+        [#(#grad)*]
+    }
+}

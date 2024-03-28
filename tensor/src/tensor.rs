@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 // use crate::ops::TrackedOp;
-use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind, TensorOp};
+use crate::prelude::{BackpropOp, IntoShape, Rank, Shape, TensorId, TensorKind, TensorOp};
 use crate::store::Layout;
 use acme::prelude::BinaryOp;
 use std::ops::Index;
@@ -11,7 +11,7 @@ use std::ops::Index;
 
 pub(crate) fn new<T>(
     kind: TensorKind,
-    op: Option<TensorOp<T>>,
+    op: BackpropOp<T>,
     shape: impl IntoShape,
     store: Vec<T>,
 ) -> TensorBase<T> {
@@ -25,7 +25,7 @@ pub(crate) fn new<T>(
 }
 
 pub(crate) fn from_vec<T>(kind: TensorKind, shape: impl IntoShape, store: Vec<T>) -> TensorBase<T> {
-    new(kind, None, shape, store)
+    new(kind, BackpropOp::none(), shape, store)
 }
 
 pub(crate) fn from_vec_with_op<T>(
@@ -34,7 +34,7 @@ pub(crate) fn from_vec_with_op<T>(
     shape: impl IntoShape,
     store: Vec<T>,
 ) -> TensorBase<T> {
-    new(kind.into(), Some(op), shape, store)
+    new(kind.into(), BackpropOp::new(op), shape, store)
 }
 
 #[derive(Clone, Debug)]
@@ -43,26 +43,26 @@ pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) kind: TensorKind,
     pub(crate) layout: Layout,
-    pub(crate) op: Option<TensorOp<T>>,
+    pub(crate) op: BackpropOp<T>,
     pub(crate) store: Vec<T>,
 }
 
 impl<T> TensorBase<T> {
     pub fn new(kind: TensorKind, shape: impl IntoShape) -> Self {
         let shape = shape.into_shape();
-        let store = Vec::with_capacity(shape.elements());
+        let store = Vec::with_capacity(shape.size());
         Self {
             id: TensorId::new(),
             kind,
             layout: Layout::contiguous(shape),
-            op: None,
+            op: BackpropOp::none(),
             store,
         }
     }
 
     pub fn from_vec(
         kind: TensorKind,
-        op: Option<TensorOp<T>>,
+        op: BackpropOp<T>,
         shape: impl IntoShape,
         store: Vec<T>,
     ) -> Self {
@@ -86,14 +86,14 @@ impl<T> TensorBase<T> {
                 id: TensorId::new(),
                 kind: TensorKind::Normal,
                 layout: self.layout.clone(),
-                op: None,
+                op: BackpropOp::none(),
                 store: self.store.clone(),
             }
         }
     }
     /// Returns the number of elements in the tensor.
     pub fn elements(&self) -> usize {
-        self.layout.elements()
+        self.layout.size()
     }
     /// Returns the unique identifier of the tensor.
     pub const fn id(&self) -> TensorId {
@@ -104,8 +104,8 @@ impl<T> TensorBase<T> {
         &self.layout
     }
     /// Get a reference to the operation of the tensor
-    pub fn op(&self) -> Option<&TensorOp<T>> {
-        self.op.as_ref()
+    pub fn op(&self) -> &BackpropOp<T> {
+        &self.op
     }
     /// Get an owned reference to the [Rank] of the tensor
     pub fn rank(&self) -> Rank {
@@ -155,11 +155,7 @@ impl<T> TensorBase<T> {
             id: TensorId::new(),
             kind: self.kind,
             layout: self.layout.clone(),
-            op: Some(TensorOp::Binary(
-                Box::new(self.clone()),
-                Box::new(other.clone()),
-                op,
-            )),
+            op: BackpropOp::binary(self.clone(), other.clone(), op),
             store,
         }
     }

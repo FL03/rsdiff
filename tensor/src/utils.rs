@@ -18,7 +18,7 @@ where
     }
 
     let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
-    let mut result = vec![T::zero(); shape.elements()];
+    let mut result = vec![T::zero(); shape.size()];
 
     for i in 0..lhs.shape().nrows() {
         for j in 0..rhs.shape().ncols() {
@@ -30,7 +30,7 @@ where
             }
         }
     }
-    let op = TensorOp::Matmul(Box::new(lhs.clone()), Box::new(rhs.clone()));
+    let op = TensorOp::matmul(lhs.clone(), rhs.clone());
     let tensor = from_vec_with_op(false, op, shape, result);
     Ok(tensor)
 }
@@ -44,7 +44,7 @@ where
     }
 
     let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
-    let mut result = vec![T::zero(); shape.elements()];
+    let mut result = vec![T::zero(); shape.size()];
 
     for i in 0..lhs.shape().nrows() {
         for j in 0..rhs.shape().ncols() {
@@ -56,7 +56,7 @@ where
             }
         }
     }
-    let op = TensorOp::Matmul(Box::new(lhs.clone()), Box::new(rhs.clone()));
+    let op = TensorOp::matmul(lhs.clone(), rhs.clone());
     let tensor = from_vec_with_op(false, op, shape, result);
     Ok(tensor)
 }

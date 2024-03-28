@@ -1,6 +1,7 @@
 [package]
 authors.workspace = true
-description = "This module implements several computational graphs"
+categories.workspace = true
+description = "Computational graphs for Rust"
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
@@ -34,15 +35,16 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.0" }
-
-lazy_static = "1"
 num = "0.4"
 petgraph = "0.6"
 serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
 smart-default.workspace = true
 strum.workspace = true
+
+[dependencies.acme-core]
+path = "../core"
+version = "0.3.0-nightly.2" # "0.3.0"
 
 [package.metadata.docs.rs]
 all-features = true

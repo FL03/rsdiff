@@ -5,7 +5,7 @@
 use crate::actions::grad::GradStore;
 use crate::prelude::{Scalar, TensorId, TensorOp, TensorResult};
 use crate::TensorBase;
-use acme::prelude::{BinaryOp, Store};
+use acme::prelude::{BinaryOp, Store, UnaryOp};
 
 pub(crate) type Visited<K = TensorId> = std::collections::HashMap<K, bool>;
 
@@ -13,9 +13,9 @@ impl<T> TensorBase<T>
 where
     T: Scalar,
 {
-    fn sorted_nodes(&self) -> Vec<&TensorBase<T>> {
-        // The vec of sorted nodes is passed as an owned value rather than a mutable reference
-        // to get around some lifetime limitations.
+    /// [TensorBase::toposort] returns a topologically sorted list of nodes in the graph.
+    fn toposort(&self) -> Vec<&TensorBase<T>> {
+        // Here, the sorted nodes are passed as an owned value rather than as a mutable reference to workaround some lifetime limitations.
         fn walk<'a, T>(
             node: &'a TensorBase<T>,
             nodes: Vec<&'a TensorBase<T>>,
@@ -26,16 +26,22 @@ where
             }
             // track the gradient of the current node
             let mut track = false;
+            // recursively call on the children nodes
             let mut nodes = if node.is_variable() {
                 // Do not call recursively on the "leaf" nodes.
                 track = true;
                 nodes
-            } else if let Some(op) = node.op() {
+            } else if let Some(op) = node.op().op() {
                 match op {
                     TensorOp::Binary(lhs, rhs, _kind) => {
                         let (tg, nodes) = walk(lhs, nodes, visited);
                         track |= tg;
                         let (tg, nodes) = walk(rhs, nodes, visited);
+                        track |= tg;
+                        nodes
+                    }
+                    TensorOp::Unary(a, _kind) => {
+                        let (tg, nodes) = walk(a, nodes, visited);
                         track |= tg;
                         nodes
                     }
@@ -56,18 +62,15 @@ where
         nodes
     }
 
-    pub fn grad(&self) -> TensorResult<GradStore<T>>
-    where
-        T: std::fmt::Debug,
-    {
+    pub fn grad(&self) -> TensorResult<GradStore<T>> {
         // get the sorted nodes
-        let sorted = self.sorted_nodes();
+        let sorted = self.toposort();
         // initialize a new gradient store
         let mut store = GradStore::new();
         // insert the gradient w.r.t. the current node
         store.insert(self.id(), self.ones_like());
 
-        for node in sorted {
+        for node in sorted.iter() {
             if node.is_variable() {
                 continue;
             }
@@ -75,14 +78,18 @@ where
             let grad = store.remove(&node.id()).expect("Gradient not found");
             let grad = grad.detach();
             // handle the different types of operations
-            if let Some(op) = &self.op {
+            if let Some(op) = &*node.op {
                 match op {
                     TensorOp::Binary(lhs, rhs, kind) => match kind {
                         BinaryOp::Add => {
-                            let a = store.entry(lhs.id()).or_insert(lhs.zeros_like());
-                            *a = &*a + &grad;
-                            let b = store.entry(rhs.id()).or_insert(rhs.zeros_like());
-                            *b = &*b + &grad;
+                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) += &grad;
+                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) += &grad;
+                        }
+                        BinaryOp::Div => {
+                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) +=
+                                &grad / rhs.as_ref();
+                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) -=
+                                &grad * lhs.as_ref() / (rhs.as_ref() * rhs.as_ref());
                         }
                         BinaryOp::Mul => {
                             *store.entry(lhs.id()).or_insert(lhs.zeros_like()) +=
@@ -90,9 +97,24 @@ where
                             *store.entry(rhs.id()).or_insert(rhs.zeros_like()) +=
                                 &grad * lhs.as_ref();
                         }
+                        BinaryOp::Sub => {
+                            *store.entry(lhs.id()).or_insert(lhs.zeros_like()) += &grad;
+                            *store.entry(rhs.id()).or_insert(rhs.zeros_like()) -= &grad;
+                        }
                         _ => todo!(),
                     },
-                    TensorOp::Unary(_a, kind) => match kind {
+                    TensorOp::Unary(val, kind) => match kind {
+                        UnaryOp::Cos => {
+                            *store.entry(val.id()).or_insert(val.zeros_like()) -=
+                                &grad * val.clone().sin();
+                        }
+                        UnaryOp::Neg => {
+                            *store.entry(val.id()).or_insert(val.zeros_like()) -= &grad;
+                        }
+                        UnaryOp::Sin => {
+                            *store.entry(val.id()).or_insert(val.zeros_like()) +=
+                                &grad * val.clone().cos();
+                        }
                         _ => todo!(),
                     },
                     _ => {}

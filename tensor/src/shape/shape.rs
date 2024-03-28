@@ -48,10 +48,6 @@ impl Shape {
         &self.0
     }
 
-    pub fn elements(&self) -> usize {
-        self.0.iter().product()
-    }
-
     pub fn insert(&mut self, index: usize, dim: usize) {
         self.0.insert(index, dim)
     }
@@ -70,6 +66,27 @@ impl Shape {
         }
         true
     }
+    pub fn ncols(&self) -> usize {
+        if self.len() >= 2 {
+            self.0[1]
+        } else if self.len() == 1 {
+            1
+        } else {
+            0
+        }
+    }
+
+    pub fn ndim(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn nrows(&self) -> usize {
+        if self.len() >= 1 {
+            *self.0.first().unwrap()
+        } else {
+            0
+        }
+    }
 
     pub fn push(&mut self, dim: usize) {
         self.0.push(dim)
@@ -83,26 +100,12 @@ impl Shape {
         self.0.remove(index)
     }
 
-    pub fn ncols(&self) -> usize {
-        if self.len() >= 2 {
-            self.0[1]
-        } else if self.len() == 1 {
-            1
-        } else {
-            0
-        }
-    }
-
-    pub fn nrows(&self) -> usize {
-        if self.len() >= 1 {
-            *self.0.first().unwrap()
-        } else {
-            0
-        }
-    }
-
     pub fn set(&mut self, index: usize, dim: usize) {
         self.0[index] = dim
+    }
+
+    pub fn size(&self) -> usize {
+        self.0.iter().product()
     }
 
     pub(crate) fn stride_contiguous(&self) -> Vec<usize> {

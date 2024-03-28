@@ -43,7 +43,7 @@ mod tests {
         let mut shape = Shape::default();
         shape.extend([1, 1, 1]);
         assert_eq!(shape, Shape::new(vec![1, 1, 1]));
-        assert_eq!(shape.elements(), 1);
+        assert_eq!(shape.size(), 1);
         assert_eq!(*shape.rank(), 3);
     }
 }

@@ -1,13 +1,12 @@
 [package]
 authors.workspace = true
-categories = []
+categories.workspace = true
 description.workspace = true
 edition.workspace = true
 homepage.workspace = true
-keywords = ["async", "scsys"]
+keywords.workspace = true
 license.workspace = true
 name = "acme"
-publish = true
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -75,11 +74,16 @@ required-features = ["macros"]
 [build-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.0" }
-acme-derive = { optional = true, path = "../derive", version = "0.3.0" }
-acme-graphs = { optional = true, path = "../graphs", version = "0.3.0" }
-acme-macros = { optional = true, path = "../macros", version = "0.3.0" }
-acme-tensor = { optional = true, path = "../tensor", version = "0.3.0" }
+# acme-core = { path = "../core", version = "0.3.0" }
+# acme-derive = { optional = true, path = "../derive", version = "0.3.0" }
+# acme-graphs = { optional = true, path = "../graphs", version = "0.3.0" }
+# acme-macros = { optional = true, path = "../macros", version = "0.3.0" }
+# acme-tensor = { optional = true, path = "../tensor", version = "0.3.0" }
+acme-core = { path = "../core", version = "0.3.0-nightly.2" }
+acme-derive = { optional = true, path = "../derive", version = "0.3.0-nightly.2" }
+acme-graphs = { optional = true, path = "../graphs", version = "0.3.0-nightly.2" }
+acme-macros = { optional = true, path = "../macros", version = "0.3.0-nightly.2" }
+acme-tensor = { optional = true, path = "../tensor", version = "0.3.0-nightly.2" }
 
 [dev-dependencies]
 approx = "0.5"

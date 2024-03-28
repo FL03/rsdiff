@@ -2,7 +2,7 @@
     Appellation: node <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::{BinaryExpr, Operations};
+use crate::ops::{BinaryExpr, Operations, UnaryExpr};
 use crate::NodeIndex;
 
 #[derive(Clone, Debug)]
@@ -11,6 +11,10 @@ pub enum Node<T> {
         lhs: NodeIndex,
         rhs: NodeIndex,
         op: BinaryExpr,
+    },
+    Unary {
+        input: NodeIndex,
+        op: UnaryExpr,
     },
     Op {
         inputs: Vec<NodeIndex>,
@@ -30,6 +34,14 @@ impl<T> Node<T> {
             op: op.into(),
         }
     }
+
+    pub fn unary(input: NodeIndex, op: impl Into<UnaryExpr>) -> Self {
+        Node::Unary {
+            input,
+            op: op.into(),
+        }
+    }
+
     pub fn op(inputs: impl IntoIterator<Item = NodeIndex>, op: impl Into<Operations>) -> Self {
         Node::Op {
             inputs: Vec::from_iter(inputs),
@@ -41,7 +53,7 @@ impl<T> Node<T> {
         Node::Input { param, value }
     }
 
-    pub fn get_value(&self) -> T
+    pub fn value(&self) -> T
     where
         T: Copy + Default,
     {

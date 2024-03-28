@@ -52,19 +52,58 @@ impl<T> GradStore<T> {
     pub fn or_insert(&mut self, tensor: TensorBase<T>) -> &mut TensorBase<T> {
         self.entry(tensor.id()).or_insert(tensor)
     }
-
+    /// If the store does not have a tensor with the given id, insert a tensor with the same shape
+    /// and dtype as the given tensor, where all elements are default.
     pub fn or_insert_default(&mut self, tensor: &TensorBase<T>) -> &mut TensorBase<T>
     where
         T: Clone + Default,
     {
         self.entry(tensor.id()).or_insert(tensor.default_like())
     }
-
+    /// If the store does not have a tensor with the given id, insert a tensor with the same shape
+    /// and dtype as the given tensor, where all elements are zeros.
     pub fn or_insert_zeros(&mut self, tensor: &TensorBase<T>) -> &mut TensorBase<T>
     where
         T: Clone + num::Zero,
     {
         self.entry(tensor.id()).or_insert(tensor.zeros_like())
+    }
+}
+
+impl<T> Extend<(TensorId, TensorBase<T>)> for GradStore<T> {
+    fn extend<I: IntoIterator<Item = (TensorId, TensorBase<T>)>>(&mut self, iter: I) {
+        self.store.extend(iter)
+    }
+}
+
+impl<T> FromIterator<(TensorId, TensorBase<T>)> for GradStore<T> {
+    fn from_iter<I: IntoIterator<Item = (TensorId, TensorBase<T>)>>(iter: I) -> Self {
+        Self {
+            store: BTreeMap::from_iter(iter),
+        }
+    }
+}
+
+impl<T> Index<&TensorId> for GradStore<T> {
+    type Output = TensorBase<T>;
+
+    fn index(&self, index: &TensorId) -> &Self::Output {
+        &self.store[index]
+    }
+}
+
+impl<T> IndexMut<&TensorId> for GradStore<T> {
+    fn index_mut(&mut self, index: &TensorId) -> &mut Self::Output {
+        self.get_mut(index).expect("Tensor not found")
+    }
+}
+
+impl<T> IntoIterator for GradStore<T> {
+    type Item = (TensorId, TensorBase<T>);
+    type IntoIter = std::collections::btree_map::IntoIter<TensorId, TensorBase<T>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.store.into_iter()
     }
 }
 
@@ -83,19 +122,5 @@ impl<T> Store<TensorId, TensorBase<T>> for GradStore<T> {
 
     fn remove(&mut self, key: &TensorId) -> Option<TensorBase<T>> {
         self.store.remove(key)
-    }
-}
-
-impl<T> Index<&TensorId> for GradStore<T> {
-    type Output = TensorBase<T>;
-
-    fn index(&self, index: &TensorId) -> &Self::Output {
-        &self.store[index]
-    }
-}
-
-impl<T> IndexMut<&TensorId> for GradStore<T> {
-    fn index_mut(&mut self, index: &TensorId) -> &mut Self::Output {
-        self.get_mut(index).expect("Tensor not found")
     }
 }

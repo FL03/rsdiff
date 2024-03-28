@@ -16,7 +16,7 @@ where
 
     fn matmul(&self, other: &Self) -> Self {
         let shape = self.shape().matmul_shape(other.shape()).unwrap();
-        let mut result = vec![T::zero(); shape.elements()];
+        let mut result = vec![T::zero(); shape.size()];
 
         for i in 0..self.shape()[0] {
             for j in 0..other.shape()[1] {
@@ -26,7 +26,7 @@ where
                 }
             }
         }
-        let op = TensorOp::Matmul(Box::new(self.clone()), Box::new(other.clone()));
+        let op = TensorOp::matmul(self.clone(), other.clone());
         from_vec_with_op(false, op, shape, result)
     }
 }

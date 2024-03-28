@@ -20,7 +20,7 @@ where
     /// Create a tensor, from the given shape, filled with the given value
     pub fn fill(shape: impl IntoShape, value: T) -> Self {
         let shape = shape.into_shape();
-        let store = vec![value; shape.elements()];
+        let store = vec![value; shape.size()];
         from_vec(false.into(), shape, store)
     }
 

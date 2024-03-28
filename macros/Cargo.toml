@@ -4,6 +4,7 @@ categories.workspace = true
 description.workspace = true
 edition.workspace = true
 homepage.workspace = true
+keywords.workspace = true
 license.workspace = true
 name = "acme-macros"
 readme.workspace = true

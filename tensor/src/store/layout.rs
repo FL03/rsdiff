@@ -46,16 +46,9 @@ impl Layout {
         }
     }
 
-    pub(crate) fn position(&self, coords: impl AsRef<[usize]>) -> usize {
-        let mut index = self.offset;
-        for (i, &coord) in coords.as_ref().iter().enumerate() {
-            index += coord * self.stride[i];
-        }
-        index
-    }
-
-    pub fn elements(&self) -> usize {
-        self.shape.elements()
+    pub fn ndim(&self) -> usize {
+        debug_assert_eq!(self.stride.len(), self.shape.ndim());
+        self.shape.ndim()
     }
 
     pub fn offset(&self) -> usize {
@@ -66,7 +59,22 @@ impl Layout {
         &self.shape
     }
 
+    pub fn size(&self) -> usize {
+        self.shape.size()
+    }
+
     pub fn stride(&self) -> &[usize] {
         &self.stride
+    }
+}
+
+// Internal methods
+impl Layout {
+    pub(crate) fn position(&self, coords: impl AsRef<[usize]>) -> usize {
+        let mut index = self.offset;
+        for (i, &coord) in coords.as_ref().iter().enumerate() {
+            index += coord * self.stride[i];
+        }
+        index
     }
 }

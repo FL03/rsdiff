@@ -2,12 +2,11 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-// use crate::ops::TrackedOp;
-use crate::prelude::{BackpropOp, IntoShape, Rank, Shape, TensorId, TensorKind, TensorOp};
+use crate::ops::{BackpropOp, TensorOp};
+use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind};
 use crate::store::Layout;
 use acme::prelude::BinaryOp;
-use std::ops::Index;
-// use std::sync::{Arc, RwLock};
+use std::ops::{Index, IndexMut};
 
 pub(crate) fn new<T>(
     kind: impl Into<TensorKind>,
@@ -61,6 +60,16 @@ impl<T> TensorBase<T> {
             layout: Layout::contiguous(shape),
             op: BackpropOp::none(),
             store,
+        }
+    }
+
+    pub fn from_scalar(value: T) -> Self {
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::contiguous(()),
+            op: None.into(),
+            store: vec![value],
         }
     }
 
@@ -214,7 +223,7 @@ impl<T> TensorBase<T> {
     pub(crate) fn data(&self) -> &Vec<T> {
         &self.store
     }
-
+    #[allow(dead_code)]
     pub(crate) fn data_mut(&mut self) -> &mut Vec<T> {
         &mut self.store
     }
@@ -224,16 +233,17 @@ impl<T> Index<&[usize]> for TensorBase<T> {
     type Output = T;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
-        let i = self.layout().position(index).unwrap();
+        let i = self.layout().index(index);
         &self.store[i]
     }
 }
 
-// impl<T> IndexMut<&[usize]> for Tensor<T> {
-//     fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
-//         self.get_mut(index).unwrap()
-//     }
-// }
+impl<T> IndexMut<&[usize]> for TensorBase<T> {
+    fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
+        let i = self.layout().index(index);
+        &mut self.store[i]
+    }
+}
 
 impl<T> Eq for TensorBase<T> where T: Eq {}
 

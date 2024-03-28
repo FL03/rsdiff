@@ -2,18 +2,19 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::shape::Axis;
+use crate::shape::{Axis, Shape};
 use crate::TensorBase;
-use acme::ops::binary::BinaryOp;
-use acme::ops::unary::UnaryOp;
+use acme::prelude::{BinaryOp, UnaryOp};
 
-pub type BoxTensor<T = f64> = Box<crate::TensorBase<T>>;
+pub type BoxTensor<T = f64> = Box<TensorBase<T>>;
 
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub enum TensorOp<T> {
     Binary(BoxTensor<T>, BoxTensor<T>, BinaryOp),
     BinaryScalar(BoxTensor<T>, T, BinaryOp),
     Unary(BoxTensor<T>, UnaryOp),
+    Broadcast(BoxTensor<T>, Shape),
     Matmul(BoxTensor<T>, BoxTensor<T>),
     Transpose {
         tensor: BoxTensor<T>,
@@ -50,6 +51,7 @@ impl<T> TensorOp<T> {
             TensorOp::Binary(lhs, _, _) => lhs,
             TensorOp::BinaryScalar(lhs, _, _) => lhs,
             TensorOp::Unary(lhs, _) => lhs,
+            TensorOp::Broadcast(tensor, _) => tensor,
             TensorOp::Matmul(lhs, _) => lhs,
             TensorOp::Transpose { tensor, .. } => tensor,
         }

@@ -2,20 +2,24 @@
     Appellation: reshape <impls>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{BackpropOp, TensorId, TensorOp, TensorResult};
+use crate::prelude::{TensorId, TensorOp, TensorResult};
 use crate::shape::{Axis, IntoShape, ShapeError};
-use crate::tensor::{from_vec, TensorBase};
+use crate::tensor::TensorBase;
 
 impl<T> TensorBase<T>
 where
     T: Clone + Default,
 {
     pub fn broadcast(&self, shape: impl IntoShape) -> Self {
-        let shape = shape.into_shape();
+        let layout = self.layout.broadcast_as(shape).unwrap();
 
-        let _diff = *self.shape().rank() - *shape.rank();
-
-        unimplemented!()
+        Self {
+            id: TensorId::new(),
+            kind: self.kind.clone(),
+            layout,
+            op: self.op.clone(),
+            store: self.store.clone(),
+        }
     }
 
     pub fn pad(&self, shape: impl IntoShape, _with: T) -> Self {
@@ -27,25 +31,31 @@ where
     }
 
     ///
-    pub fn swap_axes(&self, swap: Axis, with: Axis) -> TensorResult<Self> {
-        let layout = self.layout().swap_axes(swap, with);
+    pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {
+        let op = TensorOp::transpose(self.clone(), swap, with);
 
-        let shape = self.shape();
-        let mut res = self.data().clone();
+        let layout = self.layout().clone().transpose(swap, with);
+        let shape = self.layout.shape();
+        let mut data = self.store.to_vec();
 
         for i in 0..shape[swap] {
             for j in 0..shape[with] {
-                let target = self.layout.position(&[i, j])?;
-                let dest = layout.position(&[j, i])?;
-                res[dest] = self.data()[target].clone();
+                let scope = self.layout.index([i, j]);
+                let target = layout.index([j, i]);
+                data[target] = self.data()[scope].clone();
             }
         }
 
-        let tensor = crate::new(false, None, layout.shape(), res);
-        Ok(tensor)
+        TensorBase {
+            id: TensorId::new(),
+            kind: self.kind.clone(),
+            layout,
+            op: op.into(),
+            store: data.clone(),
+        }
     }
     /// Transpose the tensor.
-    pub fn t(&self) -> TensorBase<T> {
+    pub fn t(&self) -> Self {
         let (a, b) = (Axis(0), Axis(1));
         let op = TensorOp::transpose(self.clone(), a, b);
 
@@ -55,10 +65,9 @@ where
 
         for i in 0..shape[a] {
             for j in 0..shape[b] {
-                let scope = self.layout.select([i, j]);
-                let target = layout.select([j, i]);
-                println!("Swapping {:?} with {:?}", scope, target);
-                data[target] = self[&[i, j]].clone();
+                let scope = self.layout.index([i, j]);
+                let target = layout.index([j, i]);
+                data[target] = self.data()[scope].clone();
             }
         }
 

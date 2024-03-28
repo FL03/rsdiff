@@ -8,6 +8,17 @@ extern crate acme_tensor as acme;
 use acme::prelude::Tensor;
 
 #[test]
+#[ignore = "Not implemented"]
+fn test_broadcast() {
+    let shape = (4, 1);
+    let a = Tensor::<f64>::ones(shape);
+    let b = a.clone().broadcast((4, 1, 1));
+
+    assert_ne!(&a.shape(), &b.shape());
+    assert_eq!(&a.size(), &b.size());
+}
+
+#[test]
 fn test_reshape() {
     let shape = (2, 2);
     let a = Tensor::<f64>::ones(shape);

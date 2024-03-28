@@ -3,7 +3,7 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::error::ShapeError;
-use super::{Axis, Rank};
+use super::{Axis, Rank, Stride};
 use crate::prelude::TensorResult;
 
 use core::ops::{self, Deref};
@@ -31,15 +31,8 @@ impl Shape {
         Self(vec![0; rank])
     }
 
-    pub fn as_slice(&self) -> &[usize] {
-        &self.0
-    }
-
     pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
-        if *self.rank() != 2 || *other.rank() != 2 {
-            return Err(ShapeError::IncompatibleShapes.into());
-        }
-        if self[1] != other[0] {
+        if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
             return Err(ShapeError::IncompatibleShapes.into());
         }
         Ok(Self::from((self[0], other[1])))
@@ -54,7 +47,7 @@ impl Shape {
     }
 
     /// Returns true if the strides are C contiguous (aka row major).
-    pub fn is_contiguous(&self, stride: &[usize]) -> bool {
+    pub fn is_contiguous(&self, stride: &Stride) -> bool {
         if self.0.len() != stride.len() {
             return false;
         }
@@ -76,10 +69,6 @@ impl Shape {
         } else {
             0
         }
-    }
-
-    pub fn ndim(&self) -> usize {
-        self.0.len()
     }
 
     pub fn nrows(&self) -> usize {
@@ -132,7 +121,7 @@ impl Shape {
         shape
     }
 
-    pub(crate) fn stride_contiguous(&self) -> Vec<usize> {
+    pub(crate) fn stride_contiguous(&self) -> Stride {
         let mut stride: Vec<_> = self
             .0
             .iter()
@@ -144,7 +133,44 @@ impl Shape {
             })
             .collect();
         stride.reverse();
-        stride
+        stride.into()
+    }
+
+    pub fn upcast(&self, to: &Shape, stride: &Stride) -> Option<Stride> {
+        let mut new_stride = to.slice().to_vec();
+        // begin at the back (the least significant dimension)
+        // size of the axis has to either agree or `from` has to be 1
+        if to.rank() < self.rank() {
+            return None;
+        }
+
+        {
+            let mut new_stride_iter = new_stride.as_mut_slice().iter_mut().rev();
+            for ((er, es), dr) in self
+                .slice()
+                .iter()
+                .rev()
+                .zip(stride.slice().iter().rev())
+                .zip(new_stride_iter.by_ref())
+            {
+                /* update strides */
+                if *dr == *er {
+                    /* keep stride */
+                    *dr = *es;
+                } else if *er == 1 {
+                    /* dead dimension, zero stride */
+                    *dr = 0
+                } else {
+                    return None;
+                }
+            }
+
+            /* set remaining strides to zero */
+            for dr in new_stride_iter {
+                *dr = 0;
+            }
+        }
+        Some(new_stride.into())
     }
 }
 

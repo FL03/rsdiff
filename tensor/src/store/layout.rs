@@ -2,28 +2,51 @@
     Appellation: layout <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Layout
-//!
-//!
-use crate::shape::{Axis, IntoShape, Shape, ShapeError, ShapeResult};
+use crate::shape::{Axis, IntoShape, IntoStride, Rank, Shape, ShapeError, ShapeResult, Stride};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+/// A layout is a description of how data is stored in memory.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Layout {
     pub(crate) offset: usize,
     pub(crate) shape: Shape,
-    pub(crate) stride: Vec<usize>,
+    pub(crate) stride: Stride,
 }
 
 impl Layout {
-    pub fn new(offset: usize, shape: Shape, stride: Vec<usize>) -> Self {
+    pub fn new(offset: usize, shape: impl IntoShape, stride: impl IntoStride) -> Self {
         Self {
             offset,
-            shape,
-            stride,
+            shape: shape.into_shape(),
+            stride: stride.into_stride(),
         }
+    }
+    /// Broadcast the layout to a new shape.
+    ///
+    /// The new shape must have the same or higher rank than the current shape.
+    pub fn broadcast_as(&self, shape: impl IntoShape) -> ShapeResult<Self> {
+        let shape = shape.into_shape();
+        if shape.rank() < self.shape().rank() {
+            return Err(ShapeError::IncompatibleShapes);
+        }
+        let added_dims = shape.rank() - self.shape().rank();
+        let mut stride = vec![0; added_dims];
+        for (&dst_dim, (&src_dim, &src_stride)) in shape[added_dims..]
+            .iter()
+            .zip(self.shape().iter().zip(self.stride().iter()))
+        {
+            let s = if dst_dim == src_dim {
+                src_stride
+            } else if src_dim != 1 {
+                return Err(ShapeError::IncompatibleShapes);
+            } else {
+                0
+            };
+            stride.push(s)
+        }
+        Ok(Self::new(self.offset, shape, stride))
     }
     /// Create a new layout with a contiguous stride.
     pub fn contiguous(shape: impl IntoShape) -> Self {
@@ -35,23 +58,23 @@ impl Layout {
             stride,
         }
     }
-
-    pub fn ndim(&self) -> usize {
-        debug_assert_eq!(self.stride.len(), self.shape.ndim());
-        self.shape.ndim()
-    }
-
+    /// Get a peek at the offset of the layout.
     pub fn offset(&self) -> usize {
         self.offset
     }
-
+    /// Return the rank (number of dimensions) of the layout.
+    pub fn rank(&self) -> Rank {
+        debug_assert_eq!(self.stride.len(), *self.shape.rank());
+        self.shape.rank()
+    }
+    /// Reshape the layout to a new shape.
     pub fn reshape(&mut self, shape: impl IntoShape) {
         self.shape = shape.into_shape();
         self.stride = self.shape.stride_contiguous();
     }
-
+    /// Reverse the order of the axes.
     pub fn reverse_axes(mut self) -> Layout {
-        self.shape.slice_mut().reverse();
+        self.shape.reverse();
         self.stride.reverse();
         self
     }
@@ -64,17 +87,15 @@ impl Layout {
         self.shape.size()
     }
 
-    pub fn stride(&self) -> &[usize] {
+    pub fn stride(&self) -> &Stride {
         &self.stride
     }
 
     pub fn swap_axes(&self, a: Axis, b: Axis) -> Layout {
-        let mut stride = self.stride.to_vec();
-        stride.swap(a.axis(), b.axis());
         Layout {
             offset: self.offset,
             shape: self.shape.swap_axes(a, b),
-            stride,
+            stride: self.stride.swap_axes(a, b),
         }
     }
 
@@ -102,26 +123,9 @@ impl Layout {
 
 // Internal methods
 impl Layout {
-    pub fn position(&self, coords: impl AsRef<[usize]>) -> ShapeResult<usize> {
+    pub(crate) fn index(&self, coords: impl AsRef<[usize]>) -> usize {
         let coords = coords.as_ref();
-        if coords.len() != self.shape.ndim() {
-            return Err(ShapeError::DimensionMismatch.into());
-        }
-        for (&coord, &dim) in coords.iter().zip(self.shape.slice().iter()) {
-            if coord >= dim {
-                return Err(ShapeError::MismatchedElements.into());
-            }
-        }
-        let mut index = self.offset;
-        for (i, &coord) in coords.iter().enumerate() {
-            index += coord * self.stride[i];
-        }
-        Ok(index)
-    }
-
-    pub fn select(&self, coords: impl AsRef<[usize]>) -> usize {
-        let coords = coords.as_ref();
-        if coords.len() != self.shape.ndim() {
+        if coords.len() != *self.shape.rank() {
             panic!("Dimension mismatch");
         }
         let index = coords
@@ -140,8 +144,8 @@ mod tests {
     fn test_position() {
         let shape = (3, 3);
         let layout = Layout::contiguous(shape);
-        assert_eq!(layout.select(&[0, 0]), 0);
-        assert_eq!(layout.select(&[0, 1]), 1);
-        assert_eq!(layout.select(&[2, 2]), 8);
+        assert_eq!(layout.index(&[0, 0]), 0);
+        assert_eq!(layout.index(&[0, 1]), 1);
+        assert_eq!(layout.index(&[2, 2]), 8);
     }
 }

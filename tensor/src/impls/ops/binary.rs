@@ -44,7 +44,7 @@ where
 }
 
 macro_rules! impl_arithmetic {
-    ($trait:ident, $method:ident, $op:tt) => {
+    (op: $trait:ident, $method:ident, $op:tt) => {
         impl_scalar_arith!($trait, $method, $op);
 
         impl<T> std::ops::$trait for TensorBase<T>
@@ -112,6 +112,9 @@ macro_rules! impl_arithmetic {
                 from_vec_with_op(false, op, shape, store)
             }
         }
+    };
+    ($(($trait:ident, $method:ident, $op:tt)),*) => {
+        $( impl_arithmetic!(op: $trait, $method, $op); )*
     };
 }
 
@@ -181,12 +184,10 @@ macro_rules! impl_assign_op {
 
 }
 
-impl_arithmetic!(Add, add, +);
-impl_arithmetic!(Div, div, /);
-impl_arithmetic!(Mul, mul, *);
-impl_arithmetic!(Sub, sub, -);
+impl_arithmetic!((Add, add, +), (Div, div, /), (Mul, mul, *), (Rem, rem, %), (Sub, sub, -));
 
 impl_assign_op!(AddAssign, add_assign, Add, +);
 impl_assign_op!(DivAssign, div_assign, Div, /);
 impl_assign_op!(MulAssign, mul_assign, Mul, *);
+impl_assign_op!(RemAssign, rem_assign, Rem, %);
 impl_assign_op!(SubAssign, sub_assign, Sub, -);

@@ -87,3 +87,54 @@ impl From<Rank> for usize {
 unsafe impl Send for Rank {}
 
 unsafe impl Sync for Rank {}
+
+macro_rules! impl_std_ops {
+    ($trait:tt, $method:ident, $e:tt) => {
+        impl std::ops::$trait<usize> for Rank {
+                type Output = usize;
+
+                fn $method(self, rhs: usize) -> Self::Output {
+                    self.0 $e rhs
+                }
+            }
+
+        impl std::ops::$trait<Rank> for Rank {
+            type Output = usize;
+
+            fn $method(self, rhs: Rank) -> Self::Output {
+                self.0 $e rhs.0
+            }
+        }
+
+        impl<'a> std::ops::$trait<Rank> for &'a Rank {
+            type Output = usize;
+
+            fn $method(self, rhs: Rank) -> Self::Output {
+                self.0 $e rhs.0
+            }
+        }
+
+        impl<'a> std::ops::$trait<&'a Rank> for Rank {
+            type Output = usize;
+
+            fn $method(self, rhs: &'a Rank) -> Self::Output {
+                self.0 $e rhs.0
+            }
+        }
+
+        impl<'a> std::ops::$trait<&'a Rank> for &'a Rank {
+            type Output = usize;
+
+            fn $method(self, rhs: &'a Rank) -> Self::Output {
+                self.0 $e rhs.0
+            }
+        }
+    };
+    (many: $(($trait:tt, $method:ident, $e:tt)),*) => {
+        $(
+           impl_std_ops!($trait, $method, $e);
+        )*
+    };
+}
+
+impl_std_ops!(many: (Add, add, +), (Sub, sub, -), (Mul, mul, *), (Div, div, /), (Rem, rem, %));

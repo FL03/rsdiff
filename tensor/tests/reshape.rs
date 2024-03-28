@@ -31,7 +31,7 @@ fn test_reshape() {
 #[test]
 fn test_transpose() {
     let shape = (2, 3);
-    let a = Tensor::<f64>::linspace(0.0, 6.0, 6).with_shape(shape);
+    let a = Tensor::<f64>::linspace(0f64, 6f64, 6).with_shape(shape);
     let at = a.t();
     println!("Transposed Shape: {:?}", &at.shape());
 

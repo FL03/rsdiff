@@ -12,7 +12,7 @@ extern crate alloc;
 extern crate acme_core as acme;
 
 #[doc(inline)]
-pub use self::{seal::*, tensor::*, utils::*};
+pub use self::{tensor::*, utils::*};
 
 #[macro_use]
 pub(crate) mod seal;

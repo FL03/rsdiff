@@ -24,8 +24,9 @@ fn test_reshape() {
     let a = Tensor::<f64>::ones(shape);
     let b = a.clone().reshape((4,)).unwrap();
 
-    assert_ne!(&a.shape(), &b.shape());
-    assert_eq!(&a.size(), &b.size());
+    assert_ne!(a.rank(), b.rank());
+    assert_ne!(a.shape(), b.shape());
+    assert_eq!(a.size(), b.size());
 }
 
 #[test]

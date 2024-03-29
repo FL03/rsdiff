@@ -34,6 +34,18 @@ pub enum Op {
     Unary(UnaryOp),
 }
 
+impl From<BinaryOp> for Op {
+    fn from(op: BinaryOp) -> Self {
+        Self::Binary(op)
+    }
+}
+
+impl From<UnaryOp> for Op {
+    fn from(op: UnaryOp) -> Self {
+        Self::Unary(op)
+    }
+}
+
 pub enum Expr {
     Binary(BinaryOperator<Box<dyn std::any::Any>>),
 }

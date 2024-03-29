@@ -2,6 +2,7 @@
     Appellation: macros <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![allow(unused)]
 #![cfg(all(test, feature = "macros"))]
 
 extern crate acme;

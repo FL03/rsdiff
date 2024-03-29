@@ -12,11 +12,16 @@ pub(crate) mod dual;
 pub(crate) mod operators;
 pub(crate) mod variables;
 
+/// A boxed error type for use in the library.
+pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
+/// A boxed result type for use in the library.
+pub type BoxResult<T = ()> = std::result::Result<T, BoxError>;
+
 macro_rules! impl_op {
     ($name:ident, $bound:ident, $fn:ident, $val:tt, $e:expr) => {
-        impl<T> $bound for $name<T>
+        impl<T> std::ops::$bound for $name<T>
         where
-            T: $bound<Output = T>,
+            T: std::ops::$bound<Output = T>,
         {
             type Output = Self;
 
@@ -25,9 +30,9 @@ macro_rules! impl_op {
             }
         }
 
-        impl<T> $bound<T> for $name<T>
+        impl<T> std::ops::$bound<T> for $name<T>
         where
-            T: $bound<Output = T>,
+            T: std::ops::$bound<Output = T>,
         {
             type Output = Self;
 
@@ -39,18 +44,16 @@ macro_rules! impl_op {
 }
 
 macro_rules! impl_const_op {
-    ($name:ident, $bound:ident, $fn:ident, $e:expr) => {
-        impl_op!($name, $bound, $fn, 0, |a, b| $name::new($e(a, b)));
+    ($bound:ident, $fn:ident, $e:expr) => {
+        impl_op!(Constant, $bound, $fn, 0, |a, b| Constant::new($e(a, b)));
     };
 }
 
-use std::ops::{Add, Div, Mul, Rem, Sub};
-
-impl_const_op!(Constant, Add, add, |a, b| a + b);
-impl_const_op!(Constant, Div, div, |a, b| a / b);
-impl_const_op!(Constant, Mul, mul, |a, b| a * b);
-impl_const_op!(Constant, Rem, rem, |a, b| a % b);
-impl_const_op!(Constant, Sub, sub, |a, b| a - b);
+impl_const_op!(Add, add, |a, b| a + b);
+impl_const_op!(Div, div, |a, b| a / b);
+impl_const_op!(Mul, mul, |a, b| a * b);
+impl_const_op!(Rem, rem, |a, b| a % b);
+impl_const_op!(Sub, sub, |a, b| a - b);
 
 #[cfg(test)]
 mod tests {

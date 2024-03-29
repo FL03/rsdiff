@@ -23,7 +23,7 @@ where
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
-pub struct Stride(Vec<usize>);
+pub struct Stride(pub(crate) Vec<usize>);
 
 impl Stride {
     pub fn new(stride: Vec<usize>) -> Self {

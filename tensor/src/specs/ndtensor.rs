@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::TensorId;
-use crate::shape::prelude::{Rank, Shape};
+use crate::shape::{Rank, Shape, Stride};
 use crate::store::Layout;
 
 pub trait NdTensor {
@@ -25,7 +25,7 @@ pub trait NdTensor {
         self.shape().size()
     }
 
-    fn stride(&self) -> &[usize] {
+    fn stride(&self) -> &Stride {
         self.layout().stride()
     }
 }

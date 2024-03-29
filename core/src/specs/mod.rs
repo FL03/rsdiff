@@ -12,6 +12,12 @@ pub mod func;
 
 use crate::errors::PredictError;
 
+pub trait Idx {
+    type Index;
+
+    fn index(&self) -> Self::Index;
+}
+
 pub trait Backward {
     type Output;
 

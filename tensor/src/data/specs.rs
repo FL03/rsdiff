@@ -140,6 +140,7 @@ pub unsafe trait RawDataClone: RawData {
     }
 }
 
+/// Raw Data Subsitution
 pub trait RawDataSubst<A>: RawData {
     /// The resulting array storage of the same kind but substituted element type
     type Output: RawData<Elem = A>;

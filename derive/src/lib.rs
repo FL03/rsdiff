@@ -6,24 +6,16 @@
 //!
 //!
 extern crate proc_macro;
-use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::{parse_macro_input, Data, DataStruct, DeriveInput};
 
 pub(crate) mod ast;
 pub(crate) mod cmp;
 pub(crate) mod utils;
 
-#[proc_macro_derive(AnswerFn)]
-pub fn derive_answer_fn(_item: TokenStream) -> TokenStream {
-    "fn answer() -> u32 { 42 }".parse().unwrap()
-}
+use proc_macro::TokenStream;
+use quote::{format_ident, quote};
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput};
 
-#[proc_macro_derive(HelperAttr, attributes(helper))]
-pub fn derive_helper_attr(_item: TokenStream) -> TokenStream {
-    TokenStream::new()
-}
-
+/// This macro generates a parameter struct and an enum of parameter keys.
 #[proc_macro_derive(Params, attributes(param))]
 pub fn params(input: TokenStream) -> TokenStream {
     // Parse the input tokens into a syntax tree

@@ -5,12 +5,6 @@
 //! # Core
 //!
 //!
-
-pub use self::{primitives::*, utils::*};
-
-pub(crate) mod primitives;
-pub(crate) mod utils;
-
 pub mod errors;
 pub mod eval;
 pub mod id;
@@ -20,9 +14,6 @@ pub mod specs;
 pub mod types;
 
 pub mod prelude {
-    pub use crate::primitives::*;
-    pub use crate::utils::*;
-
     pub use crate::errors::*;
     pub use crate::eval::*;
     pub use crate::id::*;

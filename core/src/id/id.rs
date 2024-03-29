@@ -8,13 +8,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-pub struct Id {
+pub struct Id<Idx = usize> {
     id: AtomicId,
-    index: usize,
+    index: Idx,
 }
 
-impl Id {
-    pub fn new(index: usize) -> Self {
+impl<Idx> Id<Idx> {
+    pub fn new(index: Idx) -> Self {
         Self {
             id: AtomicId::new(),
             index,
@@ -25,19 +25,15 @@ impl Id {
         *self.id
     }
 
-    pub fn index(&self) -> usize {
-        self.index
-    }
-
-    pub(crate) fn next_index(&self) -> Self {
-        Self {
-            id: self.id,
-            index: self.index() + 1,
-        }
+    pub fn index(&self) -> &Idx {
+        &self.index
     }
 }
 
-impl std::fmt::Display for Id {
+impl<Idx> std::fmt::Display for Id<Idx>
+where
+    Idx: std::fmt::Display,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         if f.alternate() {
             write!(f, "{}.{}", self.index(), self.id)

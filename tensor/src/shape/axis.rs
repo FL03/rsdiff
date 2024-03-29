@@ -2,12 +2,9 @@
    Appellation: axis <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Axis
-//!
-//! An [Axis] is used to represent a dimension in a tensor.
+use core::ops::Deref;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::ops::Deref;
 
 pub trait IntoAxis {
     fn into_axis(self) -> Axis;
@@ -19,11 +16,7 @@ impl IntoAxis for usize {
     }
 }
 
-pub struct Switch {
-    pub swap: Axis,
-    pub with: Axis,
-}
-
+/// An [Axis] is used to represent a dimension in a tensor.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Axis(pub(crate) usize);

@@ -31,9 +31,9 @@ impl Layout {
         if shape.rank() < self.shape().rank() {
             return Err(ShapeError::IncompatibleShapes);
         }
-        let added_dims = shape.rank() - self.shape().rank();
-        let mut stride = vec![0; added_dims];
-        for (&dst_dim, (&src_dim, &src_stride)) in shape[added_dims..]
+        let diff = shape.rank() - self.shape().rank();
+        let mut stride = vec![0; *diff];
+        for (&dst_dim, (&src_dim, &src_stride)) in shape[*diff..]
             .iter()
             .zip(self.shape().iter().zip(self.stride().iter()))
         {

@@ -12,11 +12,12 @@ pub trait StructuralFn {
 
 pub trait StructuredArgs {}
 
-pub struct StructFunc<F, A>
-where
-    F: StructuralFn,
-    A: StructuredArgs,
-{
-    args: A,
-    func: F,
+pub struct Sigmoid<T> {
+    x: T,
+}
+
+impl<T> Sigmoid<T> {
+    pub fn new(x: T) -> Self {
+        Self { x }
+    }
 }

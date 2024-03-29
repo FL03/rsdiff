@@ -2,14 +2,14 @@
    Appellation: shape <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::error::ShapeError;
 use super::{Axis, Rank, Stride};
-use crate::prelude::TensorResult;
+use crate::prelude::{ShapeError, SwapAxes, TensorResult};
 
 use core::ops::{self, Deref};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+/// A shape is a description of the number of elements in each dimension.
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Shape(Vec<usize>);
@@ -18,7 +18,7 @@ impl Shape {
     pub fn new(shape: Vec<usize>) -> Self {
         Self(shape)
     }
-
+    /// Creates a new shape of rank 0.
     pub fn scalar() -> Self {
         Self(Vec::new())
     }
@@ -26,7 +26,7 @@ impl Shape {
     pub fn with_capacity(capacity: usize) -> Self {
         Self(Vec::with_capacity(capacity))
     }
-
+    /// Creates a new shape of the given rank with all dimensions set to 0.
     pub fn zeros(rank: usize) -> Self {
         Self(vec![0; rank])
     }
@@ -37,15 +37,10 @@ impl Shape {
         }
         Ok(Self::from((self[0], other[1])))
     }
-
-    pub fn dims(&self) -> &[usize] {
-        &self.0
+    /// Inserts a new dimension along the given [Axis].
+    pub fn insert(&mut self, index: Axis, dim: usize) {
+        self.0.insert(*index, dim)
     }
-
-    pub fn insert(&mut self, index: usize, dim: usize) {
-        self.0.insert(index, dim)
-    }
-
     /// Returns true if the strides are C contiguous (aka row major).
     pub fn is_contiguous(&self, stride: &Stride) -> bool {
         if self.0.len() != stride.len() {
@@ -60,7 +55,7 @@ impl Shape {
         }
         true
     }
-
+    /// The number of columns in the shape.
     pub fn ncols(&self) -> usize {
         if self.len() >= 2 {
             self.0[1]
@@ -70,7 +65,7 @@ impl Shape {
             0
         }
     }
-
+    /// The number of rows in the shape.
     pub fn nrows(&self) -> usize {
         if self.len() >= 1 {
             *self.0.first().unwrap()
@@ -78,43 +73,43 @@ impl Shape {
             0
         }
     }
-
+    /// Add a new dimension to the shape.
     pub fn push(&mut self, dim: usize) {
         self.0.push(dim)
     }
-
+    /// Get the number of dimensions, or [Rank], of the shape
     pub fn rank(&self) -> Rank {
         self.0.len().into()
     }
-
-    pub fn remove(&mut self, index: usize) -> usize {
-        self.0.remove(index)
+    /// Remove the dimension at the given [Axis].
+    pub fn remove(&mut self, index: Axis) -> usize {
+        self.0.remove(*index)
     }
-
+    /// Reverse the dimensions of the shape.
     pub fn reverse(&mut self) {
         self.0.reverse()
     }
-
+    /// Set the dimension at the given [Axis].
     pub fn set(&mut self, index: Axis, dim: usize) {
         self[index] = dim
     }
-
+    /// The number of elements in the shape.
     pub fn size(&self) -> usize {
         self.0.iter().product()
     }
-
+    /// Get a reference to the shape as a slice.
     pub fn slice(&self) -> &[usize] {
         &self.0
     }
-
+    /// Get a mutable reference to the shape as a slice.
     pub fn slice_mut(&mut self) -> &mut [usize] {
         &mut self.0
     }
-
-    pub(crate) fn swap(&mut self, a: Axis, b: Axis) {
+    /// Swap the dimensions of the current [Shape] at the given [Axis].
+    pub fn swap(&mut self, a: Axis, b: Axis) {
         self.0.swap(a.axis(), b.axis())
     }
-
+    /// Swap the dimensions at the given [Axis], creating a new [Shape]
     pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {
         let mut shape = self.clone();
         shape.swap(swap, with);
@@ -197,6 +192,14 @@ impl Deref for Shape {
 impl Extend<usize> for Shape {
     fn extend<I: IntoIterator<Item = usize>>(&mut self, iter: I) {
         self.0.extend(iter)
+    }
+}
+
+impl SwapAxes for Shape {
+    fn swap_axes(&self, a: Axis, b: Axis) -> Self {
+        let mut shape = self.clone();
+        shape.swap(a, b);
+        shape
     }
 }
 

@@ -13,7 +13,7 @@ use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-#[repr(transparent)]
+#[repr(C)]
 pub struct AtomicId(usize);
 
 impl AtomicId {

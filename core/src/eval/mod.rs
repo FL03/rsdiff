@@ -6,16 +6,24 @@ pub use self::evaluator::*;
 
 pub(crate) mod evaluator;
 
-pub trait Evaluate {
+pub trait EvaluateOnce {
     type Output;
 
-    fn eval(self) -> Self::Output;
+    fn eval_once(self) -> Self::Output;
 }
 
-impl Evaluate for f64 {
+pub trait EvaluateMut: EvaluateOnce {
+    fn eval_mut(&mut self) -> Self::Output;
+}
+
+pub trait Evaluate: EvaluateMut {
+    fn eval(&self) -> Self::Output;
+}
+
+impl EvaluateOnce for f64 {
     type Output = f64;
 
-    fn eval(self) -> Self::Output {
+    fn eval_once(self) -> Self::Output {
         self
     }
 }

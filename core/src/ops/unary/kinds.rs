@@ -43,6 +43,7 @@ pub enum UnaryOp {
     Inv,
     Ln,
     Neg,
+    Not,
     Sin,
     Sinh,
     Sqrt,

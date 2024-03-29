@@ -5,10 +5,10 @@
 //! # Rank
 //!
 //! The rank of a n-dimensional array describes the number of dimensions
+use core::borrow::Borrow;
+use core::ops::{Deref, DerefMut};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::borrow::Borrow;
-use std::ops::{Deref, DerefMut};
 
 pub trait IntoRank {
     fn into_rank(self) -> Rank;
@@ -22,11 +22,15 @@ impl IntoRank for usize {
 
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Rank(pub usize);
+pub struct Rank(pub(crate) usize);
 
 impl Rank {
     pub fn new(rank: usize) -> Self {
         Self(rank)
+    }
+
+    pub fn into_inner(self) -> usize {
+        self.0
     }
 
     pub fn rank(&self) -> usize {
@@ -91,42 +95,47 @@ unsafe impl Sync for Rank {}
 macro_rules! impl_std_ops {
     ($trait:tt, $method:ident, $e:tt) => {
         impl std::ops::$trait<usize> for Rank {
-                type Output = usize;
+            type Output = Rank;
 
-                fn $method(self, rhs: usize) -> Self::Output {
-                    self.0 $e rhs
-                }
+            fn $method(self, rhs: usize) -> Self::Output {
+                let rank = self.0 $e rhs;
+                Rank(rank)
             }
+        }
 
         impl std::ops::$trait<Rank> for Rank {
-            type Output = usize;
+            type Output = Rank;
 
             fn $method(self, rhs: Rank) -> Self::Output {
-                self.0 $e rhs.0
+                let rank = self.0 $e rhs.0;
+                Rank(rank)
             }
         }
 
         impl<'a> std::ops::$trait<Rank> for &'a Rank {
-            type Output = usize;
+            type Output = Rank;
 
             fn $method(self, rhs: Rank) -> Self::Output {
-                self.0 $e rhs.0
+                let rank = self.0 $e rhs.0;
+                Rank(rank)
             }
         }
 
         impl<'a> std::ops::$trait<&'a Rank> for Rank {
-            type Output = usize;
+            type Output = Rank;
 
             fn $method(self, rhs: &'a Rank) -> Self::Output {
-                self.0 $e rhs.0
+                let rank = self.0 $e rhs.0;
+                Rank(rank)
             }
         }
 
         impl<'a> std::ops::$trait<&'a Rank> for &'a Rank {
-            type Output = usize;
+            type Output = Rank;
 
             fn $method(self, rhs: &'a Rank) -> Self::Output {
-                self.0 $e rhs.0
+                let rank = self.0 $e rhs.0;
+                Rank(rank)
             }
         }
     };

@@ -12,6 +12,19 @@ pub(crate) mod kinds;
 pub mod binary;
 pub mod unary;
 
+pub trait IntoOp {
+    fn into_op(self) -> Op;
+}
+
+impl<S> IntoOp for S
+where
+    S: Into<Op>,
+{
+    fn into_op(self) -> Op {
+        self.into()
+    }
+}
+
 pub trait Operation {
     type Output;
 

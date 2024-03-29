@@ -62,7 +62,7 @@ impl<T> TensorBase<T> {
             store,
         }
     }
-
+    /// Create a new tensor from a scalar value.
     pub fn from_scalar(value: T) -> Self {
         Self {
             id: TensorId::new(),
@@ -87,7 +87,7 @@ impl<T> TensorBase<T> {
             store,
         }
     }
-
+    /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
     where
         T: Clone,
@@ -96,8 +96,8 @@ impl<T> TensorBase<T> {
             self.clone()
         } else {
             Self {
-                id: TensorId::new(),
-                kind: TensorKind::Normal,
+                id: self.id,
+                kind: self.kind,
                 layout: self.layout.clone(),
                 op: BackpropOp::none(),
                 store: self.store.clone(),
@@ -109,11 +109,11 @@ impl<T> TensorBase<T> {
         self.id
     }
     /// Get a reference to the [Layout] of the tensor
-    pub fn layout(&self) -> &Layout {
+    pub const fn layout(&self) -> &Layout {
         &self.layout
     }
     /// Get a reference to the operation of the tensor
-    pub fn op(&self) -> &BackpropOp<T> {
+    pub const fn op(&self) -> &BackpropOp<T> {
         &self.op
     }
     /// Get an owned reference to the [Rank] of the tensor
@@ -218,12 +218,21 @@ impl<T> TensorBase<T> {
         self
     }
 }
-
+// Inernal Methods
+#[allow(dead_code)]
 impl<T> TensorBase<T> {
+    pub(crate) fn as_slice(&self) -> &[T] {
+        &self.store
+    }
+
+    pub(crate) fn as_mut_slice(&mut self) -> &mut [T] {
+        &mut self.store
+    }
+
     pub(crate) fn data(&self) -> &Vec<T> {
         &self.store
     }
-    #[allow(dead_code)]
+
     pub(crate) fn data_mut(&mut self) -> &mut Vec<T> {
         &mut self.store
     }

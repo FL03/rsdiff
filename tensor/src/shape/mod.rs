@@ -4,7 +4,8 @@
 */
 //! # Shapes
 //!
-//!
+//! This modules provides implements several useful primitives for working with
+//! the shape of a [Tensor](crate::tensor::TensorBase).
 pub use self::{axis::*, error::*, rank::*, shape::Shape, stride::*};
 
 pub(crate) mod axis;

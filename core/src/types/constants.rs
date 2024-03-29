@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-use crate::prelude::{Evaluate, Gradient};
+use crate::prelude::{EvaluateOnce, Gradient};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -68,10 +68,10 @@ where
     }
 }
 
-impl<T> Evaluate for Constant<T> {
+impl<T> EvaluateOnce for Constant<T> {
     type Output = T;
 
-    fn eval(self) -> Self::Output {
+    fn eval_once(self) -> Self::Output {
         self.0
     }
 }

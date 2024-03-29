@@ -16,8 +16,6 @@ default = [
     "std"
 ]
 
-std = []
-
 serde = [
     "dep:serde",
     "serde-ext",
@@ -25,6 +23,10 @@ serde = [
 
 serde-ext = [
     "acme-core/serde"
+]
+
+std = [
+    "acme-core/std",
 ]
 
 [build-dependencies]
@@ -37,7 +39,8 @@ strum = { features = ["derive"], version = "0.26" }
 
 [dependencies.acme-core]
 path = "../core"
-version = "0.3.0-nightly.3"
+version = "0.3.0"
+# version = "0.3.0-nightly.4"
 
 [dev-dependencies]
 approx = "0.5"

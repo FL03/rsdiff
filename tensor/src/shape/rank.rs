@@ -29,8 +29,16 @@ impl Rank {
         Self(rank)
     }
 
+    pub const fn scalar() -> Self {
+        Self(0)
+    }
+
     pub fn into_inner(self) -> usize {
         self.0
+    }
+
+    pub fn is_scalar(&self) -> bool {
+        self.0 == 0
     }
 
     pub fn rank(&self) -> usize {

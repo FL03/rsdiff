@@ -5,6 +5,10 @@
 //! # Core
 //!
 //!
+
+#[macro_use]
+pub(crate) mod seal;
+
 pub mod errors;
 pub mod eval;
 pub mod id;

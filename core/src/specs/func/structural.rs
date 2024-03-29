@@ -13,7 +13,7 @@ pub trait StructuralFn {
 pub trait StructuredArgs {}
 
 pub struct Sigmoid<T> {
-    x: T,
+    pub x: T,
 }
 
 impl<T> Sigmoid<T> {

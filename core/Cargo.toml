@@ -10,7 +10,9 @@ repository.workspace = true
 version.workspace = true
 
 [features]
-default = []
+default = [
+    "std",
+]
 
 serde = [
     "dep:serde",
@@ -20,6 +22,8 @@ serde = [
 serde-ext = [
     "dep:serde_json",
 ]
+
+std = []
 
 [lib]
 bench = false

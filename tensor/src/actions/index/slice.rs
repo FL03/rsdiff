@@ -9,5 +9,8 @@
 pub struct Slice {
     pub start: usize,
     pub end: usize,
-    pub step: usize,
 }
+
+impl Slice {}
+
+pub enum Index {}

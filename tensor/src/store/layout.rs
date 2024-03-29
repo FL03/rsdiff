@@ -58,6 +58,10 @@ impl Layout {
             stride,
         }
     }
+    /// Determine if the current layout is contiguous or not.
+    pub fn is_contiguous(&self) -> bool {
+        self.shape.is_contiguous(&self.stride)
+    }
     /// Get a peek at the offset of the layout.
     pub fn offset(&self) -> usize {
         self.offset
@@ -123,16 +127,16 @@ impl Layout {
 
 // Internal methods
 impl Layout {
-    pub(crate) fn index(&self, coords: impl AsRef<[usize]>) -> usize {
-        let coords = coords.as_ref();
-        if coords.len() != *self.shape.rank() {
+    pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
+        let idx = idx.as_ref();
+        if idx.len() != *self.shape.rank() {
             panic!("Dimension mismatch");
         }
-        let index = coords
+        idx
             .iter()
             .zip(self.stride.iter())
-            .fold(self.offset, |acc, (&coord, &stride)| acc + coord * stride);
-        index
+            .map(|(i, s)| i * s)
+            .sum()
     }
 }
 

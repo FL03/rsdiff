@@ -3,14 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-pub use self::{gradient::*, store::*};
+pub use self::{gradient::*, prop::*, store::*};
 
 pub(crate) mod gradient;
+pub(crate) mod prop;
 pub(crate) mod store;
 
 pub mod func;
 
-use crate::errors::PredictError;
+use core::borrow::Borrow;
 
 pub trait Idx {
     type Index;
@@ -18,36 +19,16 @@ pub trait Idx {
     fn index(&self) -> Self::Index;
 }
 
-pub trait Backward {
-    type Output;
-
-    fn backward(&self) -> Self::Output;
-}
-
-pub trait Forward<T> {
-    type Output;
-
-    fn forward(&self, args: &T) -> Result<Self::Output, PredictError>;
-}
-
-impl<S, T> Forward<T> for Option<S>
+pub trait IdxExt: Idx
 where
-    S: Forward<T, Output = T>,
-    T: Clone,
+    Self: Borrow<Self::Index> + Copy,
 {
-    type Output = T;
-
-    fn forward(&self, args: &T) -> Result<Self::Output, PredictError> {
-        match self {
-            Some(s) => s.forward(args),
-            None => Ok(args.clone()),
-        }
-    }
 }
 
 pub(crate) mod prelude {
     pub use super::func::*;
     pub use super::gradient::*;
+    pub use super::prop::*;
     pub use super::store::*;
 }
 

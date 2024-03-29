@@ -2,6 +2,7 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::actions::index::Strides;
 use crate::ops::{BackpropOp, TensorOp};
 use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind};
 use crate::store::Layout;
@@ -108,6 +109,10 @@ impl<T> TensorBase<T> {
     pub const fn id(&self) -> TensorId {
         self.id
     }
+
+    pub fn is_contiguous(&self) -> bool {
+        self.layout().is_contiguous()
+    }
     /// Get a reference to the [Layout] of the tensor
     pub const fn layout(&self) -> &Layout {
         &self.layout
@@ -132,6 +137,7 @@ impl<T> TensorBase<T> {
     pub fn stride(&self) -> &[usize] {
         self.layout.stride()
     }
+    
     /// A function to check if the tensor is a scalar
     pub fn is_scalar(&self) -> bool {
         self.shape().len() == 0
@@ -218,6 +224,16 @@ impl<T> TensorBase<T> {
         self
     }
 }
+
+impl<T> TensorBase<T> where T: Clone {
+    pub fn to_owned(&self) -> TensorBase<T> {
+        self.clone()
+    }
+
+    pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
+        unimplemented!("view")
+    }
+}
 // Inernal Methods
 #[allow(dead_code)]
 impl<T> TensorBase<T> {
@@ -235,6 +251,14 @@ impl<T> TensorBase<T> {
 
     pub(crate) fn data_mut(&mut self) -> &mut Vec<T> {
         &mut self.store
+    }
+
+    pub(crate) fn get_by_index(&self, index: usize) -> Option<&T> {
+        self.store.get(index)
+    }
+    /// Create an iterator over the strides of the tensor
+    pub(crate) fn strides(&self) -> Strides<'_> {
+        self.layout().into()
     }
 }
 
@@ -272,3 +296,5 @@ impl<T> FromIterator<T> for TensorBase<T> {
         from_vec(TensorKind::Normal, shape, store)
     }
 }
+
+

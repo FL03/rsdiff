@@ -2,7 +2,7 @@
     Appellation: stores <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use std::borrow::Borrow;
+use core::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
 
 pub trait Get<Q> {

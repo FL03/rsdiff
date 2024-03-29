@@ -39,6 +39,16 @@ impl<T> BackpropOp<T> {
     pub fn into_inner(self) -> Option<TensorOp<T>> {
         self.0
     }
+
+    pub fn take(&mut self) -> Option<TensorOp<T>> {
+        self.0.take()
+    }
+}
+
+impl<T> BackpropOp<T> where T: Clone {
+    pub fn view(&self) -> BackpropOp<&T> {
+        BackpropOp(self.0.as_ref().map(|op| op.view()))
+    }
 }
 
 impl<T> Borrow<Option<TensorOp<T>>> for BackpropOp<T> {

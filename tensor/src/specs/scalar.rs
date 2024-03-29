@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use num::complex::Complex;
-use num::traits::real::Real;
 use num::traits::{Float, FromPrimitive, NumAssign, NumCast, NumOps};
 use std::iter::{Product, Sum};
 use std::ops::Neg;
@@ -20,10 +19,10 @@ pub trait Scalar:
     + Sum
     + 'static
 {
-    type Complex: Scalar<Complex = Self::Complex, Real = Self::Real> + NumOps<Self::Real>;
+    type Complex: Scalar<Complex = Self::Complex, Real = Self::Real>
+        + NumOps<Self::Real, Self::Complex>;
     type Real: Scalar<Complex = Self::Complex, Real = Self::Real>
-        + NumOps<Self::Complex, Self::Complex>
-        + Real;
+        + NumOps<Self::Complex, Self::Complex>;
 
     fn abs(self) -> Self::Real;
 
@@ -221,11 +220,7 @@ macro_rules! impl_scalar {
             }
         }
     };
-    ($($t:ty),*) => {
-        $(
-            impl_scalar!($t);
-        )*
-    };
 }
+
 impl_scalar!(f32);
 impl_scalar!(f64);

@@ -50,6 +50,11 @@ serde = [
     "acme-tensor/serde"
 ]
 
+std = [
+    "acme-core/std",
+    "acme-tensor/std"
+]
+
 
 [lib]
 bench = true
@@ -74,16 +79,16 @@ required-features = ["macros"]
 [build-dependencies]
 
 [dependencies]
-# acme-core = { path = "../core", version = "0.3.0" }
-# acme-derive = { optional = true, path = "../derive", version = "0.3.0" }
-# acme-graphs = { optional = true, path = "../graphs", version = "0.3.0" }
-# acme-macros = { optional = true, path = "../macros", version = "0.3.0" }
-# acme-tensor = { optional = true, path = "../tensor", version = "0.3.0" }
-acme-core = { path = "../core", version = "0.3.0-nightly.3" }
-acme-derive = { optional = true, path = "../derive", version = "0.3.0-nightly.3" }
-acme-graphs = { optional = true, path = "../graphs", version = "0.3.0-nightly.3" }
-acme-macros = { optional = true, path = "../macros", version = "0.3.0-nightly.3" }
-acme-tensor = { optional = true, path = "../tensor", version = "0.3.0-nightly.3" }
+acme-core = { path = "../core", version = "0.3.0" }
+acme-derive = { optional = true, path = "../derive", version = "0.3.0" }
+acme-graphs = { optional = true, path = "../graphs", version = "0.3.0" }
+acme-macros = { optional = true, path = "../macros", version = "0.3.0" }
+acme-tensor = { optional = true, path = "../tensor", version = "0.3.0" }
+# acme-core = { path = "../core", version = "0.3.0-nightly.4" }
+# acme-derive = { optional = true, path = "../derive", version = "0.3.0-nightly.4" }
+# acme-graphs = { optional = true, path = "../graphs", version = "0.3.0-nightly.4" }
+# acme-macros = { optional = true, path = "../macros", version = "0.3.0-nightly.4" }
+# acme-tensor = { optional = true, path = "../tensor", version = "0.3.0-nightly.4" }
 
 [dev-dependencies]
 approx = "0.5"

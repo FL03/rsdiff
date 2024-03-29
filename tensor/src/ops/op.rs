@@ -31,6 +31,10 @@ impl<T> TensorOp<T> {
         TensorOp::BinaryScalar(Box::new(lhs), rhs, op)
     }
 
+    pub fn broadcast(tensor: TensorBase<T>, shape: Shape) -> Self {
+        TensorOp::Broadcast(Box::new(tensor), shape)
+    }
+
     pub fn matmul(lhs: TensorBase<T>, rhs: TensorBase<T>) -> Self {
         TensorOp::Matmul(Box::new(lhs), Box::new(rhs))
     }
@@ -62,6 +66,27 @@ impl<T> TensorOp<T> {
             TensorOp::Binary(_, rhs, _) => Some(rhs),
             TensorOp::Matmul(_, rhs) => Some(rhs),
             _ => None,
+        }
+    }
+}
+
+impl<T> TensorOp<T> where T: Clone {
+    pub fn view<'a>(&'a self) -> TensorOp<&'a T> {
+        match self {
+            TensorOp::Binary(lhs, rhs, op) => {
+                TensorOp::binary(lhs.view(), rhs.view(), *op)
+            }
+            TensorOp::BinaryScalar(lhs, rhs, op) => {
+                TensorOp::binary_scalar(lhs.view(), rhs, *op)
+            }
+            TensorOp::Unary(tensor, op) => TensorOp::unary(tensor.view(), *op),
+            TensorOp::Broadcast(tensor, shape) => {
+                TensorOp::broadcast(tensor.view(), shape.clone())
+            }
+            TensorOp::Matmul(lhs, rhs) => TensorOp::matmul(lhs.view(), rhs.view()),
+            TensorOp::Transpose { tensor, axes } => {
+                TensorOp::transpose(tensor.view(), axes.0, axes.1)
+            }
         }
     }
 }

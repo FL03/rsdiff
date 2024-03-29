@@ -2,7 +2,7 @@
    Appellation: operator <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{UnaryOp, UnaryOperation};
+use super::{Unary, UnaryOp};
 // use std::marker::PhantomData;
 
 pub struct UnaryOperator<A> {
@@ -22,7 +22,7 @@ impl<A> UnaryOperator<A> {
 
     pub fn eval(self) -> A::Output
     where
-        A: UnaryOperation,
+        A: Unary,
     {
         self.args.unary(self.op)
     }

@@ -2,7 +2,7 @@
     Appellation: reshape <impls>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{TensorId, TensorOp, TensorResult};
+use crate::prelude::{TensorExpr, TensorId, TensorResult};
 use crate::shape::{Axis, IntoShape, ShapeError};
 use crate::tensor::TensorBase;
 
@@ -32,7 +32,7 @@ where
 
     ///
     pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {
-        let op = TensorOp::transpose(self.clone(), swap, with);
+        let op = TensorExpr::transpose(self.clone(), swap, with);
 
         let layout = self.layout().clone().transpose(swap, with);
         let shape = self.layout.shape();
@@ -57,7 +57,7 @@ where
     /// Transpose the tensor.
     pub fn t(&self) -> Self {
         let (a, b) = (Axis(0), Axis(1));
-        let op = TensorOp::transpose(self.clone(), a, b);
+        let op = TensorExpr::transpose(self.clone(), a, b);
 
         let layout = self.layout().clone().transpose(a, b);
         let shape = self.layout.shape();

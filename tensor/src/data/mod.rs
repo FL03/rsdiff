@@ -196,7 +196,7 @@ where
             data,
             kind: TensorKind::Normal,
             layout: Layout::contiguous(0),
-            op: BackpropOp::none(),
+            op: BackpropOp::<A>::none(),
             ptr,
         };
         debug_assert!(tensor.pointer_is_inbounds());

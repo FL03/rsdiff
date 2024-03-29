@@ -2,26 +2,33 @@
     Appellation: arange <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use num::traits::{FromPrimitive, Num, ToPrimitive};
-use std::ops;
+use core::ops::{self, Range};
+use num::traits::{Bounded, FromPrimitive, Num, ToPrimitive};
+
+pub fn step_size<T>(start: T, stop: T, steps: usize) -> T
+where
+    T: FromPrimitive + Num,
+{
+    (stop - start) / T::from_usize(steps).unwrap()
+}
 
 pub struct Arange<T> {
-    range: Aranged<T>,
+    range: Boundary<T>,
     step: T,
 }
 
 impl<T> Arange<T> {
-    pub fn new(range: Aranged<T>, step: T) -> Self {
+    pub fn new(range: Boundary<T>, step: T) -> Self {
         Self { range, step }
     }
 
     pub fn range(start: T, stop: T, step: T) -> Self {
-        Self::new(Aranged::Range { start, stop }, step)
+        Self::new(Boundary::Range { start, stop }, step)
     }
 }
 impl<T> Arange<T>
 where
-    T: Copy + Default + Num,
+    T: Copy + Default + FromPrimitive + Num,
 {
     pub fn start(&self) -> T {
         self.range.start()
@@ -29,10 +36,10 @@ where
 
     pub fn steps(&self) -> usize
     where
-        T: FromPrimitive + ToPrimitive,
+        T: ToPrimitive,
     {
-        let start = self.range.start();
-        let stop = self.range.stop();
+        let start = self.start();
+        let stop = self.stop();
         let step = self.step;
         let steps = (stop - start) / step;
         steps.to_usize().unwrap()
@@ -43,36 +50,61 @@ where
     }
 
     pub fn stop(&self) -> T {
-        self.range.stop()
+        self.range.stop_or_linear()
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Aranged<T> {
+pub enum Boundary<T> {
     Range { start: T, stop: T },
+    From { start: T },
     Inclusive { start: T, stop: T },
     Until { stop: T },
 }
 
-impl<T> Aranged<T>
+impl<T> Boundary<T>
 where
     T: Copy + Default,
 {
     /// Returns the start value of the range.
     pub fn start(&self) -> T {
         match self {
-            Aranged::Range { start, .. } => *start,
-            Aranged::Inclusive { start, .. } => *start,
-            Aranged::Until { .. } => T::default(),
+            Boundary::Range { start, .. } => *start,
+            Boundary::From { start } => *start,
+            Boundary::Inclusive { start, .. } => *start,
+            Boundary::Until { .. } => T::default(),
         }
     }
     /// Returns the stop value of the range.
-    pub fn stop(&self) -> T {
+    pub fn stop(&self) -> Option<T> {
         match self {
-            Aranged::Range { stop, .. } => *stop,
-            Aranged::Inclusive { stop, .. } => *stop,
-            Aranged::Until { stop } => *stop,
+            Boundary::Range { stop, .. }
+            | Boundary::Inclusive { stop, .. }
+            | Boundary::Until { stop } => Some(*stop),
+            _ => None,
         }
+    }
+
+    pub fn stop_or(&self, default: T) -> T {
+        self.stop().unwrap_or(default)
+    }
+
+    pub fn stop_or_linear(&self) -> T
+    where
+        T: FromPrimitive + Num,
+    {
+        self.stop_or(self.start() * T::from_usize(2).unwrap())
+    }
+
+    pub fn stop_or_default(&self) -> T {
+        self.stop_or(T::default())
+    }
+
+    pub fn stop_or_max(&self) -> T
+    where
+        T: Bounded,
+    {
+        self.stop_or(T::max_value())
     }
 
     pub fn step_size(&self, steps: usize) -> T
@@ -81,51 +113,57 @@ where
     {
         let steps = T::from_usize(steps).unwrap();
         let start = self.start();
-        let stop = self.stop();
+        let stop = self.stop_or_default();
         let step = (stop - start) / steps;
         step
     }
 }
 
-impl<T> From<ops::Range<T>> for Aranged<T> {
-    fn from(args: ops::Range<T>) -> Self {
-        Aranged::Range {
+impl<T> From<Range<T>> for Boundary<T> {
+    fn from(args: Range<T>) -> Self {
+        Boundary::Range {
             start: args.start,
             stop: args.end,
         }
     }
 }
 
-impl<T> From<ops::RangeTo<T>> for Aranged<T> {
-    fn from(args: ops::RangeTo<T>) -> Self {
-        Aranged::Until { stop: args.end }
+impl<T> From<ops::RangeFrom<T>> for Boundary<T> {
+    fn from(args: ops::RangeFrom<T>) -> Self {
+        Boundary::From { start: args.start }
     }
 }
 
-impl<T> From<[T; 2]> for Aranged<T>
+impl<T> From<ops::RangeTo<T>> for Boundary<T> {
+    fn from(args: ops::RangeTo<T>) -> Self {
+        Boundary::Until { stop: args.end }
+    }
+}
+
+impl<T> From<[T; 2]> for Boundary<T>
 where
     T: Copy,
 {
     fn from(args: [T; 2]) -> Self {
-        Aranged::Range {
+        Boundary::Range {
             start: args[0],
             stop: args[1],
         }
     }
 }
 
-impl<T> From<(T, T)> for Aranged<T> {
+impl<T> From<(T, T)> for Boundary<T> {
     fn from(args: (T, T)) -> Self {
-        Aranged::Inclusive {
+        Boundary::Inclusive {
             start: args.0,
             stop: args.1,
         }
     }
 }
 
-impl<T> From<T> for Aranged<T> {
+impl<T> From<T> for Boundary<T> {
     fn from(stop: T) -> Self {
-        Aranged::Until { stop }
+        Boundary::Until { stop }
     }
 }
 
@@ -135,7 +173,7 @@ mod tests {
 
     #[test]
     fn test_arange() {
-        let setup = Aranged::Range { start: 0, stop: 10 };
+        let setup = Boundary::Range { start: 0, stop: 10 };
         let arange = Arange::new(setup, 1);
         assert_eq!(arange.start(), 0);
         assert_eq!(arange.stop(), 10);

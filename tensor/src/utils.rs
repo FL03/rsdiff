@@ -5,7 +5,7 @@
 //! # Utilities
 //!
 //!
-use crate::prelude::{Scalar, TensorOp, TensorResult};
+use crate::prelude::{Scalar, TensorExpr, TensorResult};
 use crate::shape::ShapeError;
 use crate::tensor::{from_vec_with_op, TensorBase};
 
@@ -30,7 +30,7 @@ where
             }
         }
     }
-    let op = TensorOp::matmul(lhs.clone(), rhs.clone());
+    let op = TensorExpr::matmul(lhs.clone(), rhs.clone());
     let tensor = from_vec_with_op(false, op, shape, result);
     Ok(tensor)
 }
@@ -56,7 +56,7 @@ where
             }
         }
     }
-    let op = TensorOp::matmul(lhs.clone(), rhs.clone());
+    let op = TensorExpr::matmul(lhs.clone(), rhs.clone());
     let tensor = from_vec_with_op(false, op, shape, result);
     Ok(tensor)
 }

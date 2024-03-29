@@ -13,8 +13,10 @@ pub(crate) mod specs;
 
 use num::{Complex, Num};
 
-pub trait UnaryOperation {
+pub trait Unary {
     type Output;
+
+    fn name(&self) -> &str;
 
     fn unary(self, expr: UnaryOp) -> Self::Output;
 }

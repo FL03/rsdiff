@@ -19,6 +19,8 @@ pub mod iter;
 pub(crate) mod prelude {
     pub use super::arange::*;
     pub use super::grad::*;
+    pub use super::index::*;
+    pub use super::iter::*;
 }
 
 #[cfg(test)]

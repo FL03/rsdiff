@@ -5,7 +5,7 @@
 //! Implementations for linear algebra operations.
 //!
 //!
-use crate::prelude::{Matmul, Scalar, TensorOp};
+use crate::prelude::{Matmul, Scalar, TensorExpr};
 use crate::tensor::*;
 
 impl<T> TensorBase<T> where T: Scalar {}
@@ -28,7 +28,7 @@ where
                 }
             }
         }
-        let op = TensorOp::matmul(self.clone(), other.clone());
+        let op = TensorExpr::matmul(self.clone(), other.clone());
         from_vec_with_op(false, op, shape, result)
     }
 }

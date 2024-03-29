@@ -13,7 +13,11 @@ pub(crate) mod kinds {
     pub(crate) mod reshape;
 }
 
-pub trait TensorExpr {}
+pub trait BaseOperation {
+    type Output;
+
+    fn name(&self) -> &str;
+}
 
 #[cfg(test)]
 mod tests {}

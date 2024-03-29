@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::actions::index::Strides;
-use crate::ops::{BackpropOp, TensorOp};
+use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind};
 use crate::store::Layout;
 use acme::prelude::BinaryOp;
@@ -34,7 +34,7 @@ pub(crate) fn from_vec<T>(
 
 pub(crate) fn from_vec_with_op<T>(
     kind: impl Into<TensorKind>,
-    op: TensorOp<T>,
+    op: TensorExpr<T>,
     shape: impl IntoShape,
     store: Vec<T>,
 ) -> TensorBase<T> {

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::actions::grad::GradStore;
-use crate::prelude::{Scalar, TensorId, TensorOp, TensorResult};
+use crate::prelude::{Scalar, TensorExpr, TensorId, TensorResult};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, Store, UnaryOp};
 
@@ -42,14 +42,14 @@ where
                 nodes
             } else if let Some(op) = scope.op().op() {
                 match op {
-                    TensorOp::Binary(lhs, rhs, _kind) => {
+                    TensorExpr::Binary(lhs, rhs, _kind) => {
                         let (tg, nodes) = walk(lhs, nodes, visited);
                         track |= tg;
                         let (tg, nodes) = walk(rhs, nodes, visited);
                         track |= tg;
                         nodes
                     }
-                    TensorOp::Unary(a, _kind) => {
+                    TensorExpr::Unary(a, _kind) => {
                         let (tg, nodes) = walk(a, nodes, visited);
                         track |= tg;
                         nodes
@@ -94,7 +94,7 @@ where
             // handle the different types of operations
             if let Some(op) = &*node.op {
                 match op {
-                    TensorOp::Binary(lhs, rhs, kind) => match kind {
+                    TensorExpr::Binary(lhs, rhs, kind) => match kind {
                         BinaryOp::Add => {
                             *entry!(store, lhs) += &grad;
                             *entry!(store, rhs) += &grad;
@@ -114,7 +114,7 @@ where
                         }
                         _ => todo!(),
                     },
-                    TensorOp::Unary(val, kind) => match kind {
+                    TensorExpr::Unary(val, kind) => match kind {
                         UnaryOp::Cos => {
                             *entry!(store, val) -= &grad * val.clone().sin();
                         }

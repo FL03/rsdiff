@@ -2,7 +2,7 @@
     Appellation: arith <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{Scalar, TensorOp};
+use crate::prelude::{Scalar, TensorExpr};
 use crate::tensor::*;
 use acme::ops::unary::UnaryOp;
 
@@ -15,7 +15,7 @@ where
     fn neg(self) -> Self::Output {
         let shape = self.shape().clone();
         let store = self.data().iter().copied().map(|a| -a).collect();
-        let op = TensorOp::unary(self, UnaryOp::Neg);
+        let op = TensorExpr::unary(self, UnaryOp::Neg);
         from_vec_with_op(false, op, shape, store)
     }
 }
@@ -29,7 +29,7 @@ where
     fn neg(self) -> Self::Output {
         let shape = self.shape().clone();
         let store = self.data().iter().copied().map(|a| -a).collect();
-        let op = TensorOp::unary(self.clone(), UnaryOp::Neg);
+        let op = TensorExpr::unary(self.clone(), UnaryOp::Neg);
         from_vec_with_op(false, op, shape, store)
     }
 }
@@ -43,7 +43,7 @@ where
     fn not(self) -> Self::Output {
         let shape = self.shape().clone();
         let store = self.data().iter().copied().map(|a| !a).collect();
-        let op = TensorOp::unary(self, UnaryOp::Not);
+        let op = TensorExpr::unary(self, UnaryOp::Not);
         from_vec_with_op(false, op, shape, store)
     }
 }
@@ -57,7 +57,7 @@ where
     fn not(self) -> Self::Output {
         let shape = self.shape().clone();
         let store = self.data().iter().copied().map(|a| !a).collect();
-        let op = TensorOp::unary(self.clone(), UnaryOp::Not);
+        let op = TensorExpr::unary(self.clone(), UnaryOp::Not);
         from_vec_with_op(false, op, shape, store)
     }
 }
@@ -67,7 +67,7 @@ macro_rules! impl_unary_op {
         pub fn $method(self) -> Self {
             let shape = self.shape().clone();
             let store = self.store.iter().copied().map(|v| v.$method()).collect();
-            let op = TensorOp::unary(self, UnaryOp::$variant);
+            let op = TensorExpr::unary(self, UnaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
     };
@@ -75,7 +75,7 @@ macro_rules! impl_unary_op {
         pub fn $method(self) -> Self {
             let shape = self.shape().clone();
             let store = self.store.iter().copied().map($f).collect();
-            let op = TensorOp::unary(self, UnaryOp::$variant);
+            let op = TensorExpr::unary(self, UnaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
     };
@@ -91,7 +91,7 @@ where
     {
         let shape = self.shape().clone();
         let store = self.store.iter().copied().map(|v| v.abs()).collect();
-        let op = TensorOp::unary(self, UnaryOp::Abs);
+        let op = TensorExpr::unary(self, UnaryOp::Abs);
         from_vec_with_op(false, op, shape, store)
     }
 

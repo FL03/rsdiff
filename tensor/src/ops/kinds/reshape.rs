@@ -8,27 +8,25 @@ use crate::shape::Shape;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
-#[derive(
-    Clone,
-    Debug,
-    EnumDiscriminants,
-    Eq,
-    PartialEq
-)]
+#[derive(Clone, Debug, EnumDiscriminants, Eq, PartialEq)]
 #[repr(u8)]
 #[strum(serialize_all = "snake_case")]
-#[strum_discriminants(derive(Display, EnumCount, EnumIs, EnumIter, EnumString, Hash, Ord, PartialOrd, VariantNames))]
+#[strum_discriminants(derive(
+    Display,
+    EnumCount,
+    EnumIs,
+    EnumIter,
+    EnumString,
+    Hash,
+    Ord,
+    PartialOrd,
+    VariantNames
+))]
 #[cfg_attr(feature = "serde", strum_discriminants(derive(Deserialize, Serialize)))]
 #[strum_discriminants(name(ReshapeOp))]
 pub enum ReshapeExpr<T> {
-    Broadcast {
-        scope: BoxTensor<T>,
-        shape: Shape,
-    },
-    Reshape {
-        scope: BoxTensor<T>,
-        shape: Shape,
-    },
+    Broadcast { scope: BoxTensor<T>, shape: Shape },
+    Reshape { scope: BoxTensor<T>, shape: Shape },
     Swap,
     Transpose,
 }

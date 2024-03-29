@@ -17,6 +17,7 @@ pub use self::{tensor::*, utils::*};
 #[macro_use]
 pub(crate) mod seal;
 pub(crate) mod tensor;
+#[macro_use]
 pub(crate) mod utils;
 
 pub mod actions;

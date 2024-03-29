@@ -88,6 +88,13 @@ impl<T> TensorBase<T> {
             store,
         }
     }
+    pub fn as_slice(&self) -> &[T] {
+        &self.store
+    }
+    ///
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
+        &mut self.store
+    }
     /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
     where
@@ -126,7 +133,7 @@ impl<T> TensorBase<T> {
         self.layout.shape().rank()
     }
     /// An owned reference of the tensors [Shape]
-    pub fn shape(&self) -> Shape {
+    pub fn shape(&self) -> &Shape {
         self.layout.shape()
     }
     /// Returns the number of elements in the tensor.
@@ -137,7 +144,6 @@ impl<T> TensorBase<T> {
     pub fn stride(&self) -> &[usize] {
         self.layout.stride()
     }
-    
     /// A function to check if the tensor is a scalar
     pub fn is_scalar(&self) -> bool {
         self.shape().len() == 0
@@ -225,7 +231,10 @@ impl<T> TensorBase<T> {
     }
 }
 
-impl<T> TensorBase<T> where T: Clone {
+impl<T> TensorBase<T>
+where
+    T: Clone,
+{
     pub fn to_owned(&self) -> TensorBase<T> {
         self.clone()
     }
@@ -237,14 +246,6 @@ impl<T> TensorBase<T> where T: Clone {
 // Inernal Methods
 #[allow(dead_code)]
 impl<T> TensorBase<T> {
-    pub(crate) fn as_slice(&self) -> &[T] {
-        &self.store
-    }
-
-    pub(crate) fn as_mut_slice(&mut self) -> &mut [T] {
-        &mut self.store
-    }
-
     pub(crate) fn data(&self) -> &Vec<T> {
         &self.store
     }
@@ -296,5 +297,3 @@ impl<T> FromIterator<T> for TensorBase<T> {
         from_vec(TensorKind::Normal, shape, store)
     }
 }
-
-

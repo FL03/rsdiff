@@ -2,36 +2,33 @@
     Appellation: reshape <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::ops::BoxTensor;
+use crate::shape::Shape;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize),
-    serde(rename_all = "snake_case", untagged)
-)]
 #[derive(
     Clone,
-    Copy,
     Debug,
-    Display,
-    EnumCount,
-    EnumIs,
-    EnumIter,
-    EnumString,
+    EnumDiscriminants,
     Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    VariantNames,
+    PartialEq
 )]
 #[repr(u8)]
 #[strum(serialize_all = "snake_case")]
-pub enum ReshapeOp {
-    Broadcast,
-    Reshape,
+#[strum_discriminants(derive(Display, EnumCount, EnumIs, EnumIter, EnumString, Hash, Ord, PartialOrd, VariantNames))]
+#[cfg_attr(feature = "serde", strum_discriminants(derive(Deserialize, Serialize)))]
+#[strum_discriminants(name(ReshapeOp))]
+pub enum ReshapeExpr<T> {
+    Broadcast {
+        scope: BoxTensor<T>,
+        shape: Shape,
+    },
+    Reshape {
+        scope: BoxTensor<T>,
+        shape: Shape,
+    },
     Swap,
     Transpose,
 }

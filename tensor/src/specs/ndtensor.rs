@@ -7,7 +7,7 @@ use crate::shape::{Rank, Shape, Stride};
 use crate::store::Layout;
 
 pub trait NdTensor {
-    type Elem;
+    type Data: TensorData;
 
     fn id(&self) -> TensorId;
 
@@ -17,7 +17,7 @@ pub trait NdTensor {
         self.layout().shape().rank()
     }
 
-    fn shape(&self) -> Shape {
+    fn shape(&self) -> &Shape {
         self.layout().shape()
     }
 
@@ -39,6 +39,6 @@ pub trait NdIterator {
     type Item;
 }
 
-pub trait NdIndex {
-    type Output;
+pub trait TensorData {
+    type Elem;
 }

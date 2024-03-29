@@ -9,6 +9,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{ItemFn, Signature};
 
+#[allow(dead_code)]
 pub fn gradient(grad: &GradientAst) -> TokenStream {
     let GradientAst { attrs, item } = grad;
     let _attrs = attrs;
@@ -39,6 +40,7 @@ pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
     }
 }
 
+#[allow(dead_code)]
 pub fn item_fn_partial(item: &ItemFn) -> TokenStream {
     let ItemFn { block, sig, .. } = item;
     let Signature { inputs, .. } = sig;

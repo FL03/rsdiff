@@ -13,9 +13,11 @@ pub(crate) mod operators;
 pub(crate) mod variables;
 
 /// A boxed error type for use in the library.
+#[cfg(feature = "std")]
 pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
 /// A boxed result type for use in the library.
-pub type BoxResult<T = ()> = std::result::Result<T, BoxError>;
+#[cfg(feature = "std")]
+pub type BoxResult<T = ()> = core::result::Result<T, BoxError>;
 
 macro_rules! impl_op {
     ($name:ident, $bound:ident, $fn:ident, $val:tt, $e:expr) => {

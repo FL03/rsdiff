@@ -26,7 +26,7 @@ fn test_ones_and_zeros() {
 fn test_arange() {
     let exp = Shape::from(10);
     let a = Tensor::arange(0_f64, 10_f64, 1_f64);
-    assert_eq!(a.shape(), exp);
+    assert_eq!(a.shape(), &exp);
 
     for i in 0..10 {
         assert_eq!(a[&[i]], i as f64);
@@ -37,7 +37,7 @@ fn test_arange() {
 fn test_linstep() {
     let exp = Shape::from(10);
     let a = Tensor::linspace(0_f64, 10_f64, 10);
-    assert_eq!(a.shape(), exp);
+    assert_eq!(a.shape(), &exp);
     let b = Tensor::arange(0_f64, 10_f64, 1_f64);
     for i in 0..10 {
         assert_eq!(a[&[i]], b[&[i]]);

@@ -34,6 +34,22 @@ impl Stride {
         Self(Vec::with_capacity(capacity))
     }
 
+    pub fn zeros(rank: Rank) -> Self {
+        Self(vec![0; *rank])
+    }
+
+    pub(crate) fn _fastest_varying_stride_order(&self) -> Self {
+        let mut indices = self.clone();
+        for (i, elt) in indices.slice_mut().into_iter().enumerate() {
+            *elt = i;
+        }
+        let strides = self.slice();
+        indices
+            .slice_mut()
+            .sort_by_key(|&i| (strides[i] as isize).abs());
+        indices
+    }
+
     pub fn get(&self, index: usize) -> Option<&usize> {
         self.0.get(index)
     }

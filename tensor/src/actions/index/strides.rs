@@ -23,7 +23,6 @@ impl<'a, T> StrideIter<'a, T> {
     }
 }
 
-
 impl<'a, T> Iterator for StrideIter<'a, T> {
     type Item = &'a T;
 

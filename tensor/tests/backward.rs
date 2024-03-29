@@ -93,12 +93,28 @@ fn test_mixed() {
     let shape = (2, 2);
 
     let a = Tensor::<f64>::ones(shape).variable();
-    let b = Tensor::<f64>::fill(shape, 2_f64).variable();
+    let b = Tensor::<f64>::fill(shape, 2f64).variable();
 
     let res = &b * (&a + &b);
 
     let grad = res.grad().unwrap();
 
-    assert_eq!(grad[&a.id()], Tensor::fill(shape, 2_f64));
-    assert_eq!(grad[&b.id()], Tensor::fill(shape, 5_f64));
+    assert_eq!(grad[&a.id()], Tensor::fill(shape, 2f64));
+    assert_eq!(grad[&b.id()], Tensor::fill(shape, 5f64));
+}
+
+#[test]
+fn test_complex_expr() {
+    let shape = (2, 2);
+
+    let a = Tensor::<f64>::ones(shape).variable();
+    let b = Tensor::fill(shape, 2f64).variable();
+    let c = Tensor::fill(shape, 3f64).variable();
+    let res = (&a + &b) * c.clone().sin() + &b;
+
+    let grad = res.grad().unwrap();
+
+    assert_eq!(grad[&a.id()], c.clone().sin());
+    assert_eq!(grad[&b.id()], c.clone().sin() + 1f64);
+    assert_eq!(grad[&c.id()], (&a + &b) * c.cos());
 }

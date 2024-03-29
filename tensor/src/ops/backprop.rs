@@ -45,7 +45,10 @@ impl<T> BackpropOp<T> {
     }
 }
 
-impl<T> BackpropOp<T> where T: Clone {
+impl<T> BackpropOp<T>
+where
+    T: Clone,
+{
     pub fn view(&self) -> BackpropOp<&T> {
         BackpropOp(self.0.as_ref().map(|op| op.view()))
     }

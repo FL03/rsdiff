@@ -2,10 +2,11 @@
     Appellation: scalar <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::tensor::TensorBase;
+use core::iter::{Product, Sum};
+use core::ops::Neg;
 use num::complex::Complex;
 use num::traits::{Float, FromPrimitive, NumAssign, NumCast, NumOps};
-use std::iter::{Product, Sum};
-use std::ops::Neg;
 
 pub trait Scalar:
     Copy
@@ -70,6 +71,10 @@ pub trait Scalar:
     fn tan(self) -> Self;
 
     fn tanh(self) -> Self;
+
+    fn into_tensor(self) -> TensorBase<Self> {
+        TensorBase::from_scalar(self)
+    }
 }
 
 impl<T> Scalar for Complex<T>

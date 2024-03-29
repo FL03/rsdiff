@@ -62,9 +62,49 @@ impl Layout {
     pub fn is_contiguous(&self) -> bool {
         self.shape.is_contiguous(&self.stride)
     }
+    pub fn is_layout_c(&self) -> bool {
+        if let 1 = *self.shape.rank() {
+            return self.stride[0] == 1 || self.shape[0] <= 1;
+        }
+
+        for d in self.shape().iter() {
+            if *d == 0 {
+                return true;
+            }
+        }
+
+        let mut contig_stride = 1_isize;
+        // check all dimensions -- a dimension of length 1 can have unequal strides
+        for (dim, s) in izip!(self.shape().iter().rev(), self.stride().iter().rev()) {
+            if *dim != 1 {
+                let s = *s as isize;
+                if s != contig_stride {
+                    return false;
+                }
+                contig_stride *= *dim as isize;
+            }
+        }
+        true
+    }
     /// Get a peek at the offset of the layout.
     pub fn offset(&self) -> usize {
         self.offset
+    }
+    /// Returns the offset from the lowest-address element to the logically first
+    /// element.
+    pub fn offset_from_low_addr_ptr_to_logical_ptr(&self) -> usize {
+        let offset =
+            izip!(self.shape().slice(), self.stride().slice()).fold(0, |_offset, (d, s)| {
+                let d = *d as isize;
+                let s = *s as isize;
+                if s < 0 && d > 1 {
+                    _offset - s * (d - 1)
+                } else {
+                    _offset
+                }
+            });
+        debug_assert!(offset >= 0);
+        offset as usize
     }
     /// Return the rank (number of dimensions) of the layout.
     pub fn rank(&self) -> Rank {
@@ -83,8 +123,8 @@ impl Layout {
         self
     }
 
-    pub fn shape(&self) -> Shape {
-        self.shape.clone()
+    pub fn shape(&self) -> &Shape {
+        &self.shape
     }
 
     pub fn size(&self) -> usize {
@@ -132,11 +172,7 @@ impl Layout {
         if idx.len() != *self.shape.rank() {
             panic!("Dimension mismatch");
         }
-        idx
-            .iter()
-            .zip(self.stride.iter())
-            .map(|(i, s)| i * s)
-            .sum()
+        idx.iter().zip(self.stride.iter()).map(|(i, s)| i * s).sum()
     }
 }
 

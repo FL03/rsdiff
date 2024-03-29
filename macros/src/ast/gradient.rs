@@ -10,6 +10,7 @@ pub struct GradientAst {
     pub item: ItemFn,
 }
 
+#[allow(dead_code)]
 impl GradientAst {
     pub fn new(attrs: Vec<Attribute>, item: ItemFn) -> Self {
         Self { attrs, item }

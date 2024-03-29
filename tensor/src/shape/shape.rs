@@ -30,7 +30,26 @@ impl Shape {
     pub fn zeros(rank: usize) -> Self {
         Self(vec![0; rank])
     }
-
+    #[doc(hidden)]
+    pub(crate) fn default_strides(&self) -> Stride {
+        // Compute default array strides
+        // Shape (a, b, c) => Give strides (b * c, c, 1)
+        let mut strides = Stride::zeros(self.rank());
+        // For empty arrays, use all zero strides.
+        if self.slice().iter().all(|&d| d != 0) {
+            let mut it = strides.slice_mut().iter_mut().rev();
+            // Set first element to 1
+            if let Some(rs) = it.next() {
+                *rs = 1;
+            }
+            let mut cum_prod = 1;
+            for (rs, dim) in it.zip(self.slice().iter().rev()) {
+                cum_prod *= *dim;
+                *rs = cum_prod;
+            }
+        }
+        strides
+    }
     pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
         if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
             return Err(ShapeError::IncompatibleShapes.into());

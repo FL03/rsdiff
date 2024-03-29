@@ -34,9 +34,13 @@ pub type ShapeResult<T = ()> = std::result::Result<T, ShapeError>;
 pub enum ShapeError {
     DimensionMismatch,
     IncompatibleShapes,
+    IncompatibleLayout,
     InvalidAxis,
     InvalidShape,
     MismatchedElements,
+    OutOfBounds,
+    Overflow,
+    Unsupported,
 }
 
 unsafe impl Send for ShapeError {}

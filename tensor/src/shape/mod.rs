@@ -29,6 +29,12 @@ where
     }
 }
 
+impl<'a> IntoShape for &'a Shape {
+    fn into_shape(self) -> Shape {
+        self.clone()
+    }
+}
+
 pub(crate) mod prelude {
     pub use super::IntoShape;
 

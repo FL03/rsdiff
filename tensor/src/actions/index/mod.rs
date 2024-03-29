@@ -5,10 +5,10 @@
 //! # Index
 //!
 //!
-pub use self::{strides::*, slice::*};
+pub use self::{slice::*, strides::*};
 
-pub(crate) mod strides;
 pub(crate) mod slice;
+pub(crate) mod strides;
 
 use crate::tensor::TensorBase;
 
@@ -36,7 +36,6 @@ mod tests {
             println!("{:?}", &elem);
 
             assert_eq!(i as f64, elem);
-
         }
     }
 }

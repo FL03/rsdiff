@@ -44,7 +44,10 @@ impl<T> TensorType<T> {
     }
 }
 
-impl<T> From<TensorBase<T>> for TensorType<T> where T: Clone {
+impl<T> From<TensorBase<T>> for TensorType<T>
+where
+    T: Clone,
+{
     fn from(tensor: TensorBase<T>) -> Self {
         if tensor.rank().is_scalar() {
             Self::Scalar(tensor.data()[0].clone())

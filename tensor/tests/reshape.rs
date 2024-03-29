@@ -5,7 +5,7 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::Tensor;
+use acme::prelude::{Shape, Tensor};
 
 #[test]
 #[ignore = "Not implemented"]
@@ -37,7 +37,7 @@ fn test_transpose() {
 
     let exp = Tensor::from_vec(false, None, (3, 2), vec![0.0, 3.0, 1.0, 4.0, 2.0, 5.0]);
     assert_ne!(&a, &at);
-    assert_eq!(at.shape(), (3, 2).into());
+    assert_eq!(at.shape(), &Shape::new(vec![3, 2]));
     for i in 0..shape.0 {
         for j in 0..shape.1 {
             assert_eq!(a[&[i, j]], exp[&[j, i]]);

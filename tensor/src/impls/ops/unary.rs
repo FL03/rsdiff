@@ -34,6 +34,34 @@ where
     }
 }
 
+impl<T> std::ops::Not for TensorBase<T>
+where
+    T: Copy + std::ops::Not<Output = T>,
+{
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        let shape = self.shape().clone();
+        let store = self.data().iter().copied().map(|a| !a).collect();
+        let op = TensorOp::unary(self, UnaryOp::Not);
+        from_vec_with_op(false, op, shape, store)
+    }
+}
+
+impl<'a, T> std::ops::Not for &'a TensorBase<T>
+where
+    T: Copy + std::ops::Not<Output = T>,
+{
+    type Output = TensorBase<T>;
+
+    fn not(self) -> Self::Output {
+        let shape = self.shape().clone();
+        let store = self.data().iter().copied().map(|a| !a).collect();
+        let op = TensorOp::unary(self.clone(), UnaryOp::Not);
+        from_vec_with_op(false, op, shape, store)
+    }
+}
+
 macro_rules! impl_unary_op {
     ($variant:ident, $method:ident) => {
         pub fn $method(self) -> Self {
@@ -73,6 +101,7 @@ where
     impl_unary_op!(Ln, ln);
     impl_unary_op!(Sin, sin);
     impl_unary_op!(Sinh, sinh);
+    impl_unary_op!(Square, sqr);
     impl_unary_op!(Sqrt, sqrt);
     impl_unary_op!(Tan, tan);
     impl_unary_op!(Tanh, tanh);

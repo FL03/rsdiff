@@ -92,7 +92,7 @@ mod tests {
         let a = 3f64;
         let b = 4f64;
 
-        assert_eq!(Scalar::square(a), 9f64);
+        assert_eq!(Scalar::sqr(a), 9f64);
         assert_eq!(Scalar::sqrt(b), 2f64);
     }
 }

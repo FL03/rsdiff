@@ -6,6 +6,9 @@ use num::traits::Inv;
 use num::Complex;
 
 macro_rules! unary_op_trait {
+    ($(($trait:ident, $method:ident)),*) => {
+        $(unary_op_trait!($trait, $method);)*
+    };
     ($trait:ident, $method:ident) => {
         pub trait $trait {
             type Output;
@@ -62,18 +65,22 @@ macro_rules! impl_unary_op {
     };
 }
 
-unary_op_trait!(Abs, abs);
-unary_op_trait!(Cos, cos);
-unary_op_trait!(Cosh, cosh);
-unary_op_trait!(Exp, exp);
-unary_op_trait!(Ln, ln);
-unary_op_trait!(Recip, recip);
-unary_op_trait!(Sin, sin);
-unary_op_trait!(Sinh, sinh);
-unary_op_trait!(Sqrt, sqrt);
-unary_op_trait!(Square, square);
-unary_op_trait!(Tan, tan);
-unary_op_trait!(Tanh, tanh);
+unary_op_trait!(
+    (Abs, abs),
+    (Exp, exp),
+    (Ln, ln),
+    (Recip, recip),
+    (SquareRoot, sqrt),
+    (Square, sqr)
+);
+unary_op_trait!(
+    (Cos, cos),
+    (Cosh, cosh),
+    (Sin, sin),
+    (Sinh, sinh),
+    (Tan, tan),
+    (Tanh, tanh)
+);
 
 impl<T> Abs for Complex<T>
 where
@@ -103,7 +110,7 @@ where
 {
     type Output = T;
 
-    fn square(self) -> Self::Output {
+    fn sqr(self) -> Self::Output {
         self * self
     }
 }
@@ -115,6 +122,6 @@ impl_unary_op!(Exp, exp; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Ln, ln; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Sin, sin; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Sinh, sinh; [f64, f32, Complex<f64>, Complex<f32>]);
-impl_unary_op!(Sqrt, sqrt; [f64, f32, Complex<f64>, Complex<f32>]);
+impl_unary_op!(SquareRoot, sqrt; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Tan, tan; [f64, f32, Complex<f64>, Complex<f32>]);
 impl_unary_op!(Tanh, tanh; [f64, f32, Complex<f64>, Complex<f32>]);

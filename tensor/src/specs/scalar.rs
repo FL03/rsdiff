@@ -25,6 +25,8 @@ pub trait Scalar:
         + NumOps<Self::Complex, Self::Complex>
         + Real;
 
+    fn abs(self) -> Self::Real;
+
     fn conj(&self) -> Self::Complex;
 
     fn im(&self) -> Self::Real {
@@ -32,12 +34,6 @@ pub trait Scalar:
     }
 
     fn re(&self) -> Self::Real;
-
-    fn abs(self) -> Self::Real {
-        let re = self.re();
-        let im = self.im();
-        <<Self as Scalar>::Real as Real>::sqrt(re * re + im * im)
-    }
 
     fn cos(self) -> Self;
 
@@ -68,7 +64,9 @@ pub trait Scalar:
 
     fn sqrt(self) -> Self;
 
-    fn square(self) -> Self::Real;
+    fn sqr(self) -> Self {
+        self.powi(2)
+    }
 
     fn tan(self) -> Self;
 
@@ -82,6 +80,10 @@ where
 {
     type Complex = Self;
     type Real = T;
+
+    fn abs(self) -> Self::Real {
+        Complex::norm(self)
+    }
 
     fn conj(&self) -> Self::Complex {
         Complex::conj(self)
@@ -139,10 +141,6 @@ where
         Complex::sqrt(self)
     }
 
-    fn square(self) -> Self::Real {
-        Complex::norm_sqr(&self)
-    }
-
     fn tan(self) -> Self {
         Complex::tan(self)
     }
@@ -157,6 +155,10 @@ macro_rules! impl_scalar {
         impl Scalar for $re {
             type Complex = Complex<$re>;
             type Real = $re;
+
+            fn abs(self) -> Self::Real {
+                <$re>::abs(self)
+            }
 
             fn conj(&self) -> Self::Complex {
                 Complex::new(*self, -<$re>::default())
@@ -208,10 +210,6 @@ macro_rules! impl_scalar {
 
             fn sqrt(self) -> Self {
                 <$re>::sqrt(self)
-            }
-
-            fn square(self) -> Self::Real {
-                self * self
             }
 
             fn tan(self) -> Self {

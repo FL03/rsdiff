@@ -66,6 +66,10 @@ crate-type = ["cdylib", "rlib"]
 doctest = true
 test = true
 
+[[bench]]
+name = "tensor"
+required-features = ["tensor"]
+
 [[example]]
 doc = true
 name = "autodiff"

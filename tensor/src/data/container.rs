@@ -65,16 +65,6 @@ where
             None
         }
     }
-
-    /// Return true if the array is known to be contiguous.
-    pub fn is_contiguous(&self) -> bool {
-        self.layout.is_contiguous()
-    }
-
-    pub fn is_standard_layout(&self) -> bool {
-        self.layout.is_layout_c()
-    }
-
     /// Without any coping, turn the tensor into a shared tensor.
     pub fn into_shared(self) -> SharedContainer<A>
     where
@@ -84,6 +74,23 @@ where
         // safe because: equivalent unmoved data, ptr and dims remain valid
         unsafe { ContainerBase::from_data_ptr(data, self.ptr).with_layout(self.layout) }
     }
+    /// Return true if the array is known to be contiguous.
+    pub fn is_contiguous(&self) -> bool {
+        self.layout().is_contiguous()
+    }
+    /// Return true if the array is known to be c-contiguous (Row Major)
+    pub fn is_standard_layout(&self) -> bool {
+        self.layout().is_layout_c()
+    }
+    ///
+    pub fn iter(&self) -> slice::Iter<'_, A>
+    where
+        S: Data,
+    {
+        dbg!("Implement a custom iter for ContainerBase");
+        self.as_slice_memory_order().unwrap().iter()
+    }
+    
 
     pub fn layout(&self) -> &Layout {
         &self.layout
@@ -103,10 +110,18 @@ where
                     f,
                 )
             } else {
-                unimplemented!()
-                // BaseTensor::from_shape_trusted_iter_unchecked(self.shape(), self.iter(), f)
+                ContainerBase::from_shape_trusted_iter_unchecked(self.shape(), self.iter(), f)
             }
         }
+    }
+
+    pub fn mapv<B, F>(&self, mut f: F) -> Container<B>
+    where
+        F: FnMut(A) -> B,
+        A: Clone,
+        S: Data,
+    {
+        self.map(move |x| f(x.clone()))
     }
 
     pub fn shape(&self) -> &Shape {

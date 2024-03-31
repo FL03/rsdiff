@@ -8,7 +8,7 @@ extern crate test;
 use test::Bencher;
 
 // bench: find the `BENCH_SIZE` first terms of the fibonacci sequence
-static BENCH_SIZE: usize = 20;
+const BENCH_SIZE: usize = 20;
 
 // function to benchmark must be annotated with `#[bench]`
 #[bench]
@@ -20,7 +20,7 @@ fn recursive_fibonacci(b: &mut Bencher) {
 
 #[bench]
 fn iterative_fibonacci(b: &mut Bencher) {
-    b.iter(|| fib::Fibonacci::seq().take(BENCH_SIZE).collect::<Vec<_>>())
+    b.iter(|| fib::Fibonacci::seq().take(BENCH_SIZE))
 }
 
 pub mod fib {

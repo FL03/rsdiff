@@ -54,13 +54,6 @@ impl Shape {
     pub fn diagonalize(&self) -> Shape {
         Self::new(vec![self.size()])
     }
-
-    pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
-        if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
-            return Err(ShapeError::IncompatibleShapes.into());
-        }
-        Ok(Self::from((self[0], other[1])))
-    }
     /// Inserts a new dimension along the given [Axis].
     pub fn insert(&mut self, index: Axis, dim: usize) {
         self.0.insert(*index, dim)
@@ -111,6 +104,10 @@ impl Shape {
             0
         }
     }
+
+    pub fn pop(&mut self) -> Option<usize> {
+        self.0.pop()
+    }
     /// Add a new dimension to the shape.
     pub fn push(&mut self, dim: usize) {
         self.0.push(dim)
@@ -154,21 +151,6 @@ impl Shape {
         shape
     }
 
-    pub(crate) fn stride_contiguous(&self) -> Stride {
-        let mut stride: Vec<_> = self
-            .0
-            .iter()
-            .rev()
-            .scan(1, |prod, u| {
-                let prod_pre_mult = *prod;
-                *prod *= u;
-                Some(prod_pre_mult)
-            })
-            .collect();
-        stride.reverse();
-        stride.into()
-    }
-
     pub fn upcast(&self, to: &Shape, stride: &Stride) -> Option<Stride> {
         let mut new_stride = to.slice().to_vec();
         // begin at the back (the least significant dimension)
@@ -203,6 +185,31 @@ impl Shape {
         }
 
         Some(new_stride.into())
+    }
+}
+
+// Internal methods
+impl Shape {
+    pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
+        if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
+            return Err(ShapeError::IncompatibleShapes.into());
+        }
+        Ok(Self::from((self[0], other[1])))
+    }
+
+    pub(crate) fn stride_contiguous(&self) -> Stride {
+        let mut stride: Vec<_> = self
+            .0
+            .iter()
+            .rev()
+            .scan(1, |prod, u| {
+                let prod_pre_mult = *prod;
+                *prod *= u;
+                Some(prod_pre_mult)
+            })
+            .collect();
+        stride.reverse();
+        stride.into()
     }
 }
 

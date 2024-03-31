@@ -32,6 +32,21 @@ impl<'a, T> Iterator for StrideIter<'a, T> {
     }
 }
 
+impl<'a, T> DoubleEndedIterator for StrideIter<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        // let idx = self.strides.next_back()?;
+        // self.scope = self.tensor.get_by_index(idx);
+        // self.scope
+        unimplemented!()
+    }
+}
+
+impl<'a, T> From<&'a TensorBase<T>> for StrideIter<'a, T> {
+    fn from(tensor: &'a TensorBase<T>) -> Self {
+        Self::new(tensor)
+    }
+}
+
 pub struct Strided<'a> {
     next: Option<usize>,
     position: Vec<usize>,
@@ -62,6 +77,40 @@ impl<'a> Strided<'a> {
             .zip(self.stride.iter())
             .map(|(i, s)| i * s)
             .sum()
+    }
+}
+
+impl<'a> DoubleEndedIterator for Strided<'a> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        
+        let scope = match self.next {
+            None => return None,
+            Some(storage_index) => storage_index,
+        };
+        self.position = self.shape.iter().map(|i| i - 1).collect();
+        let mut updated = false;
+        let mut next = scope;
+        for ((multi_i, max_i), stride_i) in self
+            .position
+            .iter_mut()
+            .zip(self.shape.iter())
+            .zip(self.stride.iter())
+            .rev()
+        {
+            let next_i = *multi_i - 1;
+            if next_i < *max_i {
+                *multi_i = next_i;
+                updated = true;
+                next -= stride_i;
+                break;
+            } else {
+                next += *multi_i * stride_i;
+                *multi_i = 0
+            }
+        }
+        self.next = if updated { Some(next) } else { None };
+        // Some(scope)
+        unimplemented!()
     }
 }
 

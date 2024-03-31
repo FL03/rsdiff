@@ -5,12 +5,16 @@
 use crate::actions::iter::StrideIter;
 use crate::data::Layout;
 use crate::ops::{BackpropOp, TensorExpr};
-use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind};
+use crate::shape::{IntoShape, Rank, Shape, Stride};
+use crate::prelude::{TensorId, TensorKind};
 
 use acme::prelude::BinaryOp;
+#[cfg(not(feature = "std"))]
+use alloc::vec::{self, Vec};
 use core::iter::Map;
 use core::ops::{Index, IndexMut};
 use core::slice::Iter as SliceIter;
+#[cfg(feature = "std")]
 use std::vec;
 
 pub(crate) fn new<T>(
@@ -92,7 +96,20 @@ impl<T> TensorBase<T> {
             store,
         }
     }
-    /// Returns a
+
+    pub fn from_shape_vec(
+        shape: impl IntoShape,
+        store: Vec<T>,
+    ) -> Self {
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::contiguous(shape),
+            op: BackpropOp::none(),
+            store,
+        }
+    }
+    /// Get
     pub fn as_slice(&self) -> &[T] {
         &self.store
     }
@@ -162,7 +179,7 @@ impl<T> TensorBase<T> {
         self.layout.size()
     }
     /// Get a reference to the stride of the tensor
-    pub fn stride(&self) -> &[usize] {
+    pub fn stride(&self) -> &Stride {
         self.layout.stride()
     }
     /// Create an iterator over the tensor

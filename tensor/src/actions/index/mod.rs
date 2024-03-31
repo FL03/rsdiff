@@ -11,6 +11,10 @@ pub(crate) mod slice;
 
 use crate::tensor::TensorBase;
 
+pub type Ix = usize;
+
+pub type Ixs = isize;
+
 pub enum IndexItem<T> {
     Scalar(T),
     Tensor(TensorBase<T>),

@@ -9,17 +9,44 @@ pub use self::{dimension::Dim, utils::*};
 
 pub(crate) mod dimension;
 
-pub trait Dimension {
+use core::ops::IndexMut;
+
+pub trait IntoDimension {
+    type Dim: Dimension;
+
+    fn into_dimension(self) -> Self::Dim;
+}
+
+pub trait Dimension: IndexMut<usize, Output = usize> {
     type Pattern;
 
-    fn elements(&self) -> usize;
+    fn as_slice(&self) -> &[usize];
 
-    fn ndim(&self) -> usize;
+    fn rank(&self) -> usize;
+
+    fn size(&self) -> usize;
+
+    #[doc(hidden)]
+    /// Return stride offset for index.
+    fn stride_offset(index: &Self, strides: &Self) -> isize {
+        let mut offset = 0;
+        for (&i, &s) in izip!(index.as_slice(), strides.as_slice()) {
+            offset += stride_offset(i, s);
+        }
+        offset
+    }
 }
 
 pub(crate) mod utils {
+    use crate::actions::index::{Ix, Ixs};
     use crate::shape::{Shape, ShapeError, Stride};
     use core::mem;
+
+    /// Calculate offset from `Ix` stride converting sign properly
+    #[inline(always)]
+    pub fn stride_offset(n: Ix, stride: Ix) -> isize {
+        (n as isize) * (stride as Ixs)
+    }
 
     pub(crate) fn can_index_slice<A>(
         data: &[A],

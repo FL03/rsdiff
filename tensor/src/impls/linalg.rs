@@ -6,7 +6,7 @@
 //!
 //!
 use crate::prelude::{Matmul, Scalar, ShapeError, TensorError, TensorExpr, TensorResult};
-use crate::tensor::*;
+use crate::tensor::{self, TensorBase};
 use acme::prelude::UnaryOp;
 use num::traits::{Num, Signed};
 
@@ -27,10 +27,7 @@ where
         inverse[(i * n) + i] = T::one();
     }
 
-    let mut permutation = vec![0; n];
-    for i in 0..n {
-        permutation[i] = i;
-    }
+    let mut permutation = Vec::<usize>::from_iter(0..n);
 
     for i in 0..n {
         let mut max_row = i;
@@ -76,7 +73,7 @@ where
         }
     }
     let op = TensorExpr::unary(tensor.clone(), UnaryOp::Inv);
-    let tensor = from_vec_with_op(false, op, shape, res);
+    let tensor = tensor::from_vec_with_op(false, op, shape, res);
     Ok(tensor)
 }
 
@@ -91,7 +88,42 @@ where
         let rank = *self.rank();
 
         let store = (0..rank).map(|i| self[vec![i; rank]]).collect::<Vec<T>>();
-        from_vec(false, self.shape().diagonalize(), store)
+        tensor::from_vec(false, self.shape().diagonalize(), store)
+    }
+
+    pub fn det(&self) -> Result<T, TensorError> {
+        if !self.shape().is_square() {
+            return Err(ShapeError::InvalidShape.into());
+        }
+        let shape = self.shape();
+        let n = *shape.first().unwrap();
+        if n == 1 {
+            return Ok(T::zero());
+        }
+        if n == 2 {
+            let res =  self[vec![0, 0]] * self[vec![1, 1]] - self[vec![0, 1]] * self[vec![1, 0]];
+            return Ok(res);
+        }
+        let mut det = T::zero();
+        let mut cur_shape = shape.clone();
+        for i in 0..n {
+            let _ = cur_shape.pop();
+            let mut sub = vec![T::zero(); (n - 1).pow(2)];
+            let mut k = 0;
+            for j in 0..n {
+                if j == i {
+                    continue;
+                }
+                for l in 1..n {
+                    sub[k] = self[vec![l, j]];
+                    k += 1;
+                }
+            }
+            let sub_tensor = tensor::from_vec(false, cur_shape.clone(), sub);
+            let sign = if i % 2 == 0 { T::one() } else { -T::one() };
+            det = det + sign * self[vec![0, i]] * sub_tensor.det()?;
+        }
+        Ok(det)
     }
     pub fn inv(&self) -> TensorResult<Self> {
         inverse(self)
@@ -117,6 +149,6 @@ where
             }
         }
         let op = TensorExpr::matmul(self.clone(), other.clone());
-        from_vec_with_op(false, op, shape, result)
+        tensor::from_vec_with_op(false, op, shape, result)
     }
 }

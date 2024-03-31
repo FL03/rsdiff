@@ -6,9 +6,10 @@
 //!
 //!
 pub(crate) use self::utils::*;
-pub use self::{container::*, specs::*};
+pub use self::{container::*, layout::*, specs::*};
 
 pub(crate) mod container;
+pub(crate) mod layout;
 pub(crate) mod specs;
 
 pub mod elem;
@@ -51,6 +52,7 @@ pub(crate) mod utils {
 }
 
 pub(crate) mod prelude {
+    pub use super::layout::Layout;
     pub use super::repr::*;
     pub use super::specs::*;
 }

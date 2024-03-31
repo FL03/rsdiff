@@ -2,7 +2,7 @@
     Appellation: prop <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::errors::PredictError;
+use crate::error::PredictError;
 
 /// [Backward] describes an object capable of backward propagation.
 ///

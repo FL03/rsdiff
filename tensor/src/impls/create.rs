@@ -11,6 +11,14 @@ impl<T> TensorBase<T>
 where
     T: Clone,
 {
+    /// Create a new tensor, whose elements are set to their default value
+    /// from the current shape.
+    pub fn default_like(&self) -> Self
+    where
+        T: Default,
+    {
+        Self::fill(self.shape(), T::default())
+    }
     /// Create an empty tensor from the given shape
     pub fn empty(shape: impl IntoShape) -> Self
     where
@@ -24,12 +32,9 @@ where
         let store = vec![value; shape.size()];
         from_vec(false, shape, store)
     }
-
-    pub fn default_like(&self) -> Self
-    where
-        T: Default,
-    {
-        Self::fill(self.shape().clone(), T::default())
+    /// Create a tensor, filled with some value, from the current shape
+    pub fn fill_like(&self, value: T) -> Self {
+        Self::fill(self.shape(), value)
     }
 }
 

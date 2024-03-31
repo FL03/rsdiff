@@ -2,8 +2,7 @@
     Appellation: stride <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::shape::{Shape, Stride};
-use crate::store::Layout;
+use crate::prelude::{Layout, Shape, Stride};
 use crate::tensor::TensorBase;
 
 pub struct StrideIter<'a, T> {

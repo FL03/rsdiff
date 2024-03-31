@@ -5,9 +5,9 @@
 //! # Errors
 //!
 //!
-pub use self::{error::*, kinds::*};
+pub use self::{err::*, kinds::*};
 
-pub(crate) mod error;
+pub(crate) mod err;
 pub(crate) mod kinds;
 
 pub type Result<T = ()> = std::result::Result<T, Error>;

@@ -5,7 +5,7 @@
 use super::ErrorType;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIs, VariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -31,6 +31,8 @@ pub enum ModuleError {
     Predict(PredictError),
 }
 
+impl std::error::Error for ModuleError {}
+
 impl ErrorType for ModuleError {
     type Kind = ModuleError;
 
@@ -50,6 +52,8 @@ impl ErrorType for ModuleError {
     Display,
     EnumCount,
     EnumIs,
+    EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,
@@ -68,6 +72,8 @@ pub enum PredictError {
     NumericalError,
 }
 
+impl std::error::Error for PredictError {}
+
 #[derive(
     Clone,
     Copy,
@@ -75,6 +81,8 @@ pub enum PredictError {
     Display,
     EnumCount,
     EnumIs,
+    EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,
@@ -92,3 +100,5 @@ pub enum GradientError {
     Backward,
     Forward,
 }
+
+impl std::error::Error for GradientError {}

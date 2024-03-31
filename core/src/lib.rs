@@ -11,7 +11,7 @@ extern crate alloc;
 #[macro_use]
 pub(crate) mod seal;
 
-pub mod errors;
+pub mod error;
 pub mod eval;
 pub mod id;
 pub mod math;
@@ -20,7 +20,7 @@ pub mod specs;
 pub mod types;
 
 pub mod prelude {
-    pub use crate::errors::*;
+    pub use crate::error::*;
     pub use crate::eval::*;
     pub use crate::id::*;
     pub use crate::ops::prelude::*;

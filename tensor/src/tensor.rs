@@ -3,9 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::actions::iter::StrideIter;
+use crate::data::Layout;
 use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind};
-use crate::store::Layout;
+
 use acme::prelude::BinaryOp;
 use core::iter::Map;
 use core::ops::{Index, IndexMut};

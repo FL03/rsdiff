@@ -2,11 +2,12 @@
     Appellation: kinds <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{external::*, propagation::*, standard::*};
+pub use self::{external::*, propagation::*, standard::*, types::*};
 
 pub(crate) mod external;
 pub(crate) mod propagation;
 pub(crate) mod standard;
+pub(crate) mod types;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

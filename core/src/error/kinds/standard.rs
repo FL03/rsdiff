@@ -4,7 +4,7 @@
 */
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -15,6 +15,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     EnumCount,
     EnumIs,
     EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,
@@ -44,6 +45,7 @@ pub enum StdError {
     EnumCount,
     EnumIs,
     EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,

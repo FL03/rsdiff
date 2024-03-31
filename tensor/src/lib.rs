@@ -31,7 +31,6 @@ pub mod ops;
 pub mod shape;
 pub mod specs;
 pub mod stats;
-pub mod store;
 pub mod types;
 
 mod impls {
@@ -63,8 +62,6 @@ pub mod prelude {
     pub use crate::shape::prelude::*;
     #[doc(inline)]
     pub use crate::specs::prelude::*;
-    #[doc(inline)]
-    pub use crate::store::*;
     #[doc(inline)]
     pub use crate::types::prelude::*;
     pub use crate::utils::*;

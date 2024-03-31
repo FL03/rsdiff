@@ -2,11 +2,14 @@
     Appellation: dtype <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
+use acme::prelude::TypeError;
 use std::any::TypeId;
 
-pub enum TypeError {
-    ConversionError,
+pub trait TypeOf {
+    fn of<T>(_value: &T) -> Result<Self, TypeError>
+    where
+        T: 'static,
+        Self: Sized;
 }
 
 pub enum DType {
@@ -15,16 +18,16 @@ pub enum DType {
 }
 
 impl DType {
-    pub fn from_type<T>(_value: &T) -> Result<Self, ()>
+    pub fn of<T>(val: &T) -> Result<Self, TypeError>
     where
         T: 'static,
     {
-        if let Ok(float) = Float::from_type(_value) {
+        if let Ok(float) = Float::from_type(val) {
             Ok(DType::Float(float))
-        } else if let Ok(integer) = Integer::from_type(_value) {
+        } else if let Ok(integer) = Integer::from_type(val) {
             Ok(DType::Integer(integer))
         } else {
-            Err(())
+            Err(TypeError::InvalidType)
         }
     }
 }
@@ -35,7 +38,7 @@ pub enum Float {
 }
 
 impl Float {
-    pub fn from_type<T>(_value: &T) -> Result<Self, ()>
+    pub fn from_type<T>(_value: &T) -> Result<Self, TypeError>
     where
         T: 'static,
     {
@@ -44,7 +47,7 @@ impl Float {
         } else if TypeId::of::<T>() == TypeId::of::<f64>() {
             Ok(Float::F64)
         } else {
-            Err(())
+            Err(TypeError::InvalidType)
         }
     }
 }
@@ -67,7 +70,7 @@ pub struct Integer {
 }
 
 impl Integer {
-    pub fn from_type<T>(_value: &T) -> Result<Self, ()>
+    pub fn from_type<T>(_value: &T) -> Result<Self, TypeError>
     where
         T: 'static,
     {
@@ -122,7 +125,7 @@ impl Integer {
                 signed: false,
             })
         } else {
-            Err(())
+            Err(TypeError::InvalidType)
         }
     }
 }
@@ -136,3 +139,25 @@ pub enum NumBits {
     B128 = 128,
     BSize,
 }
+
+macro_rules! impl_from_bits {
+    ($v:ident, $t:ty) => {
+        impl From<$t> for NumBits {
+            fn from(_: $t) -> Self {
+                NumBits::$v
+            }
+        }
+    };
+    ($v:ident: [$($t:ty),*]) => {
+        $(
+            impl_from_bits!($v, $t);
+        )*
+    };
+}
+
+impl_from_bits!(B8: [u8, i8]);
+impl_from_bits!(B16: [u16, i16]);
+impl_from_bits!(B32: [u32, i32]);
+impl_from_bits!(B64: [u64, i64]);
+impl_from_bits!(B128: [u128, i128]);
+impl_from_bits!(BSize: [usize, isize]);

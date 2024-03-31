@@ -2,9 +2,8 @@
     Appellation: ndtensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::TensorId;
+use crate::prelude::{Layout, TensorId};
 use crate::shape::{Rank, Shape, Stride};
-use crate::store::Layout;
 
 pub trait NdTensor {
     type Data: TensorData;

@@ -12,12 +12,12 @@ where
 {
     pub fn broadcast(&self, shape: impl IntoShape) -> Self {
         let layout = self.layout.broadcast_as(shape).unwrap();
-
+        let op = TensorExpr::broadcast(self.clone(), layout.shape().clone());
         Self {
             id: TensorId::new(),
-            kind: self.kind.clone(),
+            kind: self.kind(),
             layout,
-            op: self.op.clone(),
+            op: op.into(),
             store: self.store.clone(),
         }
     }
@@ -32,9 +32,9 @@ where
 
     ///
     pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {
-        let op = TensorExpr::transpose(self.clone(), swap, with);
+        let op = TensorExpr::swap_axes(self.clone(), swap, with);
 
-        let layout = self.layout().clone().transpose(swap, with);
+        let layout = self.layout().clone().swap_axes(swap, with);
         let shape = self.layout.shape();
         let mut data = self.store.to_vec();
 
@@ -56,27 +56,15 @@ where
     }
     /// Transpose the tensor.
     pub fn t(&self) -> Self {
-        let (a, b) = (Axis(0), Axis(1));
-        let op = TensorExpr::transpose(self.clone(), a, b);
+        let op = TensorExpr::transpose(self.clone());
 
-        let layout = self.layout().clone().transpose(a, b);
-        let shape = self.layout.shape();
-        let mut data = self.store.to_vec();
-
-        for i in 0..shape[a] {
-            for j in 0..shape[b] {
-                let scope = self.layout.index([i, j]);
-                let target = layout.index([j, i]);
-                data[target] = self.data()[scope].clone();
-            }
-        }
-
+        let layout = self.layout().clone().reverse_axes();
         TensorBase {
             id: TensorId::new(),
-            kind: self.kind.clone(),
+            kind: self.kind(),
             layout,
             op: op.into(),
-            store: data.clone(),
+            store: self.data().clone(),
         }
     }
 

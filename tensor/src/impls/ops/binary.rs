@@ -5,6 +5,7 @@
 use crate::prelude::TensorExpr;
 use crate::tensor::{from_vec_with_op, TensorBase};
 use acme::ops::binary::BinaryOp;
+use core::ops;
 use num::traits::Pow;
 
 macro_rules! cmp {
@@ -47,9 +48,9 @@ macro_rules! impl_arithmetic {
     (op: $trait:ident, $method:ident, $op:tt) => {
         impl_scalar_arith!($trait, $method, $op);
 
-        impl<T> std::ops::$trait for TensorBase<T>
+        impl<T> ops::$trait for TensorBase<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = Self;
 
@@ -62,9 +63,9 @@ macro_rules! impl_arithmetic {
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a TensorBase<T>> for TensorBase<T>
+        impl<'a, T> ops::$trait<&'a TensorBase<T>> for TensorBase<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 
@@ -79,9 +80,9 @@ macro_rules! impl_arithmetic {
             }
         }
 
-        impl<'a, T> std::ops::$trait<TensorBase<T>> for &'a TensorBase<T>
+        impl<'a, T> ops::$trait<TensorBase<T>> for &'a TensorBase<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 
@@ -96,9 +97,9 @@ macro_rules! impl_arithmetic {
             }
         }
 
-        impl<'a, 'b, T> std::ops::$trait<&'b TensorBase<T>> for &'a TensorBase<T>
+        impl<'a, 'b, T> ops::$trait<&'b TensorBase<T>> for &'a TensorBase<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 
@@ -121,9 +122,9 @@ macro_rules! impl_arithmetic {
 macro_rules! impl_scalar_arith {
     ($trait:ident, $method:ident, $op:tt) => {
 
-        impl<T> std::ops::$trait<T> for TensorBase<T>
+        impl<T> ops::$trait<T> for TensorBase<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = Self;
 
@@ -135,9 +136,9 @@ macro_rules! impl_scalar_arith {
             }
         }
 
-        impl<'a, T> std::ops::$trait<T> for &'a TensorBase<T>
+        impl<'a, T> ops::$trait<T> for &'a TensorBase<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = TensorBase<T>;
 
@@ -153,9 +154,9 @@ macro_rules! impl_scalar_arith {
 
 macro_rules! impl_assign_op {
     ($trait:ident, $method:ident, $inner:ident, $op:tt) => {
-        impl<T> std::ops::$trait for TensorBase<T>
+        impl<T> ops::$trait for TensorBase<T>
         where
-            T: Copy + std::ops::$inner<T, Output = T>,
+            T: Copy + ops::$inner<T, Output = T>,
         {
             fn $method(&mut self, other: Self) {
                 cmp!(ne: self.shape(), other.shape());
@@ -167,9 +168,9 @@ macro_rules! impl_assign_op {
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a TensorBase<T>> for TensorBase<T>
+        impl<'a, T> ops::$trait<&'a TensorBase<T>> for TensorBase<T>
         where
-            T: Copy + std::ops::$inner<Output = T>,
+            T: Copy + ops::$inner<Output = T>,
         {
             fn $method(&mut self, other: &'a TensorBase<T>) {
                 cmp!(ne: self.shape(), other.shape());

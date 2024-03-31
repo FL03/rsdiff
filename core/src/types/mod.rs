@@ -1,8 +1,8 @@
 /*
-    Appellation: cmp <module>
+    Appellation: types <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Components
+//! # Types
 //!
 //!
 pub use self::{constants::*, dual::*, operators::*, variables::*};

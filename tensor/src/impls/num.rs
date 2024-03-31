@@ -22,7 +22,7 @@ where
     T: Scalar,
 {
     fn one() -> Self {
-        Self::fill(1, T::one())
+        Self::from_scalar(T::one())
     }
 }
 
@@ -31,7 +31,7 @@ where
     T: Scalar,
 {
     fn zero() -> Self {
-        Self::fill(1, T::zero())
+        Self::from_scalar(T::zero())
     }
 
     fn is_zero(&self) -> bool {

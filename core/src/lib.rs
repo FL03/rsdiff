@@ -5,6 +5,8 @@
 //! # Core
 //!
 //!
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 #[macro_use]
 pub(crate) mod seal;

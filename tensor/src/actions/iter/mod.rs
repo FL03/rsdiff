@@ -5,9 +5,10 @@
 //! # Iter
 //!
 //!
-pub use self::{iterator::*, utils::*};
+pub use self::{iterator::*, strides::*, utils::*};
 
 pub(crate) mod iterator;
+pub(crate) mod strides;
 
 pub trait IterTensor {
     type Item;
@@ -40,4 +41,19 @@ pub(crate) mod utils {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::actions::Linspace;
+    use crate::prelude::{Shape, Tensor};
+
+    #[test]
+    fn test_strided() {
+        let shape = Shape::from_iter([2, 2]);
+        let n = shape.size();
+        let exp = Vec::linspace(0f64, n as f64, n);
+        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
+        let iter = tensor.strided();
+        for (i, idx) in iter.enumerate() {
+            assert_eq!(idx, &exp[i]);
+        }
+    }
+}

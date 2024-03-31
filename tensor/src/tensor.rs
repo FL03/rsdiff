@@ -2,12 +2,14 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::index::Strides;
+use crate::actions::iter::StrideIter;
 use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{IntoShape, Rank, Shape, TensorId, TensorKind};
 use crate::store::Layout;
 use acme::prelude::BinaryOp;
-use std::ops::{Index, IndexMut};
+use core::iter::Map;
+use core::ops::{Index, IndexMut};
+use core::slice::Iter as SliceIter;
 
 pub(crate) fn new<T>(
     kind: impl Into<TensorKind>,
@@ -88,6 +90,7 @@ impl<T> TensorBase<T> {
             store,
         }
     }
+    /// Returns a
     pub fn as_slice(&self) -> &[T] {
         &self.store
     }
@@ -116,13 +119,25 @@ impl<T> TensorBase<T> {
     pub const fn id(&self) -> TensorId {
         self.id
     }
-
+    /// Returns true if the tensor is contiguous.
     pub fn is_contiguous(&self) -> bool {
         self.layout().is_contiguous()
     }
-
+    /// Returns true if the tensor is empty.
     pub fn is_empty(&self) -> bool {
         self.store.is_empty()
+    }
+    /// A function to check if the tensor is a scalar
+    pub fn is_scalar(&self) -> bool {
+        self.shape().len() == 0
+    }
+    /// A function to check if the tensor is a variable
+    pub const fn is_variable(&self) -> bool {
+        self.kind.is_variable()
+    }
+    /// Get the kind of the tensor
+    pub fn kind(&self) -> TensorKind {
+        self.kind
     }
     /// Get a reference to the [Layout] of the tensor
     pub const fn layout(&self) -> &Layout {
@@ -148,77 +163,43 @@ impl<T> TensorBase<T> {
     pub fn stride(&self) -> &[usize] {
         self.layout.stride()
     }
-    /// A function to check if the tensor is a scalar
-    pub fn is_scalar(&self) -> bool {
-        self.shape().len() == 0
-    }
-    /// A function to check if the tensor is a variable
-    pub const fn is_variable(&self) -> bool {
-        self.kind.is_variable()
-    }
-    /// Changes the kind of tensor to a variable
-    pub fn variable(mut self) -> Self {
-        self.kind = TensorKind::Variable;
-        self
+    /// Create an iterator over the tensor
+    pub fn strided(&self) -> StrideIter<'_, T> {
+        StrideIter::new(self)
     }
     /// Turn the tensor into a one-dimensional vector
     pub fn to_vec(&self) -> Vec<T>
     where
         T: Clone,
     {
-        self.store.clone()
+        self.store.to_vec()
+    }
+    /// Changes the kind of tensor to a variable
+    pub fn variable(mut self) -> Self {
+        self.kind = TensorKind::Variable;
+        self
     }
 
-    pub fn apply_binary<F>(&self, op: BinaryOp, other: &Self, f: F) -> Self
+    pub fn apply_binary<F>(&self, other: &Self, op: BinaryOp, f: F) -> Self
     where
         F: Fn(&T, &T) -> T,
         T: Clone,
     {
         let store = self
-            .store
+            .data()
             .iter()
-            .zip(other.store.iter())
+            .zip(other.data().iter())
             .map(|(a, b)| f(a, b))
             .collect();
         TensorBase {
             id: TensorId::new(),
-            kind: self.kind,
-            layout: self.layout.clone(),
+            kind: self.kind(),
+            layout: self.layout().clone(),
             op: BackpropOp::binary(self.clone(), other.clone(), op),
             store,
         }
     }
-
-    pub fn map<'a, F>(&'a self, f: F) -> TensorBase<T>
-    where
-        F: FnMut(&'a T) -> T,
-        T: 'a + Clone,
-    {
-        let store = self.store.iter().map(f).collect();
-        TensorBase {
-            id: TensorId::new(),
-            kind: self.kind,
-            layout: self.layout.clone(),
-            op: self.op.clone(),
-            store,
-        }
-    }
-
-    pub fn mapv<F>(&self, f: F) -> TensorBase<T>
-    where
-        F: Fn(T) -> T,
-        T: Copy,
-    {
-        let store = self.store.iter().copied().map(f).collect();
-        TensorBase {
-            id: TensorId::new(),
-            kind: self.kind,
-            layout: self.layout.clone(),
-            op: self.op.clone(),
-            store,
-        }
-    }
-
+    ///
     pub fn with_layout(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
@@ -244,7 +225,14 @@ where
     }
 
     pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
-        unimplemented!("view")
+        let store = self.store.iter().collect();
+        TensorBase {
+            id: self.id,
+            kind: self.kind,
+            layout: self.layout.clone(),
+            op: self.op.view(),
+            store,
+        }
     }
 }
 // Inernal Methods
@@ -261,9 +249,28 @@ impl<T> TensorBase<T> {
     pub(crate) fn get_by_index(&self, index: usize) -> Option<&T> {
         self.store.get(index)
     }
-    /// Create an iterator over the strides of the tensor
-    pub(crate) fn strides(&self) -> Strides<'_> {
-        self.layout().into()
+
+    pub(crate) fn map<'a, F>(&'a self, f: F) -> Map<SliceIter<'a, T>, F>
+    where
+        F: FnMut(&'a T) -> T,
+        T: 'a + Clone,
+    {
+        self.store.iter().map(f)
+    }
+
+    pub(crate) fn mapv<F>(&self, f: F) -> TensorBase<T>
+    where
+        F: Fn(T) -> T,
+        T: Copy,
+    {
+        let store = self.store.iter().copied().map(f).collect();
+        TensorBase {
+            id: TensorId::new(),
+            kind: self.kind,
+            layout: self.layout.clone(),
+            op: self.op.clone(),
+            store,
+        }
     }
 }
 

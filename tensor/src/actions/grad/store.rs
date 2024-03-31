@@ -5,8 +5,9 @@
 use crate::prelude::TensorId;
 use crate::TensorBase;
 use acme::prelude::Store;
-use std::collections::btree_map::{BTreeMap, Entry, Keys};
-use std::ops::{Index, IndexMut};
+use core::borrow::{Borrow, BorrowMut};
+use core::ops::{Deref, DerefMut, Index, IndexMut};
+use std::collections::btree_map::{BTreeMap, Entry, Keys, Values};
 
 #[derive(Clone, Debug)]
 pub struct GradStore<T> {
@@ -39,7 +40,7 @@ impl<T> GradStore<T> {
     pub fn is_empty(&self) -> bool {
         self.store.is_empty()
     }
-
+    /// Returns an iterator over the store's keys
     pub fn keys(&self) -> Keys<'_, TensorId, TensorBase<T>> {
         self.store.keys()
     }
@@ -67,6 +68,56 @@ impl<T> GradStore<T> {
         T: Clone + num::Zero,
     {
         self.entry(tensor.id()).or_insert(tensor.zeros_like())
+    }
+    /// Remove an element from the store.
+    pub fn remove(&mut self, key: &TensorId) -> Option<TensorBase<T>> {
+        self.store.remove(key)
+    }
+    /// Remove a tensor from the store.
+    pub fn remove_tensor(&mut self, tensor: &TensorBase<T>) -> Option<TensorBase<T>> {
+        self.remove(&tensor.id())
+    }
+
+    pub fn values(&self) -> Values<'_, TensorId, TensorBase<T>> {
+        self.store.values()
+    }
+}
+
+impl<T> AsRef<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+    fn as_ref(&self) -> &BTreeMap<TensorId, TensorBase<T>> {
+        &self.store
+    }
+}
+
+impl<T> AsMut<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+    fn as_mut(&mut self) -> &mut BTreeMap<TensorId, TensorBase<T>> {
+        &mut self.store
+    }
+}
+
+impl<T> Borrow<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+    fn borrow(&self) -> &BTreeMap<TensorId, TensorBase<T>> {
+        &self.store
+    }
+}
+
+impl<T> BorrowMut<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+    fn borrow_mut(&mut self) -> &mut BTreeMap<TensorId, TensorBase<T>> {
+        &mut self.store
+    }
+}
+
+impl<T> Deref for GradStore<T> {
+    type Target = BTreeMap<TensorId, TensorBase<T>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.store
+    }
+}
+
+impl<T> DerefMut for GradStore<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.store
     }
 }
 
@@ -121,6 +172,6 @@ impl<T> Store<TensorId, TensorBase<T>> for GradStore<T> {
     }
 
     fn remove(&mut self, key: &TensorId) -> Option<TensorBase<T>> {
-        self.store.remove(key)
+        self.remove(key)
     }
 }

@@ -15,12 +15,12 @@ use crate::shape::Rank;
 use crate::tensor::TensorBase;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum TensorType<T> {
+pub enum Tensors<T> {
     Scalar(T),
     Tensor(TensorBase<T>),
 }
 
-impl<T> TensorType<T> {
+impl<T> Tensors<T> {
     pub fn scalar(scalar: T) -> Self {
         Self::Scalar(scalar)
     }
@@ -38,13 +38,13 @@ impl<T> TensorType<T> {
 
     pub fn rank(&self) -> Rank {
         match self {
-            Self::Scalar(_) => Rank::scalar(),
             Self::Tensor(tensor) => tensor.rank(),
+            _ => Rank::scalar(),
         }
     }
 }
 
-impl<T> From<TensorBase<T>> for TensorType<T>
+impl<T> From<TensorBase<T>> for Tensors<T>
 where
     T: Clone,
 {
@@ -71,7 +71,7 @@ mod tests {
     fn test_tensor_type() {
         let shape = (2, 3);
         let tensor = TensorBase::<f64>::ones(shape);
-        let item = TensorType::tensor(tensor);
+        let item = Tensors::tensor(tensor);
 
         assert_eq!(item.rank(), Rank::from(2));
     }

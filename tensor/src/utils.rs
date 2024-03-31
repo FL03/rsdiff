@@ -14,10 +14,10 @@ where
     T: Scalar,
 {
     if lhs.shape().rank() != rhs.shape().rank() {
-        return Err(ShapeError::IncompatibleShapes.into());
+        return Err(ShapeError::DimensionMismatch.into());
     }
 
-    let shape = lhs.shape().matmul_shape(&rhs.shape()).unwrap();
+    let shape = lhs.shape().matmul_shape(rhs.shape()).unwrap();
     let mut result = vec![T::zero(); shape.size()];
 
     for i in 0..lhs.shape().nrows() {

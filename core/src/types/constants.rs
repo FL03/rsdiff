@@ -2,18 +2,17 @@
     Appellation: constants <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
 use crate::prelude::{EvaluateOnce, Gradient};
+use core::borrow::{Borrow, BorrowMut};
+use core::ops::{Deref, DerefMut, Neg, Not};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::borrow::{Borrow, BorrowMut};
-use std::ops::{Deref, DerefMut, Neg, Not};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[repr(C)]
-pub struct Constant<T>(pub T);
+pub struct Constant<T>(pub(crate) T);
 
 impl<T> Constant<T> {
     pub fn new(value: T) -> Self {

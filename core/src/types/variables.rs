@@ -215,9 +215,9 @@ macro_rules! impl_std_op {
         )*
     };
     ($trait:ident, $method:ident, $e:tt) => {
-        impl<T> std::ops::$trait for Variable<T>
+        impl<T> core::ops::$trait for Variable<T>
         where
-            T: Copy + Default + std::ops::$trait<Output = T>,
+            T: Copy + Default + core::ops::$trait<Output = T>,
         {
             type Output = Variable<T>;
 
@@ -228,9 +228,9 @@ macro_rules! impl_std_op {
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a Variable<T>> for Variable<T>
+        impl<'a, T> core::ops::$trait<&'a Variable<T>> for Variable<T>
         where
-            T: Copy + Default + std::ops::$trait<Output = T>,
+            T: Copy + Default + core::ops::$trait<Output = T>,
         {
             type Output = Variable<T>;
 
@@ -241,9 +241,9 @@ macro_rules! impl_std_op {
             }
         }
 
-        impl<'a, T> std::ops::$trait<Variable<T>> for &'a Variable<T>
+        impl<'a, T> core::ops::$trait<Variable<T>> for &'a Variable<T>
         where
-            T: Copy + Default + std::ops::$trait<Output = T>,
+            T: Copy + Default + core::ops::$trait<Output = T>,
         {
             type Output = Variable<T>;
 
@@ -254,9 +254,9 @@ macro_rules! impl_std_op {
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a Variable<T>> for &'a Variable<T>
+        impl<'a, T> core::ops::$trait<&'a Variable<T>> for &'a Variable<T>
         where
-            T: Copy + Default + std::ops::$trait<Output = T>,
+            T: Copy + Default + core::ops::$trait<Output = T>,
         {
             type Output = Variable<T>;
 
@@ -267,9 +267,9 @@ macro_rules! impl_std_op {
             }
         }
 
-        impl<T> std::ops::$trait<T> for Variable<T>
+        impl<T> core::ops::$trait<T> for Variable<T>
         where
-            T: Copy + Default + std::ops::$trait<Output = T>,
+            T: Copy + Default + core::ops::$trait<Output = T>,
         {
             type Output = Self;
 

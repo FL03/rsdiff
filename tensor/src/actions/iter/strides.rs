@@ -8,13 +8,13 @@ use crate::tensor::TensorBase;
 
 pub struct StrideIter<'a, T> {
     scope: Option<&'a T>,
-    strides: Strides<'a>,
+    strides: Strided<'a>,
     tensor: &'a TensorBase<T>,
 }
 
 impl<'a, T> StrideIter<'a, T> {
     pub fn new(tensor: &'a TensorBase<T>) -> Self {
-        let strides = Strides::from(tensor.layout());
+        let strides = Strided::from(tensor.layout());
         Self {
             scope: None,
             strides,
@@ -33,14 +33,14 @@ impl<'a, T> Iterator for StrideIter<'a, T> {
     }
 }
 
-pub struct Strides<'a> {
+pub struct Strided<'a> {
     next: Option<usize>,
     position: Vec<usize>,
     pub(crate) shape: &'a Shape,
     pub(crate) stride: &'a Stride,
 }
 
-impl<'a> Strides<'a> {
+impl<'a> Strided<'a> {
     pub fn new(offset: usize, shape: &'a Shape, stride: &'a Stride) -> Self {
         let elem_count: usize = shape.iter().product();
         let next = if elem_count == 0 {
@@ -66,7 +66,7 @@ impl<'a> Strides<'a> {
     }
 }
 
-impl<'a> Iterator for Strides<'a> {
+impl<'a> Iterator for Strided<'a> {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -99,7 +99,7 @@ impl<'a> Iterator for Strides<'a> {
     }
 }
 
-impl<'a> From<&'a Layout> for Strides<'a> {
+impl<'a> From<&'a Layout> for Strided<'a> {
     fn from(layout: &'a Layout) -> Self {
         Self::new(layout.offset, &layout.shape, &layout.stride)
     }

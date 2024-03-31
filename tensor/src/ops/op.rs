@@ -9,7 +9,7 @@ use acme::prelude::{BinaryOp, UnaryOp};
 
 pub type BoxTensor<T = f64> = Box<TensorBase<T>>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum TensorExpr<T> {
     Binary(BoxTensor<T>, BoxTensor<T>, BinaryOp),
@@ -17,12 +17,10 @@ pub enum TensorExpr<T> {
     Unary(BoxTensor<T>, UnaryOp),
     Broadcast(BoxTensor<T>, Shape),
     Matmul(BoxTensor<T>, BoxTensor<T>),
-    Reshape(BoxTensor<T>, ReshapeExpr<T>),
+    Reshape(BoxTensor<T>, Shape),
     Shape(ReshapeExpr<T>),
-    Transpose {
-        scope: BoxTensor<T>,
-        target: (Axis, Axis),
-    },
+    SwapAxes(BoxTensor<T>, Axis, Axis),
+    Transpose(BoxTensor<T>),
 }
 
 impl<T> TensorExpr<T> {
@@ -42,11 +40,20 @@ impl<T> TensorExpr<T> {
         TensorExpr::Matmul(Box::new(lhs), Box::new(rhs))
     }
 
-    pub fn transpose(scope: TensorBase<T>, swap: Axis, with: Axis) -> Self {
-        TensorExpr::Transpose {
-            scope: Box::new(scope),
-            target: (swap, with),
-        }
+    pub fn reshape(tensor: TensorBase<T>, shape: Shape) -> Self {
+        TensorExpr::Reshape(Box::new(tensor), shape)
+    }
+
+    pub fn shape(expr: ReshapeExpr<T>) -> Self {
+        TensorExpr::Shape(expr)
+    }
+
+    pub fn swap_axes(tensor: TensorBase<T>, swap: Axis, with: Axis) -> Self {
+        TensorExpr::SwapAxes(Box::new(tensor), swap, with)
+    }
+
+    pub fn transpose(scope: TensorBase<T>) -> Self {
+        TensorExpr::Transpose(Box::new(scope))
     }
 
     pub fn unary(tensor: TensorBase<T>, op: UnaryOp) -> Self {
@@ -61,7 +68,7 @@ impl<T> TensorExpr<T> {
             TensorExpr::Unary(lhs, _) => Some(*lhs),
             TensorExpr::Broadcast(tensor, _) => Some(*tensor),
             TensorExpr::Matmul(lhs, _) => Some(*lhs),
-            TensorExpr::Transpose { scope, .. } => Some(*scope),
+            TensorExpr::Transpose(lhs) => Some(*lhs),
             _ => None,
         }
     }
@@ -91,10 +98,8 @@ where
                 TensorExpr::broadcast(tensor.view(), shape.clone())
             }
             TensorExpr::Matmul(lhs, rhs) => TensorExpr::matmul(lhs.view(), rhs.view()),
-            TensorExpr::Transpose {
-                scope: tensor,
-                target: axes,
-            } => TensorExpr::transpose(tensor.view(), axes.0, axes.1),
+            TensorExpr::Reshape(tensor, shape) => TensorExpr::reshape(tensor.view(), shape.clone()),
+            TensorExpr::Transpose(tensor) => TensorExpr::transpose(tensor.view()),
             _ => unimplemented!(),
         }
     }

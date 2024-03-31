@@ -7,9 +7,17 @@ use num::traits::{Bounded, FromPrimitive, Num, ToPrimitive};
 
 pub fn step_size<T>(start: T, stop: T, steps: usize) -> T
 where
-    T: FromPrimitive + Num,
+    T: FromPrimitive + ops::Div<Output = T> + ops::Sub<Output = T>,
 {
     (stop - start) / T::from_usize(steps).unwrap()
+}
+
+pub fn steps<T>(start: T, stop: T, step: T) -> usize
+where
+    T: ToPrimitive + ops::Div<Output = T> + ops::Sub<Output = T>,
+{
+    let steps = (stop - start) / step;
+    steps.to_usize().unwrap()
 }
 
 pub struct Arange<T> {
@@ -28,7 +36,7 @@ impl<T> Arange<T> {
 }
 impl<T> Arange<T>
 where
-    T: Copy + Default + FromPrimitive + Num,
+    T: Copy + Default + Num + PartialOrd,
 {
     pub fn start(&self) -> T {
         self.range.start()
@@ -36,26 +44,25 @@ where
 
     pub fn steps(&self) -> usize
     where
-        T: ToPrimitive,
+        T: FromPrimitive + ToPrimitive,
     {
-        let start = self.start();
-        let stop = self.stop();
-        let step = self.step;
-        let steps = (stop - start) / step;
-        steps.to_usize().unwrap()
+        steps(self.start(), self.stop(), self.step)
     }
 
     pub fn step(&self) -> T {
         self.step
     }
 
-    pub fn stop(&self) -> T {
+    pub fn stop(&self) -> T
+    where
+        T: FromPrimitive + PartialOrd,
+    {
         self.range.stop_or_linear()
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Boundary<T> {
+pub enum Boundary<T = isize> {
     Range { start: T, stop: T },
     From { start: T },
     Inclusive { start: T, stop: T },
@@ -85,7 +92,25 @@ where
         }
     }
 
+    pub fn step_size(&self, steps: usize) -> T
+    where
+        T: FromPrimitive + Num + PartialOrd,
+    {
+        let steps = T::from_usize(steps).unwrap();
+        let start = self.start();
+        let stop = self.stop_or_default();
+        let step = (stop - start) / steps;
+        step
+    }
+}
+
+impl<T> Boundary<T>
+where
+    T: Copy + Default + PartialOrd,
+{
     pub fn stop_or(&self, default: T) -> T {
+        debug_assert!(default >= self.start());
+
         self.stop().unwrap_or(default)
     }
 
@@ -106,19 +131,7 @@ where
     {
         self.stop_or(T::max_value())
     }
-
-    pub fn step_size(&self, steps: usize) -> T
-    where
-        T: FromPrimitive + Num,
-    {
-        let steps = T::from_usize(steps).unwrap();
-        let start = self.start();
-        let stop = self.stop_or_default();
-        let step = (stop - start) / steps;
-        step
-    }
 }
-
 impl<T> From<Range<T>> for Boundary<T> {
     fn from(args: Range<T>) -> Self {
         Boundary::Range {

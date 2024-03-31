@@ -10,7 +10,7 @@ pub mod uplo;
 use crate::shape::Axis;
 
 pub trait Inverse {
-    fn inv(self) -> Self;
+    fn inv(&self) -> Self;
 }
 
 /// Matrix multiplication

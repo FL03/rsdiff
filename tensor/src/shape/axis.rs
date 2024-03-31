@@ -23,7 +23,7 @@ pub struct Axis(pub(crate) usize);
 
 impl Axis {
     pub fn new(axis: usize) -> Self {
-        Axis(axis)
+        Self(axis)
     }
 
     pub fn into_inner(self) -> usize {

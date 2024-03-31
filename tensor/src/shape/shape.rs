@@ -50,6 +50,11 @@ impl Shape {
         }
         strides
     }
+
+    pub fn diagonalize(&self) -> Shape {
+        Self::new(vec![self.size()])
+    }
+
     pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
         if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
             return Err(ShapeError::IncompatibleShapes.into());
@@ -59,6 +64,20 @@ impl Shape {
     /// Inserts a new dimension along the given [Axis].
     pub fn insert(&mut self, index: Axis, dim: usize) {
         self.0.insert(*index, dim)
+    }
+
+    pub fn insert_axis(&self, index: Axis) -> Self {
+        let mut shape = self.clone();
+        shape.insert(index, 1);
+        shape
+    }
+    /// Returns true if the shape is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+    /// Checks to see if the shape is square
+    pub fn is_square(&self) -> bool {
+        self.iter().all(|&dim| dim == self[0])
     }
     /// Returns true if the strides are C contiguous (aka row major).
     pub fn is_contiguous(&self, stride: &Stride) -> bool {

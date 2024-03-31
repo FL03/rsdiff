@@ -6,10 +6,10 @@
 //!
 //!
 pub(crate) use self::utils::*;
-pub use self::{specs::*, tensor::*};
+pub use self::{container::*, specs::*};
 
+pub(crate) mod container;
 pub(crate) mod specs;
-pub(crate) mod tensor;
 
 pub mod elem;
 
@@ -18,12 +18,13 @@ pub mod repr {
 
     pub(crate) mod owned;
     pub(crate) mod shared;
+    #[allow(dead_code)]
     pub(crate) mod view;
 }
 
-pub type Tensor<A = f64> = BaseTensor<repr::OwnedRepr<A>>;
+pub type Container<A = f64> = ContainerBase<repr::OwnedRepr<A>>;
 
-pub type ArcTensor<A = f64> = BaseTensor<repr::OwnedArcRepr<A>>;
+pub type SharedContainer<A = f64> = ContainerBase<repr::OwnedArcRepr<A>>;
 
 pub(crate) mod utils {
     #[cfg(not(feature = "std"))]

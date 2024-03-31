@@ -1,11 +1,11 @@
 /*
-    Appellation: tensor <mod>
+    Appellation: container <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::specs::{Data, DataOwned, RawData, RawDataMut};
-use super::{nonnull_from_vec_data, ArcTensor, Tensor};
+use super::{nonnull_from_vec_data, Container, SharedContainer};
 use crate::actions::iter::to_vec_mapped;
-use crate::prelude::{BackpropOp, Layout, TensorId, TensorKind};
+use crate::prelude::Layout;
 use crate::shape::dim::can_index_slice;
 use crate::shape::{IntoShape, IntoStride, Shape, Stride};
 use core::ptr::NonNull;
@@ -13,19 +13,16 @@ use core::slice;
 use rawpointer::PointerExt;
 
 #[derive(Clone)]
-pub struct BaseTensor<S>
+pub struct ContainerBase<S>
 where
     S: RawData,
 {
-    pub(crate) id: TensorId,
     pub(crate) data: S,
-    pub(crate) kind: TensorKind,
     pub(crate) layout: Layout,
-    pub(crate) op: BackpropOp<S::Elem>,
     pub(crate) ptr: NonNull<S::Elem>,
 }
 
-impl<A, S> BaseTensor<S>
+impl<A, S> ContainerBase<S>
 where
     S: RawData<Elem = A>,
 {
@@ -49,7 +46,7 @@ where
     where
         S: RawDataMut,
     {
-        // self.try_ensure_unique(); // for ArcArray
+        RawDataMut::try_ensure_unique(self); // for ArcArray
         self.ptr.as_ptr()
     }
     pub fn as_slice_memory_order(&self) -> Option<&[A]>
@@ -79,20 +76,20 @@ where
     }
 
     /// Without any coping, turn the tensor into a shared tensor.
-    pub fn into_shared(self) -> ArcTensor<A>
+    pub fn into_shared(self) -> SharedContainer<A>
     where
         S: DataOwned,
     {
         let data = self.data.into_shared();
         // safe because: equivalent unmoved data, ptr and dims remain valid
-        unsafe { BaseTensor::from_data_ptr(data, self.ptr).with_layout(self.layout) }
+        unsafe { ContainerBase::from_data_ptr(data, self.ptr).with_layout(self.layout) }
     }
 
     pub fn layout(&self) -> &Layout {
         &self.layout
     }
 
-    pub fn map<'a, B, F>(&'a self, f: F) -> Tensor<B>
+    pub fn map<'a, B, F>(&'a self, f: F) -> Container<B>
     where
         F: FnMut(&'a A) -> B,
         A: 'a,
@@ -100,7 +97,11 @@ where
     {
         unsafe {
             if let Some(slc) = self.as_slice_memory_order() {
-                BaseTensor::from_shape_trusted_iter_unchecked(self.shape().slice(), slc.iter(), f)
+                ContainerBase::from_shape_trusted_iter_unchecked(
+                    self.shape().slice(),
+                    slc.iter(),
+                    f,
+                )
             } else {
                 unimplemented!()
                 // BaseTensor::from_shape_trusted_iter_unchecked(self.shape(), self.iter(), f)
@@ -122,7 +123,7 @@ where
 }
 
 // Internal methods
-impl<A, S> BaseTensor<S>
+impl<A, S> ContainerBase<S>
 where
     S: DataOwned + RawData<Elem = A>,
 {
@@ -139,7 +140,7 @@ where
             let tmp = nonnull_from_vec_data(&mut v);
             PointerExt::add(tmp, layout.offset_from_low_addr_ptr_to_logical_ptr())
         };
-        BaseTensor::from_data_ptr(DataOwned::new(v), ptr).with_layout(layout)
+        ContainerBase::from_data_ptr(DataOwned::new(v), ptr).with_layout(layout)
     }
 
     /// Creates an array from an iterator, mapped by `map` and interpret it according to the
@@ -165,17 +166,14 @@ where
     }
 }
 
-impl<A, S> BaseTensor<S>
+impl<A, S> ContainerBase<S>
 where
     S: RawData<Elem = A>,
 {
     pub(crate) unsafe fn from_data_ptr(data: S, ptr: NonNull<A>) -> Self {
         let tensor = Self {
-            id: TensorId::new(),
             data,
-            kind: TensorKind::Normal,
             layout: Layout::contiguous(0),
-            op: BackpropOp::<A>::none(),
             ptr,
         };
         debug_assert!(tensor.pointer_is_inbounds());
@@ -186,15 +184,12 @@ where
         self.data._is_pointer_inbounds(self.as_ptr())
     }
 
-    pub(crate) unsafe fn with_layout(self, layout: Layout) -> BaseTensor<S> {
+    pub(crate) unsafe fn with_layout(self, layout: Layout) -> ContainerBase<S> {
         debug_assert_eq!(self.layout().rank(), layout.rank());
 
         Self {
-            id: self.id,
             data: self.data,
-            kind: self.kind,
             layout,
-            op: self.op,
             ptr: self.ptr,
         }
     }

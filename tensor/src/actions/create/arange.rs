@@ -2,23 +2,9 @@
     Appellation: arange <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::utils::steps;
 use core::ops::{self, Range};
 use num::traits::{Bounded, FromPrimitive, Num, ToPrimitive};
-
-pub fn step_size<T>(start: T, stop: T, steps: usize) -> T
-where
-    T: FromPrimitive + ops::Div<Output = T> + ops::Sub<Output = T>,
-{
-    (stop - start) / T::from_usize(steps).unwrap()
-}
-
-pub fn steps<T>(start: T, stop: T, step: T) -> usize
-where
-    T: ToPrimitive + ops::Div<Output = T> + ops::Sub<Output = T>,
-{
-    let steps = (stop - start) / step;
-    steps.to_usize().unwrap()
-}
 
 pub struct Arange<T> {
     range: Boundary<T>,

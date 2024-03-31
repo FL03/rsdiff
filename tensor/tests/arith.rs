@@ -5,7 +5,7 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::{Matmul, Tensor};
+use acme::prelude::Tensor;
 
 #[test]
 fn test_add() {
@@ -49,15 +49,6 @@ fn test_sub() {
     let c = a - &b;
 
     assert_eq!(c, Tensor::<f64>::zeros(shape));
-}
-
-#[test]
-fn test_matmul() {
-    let a = Tensor::<f64>::fill((3, 2), 2_f64);
-    let b = Tensor::<f64>::ones((2, 3));
-    let c = a.matmul(&b);
-
-    assert_eq!(c, Tensor::<f64>::fill((3, 3), 4.0));
 }
 
 #[test]

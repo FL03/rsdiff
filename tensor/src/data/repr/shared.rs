@@ -4,7 +4,7 @@
 */
 use crate::data::repr::OwnedRepr;
 use crate::data::specs::*;
-use crate::data::{ArcTensor, BaseTensor, Tensor};
+use crate::data::{Container, ContainerBase, SharedContainer};
 #[cfg(not(feature = "std"))]
 use alloc::sync::Arc;
 use core::mem::MaybeUninit;
@@ -23,35 +23,37 @@ impl<A> Clone for OwnedArcRepr<A> {
 }
 
 unsafe impl<A> Data for OwnedArcRepr<A> {
-    fn into_owned(self_: BaseTensor<Self>) -> crate::data::Tensor<Self::Elem>
+    fn into_owned(self_: ContainerBase<Self>) -> crate::data::Container<Self::Elem>
     where
         Self::Elem: Clone,
     {
         // Self::ensure_unique(&mut self_);
         let data = Arc::try_unwrap(self_.data.0).ok().unwrap();
         // safe because data is equivalent
-        unsafe { BaseTensor::from_data_ptr(data, self_.ptr).with_layout(self_.layout) }
+        unsafe { ContainerBase::from_data_ptr(data, self_.ptr).with_layout(self_.layout) }
     }
 
     fn try_into_owned_nocopy<D>(
-        self_: BaseTensor<Self>,
-    ) -> Result<Tensor<Self::Elem>, BaseTensor<Self>> {
+        self_: ContainerBase<Self>,
+    ) -> Result<Container<Self::Elem>, ContainerBase<Self>> {
         match Arc::try_unwrap(self_.data.0) {
             Ok(owned_data) => unsafe {
                 // Safe because the data is equivalent.
-                Ok(BaseTensor::from_data_ptr(owned_data, self_.ptr).with_layout(self_.layout))
+                Ok(ContainerBase::from_data_ptr(owned_data, self_.ptr).with_layout(self_.layout))
             },
             Err(arc_data) => unsafe {
                 // Safe because the data is equivalent; we're just
                 // reconstructing `self_`.
-                Err(BaseTensor::from_data_ptr(OwnedArcRepr(arc_data), self_.ptr)
-                    .with_layout(self_.layout))
+                Err(
+                    ContainerBase::from_data_ptr(OwnedArcRepr(arc_data), self_.ptr)
+                        .with_layout(self_.layout),
+                )
             },
         }
     }
 
     #[allow(clippy::wrong_self_convention)]
-    fn to_shared(self_: &BaseTensor<Self>) -> ArcTensor<Self::Elem>
+    fn to_shared(self_: &ContainerBase<Self>) -> SharedContainer<Self::Elem>
     where
         Self::Elem: Clone,
     {
@@ -98,7 +100,7 @@ unsafe impl<A> RawDataMut for OwnedArcRepr<A>
 where
     A: Clone,
 {
-    fn try_ensure_unique(self_: &mut BaseTensor<Self>)
+    fn try_ensure_unique(self_: &mut ContainerBase<Self>)
     where
         Self: Sized,
     {

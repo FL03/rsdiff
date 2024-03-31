@@ -10,6 +10,7 @@ use acme::prelude::BinaryOp;
 use core::iter::Map;
 use core::ops::{Index, IndexMut};
 use core::slice::Iter as SliceIter;
+use std::vec;
 
 pub(crate) fn new<T>(
     kind: impl Into<TensorKind>,
@@ -274,17 +275,23 @@ impl<T> TensorBase<T> {
     }
 }
 
-impl<T> Index<&[usize]> for TensorBase<T> {
+impl<Idx, T> Index<Idx> for TensorBase<T>
+where
+    Idx: AsRef<[usize]>,
+{
     type Output = T;
 
-    fn index(&self, index: &[usize]) -> &Self::Output {
+    fn index(&self, index: Idx) -> &Self::Output {
         let i = self.layout().index(index);
         &self.store[i]
     }
 }
 
-impl<T> IndexMut<&[usize]> for TensorBase<T> {
-    fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
+impl<Idx, T> IndexMut<Idx> for TensorBase<T>
+where
+    Idx: AsRef<[usize]>,
+{
+    fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         let i = self.layout().index(index);
         &mut self.store[i]
     }

@@ -2,29 +2,17 @@
     Appellation: specs <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{affine::*, ndtensor::*, reshape::*, scalar::*};
+pub use self::{affine::*, moves::*, ndtensor::*, scalar::*};
 
 pub(crate) mod affine;
+pub(crate) mod moves;
 pub(crate) mod ndtensor;
-pub(crate) mod reshape;
 pub(crate) mod scalar;
-
-pub trait Hstack<T> {
-    type Output;
-
-    fn hstack(&self, other: &T) -> Self::Output;
-}
-
-pub trait Vstack<T> {
-    type Output;
-
-    fn vstack(&self, other: &T) -> Self::Output;
-}
 
 pub(crate) mod prelude {
     pub use super::affine::*;
+    pub use super::moves::*;
     pub use super::ndtensor::*;
-    pub use super::reshape::*;
     pub use super::scalar::*;
 }
 

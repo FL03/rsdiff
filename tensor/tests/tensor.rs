@@ -5,7 +5,7 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::Tensor;
+use acme::prelude::{IntoShape, Tensor};
 
 #[test]
 fn test_tensor() {
@@ -17,6 +17,19 @@ fn test_tensor() {
     assert_eq!(a.shape(), b.shape());
     assert_eq!(a.size(), b.size());
     assert_eq!(a.stride(), b.stride());
+}
+
+#[test]
+fn test_index() {
+    let shape = (2, 3).into_shape();
+    let n = shape.size();
+    let a = Tensor::<f64>::linspace(0f64, n as f64, n)
+        .reshape(shape)
+        .unwrap();
+
+    assert_eq!(a[[0, 0]], 0f64);
+    assert_eq!(a[[0, 1]], 1f64);
+    assert_eq!(a[[1, 2]], 5f64);
 }
 
 #[test]

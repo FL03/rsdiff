@@ -4,6 +4,7 @@
 */
 use crate::prelude::IntoShape;
 use crate::tensor::{from_vec, TensorBase};
+use num::traits::real::Real;
 use num::traits::{FromPrimitive, NumAssign, One, Zero};
 
 impl<T> TensorBase<T>
@@ -41,7 +42,6 @@ where
         if T::is_zero(&step) {
             panic!("step must be non-zero");
         }
-        // let steps = ((end - start) / step).ceil() as usize;
         let mut store = Vec::new();
         let mut value = start;
         while value < end {
@@ -50,26 +50,29 @@ where
         }
         from_vec(false, store.len(), store)
     }
-
-    /// Create a tensor within a range of values
+    /// Create an identity matrix of a certain size
+    pub fn eye(size: usize) -> Self {
+        let mut store = Vec::with_capacity(size * size);
+        for i in 0..size {
+            for j in 0..size {
+                store.push(if i == j { T::one() } else { T::zero() });
+            }
+        }
+        from_vec(false, (size, size), store)
+    }
+    /// Create a tensor with a certain number of elements, evenly spaced
+    /// between the provided start and end values
     pub fn linspace(start: T, end: T, steps: usize) -> Self
     where
         T: FromPrimitive,
     {
-        // let steps = ((end - start) / step).ceil() as usize;
         let step = (end - start) / T::from_usize(steps).unwrap();
-        let mut store = Vec::with_capacity(steps);
-        let mut value: T = start;
-        for _ in 0..steps {
-            store.push(value);
-            value += step;
-        }
-        from_vec(false, store.len(), store)
+        Self::arange(start, end, step)
     }
 
     pub fn logspace(start: T, end: T, steps: usize) -> Self
     where
-        T: num::traits::real::Real,
+        T: Real,
     {
         let start = start.log2();
         let end = end.log2();
@@ -85,7 +88,7 @@ where
 
     pub fn geomspace(start: T, end: T, steps: usize) -> Self
     where
-        T: num::Float,
+        T: Real,
     {
         let start = start.log10();
         let end = end.log10();
@@ -110,11 +113,11 @@ where
     }
     /// Create a tensor, filled with ones, from the shape of another tensor
     pub fn ones_from(tensor: &TensorBase<T>) -> Self {
-        Self::ones(tensor.shape().clone())
+        Self::ones(tensor.shape())
     }
     /// Create a tensor, filled with ones, from the shape of the tensor
     pub fn ones_like(&self) -> Self {
-        Self::ones(self.shape().clone())
+        Self::ones(self.shape())
     }
 }
 
@@ -128,10 +131,10 @@ where
     }
     /// Create a tensor, filled with zeros, from the shape of another tensor
     pub fn zeros_from(tensor: &TensorBase<T>) -> Self {
-        Self::zeros(tensor.shape().clone())
+        Self::zeros(tensor.shape())
     }
     /// Create a tensor, filled with zeros, from the shape of the tensor
     pub fn zeros_like(&self) -> Self {
-        Self::zeros(self.shape().clone())
+        Self::zeros(self.shape())
     }
 }

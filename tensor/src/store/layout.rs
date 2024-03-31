@@ -86,6 +86,9 @@ impl Layout {
         }
         true
     }
+    pub fn is_square(&self) -> bool {
+        self.shape.is_square()
+    }
     /// Get a peek at the offset of the layout.
     pub fn offset(&self) -> usize {
         self.offset
@@ -166,6 +169,7 @@ impl Layout {
 }
 
 // Internal methods
+#[allow(dead_code)]
 impl Layout {
     pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
         let idx = idx.as_ref();
@@ -173,6 +177,14 @@ impl Layout {
             panic!("Dimension mismatch");
         }
         idx.iter().zip(self.stride.iter()).map(|(i, s)| i * s).sum()
+    }
+
+    pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
+        idx.as_ref()
+            .iter()
+            .zip(self.stride.iter())
+            .map(|(i, s)| i * s)
+            .sum()
     }
 }
 
@@ -184,8 +196,8 @@ mod tests {
     fn test_position() {
         let shape = (3, 3);
         let layout = Layout::contiguous(shape);
-        assert_eq!(layout.index(&[0, 0]), 0);
-        assert_eq!(layout.index(&[0, 1]), 1);
-        assert_eq!(layout.index(&[2, 2]), 8);
+        assert_eq!(layout.index_unchecked([0, 0]), 0);
+        assert_eq!(layout.index([0, 1]), 1);
+        assert_eq!(layout.index([2, 2]), 8);
     }
 }

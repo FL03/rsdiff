@@ -39,33 +39,9 @@ where
 }
 
 pub trait Operation {
-    type Output;
+    type Kind;
 
-    fn kind(&self) -> String;
-}
-
-pub trait Pow<T> {
-    type Output;
-
-    fn pow(&self, exp: T) -> Self::Output;
-}
-
-pub trait Powc<T>: Pow<T> {
-    fn powc(&self, exp: T) -> Self::Output;
-}
-
-pub trait Powi<T>: Pow<T> {
-    fn powi(&self, exp: T) -> Self::Output;
-}
-
-pub trait Powf<T>: Pow<T> {
-    fn powf(&self, exp: T) -> Self::Output;
-}
-
-pub trait Squared {
-    type Output;
-
-    fn squared(&self) -> Self::Output;
+    fn kind(&self) -> Self::Kind;
 }
 
 pub(crate) mod prelude {

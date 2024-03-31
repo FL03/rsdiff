@@ -5,14 +5,9 @@
 //! # Store
 //!
 //! This module provides the storage and layout for the tensor data structure.
-pub use self::{layout::*, storage::*};
+pub use self::layout::Layout;
 
 pub(crate) mod layout;
-pub(crate) mod storage;
-
-pub trait TensorStore {
-    type Elem;
-}
 
 #[cfg(test)]
 mod tests {}

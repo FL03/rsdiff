@@ -23,6 +23,7 @@ pub enum TensorError {
     Arithmetic(ArithmeticError),
     Indexing(String),
     Shape(ShapeError),
+    Singular,
 }
 
 unsafe impl Send for TensorError {}

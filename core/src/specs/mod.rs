@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-pub use self::{gradient::*, prop::*, store::*};
+pub use self::{arith::*, gradient::*, prop::*, store::*};
 
+pub(crate) mod arith;
 pub(crate) mod gradient;
 pub(crate) mod prop;
 pub(crate) mod store;

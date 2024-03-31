@@ -20,6 +20,11 @@ fn test_ones_and_zeros() {
     assert_eq!(a.stride(), b.stride());
     assert_eq!(a, Tensor::ones(shape));
     assert_eq!(b, Tensor::zeros(shape));
+
+    use num::traits::{One, Zero};
+
+    assert!(Tensor::<f64>::one().is_scalar());
+    assert!(Tensor::<f64>::zero().is_scalar());
 }
 
 #[test]

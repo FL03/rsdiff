@@ -30,6 +30,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
 pub enum BinaryOp {
+    // <Kind = String> {
     #[default]
     Add,
     Sub,
@@ -44,6 +45,7 @@ pub enum BinaryOp {
     Xor,
     Shl,
     Shr,
+    // Custom(Kind),
 }
 
 impl BinaryOp {

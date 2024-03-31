@@ -36,6 +36,10 @@ graph = [
     "dep:acme-graphs"
 ]
 
+io = [
+    "acme-tensor/io"
+]
+
 macros = [
     "dep:acme-macros"
 ]

@@ -16,6 +16,10 @@ default = [
     "std"
 ]
 
+io = [
+
+]
+
 serde = [
     "dep:serde",
     "serde-ext",

@@ -3,13 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::data::repr::OwnedArcRepr;
-use crate::data::{ArcTensor, BaseTensor, Tensor};
+use crate::data::{Container, ContainerBase, SharedContainer};
 use core::mem::MaybeUninit;
 use core::ptr::NonNull;
 
-/// Array representation trait.
+/// Container representation trait.
 ///
-/// For an array with elements that can be accessed with safe code.
+/// For a container with elements that can be accessed with safe code.
 ///
 /// ***Internal trait, see `RawData`.***
 #[allow(clippy::missing_safety_doc)] // not implementable downstream
@@ -17,7 +17,7 @@ pub unsafe trait Data: RawData {
     /// Converts the array to a uniquely owned array, cloning elements if necessary.
     #[doc(hidden)]
     #[allow(clippy::wrong_self_convention)]
-    fn into_owned(self_: BaseTensor<Self>) -> Tensor<Self::Elem>
+    fn into_owned(self_: ContainerBase<Self>) -> Container<Self::Elem>
     where
         Self::Elem: Clone;
 
@@ -25,14 +25,14 @@ pub unsafe trait Data: RawData {
     /// cloning the array elements. Otherwise, returns `self_` unchanged.
     #[doc(hidden)]
     fn try_into_owned_nocopy<D>(
-        self_: BaseTensor<Self>,
-    ) -> Result<Tensor<Self::Elem>, BaseTensor<Self>>;
+        self_: ContainerBase<Self>,
+    ) -> Result<Container<Self::Elem>, ContainerBase<Self>>;
 
     /// Return a shared ownership (copy on write) array based on the existing one,
     /// cloning elements if necessary.
     #[doc(hidden)]
     #[allow(clippy::wrong_self_convention)]
-    fn to_shared(self_: &BaseTensor<Self>) -> ArcTensor<Self::Elem>
+    fn to_shared(self_: &ContainerBase<Self>) -> SharedContainer<Self::Elem>
     where
         Self::Elem: Clone;
 }
@@ -42,7 +42,7 @@ pub unsafe trait DataMut: Data + RawDataMut {
     /// Ensures that the array has unique access to its data.
     #[doc(hidden)]
     #[inline]
-    fn ensure_unique(self_: &mut BaseTensor<Self>)
+    fn ensure_unique(self_: &mut ContainerBase<Self>)
     where
         Self: Sized,
     {
@@ -105,7 +105,7 @@ pub unsafe trait RawDataMut: RawData {
     /// Additionally, if `Self` provides safe mutable access to array elements,
     /// then this method **must** panic or ensure that the data is unique.
     #[doc(hidden)]
-    fn try_ensure_unique(_: &mut BaseTensor<Self>)
+    fn try_ensure_unique(_: &mut ContainerBase<Self>)
     where
         Self: Sized;
 

@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::BinaryOperation;
+use num::traits::NumOps;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
@@ -71,7 +72,7 @@ macro_rules! impl_binary_op {
     ($op:ident, $bound:ident, $operator:tt) => {
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
-            A: $bound<B, Output = C>,
+            A: core::ops::$bound<B, Output = C>,
         {
             type Output = C;
 
@@ -83,7 +84,7 @@ macro_rules! impl_binary_op {
     (expr $op:ident, $bound:ident, $exp:expr) => {
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
-            A: $bound<B, Output = C>,
+            A: core::ops::$bound<B, Output = C>,
         {
             type Output = C;
 
@@ -95,15 +96,15 @@ macro_rules! impl_binary_op {
 }
 
 // operator!(Addition, Division, Multiplication, Subtraction);
-operators!(class Arithmetic; {Addition: Add, Division: Div, Multiplication: Mul, Subtraction: Sub});
-
-use std::ops::{Add, Div, Mul, Sub};
+operators!(class Arithmetic; {Addition: Add, Division: Div, Multiplication: Mul, Remainder: Rem, Subtraction: Sub});
 
 impl_binary_op!(Addition, Add, +);
 
 impl_binary_op!(Division, Div, /);
 
 impl_binary_op!(Multiplication, Mul, *);
+
+impl_binary_op!(Remainder, Rem, %);
 
 impl_binary_op!(Subtraction, Sub, -);
 
@@ -130,12 +131,13 @@ impl Arithmetic {
 
     pub fn op<A, B, C>(&self) -> Box<dyn BinaryOperation<A, B, Output = C>>
     where
-        A: Add<B, Output = C> + Div<B, Output = C> + Mul<B, Output = C> + Sub<B, Output = C>,
+        A: NumOps<B, C>,
     {
         match self.clone() {
             Arithmetic::Add(op) => Box::new(op),
             Arithmetic::Div(op) => Box::new(op),
             Arithmetic::Mul(op) => Box::new(op),
+            Arithmetic::Rem(op) => Box::new(op),
             Arithmetic::Sub(op) => Box::new(op),
         }
     }
@@ -145,19 +147,15 @@ impl Arithmetic {
             Arithmetic::Add(op) => op.name(),
             Arithmetic::Div(op) => op.name(),
             Arithmetic::Mul(op) => op.name(),
+            Arithmetic::Rem(op) => op.name(),
             Arithmetic::Sub(op) => op.name(),
         }
     }
 
     pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
     where
-        A: Add<B, Output = C> + Div<B, Output = C> + Mul<B, Output = C> + Sub<B, Output = C>,
+        A: NumOps<B, C>,
     {
-        match self {
-            Arithmetic::Add(op) => op.eval(lhs, rhs),
-            Arithmetic::Div(op) => op.eval(lhs, rhs),
-            Arithmetic::Mul(op) => op.eval(lhs, rhs),
-            Arithmetic::Sub(op) => op.eval(lhs, rhs),
-        }
+        self.op().eval(lhs, rhs)
     }
 }

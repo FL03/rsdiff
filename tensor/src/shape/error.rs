@@ -4,7 +4,7 @@
 */
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumProperty, EnumString, VariantNames};
 
 pub type ShapeResult<T = ()> = std::result::Result<T, ShapeError>;
 
@@ -21,6 +21,7 @@ pub type ShapeResult<T = ()> = std::result::Result<T, ShapeError>;
     EnumCount,
     EnumIs,
     EnumIter,
+    EnumProperty,
     EnumString,
     Eq,
     Hash,
@@ -32,7 +33,9 @@ pub type ShapeResult<T = ()> = std::result::Result<T, ShapeError>;
 #[repr(usize)]
 #[strum(serialize_all = "snake_case")]
 pub enum ShapeError {
+    #[strum(props(desc = "Dimension mismatch"))]
     DimensionMismatch,
+    #[strum(props(desc = "incompatible shapes"))]
     IncompatibleShapes,
     IncompatibleLayout,
     InvalidAxis,

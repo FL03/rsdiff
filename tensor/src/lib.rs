@@ -24,6 +24,8 @@ pub mod actions;
 pub mod backend;
 pub mod data;
 pub mod error;
+#[cfg(feature = "io")]
+pub mod io;
 pub mod linalg;
 pub mod ops;
 pub mod shape;

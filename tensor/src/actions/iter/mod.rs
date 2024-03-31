@@ -42,7 +42,7 @@ pub(crate) mod utils {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::Linspace;
+    use crate::actions::create::Linspace;
     use crate::prelude::{Shape, Tensor};
 
     #[test]

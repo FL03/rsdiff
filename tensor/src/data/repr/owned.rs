@@ -4,7 +4,7 @@
 */
 use crate::data::repr::OwnedArcRepr;
 use crate::data::utils::nonnull_from_vec_data;
-use crate::data::{ArcTensor, BaseTensor, Tensor};
+use crate::data::{Container, ContainerBase, SharedContainer};
 use crate::data::{Data, DataMut, DataOwned, RawData, RawDataClone, RawDataMut, RawDataSubst};
 use core::mem::{self, ManuallyDrop, MaybeUninit};
 use core::ptr::NonNull;
@@ -146,7 +146,7 @@ impl<A> Drop for OwnedRepr<A> {
 
 unsafe impl<A> Data for OwnedRepr<A> {
     #[inline]
-    fn into_owned(self_: BaseTensor<Self>) -> Tensor<Self::Elem>
+    fn into_owned(self_: ContainerBase<Self>) -> Container<Self::Elem>
     where
         A: Clone,
     {
@@ -155,12 +155,12 @@ unsafe impl<A> Data for OwnedRepr<A> {
 
     #[inline]
     fn try_into_owned_nocopy<D>(
-        self_: BaseTensor<Self>,
-    ) -> Result<Tensor<Self::Elem>, BaseTensor<Self>> {
+        self_: ContainerBase<Self>,
+    ) -> Result<Container<Self::Elem>, ContainerBase<Self>> {
         Ok(self_)
     }
 
-    fn to_shared(self_: &BaseTensor<Self>) -> ArcTensor<Self::Elem>
+    fn to_shared(self_: &ContainerBase<Self>) -> SharedContainer<Self::Elem>
     where
         Self::Elem: Clone,
     {
@@ -197,7 +197,7 @@ unsafe impl<A> RawData for OwnedRepr<A> {
 }
 
 unsafe impl<A> RawDataMut for OwnedRepr<A> {
-    fn try_ensure_unique(_: &mut BaseTensor<Self>)
+    fn try_ensure_unique(_: &mut ContainerBase<Self>)
     where
         Self: Sized,
     {

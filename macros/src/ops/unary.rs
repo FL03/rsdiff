@@ -57,7 +57,7 @@ impl Parse for UnaryMethod {
 
 pub enum UnaryOps {
     Cosine(kw::cos),
-    Exp(kw::e),
+    Exp(kw::exp),
     Ln(kw::ln),
     Sine(kw::sin),
     Tan(kw::tan),
@@ -72,7 +72,7 @@ impl Parse for UnaryOps {
                 let span = Span::call_site();
                 match method.to_string().as_str() {
                     "cos" => return Ok(UnaryOps::Cosine(kw::cos(span))),
-                    "exp" => return Ok(UnaryOps::Exp(kw::e(span))),
+                    "exp" => return Ok(UnaryOps::Exp(kw::exp(span))),
                     "ln" => return Ok(UnaryOps::Ln(kw::ln(span))),
                     "sin" => return Ok(UnaryOps::Sine(kw::sin(span))),
                     "tan" => return Ok(UnaryOps::Tan(kw::tan(span))),
@@ -87,8 +87,8 @@ impl Parse for UnaryOps {
                 input.parse::<kw::tan>().map(UnaryOps::Tan)
             } else if input.peek2(kw::ln) {
                 input.parse::<kw::ln>().map(UnaryOps::Ln)
-            } else if input.peek2(kw::e) {
-                input.parse::<kw::e>().map(UnaryOps::Exp)
+            } else if input.peek2(kw::exp) {
+                input.parse::<kw::exp>().map(UnaryOps::Exp)
             } else {
                 Err(input.error("Expected a method call"))
             }

@@ -28,6 +28,7 @@ pub mod linalg;
 pub mod ops;
 pub mod shape;
 pub mod specs;
+pub mod stats;
 pub mod store;
 pub mod types;
 

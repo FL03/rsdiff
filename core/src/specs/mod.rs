@@ -15,8 +15,6 @@ use core::borrow::Borrow;
 
 pub trait Idx {
     type Index;
-
-    fn index(&self) -> Self::Index;
 }
 
 pub trait IdxExt: Idx

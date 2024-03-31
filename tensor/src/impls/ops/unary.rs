@@ -5,10 +5,11 @@
 use crate::prelude::{Scalar, TensorExpr};
 use crate::tensor::*;
 use acme::ops::unary::UnaryOp;
+use core::ops;
 
-impl<T> std::ops::Neg for TensorBase<T>
+impl<T> ops::Neg for TensorBase<T>
 where
-    T: Copy + std::ops::Neg<Output = T>,
+    T: Copy + ops::Neg<Output = T>,
 {
     type Output = Self;
 
@@ -20,9 +21,9 @@ where
     }
 }
 
-impl<'a, T> std::ops::Neg for &'a TensorBase<T>
+impl<'a, T> ops::Neg for &'a TensorBase<T>
 where
-    T: Copy + std::ops::Neg<Output = T>,
+    T: Copy + ops::Neg<Output = T>,
 {
     type Output = TensorBase<T>;
 
@@ -34,9 +35,9 @@ where
     }
 }
 
-impl<T> std::ops::Not for TensorBase<T>
+impl<T> ops::Not for TensorBase<T>
 where
-    T: Copy + std::ops::Not<Output = T>,
+    T: Copy + ops::Not<Output = T>,
 {
     type Output = Self;
 
@@ -48,9 +49,9 @@ where
     }
 }
 
-impl<'a, T> std::ops::Not for &'a TensorBase<T>
+impl<'a, T> ops::Not for &'a TensorBase<T>
 where
-    T: Copy + std::ops::Not<Output = T>,
+    T: Copy + ops::Not<Output = T>,
 {
     type Output = TensorBase<T>;
 
@@ -66,7 +67,7 @@ macro_rules! impl_unary_op {
     ($variant:ident, $method:ident) => {
         pub fn $method(self) -> Self {
             let shape = self.shape().clone();
-            let store = self.store.iter().copied().map(|v| v.$method()).collect();
+            let store = self.store.iter().map(|v| v.$method()).collect();
             let op = TensorExpr::unary(self, UnaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }

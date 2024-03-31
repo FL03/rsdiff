@@ -42,3 +42,7 @@ pub trait NdIterator {
 pub trait TensorData {
     type Elem;
 }
+
+pub trait TensorDataMut: TensorData {
+    fn as_mut_ptr(&mut self) -> *mut Self::Elem;
+}

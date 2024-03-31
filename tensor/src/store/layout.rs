@@ -6,7 +6,7 @@ use crate::shape::{Axis, IntoShape, IntoStride, Rank, Shape, ShapeError, ShapeRe
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// A layout is a description of how data is stored in memory.
+/// The layout describes the memory layout of a tensor.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Layout {

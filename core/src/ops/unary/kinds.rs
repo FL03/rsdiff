@@ -15,7 +15,6 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Clone,
     Copy,
     Debug,
-    Default,
     Display,
     EnumCount,
     EnumIs,
@@ -30,7 +29,6 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]
 pub enum UnaryOp {
-    #[default]
     Abs,
     Cos,
     Cosh,
@@ -46,6 +44,7 @@ pub enum UnaryOp {
     Not,
     Sin,
     Sinh,
+    #[cfg_attr(feature = "serde", serde(alias = "square_root"))]
     Sqrt,
     Square,
     Tan,

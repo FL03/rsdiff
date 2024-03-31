@@ -6,13 +6,8 @@
 use super::store::Store;
 
 pub trait IsDifferentiable {
+    /// Returns true if the function is differentiable.
     fn differentiable(&self) -> bool;
-}
-
-pub trait Differentiable<T> {
-    type Derivative;
-
-    fn diff(&self, args: T) -> Self::Derivative;
 }
 
 pub trait Gradient<T> {

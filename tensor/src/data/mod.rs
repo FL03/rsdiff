@@ -105,8 +105,7 @@ where
     {
         let data = self.data.into_shared();
         // safe because: equivalent unmoved data, ptr and dims remain valid
-        // unsafe { Self::from_data_ptr(data, self.ptr).with_strides_dim(self.strides, self.dim) }
-        unsafe { BaseTensor::from_data_ptr(data, self.ptr) }
+        unsafe { BaseTensor::from_data_ptr(data, self.ptr).with_layout(self.layout) }
     }
 
     pub fn layout(&self) -> &Layout {
@@ -208,6 +207,8 @@ where
     }
 
     pub(crate) unsafe fn with_layout(self, layout: Layout) -> BaseTensor<S> {
+        debug_assert_eq!(self.layout().rank(), layout.rank());
+
         Self {
             id: self.id,
             data: self.data,
@@ -216,19 +217,6 @@ where
             op: self.op,
             ptr: self.ptr,
         }
-    }
-
-    pub(crate) unsafe fn with_strides_dim(
-        self,
-        stride: impl IntoStride,
-        dim: impl IntoShape,
-    ) -> BaseTensor<S> {
-        let shape = dim.into_shape();
-        let stride = stride.into_stride();
-        debug_assert_eq!(shape.rank(), stride.rank());
-
-        let layout = Layout::new(0, shape, stride);
-        self.with_layout(layout)
     }
 }
 

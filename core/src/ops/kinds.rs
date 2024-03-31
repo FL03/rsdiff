@@ -6,7 +6,7 @@ use super::binary::{BinaryOp, BinaryOperator};
 use super::unary::UnaryOp;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{Display, EnumCount, EnumIs, VariantNames};
 
 #[cfg_attr(
     feature = "serde",
@@ -20,7 +20,6 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Display,
     EnumCount,
     EnumIs,
-    EnumIter,
     Eq,
     Hash,
     Ord,

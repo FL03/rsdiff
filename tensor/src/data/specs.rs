@@ -42,7 +42,7 @@ pub unsafe trait DataMut: Data + RawDataMut {
     /// Ensures that the array has unique access to its data.
     #[doc(hidden)]
     #[inline]
-    fn ensure_unique<D>(self_: &mut BaseTensor<Self>)
+    fn ensure_unique(self_: &mut BaseTensor<Self>)
     where
         Self: Sized,
     {

@@ -69,7 +69,7 @@ fn test_div() {
 fn test_mul() {
     let x = 1.0;
     let y = 2.0;
-    assert_eq!(autodiff!(x: x * y), 2.0);
+    assert_eq!(autodiff!(x: x * y + 10.0), 2.0);
     assert_eq!(autodiff!(y: x * y), 1.0);
     assert_eq!(autodiff!(x: x *= y), 2.0);
     assert_eq!(autodiff!(y: x *= y), 1.0);

@@ -120,6 +120,10 @@ impl<T> TensorBase<T> {
     pub fn is_contiguous(&self) -> bool {
         self.layout().is_contiguous()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.store.is_empty()
+    }
     /// Get a reference to the [Layout] of the tensor
     pub const fn layout(&self) -> &Layout {
         &self.layout

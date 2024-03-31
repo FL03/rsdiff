@@ -66,7 +66,7 @@ impl Shape {
             return false;
         }
         let mut acc = 1;
-        for (&stride, &dim) in stride.iter().zip(self.0.iter()).rev() {
+        for (&stride, &dim) in stride.iter().zip(self.iter()).rev() {
             if stride != acc {
                 return false;
             }
@@ -158,32 +158,31 @@ impl Shape {
             return None;
         }
 
+        let mut iter = new_stride.as_mut_slice().iter_mut().rev();
+        for ((er, es), dr) in self
+            .slice()
+            .iter()
+            .rev()
+            .zip(stride.slice().iter().rev())
+            .zip(iter.by_ref())
         {
-            let mut new_stride_iter = new_stride.as_mut_slice().iter_mut().rev();
-            for ((er, es), dr) in self
-                .slice()
-                .iter()
-                .rev()
-                .zip(stride.slice().iter().rev())
-                .zip(new_stride_iter.by_ref())
-            {
-                /* update strides */
-                if *dr == *er {
-                    /* keep stride */
-                    *dr = *es;
-                } else if *er == 1 {
-                    /* dead dimension, zero stride */
-                    *dr = 0
-                } else {
-                    return None;
-                }
-            }
-
-            /* set remaining strides to zero */
-            for dr in new_stride_iter {
-                *dr = 0;
+            /* update strides */
+            if *dr == *er {
+                /* keep stride */
+                *dr = *es;
+            } else if *er == 1 {
+                /* dead dimension, zero stride */
+                *dr = 0
+            } else {
+                return None;
             }
         }
+
+        /* set remaining strides to zero */
+        for dr in iter {
+            *dr = 0;
+        }
+
         Some(new_stride.into())
     }
 }

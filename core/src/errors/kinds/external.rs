@@ -44,6 +44,8 @@ impl<E> ExternalError<E> {
     }
 }
 
+impl<E> std::error::Error for ExternalError<E> where E: std::fmt::Debug {}
+
 impl<E> ErrorType for ExternalError<E>
 where
     E: ToString,

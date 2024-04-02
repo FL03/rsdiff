@@ -23,7 +23,6 @@ pub trait SummaryStatistics<T> {
 }
 
 pub trait TensorStats<T>: SummaryStatistics<T> {
-    
     /// Compute the mean along the specified axis.
     fn mean_axis(&self, axis: Axis) -> T;
 }

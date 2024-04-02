@@ -56,5 +56,3 @@ impl BinaryOp {
         }
     }
 }
-
-

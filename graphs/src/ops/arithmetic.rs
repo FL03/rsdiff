@@ -92,7 +92,7 @@ macro_rules! impl_binary_op {
         $(
             impl_binary_op!($op, $bound, $operator);
         )*
-        
+
     };
     ($op:ident, $bound:ident, $operator:tt) => {
         operator!($op);
@@ -127,7 +127,6 @@ macro_rules! impl_binary_op {
 operators!(Arithmetic; {Add: Addition => add, Div: Division => div, Mul: Multiplication => mul, Rem: Remainder => rem, Sub: Subtraction => sub});
 
 impl_binary_op!((Addition, Add, +), (Division, Div, /), (Multiplication, Mul, *), (Remainder, Rem, %), (Subtraction, Sub, -));
-
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {

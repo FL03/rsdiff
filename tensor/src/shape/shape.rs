@@ -354,7 +354,6 @@ unsafe impl Send for Shape {}
 
 unsafe impl Sync for Shape {}
 
-
 impl From<()> for Shape {
     fn from(_: ()) -> Self {
         Self::default()
@@ -414,7 +413,6 @@ impl From<(usize, usize, usize, usize, usize, usize)> for Shape {
         Self(vec![shape.0, shape.1, shape.2, shape.3, shape.4, shape.5])
     }
 }
-
 
 // macro_rules! tuple_vec {
 //     ($($n:tt),*) => {

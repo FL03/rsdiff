@@ -8,8 +8,16 @@ use acme::ops::binary::BinaryOp;
 use core::ops;
 use num::traits::Pow;
 
-
-pub(crate) fn broadcast_scalar_op<F, T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>, op: BinaryOp, f: F) -> TensorBase<T> where F: Fn(T, T) -> T, T: Copy + Default {
+pub(crate) fn broadcast_scalar_op<F, T>(
+    lhs: &TensorBase<T>,
+    rhs: &TensorBase<T>,
+    op: BinaryOp,
+    f: F,
+) -> TensorBase<T>
+where
+    F: Fn(T, T) -> T,
+    T: Copy + Default,
+{
     let mut lhs = lhs.clone();
     let mut rhs = rhs.clone();
     if lhs.is_scalar() {
@@ -19,16 +27,27 @@ pub(crate) fn broadcast_scalar_op<F, T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>
         rhs = rhs.broadcast(lhs.shape());
     }
     let shape = lhs.shape().clone();
-    let store = lhs.data().iter().zip(rhs.data().iter()).map(|(a, b)| f(*a, *b)).collect();
+    let store = lhs
+        .data()
+        .iter()
+        .zip(rhs.data().iter())
+        .map(|(a, b)| f(*a, *b))
+        .collect();
     let op = TensorExpr::binary(lhs, rhs, op);
     from_vec_with_op(false, op, shape, store)
 }
 
-fn check_shapes_or_scalar<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) where T: Clone + Default {
+fn check_shapes_or_scalar<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>)
+where
+    T: Clone + Default,
+{
     let is_scalar = lhs.is_scalar() || rhs.is_scalar();
-    debug_assert!(is_scalar || lhs.shape() == rhs.shape(), "Shape Mismatch: {:?} != {:?}", lhs.shape(), rhs.shape());
-
-    
+    debug_assert!(
+        is_scalar || lhs.shape() == rhs.shape(),
+        "Shape Mismatch: {:?} != {:?}",
+        lhs.shape(),
+        rhs.shape()
+    );
 }
 
 macro_rules! check {
@@ -39,32 +58,50 @@ macro_rules! check {
     };
 }
 
-impl<T> TensorBase<T> where T: Scalar {
+impl<T> TensorBase<T>
+where
+    T: Scalar,
+{
     pub fn apply_binary(&self, other: &Self, op: BinaryOp) -> Self {
         check_shapes_or_scalar(self, other);
         let shape = self.shape();
-        let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a + *b).collect();
+        let store = self
+            .data()
+            .iter()
+            .zip(other.data().iter())
+            .map(|(a, b)| *a + *b)
+            .collect();
         let op = TensorExpr::binary(self.clone(), other.clone(), op);
         from_vec_with_op(false, op, shape, store)
     }
 
-    pub fn apply_binaryf<F>(&self, other: &Self, op: BinaryOp, f: F) -> Self where F: Fn(T, T) -> T {
+    pub fn apply_binaryf<F>(&self, other: &Self, op: BinaryOp, f: F) -> Self
+    where
+        F: Fn(T, T) -> T,
+    {
         check_shapes_or_scalar(self, other);
         let shape = self.shape();
-        let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| f(*a, *b)).collect();
+        let store = self
+            .data()
+            .iter()
+            .zip(other.data().iter())
+            .map(|(a, b)| f(*a, *b))
+            .collect();
         let op = TensorExpr::binary(self.clone(), other.clone(), op);
         from_vec_with_op(false, op, shape, store)
     }
 }
 
-impl<T> TensorBase<T> where T: Scalar {
+impl<T> TensorBase<T>
+where
+    T: Scalar,
+{
     pub fn pow(&self, exp: T) -> Self {
         let shape = self.shape();
         let store = self.data().iter().copied().map(|a| a.pow(exp)).collect();
         let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::Pow);
         from_vec_with_op(false, op, shape, store)
     }
-
 }
 
 impl<T> Pow<T> for TensorBase<T>
@@ -199,7 +236,7 @@ macro_rules! impl_binary_op {
             }
         }
     };
-    
+
 }
 
 macro_rules! impl_assign_op {
@@ -243,7 +280,7 @@ macro_rules! impl_binary_method {
             let op = TensorExpr::binary_scalar(self.clone(), other.clone(), BinaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
-        
+
     };
     (tensor: $variant:ident, $method:ident, $op:tt) => {
         pub fn $method(&self, other: &Self) -> Self {
@@ -253,7 +290,7 @@ macro_rules! impl_binary_method {
             let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
-        
+
     };
 }
 
@@ -265,7 +302,10 @@ impl_assign_op!(MulAssign, mul_assign, Mul, *);
 impl_assign_op!(RemAssign, rem_assign, Rem, %);
 impl_assign_op!(SubAssign, sub_assign, Sub, -);
 
-impl<T> TensorBase<T> where T: Scalar {
+impl<T> TensorBase<T>
+where
+    T: Scalar,
+{
     impl_binary_method!(tensor: Add, add, +);
     impl_binary_method!(scalar: Add, add_scalar, +);
 }

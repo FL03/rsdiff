@@ -9,7 +9,7 @@ use acme::prelude::{BinaryOp, UnaryOp};
 
 pub type BoxTensor<T = f64> = Box<TensorBase<T>>;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd,)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[non_exhaustive]
 pub enum TensorExpr<T> {
     Binary(BoxTensor<T>, BoxTensor<T>, BinaryOp),

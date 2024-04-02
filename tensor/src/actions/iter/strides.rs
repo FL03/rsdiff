@@ -87,7 +87,12 @@ impl<'a> DoubleEndedIterator for Strided<'a> {
         } else {
             return None;
         };
-        let position = self.shape.iter().zip(pos.iter()).map(|(s, p)| s - p).collect();
+        let position = self
+            .shape
+            .iter()
+            .zip(pos.iter())
+            .map(|(s, p)| s - p)
+            .collect();
         let scope = self.index(&position);
         println!("{:?}", &position);
         Some((position, scope))

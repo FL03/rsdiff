@@ -9,7 +9,17 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(Clone, Debug, EnumDiscriminants, Eq, PartialEq)]
-#[strum_discriminants(derive(Display, EnumCount, EnumIs, EnumIter, EnumString, Hash, Ord, PartialOrd, VariantNames))]
+#[strum_discriminants(derive(
+    Display,
+    EnumCount,
+    EnumIs,
+    EnumIter,
+    EnumString,
+    Hash,
+    Ord,
+    PartialOrd,
+    VariantNames
+))]
 #[strum_discriminants(name(TensorType))]
 #[cfg_attr(feature = "serde", strum_discriminants(derive(Deserialize, Serialize)))]
 pub enum Tensors<T> {

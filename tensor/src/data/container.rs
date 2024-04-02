@@ -90,7 +90,6 @@ where
         dbg!("Implement a custom iter for ContainerBase");
         self.as_slice_memory_order().unwrap().iter()
     }
-    
 
     pub fn layout(&self) -> &Layout {
         &self.layout

@@ -5,7 +5,10 @@
 use crate::prelude::Scalar;
 use crate::tensor::TensorBase;
 
-impl<T> TensorBase<T> where T: Scalar {
+impl<T> TensorBase<T>
+where
+    T: Scalar,
+{
     pub fn sum(&self) -> T {
         self.data().iter().copied().sum()
     }

@@ -46,7 +46,6 @@ pub trait Operator {
 }
 
 impl Operator for Box<dyn Operator> {
-
     fn name(&self) -> String {
         self.as_ref().name()
     }

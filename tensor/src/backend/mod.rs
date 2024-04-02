@@ -19,11 +19,9 @@ pub trait BackendStorage {
 
 #[allow(unused_imports)]
 pub(crate) mod prelude {
-    pub use super::{Backend, BackendStorage};
     pub use super::devices::Device;
+    pub use super::{Backend, BackendStorage};
 }
 
 #[cfg(test)]
-mod tests {
-
-}
+mod tests {}

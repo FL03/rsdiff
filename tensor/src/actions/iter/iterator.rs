@@ -23,4 +23,3 @@ pub struct BaseIter<'a, T> {
     data: &'a [T],
     index: usize,
 }
-

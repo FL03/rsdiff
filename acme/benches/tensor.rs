@@ -31,4 +31,3 @@ fn bench_iter_rev(b: &mut Bencher) {
     let tensor = Tensor::linspace(0f64, n as f64, n);
     b.iter(|| tensor.strided().rev().take(n))
 }
-

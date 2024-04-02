@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::IntoShape;
-use crate::tensor::{from_vec, TensorBase};
+use crate::tensor::{from_vec_with_kind, TensorBase};
 use num::traits::real::Real;
 use num::traits::{FromPrimitive, NumAssign, One, Zero};
 
@@ -30,7 +30,7 @@ where
     pub fn fill(shape: impl IntoShape, value: T) -> Self {
         let shape = shape.into_shape();
         let store = vec![value; shape.size()];
-        from_vec(false, shape, store)
+        from_vec_with_kind(false, shape, store)
     }
     /// Create a tensor, filled with some value, from the current shape
     pub fn fill_like(&self, value: T) -> Self {
@@ -53,7 +53,7 @@ where
             store.push(value);
             value += step;
         }
-        from_vec(false, store.len(), store)
+        Self::from_vec(store)
     }
     /// Create an identity matrix of a certain size
     pub fn eye(size: usize) -> Self {
@@ -63,7 +63,7 @@ where
                 store.push(if i == j { T::one() } else { T::zero() });
             }
         }
-        from_vec(false, (size, size), store)
+        Self::from_shape_vec((size, size), store)
     }
     /// Create a tensor with a certain number of elements, evenly spaced
     /// between the provided start and end values
@@ -88,7 +88,7 @@ where
             store.push(value.exp2());
             value += step;
         }
-        from_vec(false, (store.len(),), store)
+        from_vec_with_kind(false, (store.len(),), store)
     }
 
     pub fn geomspace(start: T, end: T, steps: usize) -> Self
@@ -104,7 +104,7 @@ where
             store.push(value.exp());
             value += step;
         }
-        from_vec(false, (store.len(),), store)
+        from_vec_with_kind(false, (store.len(),), store)
     }
 }
 

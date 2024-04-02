@@ -26,7 +26,7 @@ where
                 let pos = i * rhs.shape().ncols() + j;
                 let left = i * lhs.shape().ncols() + k;
                 let right = k * rhs.shape().ncols() + j;
-                result[pos] += lhs.store[left] * rhs.store[right];
+                result[pos] += lhs.data[left] * rhs.data[right];
             }
         }
     }
@@ -52,7 +52,7 @@ where
                 let pos = i * rhs.shape().ncols() + j;
                 let left = i * lhs.shape().ncols() + k;
                 let right = k * rhs.shape().ncols() + j;
-                result[pos] += lhs.store[left] * rhs.store[right];
+                result[pos] += lhs.data[left] * rhs.data[right];
             }
         }
     }

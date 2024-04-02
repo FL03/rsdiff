@@ -17,3 +17,10 @@ impl Iter {
         self.order
     }
 }
+
+pub struct BaseIter<'a, T> {
+    iter: &'a Iter,
+    data: &'a [T],
+    index: usize,
+}
+

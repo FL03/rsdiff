@@ -6,7 +6,6 @@
 extern crate acme_tensor as acme;
 
 use acme::prelude::{IntoShape, Tensor};
-use num::One;
 
 #[test]
 fn test_tensor() {
@@ -18,9 +17,15 @@ fn test_tensor() {
     assert_eq!(a.shape(), b.shape());
     assert_eq!(a.size(), b.size());
     assert_eq!(a.stride(), b.stride());
+}
 
-    let tensor = Tensor::<f64>::one();
-    assert!(tensor.is_scalar());
+#[test]
+fn test_scalar_tensor() {
+    use num::{One, Zero};
+    let one = Tensor::<f64>::one();
+    let zero = Tensor::<f64>::zero();
+    assert!(one.is_scalar());
+    assert!(zero.is_scalar());
 }
 
 #[test]
@@ -47,8 +52,8 @@ fn test_index() {
         .unwrap();
 
     assert_eq!(a[[0, 0]], 0f64);
-    assert_eq!(a[[0, 1]], 1f64);
-    assert_eq!(a[[1, 2]], 5f64);
+    assert_eq!(a[&[0, 1]], 1f64);
+    assert_eq!(a[vec![1, 2]], 5f64);
 }
 
 #[test]
@@ -62,4 +67,18 @@ fn test_higher_dim() {
     assert_eq!(a.size(), b.size());
     assert_eq!(a.stride(), b.stride());
     assert_eq!(a.stride().len(), 4);
+}
+
+#[test]
+fn test_sum() {
+    let shape = (2, 2).into_shape();
+    let a = Tensor::fill(shape, 1f64);
+    assert_eq!(a.sum(), 4.0);
+}
+
+#[test]
+fn test_product() {
+    let shape = (2, 2).into_shape();
+    let a = Tensor::fill(shape, 2f64);
+    assert_eq!(a.product(), 16.0);
 }

@@ -9,7 +9,6 @@ use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{TensorId, TensorKind};
 use crate::shape::{IntoShape, Rank, Shape, Stride};
 
-use acme::prelude::BinaryOp;
 #[cfg(not(feature = "std"))]
 use alloc::vec::{self, Vec};
 use core::iter::Map;
@@ -18,59 +17,60 @@ use core::slice::Iter as SliceIter;
 #[cfg(feature = "std")]
 use std::vec;
 
-pub(crate) fn new<T>(
+pub(crate) fn create_with<T>(
     kind: impl Into<TensorKind>,
     op: impl Into<BackpropOp<T>>,
     shape: impl IntoShape,
-    store: Vec<T>,
+    data: Vec<T>,
 ) -> TensorBase<T> {
     TensorBase {
         id: TensorId::new(),
+        data,
         kind: kind.into(),
         layout: Layout::contiguous(shape),
         op: op.into(),
-        store,
     }
 }
 
-pub(crate) fn from_vec<T>(
+pub(crate) fn from_vec_with_kind<T>(
     kind: impl Into<TensorKind>,
     shape: impl IntoShape,
-    store: Vec<T>,
+    data: Vec<T>,
 ) -> TensorBase<T> {
-    new(kind, BackpropOp::none(), shape, store)
+    create_with(kind, BackpropOp::none(), shape, data)
 }
 
 pub(crate) fn from_vec_with_op<T>(
     kind: impl Into<TensorKind>,
     op: TensorExpr<T>,
     shape: impl IntoShape,
-    store: Vec<T>,
+    data: Vec<T>,
 ) -> TensorBase<T> {
-    new(kind.into(), BackpropOp::new(op), shape, store)
+    create_with(kind.into(), BackpropOp::new(op), shape, data)
 }
 
 #[derive(Clone, Debug, Hash, Ord, PartialOrd)]
 pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
+    pub(crate) data: Vec<T>,
     pub(crate) kind: TensorKind,
     pub(crate) layout: Layout,
     pub(crate) op: BackpropOp<T>,
-    pub(crate) store: Vec<T>,
 }
 
 impl<T> TensorBase<T> {
     pub fn new(kind: TensorKind, shape: impl IntoShape) -> Self {
         let shape = shape.into_shape();
-        let store = Vec::with_capacity(shape.size());
+        let data = Vec::with_capacity(shape.size());
         Self {
             id: TensorId::new(),
+            data,
             kind,
             layout: Layout::contiguous(shape),
             op: BackpropOp::none(),
-            store,
         }
     }
+    /// Create a new tensor from an iterator.
     pub fn from_iter<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = T>,
@@ -81,12 +81,13 @@ impl<T> TensorBase<T> {
     pub fn from_scalar(value: T) -> Self {
         Self {
             id: TensorId::new(),
+            data: vec![value],
             kind: TensorKind::default(),
             layout: Layout::contiguous(()),
             op: None.into(),
-            store: vec![value],
         }
     }
+    /// Create a new tensor from an iterator, with a particular shape.
     pub fn from_shape_iter<I>(shape: impl IntoShape, iter: I) -> Self
     where
         I: IntoIterator<Item = T>,
@@ -94,33 +95,33 @@ impl<T> TensorBase<T> {
         Self::from_shape_vec(shape, Vec::from_iter(iter))
     }
     /// Create a new tensor from a [Vec], with a specified [shape](Shape).
-    pub fn from_shape_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
+    pub fn from_shape_vec(shape: impl IntoShape, data: Vec<T>) -> Self {
         Self {
             id: TensorId::new(),
+            data,
             kind: TensorKind::default(),
             layout: Layout::contiguous(shape),
             op: BackpropOp::none(),
-            store,
         }
     }
     /// Create a new, one-dimensional tensor from a [Vec].
-    pub fn from_vec(store: Vec<T>) -> Self {
-        let shape = Shape::from(store.len());
+    pub fn from_vec(data: Vec<T>) -> Self {
+        let shape = Shape::from(data.len());
         Self {
             id: TensorId::new(),
+            data,
             kind: TensorKind::default(),
             layout: Layout::contiguous(shape),
             op: BackpropOp::none(),
-            store,
         }
     }
     /// Return a reference to the tensor's data.
     pub fn as_slice(&self) -> &[T] {
-        &self.store
+        &self.data
     }
     /// Return a mutable reference to the tensor's data.
     pub fn as_mut_slice(&mut self) -> &mut [T] {
-        &mut self.store
+        &mut self.data
     }
     /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
@@ -135,7 +136,7 @@ impl<T> TensorBase<T> {
                 kind: self.kind,
                 layout: self.layout.clone(),
                 op: BackpropOp::none(),
-                store: self.store.clone(),
+                data: self.data.clone(),
             }
         }
     }
@@ -152,12 +153,12 @@ impl<T> TensorBase<T> {
     /// Returns the data at the specified index.
     pub fn get(&self, index: impl AsRef<[usize]>) -> Option<&T> {
         let i = self.layout.index(index);
-        self.store.get(i)
+        self.data().get(i)
     }
     /// Returns a mutable reference to the data at the specified index.
     pub fn get_mut(&mut self, index: impl AsRef<[usize]>) -> Option<&mut T> {
         let i = self.layout.index(index);
-        self.store.get_mut(i)
+        self.data_mut().get_mut(i)
     }
     /// Returns the unique identifier of the tensor.
     pub const fn id(&self) -> TensorId {
@@ -169,7 +170,7 @@ impl<T> TensorBase<T> {
     }
     /// Returns true if the tensor is empty.
     pub fn is_empty(&self) -> bool {
-        self.store.is_empty()
+        self.data().is_empty()
     }
     /// A function to check if the tensor is a scalar
     pub fn is_scalar(&self) -> bool {
@@ -177,7 +178,7 @@ impl<T> TensorBase<T> {
     }
     /// A function to check if the tensor is a variable
     pub const fn is_variable(&self) -> bool {
-        self.kind.is_variable()
+        self.kind().is_variable()
     }
     /// Return an iterator over the tensor
     pub fn iter(&self) -> StrideIter<'_, T> {
@@ -189,12 +190,12 @@ impl<T> TensorBase<T> {
     }
     /// Get a reference to the last element of the tensor
     pub fn last(&self) -> Option<&T> {
-        let pos = self.layout.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
+        let pos = self.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
         self.get(pos)
     }
     /// Get a mutable reference to the last element of the tensor
     pub fn last_mut(&mut self) -> Option<&mut T> {
-        let pos = self.layout.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
+        let pos = self.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
         self.get_mut(pos)
     }
     /// Get a reference to the [Layout] of the tensor
@@ -207,19 +208,19 @@ impl<T> TensorBase<T> {
     }
     /// Get an owned reference to the [Rank] of the tensor
     pub fn rank(&self) -> Rank {
-        self.layout.shape().rank()
+        self.shape().rank()
     }
     /// An owned reference of the tensors [Shape]
     pub fn shape(&self) -> &Shape {
-        self.layout.shape()
+        self.layout().shape()
     }
     /// Returns the number of elements in the tensor.
     pub fn size(&self) -> usize {
-        self.layout.size()
+        self.layout().size()
     }
     /// Get a reference to the stride of the tensor
     pub fn stride(&self) -> &Stride {
-        self.layout.stride()
+        self.layout().stride()
     }
     /// Create an iterator over the tensor
     pub fn strided(&self) -> StrideIter<'_, T> {
@@ -228,43 +229,22 @@ impl<T> TensorBase<T> {
     /// Turn the tensor into a scalar
     /// If the tensor has a rank greater than 0, this will return an error
     pub fn to_scalar(&self) -> TensorResult<&T> {
-        if self.is_scalar() {
-            Ok(self.first().unwrap())
-        } else {
-            Err(TensorError::NotScalar)
+        if !self.is_scalar() {
+            return Err(TensorError::NotScalar);
         }
+        Ok(self.first().unwrap())
     }
     /// Turn the tensor into a one-dimensional vector
     pub fn to_vec(&self) -> Vec<T>
     where
         T: Clone,
     {
-        self.store.to_vec()
+        self.data.to_vec()
     }
     /// Changes the kind of tensor to a variable
     pub fn variable(mut self) -> Self {
         self.kind = TensorKind::Variable;
         self
-    }
-
-    pub fn apply_binary<F>(&self, other: &Self, op: BinaryOp, f: F) -> Self
-    where
-        F: Fn(&T, &T) -> T,
-        T: Clone,
-    {
-        let store = self
-            .data()
-            .iter()
-            .zip(other.data().iter())
-            .map(|(a, b)| f(a, b))
-            .collect();
-        TensorBase {
-            id: TensorId::new(),
-            kind: self.kind(),
-            layout: self.layout().clone(),
-            op: BackpropOp::binary(self.clone(), other.clone(), op),
-            store,
-        }
     }
     ///
     pub unsafe fn with_layout(mut self, layout: Layout) -> Self {
@@ -292,13 +272,13 @@ where
     }
 
     pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
-        let store = self.store.iter().collect();
+        let store = self.data.iter().collect();
         TensorBase {
             id: self.id,
             kind: self.kind,
             layout: self.layout.clone(),
             op: self.op.view(),
-            store,
+            data: store,
         }
     }
 }
@@ -306,15 +286,15 @@ where
 #[allow(dead_code)]
 impl<T> TensorBase<T> {
     pub(crate) fn data(&self) -> &Vec<T> {
-        &self.store
+        &self.data
     }
 
     pub(crate) fn data_mut(&mut self) -> &mut Vec<T> {
-        &mut self.store
+        &mut self.data
     }
 
     pub(crate) fn get_by_index(&self, index: usize) -> Option<&T> {
-        self.store.get(index)
+        self.data.get(index)
     }
 
     pub(crate) fn map<'a, F>(&'a self, f: F) -> Map<SliceIter<'a, T>, F>
@@ -322,7 +302,7 @@ impl<T> TensorBase<T> {
         F: FnMut(&'a T) -> T,
         T: 'a + Clone,
     {
-        self.store.iter().map(f)
+        self.data.iter().map(f)
     }
 
     pub(crate) fn mapv<F>(&self, f: F) -> TensorBase<T>
@@ -330,13 +310,13 @@ impl<T> TensorBase<T> {
         F: Fn(T) -> T,
         T: Copy,
     {
-        let store = self.store.iter().copied().map(f).collect();
+        let store = self.data.iter().copied().map(f).collect();
         TensorBase {
             id: TensorId::new(),
             kind: self.kind,
             layout: self.layout.clone(),
             op: self.op.clone(),
-            store,
+            data: store,
         }
     }
 }
@@ -349,7 +329,7 @@ where
 
     fn index(&self, index: Idx) -> &Self::Output {
         let i = self.layout().index(index);
-        &self.store[i]
+        &self.data[i]
     }
 }
 
@@ -359,7 +339,7 @@ where
 {
     fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
         let i = self.layout().index(index);
-        &mut self.store[i]
+        &mut self.data[i]
     }
 }
 
@@ -370,12 +350,6 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.layout == other.layout && self.store == other.store
-    }
-}
-
-impl<T> FromIterator<T> for TensorBase<T> {
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        Self::from_vec(Vec::from_iter(iter))
+        self.layout == other.layout && self.data == other.data
     }
 }

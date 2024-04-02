@@ -18,7 +18,7 @@ where
             kind: self.kind(),
             layout,
             op: op.into(),
-            store: self.store.clone(),
+            data: self.data.clone(),
         }
     }
 
@@ -36,7 +36,7 @@ where
 
         let layout = self.layout().clone().swap_axes(swap, with);
         let shape = self.layout.shape();
-        let mut data = self.store.to_vec();
+        let mut data = self.data.to_vec();
 
         for i in 0..shape[swap] {
             for j in 0..shape[with] {
@@ -51,7 +51,7 @@ where
             kind: self.kind.clone(),
             layout,
             op: op.into(),
-            store: data.clone(),
+            data: data.clone(),
         }
     }
     /// Transpose the tensor.
@@ -64,7 +64,7 @@ where
             kind: self.kind(),
             layout,
             op: op.into(),
-            store: self.data().clone(),
+            data: self.data().clone(),
         }
     }
 

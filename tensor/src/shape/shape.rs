@@ -54,11 +54,14 @@ impl Shape {
     pub fn diagonalize(&self) -> Shape {
         Self::new(vec![self.size()])
     }
+    pub fn get_final_position(&self) -> Vec<usize> {
+        self.iter().map(|&dim| dim - 1).collect()
+    }
     /// Inserts a new dimension along the given [Axis].
     pub fn insert(&mut self, index: Axis, dim: usize) {
         self.0.insert(*index, dim)
     }
-
+    /// Inserts a new dimension along the given [Axis].
     pub fn insert_axis(&self, index: Axis) -> Self {
         let mut shape = self.clone();
         shape.insert(index, 1);
@@ -89,7 +92,7 @@ impl Shape {
     /// The number of columns in the shape.
     pub fn ncols(&self) -> usize {
         if self.len() >= 2 {
-            self.0[1]
+            self[1]
         } else if self.len() == 1 {
             1
         } else {
@@ -99,12 +102,12 @@ impl Shape {
     /// The number of rows in the shape.
     pub fn nrows(&self) -> usize {
         if self.len() >= 1 {
-            *self.0.first().unwrap()
+            self[0]
         } else {
             0
         }
     }
-
+    /// Removes and returns the last dimension of the shape.
     pub fn pop(&mut self) -> Option<usize> {
         self.0.pop()
     }
@@ -247,66 +250,6 @@ impl SwapAxes for Shape {
     }
 }
 
-impl From<()> for Shape {
-    fn from(_: ()) -> Self {
-        Self::default()
-    }
-}
-
-impl From<usize> for Shape {
-    fn from(dim: usize) -> Self {
-        Self(vec![dim])
-    }
-}
-
-impl From<Vec<usize>> for Shape {
-    fn from(shape: Vec<usize>) -> Self {
-        Self(shape)
-    }
-}
-
-impl From<&[usize]> for Shape {
-    fn from(shape: &[usize]) -> Self {
-        Self(shape.to_vec())
-    }
-}
-
-impl From<(usize,)> for Shape {
-    fn from(shape: (usize,)) -> Self {
-        Self(vec![shape.0])
-    }
-}
-
-impl From<(usize, usize)> for Shape {
-    fn from(shape: (usize, usize)) -> Self {
-        Self(vec![shape.0, shape.1])
-    }
-}
-
-impl From<(usize, usize, usize)> for Shape {
-    fn from(shape: (usize, usize, usize)) -> Self {
-        Self(vec![shape.0, shape.1, shape.2])
-    }
-}
-
-impl From<(usize, usize, usize, usize)> for Shape {
-    fn from(shape: (usize, usize, usize, usize)) -> Self {
-        Self(vec![shape.0, shape.1, shape.2, shape.3])
-    }
-}
-
-impl From<(usize, usize, usize, usize, usize)> for Shape {
-    fn from(shape: (usize, usize, usize, usize, usize)) -> Self {
-        Self(vec![shape.0, shape.1, shape.2, shape.3, shape.4])
-    }
-}
-
-impl From<(usize, usize, usize, usize, usize, usize)> for Shape {
-    fn from(shape: (usize, usize, usize, usize, usize, usize)) -> Self {
-        Self(vec![shape.0, shape.1, shape.2, shape.3, shape.4, shape.5])
-    }
-}
-
 impl FromIterator<usize> for Shape {
     fn from_iter<I: IntoIterator<Item = usize>>(iter: I) -> Self {
         Self(Vec::from_iter(iter))
@@ -410,6 +353,68 @@ impl ops::Index<ops::RangeToInclusive<usize>> for Shape {
 unsafe impl Send for Shape {}
 
 unsafe impl Sync for Shape {}
+
+
+impl From<()> for Shape {
+    fn from(_: ()) -> Self {
+        Self::default()
+    }
+}
+
+impl From<usize> for Shape {
+    fn from(dim: usize) -> Self {
+        Self(vec![dim])
+    }
+}
+
+impl From<Vec<usize>> for Shape {
+    fn from(shape: Vec<usize>) -> Self {
+        Self(shape)
+    }
+}
+
+impl From<&[usize]> for Shape {
+    fn from(shape: &[usize]) -> Self {
+        Self(shape.to_vec())
+    }
+}
+
+impl From<(usize,)> for Shape {
+    fn from(shape: (usize,)) -> Self {
+        Self(vec![shape.0])
+    }
+}
+
+impl From<(usize, usize)> for Shape {
+    fn from(shape: (usize, usize)) -> Self {
+        Self(vec![shape.0, shape.1])
+    }
+}
+
+impl From<(usize, usize, usize)> for Shape {
+    fn from(shape: (usize, usize, usize)) -> Self {
+        Self(vec![shape.0, shape.1, shape.2])
+    }
+}
+
+impl From<(usize, usize, usize, usize)> for Shape {
+    fn from(shape: (usize, usize, usize, usize)) -> Self {
+        Self(vec![shape.0, shape.1, shape.2, shape.3])
+    }
+}
+
+impl From<(usize, usize, usize, usize, usize)> for Shape {
+    fn from(shape: (usize, usize, usize, usize, usize)) -> Self {
+        Self(vec![shape.0, shape.1, shape.2, shape.3, shape.4])
+    }
+}
+
+impl From<(usize, usize, usize, usize, usize, usize)> for Shape {
+    fn from(shape: (usize, usize, usize, usize, usize, usize)) -> Self {
+        Self(vec![shape.0, shape.1, shape.2, shape.3, shape.4, shape.5])
+    }
+}
+
 
 // macro_rules! tuple_vec {
 //     ($($n:tt),*) => {

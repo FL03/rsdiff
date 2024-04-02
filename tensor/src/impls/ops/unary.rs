@@ -15,7 +15,7 @@ where
 
     fn neg(self) -> Self::Output {
         let shape = self.shape().clone();
-        let store = self.data().iter().copied().map(|a| -a).collect();
+        let store = self.data().iter().map(|a| (*a).neg()).collect();
         let op = TensorExpr::unary(self, UnaryOp::Neg);
         from_vec_with_op(false, op, shape, store)
     }
@@ -28,8 +28,8 @@ where
     type Output = TensorBase<T>;
 
     fn neg(self) -> Self::Output {
-        let shape = self.shape().clone();
-        let store = self.data().iter().copied().map(|a| -a).collect();
+        let shape = self.shape();
+        let store = self.data().iter().map(|a| (*a).neg()).collect();
         let op = TensorExpr::unary(self.clone(), UnaryOp::Neg);
         from_vec_with_op(false, op, shape, store)
     }
@@ -43,7 +43,7 @@ where
 
     fn not(self) -> Self::Output {
         let shape = self.shape().clone();
-        let store = self.data().iter().copied().map(|a| !a).collect();
+        let store = self.data().iter().map(|a| (*a).not()).collect();
         let op = TensorExpr::unary(self, UnaryOp::Not);
         from_vec_with_op(false, op, shape, store)
     }
@@ -57,7 +57,7 @@ where
 
     fn not(self) -> Self::Output {
         let shape = self.shape();
-        let store = self.store.iter().copied().map(|a| !a).collect();
+        let store = self.data.iter().copied().map(|a| !a).collect();
         let op = TensorExpr::unary(self.clone(), UnaryOp::Not);
         from_vec_with_op(false, op, shape, store)
     }
@@ -67,7 +67,7 @@ macro_rules! impl_unary_op {
     ($variant:ident, $method:ident) => {
         pub fn $method(&self) -> Self {
             let shape = self.shape();
-            let store = self.store.iter().copied().map(|v| v.$method()).collect();
+            let store = self.data().iter().copied().map(|v| v.$method()).collect();
             let op = TensorExpr::unary(self.clone(), UnaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
@@ -91,7 +91,7 @@ where
         T: Scalar<Real = T>,
     {
         let shape = self.shape();
-        let store = self.store.iter().copied().map(|v| v.abs()).collect();
+        let store = self.data.iter().copied().map(|v| v.abs()).collect();
         let op = TensorExpr::unary(self.clone(), UnaryOp::Abs);
         from_vec_with_op(false, op, shape, store)
     }

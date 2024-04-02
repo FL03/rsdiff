@@ -49,8 +49,8 @@ impl<'a, T> From<&'a TensorBase<T>> for StrideIter<'a, T> {
 pub struct Strided<'a> {
     next: Option<usize>,
     position: Vec<usize>,
-    pub(crate) shape: &'a Shape,
-    pub(crate) stride: &'a Stride,
+    shape: &'a Shape,
+    stride: &'a Stride,
 }
 
 impl<'a> Strided<'a> {
@@ -70,8 +70,9 @@ impl<'a> Strided<'a> {
         }
     }
 
-    pub fn index(&self, index: &[usize]) -> usize {
+    pub(crate) fn index(&self, index: impl AsRef<[usize]>) -> usize {
         index
+            .as_ref()
             .iter()
             .zip(self.stride.iter())
             .map(|(i, s)| i * s)
@@ -81,33 +82,15 @@ impl<'a> Strided<'a> {
 
 impl<'a> DoubleEndedIterator for Strided<'a> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        
-        let scope = match self.next {
-            None => return None,
-            Some(storage_index) => storage_index,
+        let (pos, _idx) = if let Some(item) = self.next() {
+            item
+        } else {
+            return None;
         };
-        let mut updated = false;
-        let mut next = scope;
-        for ((pos, max_i), stride) in self
-            .position
-            .iter_mut()
-            .zip(self.shape.iter())
-            .zip(self.stride.iter())
-        {
-            let next_i = *pos - 1;
-            if next_i > *max_i {
-                *pos = next_i;
-                updated = true;
-                next -= stride;
-                break;
-            } else {
-                next += *pos * stride;
-                *pos = 0
-            }
-        }
-        self.next = if updated { Some(next) } else { None };
-        println!("{:?}", &self.position);
-        Some((self.position.clone(), scope))
+        let position = self.shape.iter().zip(pos.iter()).map(|(s, p)| s - p).collect();
+        let scope = self.index(&position);
+        println!("{:?}", &position);
+        Some((position, scope))
         // unimplemented!()
     }
 }

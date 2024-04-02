@@ -10,7 +10,7 @@ use crate::tensor::{self, TensorBase};
 use acme::prelude::UnaryOp;
 use num::traits::{Num, Signed};
 
-pub fn inverse<T>(tensor: &TensorBase<T>) -> TensorResult<TensorBase<T>>
+fn inverse_impl<T>(tensor: &TensorBase<T>) -> TensorResult<TensorBase<T>>
 where
     T: Copy + Num + PartialOrd + Signed,
 {
@@ -88,7 +88,7 @@ where
         let rank = *self.rank();
 
         let store = (0..rank).map(|i| self[vec![i; rank]]).collect::<Vec<T>>();
-        tensor::from_vec(false, self.shape().diagonalize(), store)
+        tensor::from_vec_with_kind(false, self.shape().diagonalize(), store)
     }
 
     pub fn det(&self) -> Result<T, TensorError> {
@@ -96,12 +96,12 @@ where
             return Err(ShapeError::InvalidShape.into());
         }
         let shape = self.shape();
-        let n = *shape.first().unwrap();
+        let n = shape.nrows();
         if n == 1 {
             return Ok(T::zero());
         }
         if n == 2 {
-            let res =  self[vec![0, 0]] * self[vec![1, 1]] - self[vec![0, 1]] * self[vec![1, 0]];
+            let res = self[vec![0, 0]] * self[vec![1, 1]] - self[vec![0, 1]] * self[vec![1, 0]];
             return Ok(res);
         }
         let mut det = T::zero();
@@ -119,14 +119,14 @@ where
                     k += 1;
                 }
             }
-            let sub_tensor = tensor::from_vec(false, cur_shape.clone(), sub);
+            let sub_tensor = tensor::from_vec_with_kind(false, cur_shape.clone(), sub);
             let sign = if i % 2 == 0 { T::one() } else { -T::one() };
             det = det + sign * self[vec![0, i]] * sub_tensor.det()?;
         }
         Ok(det)
     }
     pub fn inv(&self) -> TensorResult<Self> {
-        inverse(self)
+        inverse_impl(self)
     }
 }
 
@@ -144,7 +144,7 @@ where
             for j in 0..other.shape()[1] {
                 for k in 0..self.shape()[1] {
                     result[i * other.shape()[1] + j] +=
-                        self.store[i * self.shape()[1] + k] * other.store[k * other.shape()[1] + j];
+                        self.data[i * self.shape()[1] + k] * other.data[k * other.shape()[1] + j];
                 }
             }
         }

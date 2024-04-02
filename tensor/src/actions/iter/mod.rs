@@ -48,7 +48,7 @@ mod tests {
 
     #[test]
     fn test_strided() {
-        let shape = Shape::from_iter([2, 2]);
+        let shape = Shape::from_iter([2, 2, 2, 2]);
         let n = shape.size();
         let exp = Vec::linspace(0f64, n as f64, n);
         let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
@@ -58,7 +58,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "not implemented"]
     fn test_strided_rev() {
         let shape = Shape::from_iter([2, 2]);
         let n = shape.size();

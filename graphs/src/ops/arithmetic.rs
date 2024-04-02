@@ -2,7 +2,7 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::BinaryOperation;
+use super::{BinaryOperation, Operator};
 use num::traits::NumOps;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -24,6 +24,12 @@ macro_rules! operator {
                 stringify!($op).to_lowercase()
             }
         }
+
+        impl Operator for $op {
+            fn name(&self) -> String {
+                self.name()
+            }
+        }
     };
     ($($op:ident),*) => {
         $(
@@ -34,10 +40,7 @@ macro_rules! operator {
 }
 
 macro_rules! operators {
-    (class $group:ident; {$($op:ident: $variant:ident),*}) => {
-        $(
-            operator!($op);
-        )*
+    ($group:ident; {$($variant:ident: $op:ident => $method:ident),*}) => {
         #[derive(
             Clone,
             Copy,
@@ -65,11 +68,35 @@ macro_rules! operators {
                 $variant($op),
             )*
         }
+
+        impl $group {
+            $(
+                pub fn $method() -> Self {
+                    Self::$variant($op::new())
+                }
+            )*
+
+            pub fn name(&self) -> String {
+                match self {
+                    $(
+                        $group::$variant(op) => op.name(),
+                    )*
+                }
+            }
+        }
     };
 }
 
 macro_rules! impl_binary_op {
+    ($(($op:ident, $bound:ident, $operator:tt)),*) => {
+        $(
+            impl_binary_op!($op, $bound, $operator);
+        )*
+        
+    };
     ($op:ident, $bound:ident, $operator:tt) => {
+        operator!($op);
+
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
             A: core::ops::$bound<B, Output = C>,
@@ -82,6 +109,8 @@ macro_rules! impl_binary_op {
         }
     };
     (expr $op:ident, $bound:ident, $exp:expr) => {
+        operator!($op);
+
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
             A: core::ops::$bound<B, Output = C>,
@@ -95,45 +124,21 @@ macro_rules! impl_binary_op {
     };
 }
 
-// operator!(Addition, Division, Multiplication, Subtraction);
-operators!(class Arithmetic; {Addition: Add, Division: Div, Multiplication: Mul, Remainder: Rem, Subtraction: Sub});
+operators!(Arithmetic; {Add: Addition => add, Div: Division => div, Mul: Multiplication => mul, Rem: Remainder => rem, Sub: Subtraction => sub});
 
-impl_binary_op!(Addition, Add, +);
+impl_binary_op!((Addition, Add, +), (Division, Div, /), (Multiplication, Mul, *), (Remainder, Rem, %), (Subtraction, Sub, -));
 
-impl_binary_op!(Division, Div, /);
-
-impl_binary_op!(Multiplication, Mul, *);
-
-impl_binary_op!(Remainder, Rem, %);
-
-impl_binary_op!(Subtraction, Sub, -);
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {
         op
     }
 
-    pub fn add() -> Self {
-        Self::Add(Addition::new())
-    }
-
-    pub fn div() -> Self {
-        Self::Div(Division::new())
-    }
-
-    pub fn mul() -> Self {
-        Self::Mul(Multiplication::new())
-    }
-
-    pub fn sub() -> Self {
-        Self::Sub(Subtraction::new())
-    }
-
-    pub fn op<A, B, C>(&self) -> Box<dyn BinaryOperation<A, B, Output = C>>
+    pub fn into_op<A, B, C>(self) -> Box<dyn BinaryOperation<A, B, Output = C>>
     where
         A: NumOps<B, C>,
     {
-        match self.clone() {
+        match self {
             Arithmetic::Add(op) => Box::new(op),
             Arithmetic::Div(op) => Box::new(op),
             Arithmetic::Mul(op) => Box::new(op),
@@ -142,14 +147,11 @@ impl Arithmetic {
         }
     }
 
-    pub fn name(&self) -> String {
-        match self {
-            Arithmetic::Add(op) => op.name(),
-            Arithmetic::Div(op) => op.name(),
-            Arithmetic::Mul(op) => op.name(),
-            Arithmetic::Rem(op) => op.name(),
-            Arithmetic::Sub(op) => op.name(),
-        }
+    pub fn op<A, B, C>(&self) -> Box<dyn BinaryOperation<A, B, Output = C>>
+    where
+        A: NumOps<B, C>,
+    {
+        self.into_op()
     }
 
     pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C

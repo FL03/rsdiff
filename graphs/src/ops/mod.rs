@@ -10,14 +10,44 @@ pub use self::{arithmetic::*, kinds::*};
 pub(crate) mod arithmetic;
 pub(crate) mod kinds;
 
-pub trait BinaryOperation<A, B> {
+pub trait BinaryOperation<A, B = A> {
     type Output;
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output;
 }
 
-pub trait Operator {
-    type Output;
+impl<S, A, B, C> BinaryOperation<A, B> for S
+where
+    S: Fn(A, B) -> C,
+{
+    type Output = C;
 
-    fn kind(&self) -> String;
+    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
+        self(lhs, rhs)
+    }
+}
+
+impl<A, B, C> BinaryOperation<A, B> for Box<dyn BinaryOperation<A, B, Output = C>> {
+    type Output = C;
+
+    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
+        self.as_ref().eval(lhs, rhs)
+    }
+}
+
+pub trait Operator {
+    fn boxed(self) -> Box<dyn Operator>
+    where
+        Self: Sized + 'static,
+    {
+        Box::new(self)
+    }
+    fn name(&self) -> String;
+}
+
+impl Operator for Box<dyn Operator> {
+
+    fn name(&self) -> String {
+        self.as_ref().name()
+    }
 }

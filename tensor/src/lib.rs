@@ -40,6 +40,7 @@ mod impls {
     }
     mod create;
     mod grad;
+    mod iter;
     mod linalg;
     mod num;
     mod reshape;

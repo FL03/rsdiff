@@ -114,24 +114,42 @@ where
                         }
                         _ => todo!(),
                     },
+                    TensorExpr::BinaryScalar(lhs, rhs, kind) => match kind {
+                        BinaryOp::Add => {
+                            *entry!(store, lhs) += &grad;
+                        }
+                        BinaryOp::Div => {
+                            *entry!(store, lhs) += &grad / *rhs;
+                        }
+                        BinaryOp::Mul => {
+                            *entry!(store, lhs) += &grad * *rhs;
+                        }
+                        BinaryOp::Pow => {
+                            *entry!(store, lhs) += &grad * *rhs * lhs.pow(*rhs - T::one());
+                        }
+                        BinaryOp::Sub => {
+                            *entry!(store, lhs) += &grad;
+                        }
+                        _ => todo!(),
+                    },
                     TensorExpr::Unary(val, kind) => match kind {
                         UnaryOp::Cos => {
-                            *entry!(store, val) -= &grad * val.clone().sin();
+                            *entry!(store, val) -= &grad * val.sin();
                         }
                         UnaryOp::Cosh => {
-                            *entry!(store, val) += &grad * val.clone().sinh();
+                            *entry!(store, val) += &grad * val.sinh();
                         }
                         UnaryOp::Exp => {
-                            *entry!(store, val) += &grad * val.clone().exp();
+                            *entry!(store, val) += &grad * val.exp();
                         }
                         UnaryOp::Neg => {
                             *entry!(store, val) -= &grad;
                         }
                         UnaryOp::Sin => {
-                            *entry!(store, val) += &grad * val.clone().cos();
+                            *entry!(store, val) += &grad * val.cos();
                         }
                         UnaryOp::Sinh => {
-                            *entry!(store, val) += &grad * val.clone().cosh();
+                            *entry!(store, val) += &grad * val.cosh();
                         }
                         UnaryOp::Sqrt => {
                             *entry!(store, val) +=

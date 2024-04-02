@@ -86,6 +86,7 @@ impl Layout {
         }
         true
     }
+    /// Determine if the current layout is square or not.
     pub fn is_square(&self) -> bool {
         self.shape.is_square()
     }
@@ -125,16 +126,16 @@ impl Layout {
         self.stride.reverse();
         self
     }
-
-    pub fn shape(&self) -> &Shape {
+    /// Get a reference to the shape of the layout.
+    pub const fn shape(&self) -> &Shape {
         &self.shape
     }
-
+    /// Get a reference to the number of elements in the layout.
     pub fn size(&self) -> usize {
         self.shape.size()
     }
-
-    pub fn stride(&self) -> &Stride {
+    /// Get a reference to the stride of the layout.
+    pub const fn stride(&self) -> &Stride {
         &self.stride
     }
 
@@ -146,14 +147,11 @@ impl Layout {
         }
     }
 
-    pub fn transpose(&self, a: Axis, b: Axis) -> Layout {
-        let shape = self.shape.swap_axes(a, b);
-        let stride = shape.stride_contiguous();
-        Layout {
-            offset: self.offset,
-            shape,
-            stride,
-        }
+    pub fn transpose(&self) -> Layout {
+        let mut layout = self.clone();
+        layout.shape.reverse();
+        layout.stride.reverse();
+        layout
     }
 
     pub fn with_offset(mut self, offset: usize) -> Self {

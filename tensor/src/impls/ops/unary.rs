@@ -56,8 +56,8 @@ where
     type Output = TensorBase<T>;
 
     fn not(self) -> Self::Output {
-        let shape = self.shape().clone();
-        let store = self.data().iter().copied().map(|a| !a).collect();
+        let shape = self.shape();
+        let store = self.store.iter().copied().map(|a| !a).collect();
         let op = TensorExpr::unary(self.clone(), UnaryOp::Not);
         from_vec_with_op(false, op, shape, store)
     }
@@ -65,10 +65,10 @@ where
 
 macro_rules! impl_unary_op {
     ($variant:ident, $method:ident) => {
-        pub fn $method(self) -> Self {
-            let shape = self.shape().clone();
-            let store = self.store.iter().map(|v| v.$method()).collect();
-            let op = TensorExpr::unary(self, UnaryOp::$variant);
+        pub fn $method(&self) -> Self {
+            let shape = self.shape();
+            let store = self.store.iter().copied().map(|v| v.$method()).collect();
+            let op = TensorExpr::unary(self.clone(), UnaryOp::$variant);
             from_vec_with_op(false, op, shape, store)
         }
     };
@@ -86,13 +86,13 @@ impl<T> TensorBase<T>
 where
     T: Scalar,
 {
-    pub fn abs(self) -> TensorBase<<T as Scalar>::Real>
+    pub fn abs(&self) -> TensorBase<<T as Scalar>::Real>
     where
         T: Scalar<Real = T>,
     {
-        let shape = self.shape().clone();
+        let shape = self.shape();
         let store = self.store.iter().copied().map(|v| v.abs()).collect();
-        let op = TensorExpr::unary(self, UnaryOp::Abs);
+        let op = TensorExpr::unary(self.clone(), UnaryOp::Abs);
         from_vec_with_op(false, op, shape, store)
     }
 

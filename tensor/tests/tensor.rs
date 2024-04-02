@@ -6,6 +6,7 @@
 extern crate acme_tensor as acme;
 
 use acme::prelude::{IntoShape, Tensor};
+use num::One;
 
 #[test]
 fn test_tensor() {
@@ -17,6 +18,24 @@ fn test_tensor() {
     assert_eq!(a.shape(), b.shape());
     assert_eq!(a.size(), b.size());
     assert_eq!(a.stride(), b.stride());
+
+    let tensor = Tensor::<f64>::one();
+    assert!(tensor.is_scalar());
+}
+
+#[test]
+fn test_first_and_last() {
+    let shape = (3, 3);
+    let tensor = Tensor::linspace(0f64, 9f64, 9).reshape(shape).unwrap();
+
+    assert_eq!(tensor.first(), Some(&0f64));
+    assert_eq!(tensor.last(), Some(&8f64));
+
+    let shape = (3, 3, 1);
+    let tensor = Tensor::linspace(0f64, 9f64, 9).reshape(shape).unwrap();
+
+    assert_eq!(tensor.first(), Some(&0f64));
+    assert_eq!(tensor.last(), Some(&8f64));
 }
 
 #[test]

@@ -110,11 +110,11 @@ fn test_complex_expr() {
     let a = Tensor::<f64>::ones(shape).variable();
     let b = Tensor::fill(shape, 2f64).variable();
     let c = Tensor::fill(shape, 3f64).variable();
-    let res = (&a + &b) * c.clone().sin() + &b;
+    let res = (&a + &b) * c.sin() + &b;
 
     let grad = res.grad().unwrap();
 
-    assert_eq!(grad[&a.id()], c.clone().sin());
-    assert_eq!(grad[&b.id()], c.clone().sin() + 1f64);
+    assert_eq!(grad[&a.id()], c.sin());
+    assert_eq!(grad[&b.id()], c.sin() + 1f64);
     assert_eq!(grad[&c.id()], (&a + &b) * c.cos());
 }

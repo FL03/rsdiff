@@ -35,7 +35,7 @@ fn test_transpose() {
     let a = Tensor::<f64>::linspace(0f64, 6f64, 6).with_shape(shape);
     let at = a.t();
 
-    let exp = Tensor::from_vec(false, None, (3, 2), vec![0.0, 3.0, 1.0, 4.0, 2.0, 5.0]);
+    let exp = Tensor::from_shape_vec((3, 2), vec![0.0, 3.0, 1.0, 4.0, 2.0, 5.0]);
     assert_ne!(&a, &at);
     assert_eq!(at.shape(), &Shape::new(vec![3, 2]));
     for i in 0..shape.0 {

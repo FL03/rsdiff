@@ -54,9 +54,9 @@ fn test_sub() {
 #[test]
 fn test_trig() {
     let a = Tensor::<f64>::ones((2, 2));
-    let b = a.clone().sin();
+    let b = a.sin();
     let c = a.cos();
 
-    assert_eq!(b[&[0, 0]], 1_f64.sin());
-    assert_eq!(c[&[0, 0]], 1_f64.cos());
+    assert_eq!(b[[0, 0]], 1_f64.sin());
+    assert_eq!(c[[0, 0]], 1_f64.cos());
 }

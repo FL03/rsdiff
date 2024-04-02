@@ -33,9 +33,9 @@ macro_rules! assert_diff {
 fn test_inverse() {
     let shape = Shape::from((2, 2));
     let arr: Vec<f64> = vec![1.0, 4.0, 3.0, 2.0];
-    let tensor = Tensor::from_vec(false, None, shape.clone(), arr);
+    let tensor = Tensor::from_shape_vec(shape.clone(), arr);
     let inv_arr = vec![-0.2, 0.4, 0.3, -0.1];
-    let exp = Tensor::from_vec(false, None, shape.clone(), inv_arr);
+    let exp = Tensor::from_shape_vec(shape.clone(), inv_arr);
 
     let inverse = tensor.inv().unwrap();
 

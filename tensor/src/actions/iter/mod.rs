@@ -5,8 +5,9 @@
 //! # Iter
 //!
 //!
-pub use self::{iterator::*, strides::*, utils::*};
+pub use self::{indexed::*, iterator::*, strides::*, utils::*};
 
+pub(crate) mod indexed;
 pub(crate) mod iterator;
 pub(crate) mod strides;
 
@@ -50,13 +51,22 @@ mod tests {
         let shape = Shape::from_iter([2, 2]);
         let n = shape.size();
         let exp = Vec::linspace(0f64, n as f64, n);
-        let _rev = exp.iter().rev().copied().collect::<Vec<_>>();
         let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
         for (elem, val) in tensor.strided().zip(exp.iter()) {
             assert_eq!(elem, val);
         }
-        // for (i, elem) in tensor.strided().rev().enumerate() {
-        //     assert_eq!(elem, &rev[i]);
-        // }
+    }
+
+    #[test]
+    #[ignore = "not implemented"]
+    fn test_strided_rev() {
+        let shape = Shape::from_iter([2, 2]);
+        let n = shape.size();
+        let exp = Vec::linspace(0f64, n as f64, n);
+        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
+
+        for (i, j) in tensor.strided().rev().zip(exp.iter().rev()) {
+            assert_eq!(i, j);
+        }
     }
 }

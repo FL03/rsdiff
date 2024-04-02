@@ -4,9 +4,10 @@
 */
 use crate::actions::iter::StrideIter;
 use crate::data::Layout;
+use crate::error::{TensorError, TensorResult};
 use crate::ops::{BackpropOp, TensorExpr};
-use crate::shape::{IntoShape, Rank, Shape, Stride};
 use crate::prelude::{TensorId, TensorKind};
+use crate::shape::{IntoShape, Rank, Shape, Stride};
 
 use acme::prelude::BinaryOp;
 #[cfg(not(feature = "std"))]
@@ -49,8 +50,7 @@ pub(crate) fn from_vec_with_op<T>(
     new(kind.into(), BackpropOp::new(op), shape, store)
 }
 
-#[derive(Clone, Debug)]
-// #[derive(Clone, Debug, Eq, Hash, Ord, PartialOrd)]
+#[derive(Clone, Debug, Hash, Ord, PartialOrd)]
 pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) kind: TensorKind,
@@ -71,6 +71,12 @@ impl<T> TensorBase<T> {
             store,
         }
     }
+    pub fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Self::from_vec(Vec::from_iter(iter))
+    }
     /// Create a new tensor from a scalar value.
     pub fn from_scalar(value: T) -> Self {
         Self {
@@ -81,26 +87,14 @@ impl<T> TensorBase<T> {
             store: vec![value],
         }
     }
-
-    pub fn from_vec(
-        kind: impl Into<TensorKind>,
-        op: impl Into<BackpropOp<T>>,
-        shape: impl IntoShape,
-        store: Vec<T>,
-    ) -> Self {
-        Self {
-            id: TensorId::new(),
-            kind: kind.into(),
-            layout: Layout::contiguous(shape),
-            op: op.into(),
-            store,
-        }
+    pub fn from_shape_iter<I>(shape: impl IntoShape, iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Self::from_shape_vec(shape, Vec::from_iter(iter))
     }
-
-    pub fn from_shape_vec(
-        shape: impl IntoShape,
-        store: Vec<T>,
-    ) -> Self {
+    /// Create a new tensor from a [Vec], with a specified [shape](Shape).
+    pub fn from_shape_vec(shape: impl IntoShape, store: Vec<T>) -> Self {
         Self {
             id: TensorId::new(),
             kind: TensorKind::default(),
@@ -109,11 +103,22 @@ impl<T> TensorBase<T> {
             store,
         }
     }
-    /// Get
+    /// Create a new, one-dimensional tensor from a [Vec].
+    pub fn from_vec(store: Vec<T>) -> Self {
+        let shape = Shape::from(store.len());
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::contiguous(shape),
+            op: BackpropOp::none(),
+            store,
+        }
+    }
+    /// Return a reference to the tensor's data.
     pub fn as_slice(&self) -> &[T] {
         &self.store
     }
-    ///
+    /// Return a mutable reference to the tensor's data.
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         &mut self.store
     }
@@ -134,6 +139,26 @@ impl<T> TensorBase<T> {
             }
         }
     }
+    /// Returns a reference to the first element of the tensor.
+    pub fn first(&self) -> Option<&T> {
+        let pos = vec![0; *self.rank()];
+        self.get(pos)
+    }
+    /// Returns a mutable reference to the first element of the tensor.
+    pub fn first_mut(&mut self) -> Option<&mut T> {
+        let pos = vec![0; *self.rank()];
+        self.get_mut(pos)
+    }
+    /// Returns the data at the specified index.
+    pub fn get(&self, index: impl AsRef<[usize]>) -> Option<&T> {
+        let i = self.layout.index(index);
+        self.store.get(i)
+    }
+    /// Returns a mutable reference to the data at the specified index.
+    pub fn get_mut(&mut self, index: impl AsRef<[usize]>) -> Option<&mut T> {
+        let i = self.layout.index(index);
+        self.store.get_mut(i)
+    }
     /// Returns the unique identifier of the tensor.
     pub const fn id(&self) -> TensorId {
         self.id
@@ -148,15 +173,29 @@ impl<T> TensorBase<T> {
     }
     /// A function to check if the tensor is a scalar
     pub fn is_scalar(&self) -> bool {
-        self.shape().len() == 0
+        *self.rank() == 0
     }
     /// A function to check if the tensor is a variable
     pub const fn is_variable(&self) -> bool {
         self.kind.is_variable()
     }
+    /// Return an iterator over the tensor
+    pub fn iter(&self) -> StrideIter<'_, T> {
+        StrideIter::new(self)
+    }
     /// Get the kind of the tensor
-    pub fn kind(&self) -> TensorKind {
+    pub const fn kind(&self) -> TensorKind {
         self.kind
+    }
+    /// Get a reference to the last element of the tensor
+    pub fn last(&self) -> Option<&T> {
+        let pos = self.layout.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
+        self.get(pos)
+    }
+    /// Get a mutable reference to the last element of the tensor
+    pub fn last_mut(&mut self) -> Option<&mut T> {
+        let pos = self.layout.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
+        self.get_mut(pos)
     }
     /// Get a reference to the [Layout] of the tensor
     pub const fn layout(&self) -> &Layout {
@@ -185,6 +224,15 @@ impl<T> TensorBase<T> {
     /// Create an iterator over the tensor
     pub fn strided(&self) -> StrideIter<'_, T> {
         StrideIter::new(self)
+    }
+    /// Turn the tensor into a scalar
+    /// If the tensor has a rank greater than 0, this will return an error
+    pub fn to_scalar(&self) -> TensorResult<&T> {
+        if self.is_scalar() {
+            Ok(self.first().unwrap())
+        } else {
+            Err(TensorError::NotScalar)
+        }
     }
     /// Turn the tensor into a one-dimensional vector
     pub fn to_vec(&self) -> Vec<T>
@@ -219,7 +267,7 @@ impl<T> TensorBase<T> {
         }
     }
     ///
-    pub fn with_layout(mut self, layout: Layout) -> Self {
+    pub unsafe fn with_layout(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
     }
@@ -328,8 +376,6 @@ where
 
 impl<T> FromIterator<T> for TensorBase<T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let store = Vec::from_iter(iter);
-        let shape = Shape::from(store.len());
-        from_vec(TensorKind::Normal, shape, store)
+        Self::from_vec(Vec::from_iter(iter))
     }
 }

@@ -8,7 +8,7 @@ use acme::prelude::BinaryOp;
 use core::borrow::Borrow;
 use core::ops::{Deref, DerefMut};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct BackpropOp<T = f64>(Option<TensorExpr<T>>);
 
 impl<T> BackpropOp<T> {

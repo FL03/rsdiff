@@ -14,7 +14,7 @@ pub trait SummaryStatistics<T> {
     fn median(&self) -> T;
     /// Returns the minimum value in the collection.
     fn min(&self) -> T;
-
+    /// Get the mode of the collection.
     fn mode(&self) -> T;
     /// Compute the standard deviation
     fn std(&self) -> T;
@@ -23,6 +23,8 @@ pub trait SummaryStatistics<T> {
 }
 
 pub trait TensorStats<T>: SummaryStatistics<T> {
+    
+    /// Compute the mean along the specified axis.
     fn mean_axis(&self, axis: Axis) -> T;
 }
 

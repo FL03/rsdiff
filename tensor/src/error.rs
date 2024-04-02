@@ -24,6 +24,7 @@ pub enum TensorError {
     Indexing(String),
     Shape(ShapeError),
     Singular,
+    NotScalar,
 }
 
 unsafe impl Send for TensorError {}

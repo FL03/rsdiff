@@ -8,8 +8,8 @@ keywords = ["acme", "autodiff", "mathematics", "tensor"]
 license = "Apache-2.0"
 repository = "https://github.com/FL03/acme"
 readme = "README.md"
-# version = "0.3.0"
-version = "0.3.0-nightly.4"
+version = "0.3.0"
+# version = "0.3.0-nightly.5"
 
 [workspace]
 default-members = [
@@ -27,7 +27,6 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-anyhow = "1"
 strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
 

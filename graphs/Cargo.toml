@@ -44,8 +44,8 @@ strum.workspace = true
 
 [dependencies.acme-core]
 path = "../core"
-# version = "0.3.0"
-version = "0.3.0-nightly.4"
+version = "0.3.0"
+# version = "0.3.0-nightly.5"
 
 [package.metadata.docs.rs]
 all-features = true

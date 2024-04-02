@@ -2,14 +2,15 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinaryOperation, Operator};
+use super::BinaryOperation;
+use crate::ops::{Operator, OperatorKind};
 use num::traits::NumOps;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 macro_rules! operator {
-    ($op:ident) => {
+    ($op:ident, $kind:ident) => {
 
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
@@ -25,15 +26,26 @@ macro_rules! operator {
             }
         }
 
+        impl core::fmt::Display for $op {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}", self.name())
+            }
+        }
+
         impl Operator for $op {
+
+            fn kind(&self) -> OperatorKind {
+                OperatorKind::$kind
+            }
+
             fn name(&self) -> String {
                 self.name()
             }
         }
     };
-    ($($op:ident),*) => {
+    ($kind:ident: $($op:ident),*) => {
         $(
-            operator!($op);
+            operator!($op, $kind);
         )*
     };
 
@@ -76,12 +88,41 @@ macro_rules! operators {
                 }
             )*
 
+
+            pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
+            where
+                A: NumOps<B, C>,
+            {
+                self.op().eval(lhs, rhs)
+            }
+
+            pub fn op<A, B, C>(self) -> Box<dyn BinaryOperation<A, B, Output = C>>
+            where
+                A: NumOps<B, C>,
+            {
+                match self {
+                    $(
+                        $group::$variant(op) => Box::new(op),
+                    )*
+                }
+            }
+
             pub fn name(&self) -> String {
                 match self {
                     $(
                         $group::$variant(op) => op.name(),
                     )*
                 }
+            }
+        }
+
+        impl Operator for $group {
+            fn kind(&self) -> OperatorKind {
+                OperatorKind::Binary
+            }
+
+            fn name(&self) -> String {
+                self.name()
             }
         }
     };
@@ -95,7 +136,7 @@ macro_rules! impl_binary_op {
 
     };
     ($op:ident, $bound:ident, $operator:tt) => {
-        operator!($op);
+        operator!($op, Binary);
 
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
@@ -109,7 +150,7 @@ macro_rules! impl_binary_op {
         }
     };
     (expr $op:ident, $bound:ident, $exp:expr) => {
-        operator!($op);
+        operator!($op, Binary);
 
         impl<A, B, C> BinaryOperation<A, B> for $op
         where
@@ -131,32 +172,5 @@ impl_binary_op!((Addition, Add, +), (Division, Div, /), (Multiplication, Mul, *)
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {
         op
-    }
-
-    pub fn into_op<A, B, C>(self) -> Box<dyn BinaryOperation<A, B, Output = C>>
-    where
-        A: NumOps<B, C>,
-    {
-        match self {
-            Arithmetic::Add(op) => Box::new(op),
-            Arithmetic::Div(op) => Box::new(op),
-            Arithmetic::Mul(op) => Box::new(op),
-            Arithmetic::Rem(op) => Box::new(op),
-            Arithmetic::Sub(op) => Box::new(op),
-        }
-    }
-
-    pub fn op<A, B, C>(&self) -> Box<dyn BinaryOperation<A, B, Output = C>>
-    where
-        A: NumOps<B, C>,
-    {
-        self.into_op()
-    }
-
-    pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
-    where
-        A: NumOps<B, C>,
-    {
-        self.op().eval(lhs, rhs)
     }
 }

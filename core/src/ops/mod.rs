@@ -5,9 +5,10 @@
 //! # Operations
 //!
 //!
-pub use self::kinds::*;
+pub use self::{kinds::*, operator::*};
 
 pub(crate) mod kinds;
+pub(crate) mod operator;
 
 pub mod binary;
 pub mod unary;

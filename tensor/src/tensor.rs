@@ -32,6 +32,19 @@ pub(crate) fn create_with<T>(
     }
 }
 
+pub(crate) fn from_scalar_with_op<T>(
+    kind: impl Into<TensorKind>,
+    op: TensorExpr<T>,
+    data: T,
+) -> TensorBase<T> {
+    create_with(
+        kind.into(),
+        BackpropOp::new(op),
+        Shape::scalar(),
+        vec![data],
+    )
+}
+
 pub(crate) fn from_vec_with_kind<T>(
     kind: impl Into<TensorKind>,
     shape: impl IntoShape,
@@ -176,6 +189,10 @@ impl<T> TensorBase<T> {
     pub fn is_scalar(&self) -> bool {
         *self.rank() == 0
     }
+    /// Returns true if the tensor is a square matrix.
+    pub fn is_square(&self) -> bool {
+        self.shape().is_square()
+    }
     /// A function to check if the tensor is a variable
     pub const fn is_variable(&self) -> bool {
         self.kind().is_variable()
@@ -201,6 +218,14 @@ impl<T> TensorBase<T> {
     /// Get a reference to the [Layout] of the tensor
     pub const fn layout(&self) -> &Layout {
         &self.layout
+    }
+    /// Get the number of columns in the tensor
+    pub fn ncols(&self) -> usize {
+        self.shape().ncols()
+    }
+    /// Get the number of rows in the tensor
+    pub fn nrows(&self) -> usize {
+        self.shape().nrows()
     }
     /// Get a reference to the operation of the tensor
     pub const fn op(&self) -> &BackpropOp<T> {

@@ -28,7 +28,6 @@ macro_rules! assert_diff {
     };
 }
 
-#[ignore = "not implemented"]
 #[test]
 fn test_inverse() {
     let shape = Shape::from((2, 2));
@@ -38,6 +37,7 @@ fn test_inverse() {
     let exp = Tensor::from_shape_vec(shape.clone(), inv_arr);
 
     let inverse = tensor.inv().unwrap();
+    println!("{:?}", &inverse.to_vec());
 
     for i in 0..shape.nrows() {
         for j in 0..shape.ncols() {

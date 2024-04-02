@@ -2,8 +2,7 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::arithmetic::*;
-use super::BinaryOperation;
+use acme::ops::binary::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;

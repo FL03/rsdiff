@@ -36,7 +36,6 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-anyhow.workspace = true
 lazy_static = "1"
 num = "0.4"
 serde = { optional = true, features = ["derive"], version = "1" }

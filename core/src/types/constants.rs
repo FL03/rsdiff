@@ -44,6 +44,18 @@ impl<T> AsMut<T> for Constant<T> {
     }
 }
 
+impl<T> Borrow<T> for Constant<T> {
+    fn borrow(&self) -> &T {
+        &self.0
+    }
+}
+
+impl<T> BorrowMut<T> for Constant<T> {
+    fn borrow_mut(&mut self) -> &mut T {
+        &mut self.0
+    }
+}
+
 impl<T> Deref for Constant<T> {
     type Target = T;
 
@@ -118,6 +130,83 @@ unsafe impl<T> Send for Constant<T> {}
 
 unsafe impl<T> Sync for Constant<T> {}
 
+macro_rules! impl_binary_op {
+    ($(($bound:ident, $method:ident, $e:tt)),*) => {
+        $(
+            impl_binary_op!($bound, $method, $e);
+        )*
+    };
+    ($bound:ident, $fn:ident, $e:tt) => {
+        impl<T> core::ops::$bound for Constant<T>
+        where
+            T: core::ops::$bound<T, Output = T>,
+        {
+            type Output = Constant<T>;
+
+            fn $fn(self, rhs: Constant<T>) -> Self::Output {
+                Constant(self.0 $e rhs.0)
+            }
+        }
+
+        impl<'a, T> core::ops::$bound<&'a Constant<T>> for Constant<T>
+        where
+            T: Copy + core::ops::$bound<Output = T>,
+        {
+            type Output = Constant<T>;
+
+            fn $fn(self, rhs: &'a Constant<T>) -> Self::Output {
+                Constant(self.0 $e rhs.0)
+            }
+        }
+
+        impl<'a, T> core::ops::$bound<Constant<T>> for &'a Constant<T>
+        where
+            T: Copy + core::ops::$bound<Output = T>,
+        {
+            type Output = Constant<T>;
+
+            fn $fn(self, rhs: Constant<T>) -> Self::Output {
+                Constant(self.0 $e rhs.0)
+            }
+        }
+
+        impl<'a, T> core::ops::$bound<&'a Constant<T>> for &'a Constant<T>
+        where
+            T: Copy + core::ops::$bound<Output = T>,
+        {
+            type Output = Constant<T>;
+
+            fn $fn(self, rhs: &'a Constant<T>) -> Self::Output {
+                Constant(self.0 $e rhs.0)
+            }
+        }
+
+        impl<T> core::ops::$bound<T> for Constant<T>
+        where
+            T: core::ops::$bound<Output = T>,
+        {
+            type Output = Self;
+
+            fn $fn(self, rhs: T) -> Self::Output {
+                Constant(self.0 $e rhs)
+            }
+        }
+
+        impl<'a, T> core::ops::$bound<T> for &'a Constant<T>
+        where
+            T: Copy + core::ops::$bound<Output = T>,
+        {
+            type Output = Constant<T>;
+
+            fn $fn(self, rhs: T) -> Self::Output {
+                Constant(self.0 $e rhs)
+            }
+        }
+    };
+}
+
+impl_binary_op!((Add, add, +), (Div, div, /), (Mul, mul, *), (Rem, rem, %), (Sub, sub, -));
+
 impl<T> Num for Constant<T>
 where
     T: Num,
@@ -152,17 +241,5 @@ where
 
     fn is_zero(&self) -> bool {
         self.0.is_zero()
-    }
-}
-
-impl<T> Borrow<T> for Constant<T> {
-    fn borrow(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<T> BorrowMut<T> for Constant<T> {
-    fn borrow_mut(&mut self) -> &mut T {
-        &mut self.0
     }
 }

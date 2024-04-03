@@ -6,8 +6,10 @@ use crate::prelude::{Scalar, TensorExpr};
 use crate::tensor::{from_vec_with_op, TensorBase};
 use acme::ops::binary::BinaryOp;
 use core::ops;
+use num::traits::float::{Float, FloatCore};
 use num::traits::Pow;
 
+#[allow(dead_code)]
 pub(crate) fn broadcast_scalar_op<F, T>(
     lhs: &TensorBase<T>,
     rhs: &TensorBase<T>,
@@ -92,17 +94,53 @@ where
     }
 }
 
-impl<T> TensorBase<T>
-where
-    T: Scalar,
-{
-    pub fn pow(&self, exp: T) -> Self {
+impl<T> TensorBase<T> {
+    pub fn pow(&self, exp: T) -> Self
+    where
+        T: Copy + Pow<T, Output = T>,
+    {
         let shape = self.shape();
         let store = self.data().iter().copied().map(|a| a.pow(exp)).collect();
         let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::Pow);
         from_vec_with_op(false, op, shape, store)
     }
+
+    pub fn powf(&self, exp: T) -> Self
+    where
+        T: Float,
+    {
+        let shape = self.shape();
+        let store = self.data().iter().copied().map(|a| a.powf(exp)).collect();
+        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::Pow);
+        from_vec_with_op(false, op, shape, store)
+    }
+
+    pub fn powi(&self, exp: i32) -> Self
+    where
+        T: FloatCore,
+    {
+        let shape = self.shape();
+        let store = self.data().iter().copied().map(|a| a.powi(exp)).collect();
+        let op = TensorExpr::binary_scalar(self.clone(), T::from(exp).unwrap(), BinaryOp::Pow);
+        from_vec_with_op(false, op, shape, store)
+    }
 }
+
+// impl<T> TensorBase<T> where T: ComplexFloat<Real = T> + Scalar<Complex = Complex<T>, Real = T> {
+
+//     pub fn powc(&self, exp: <T as Scalar>::Complex) -> TensorBase<<T as Scalar>::Complex> {
+//         let shape = self.shape();
+//         let store = self.data().iter().copied().map(|a| Scalar::powc(a, exp)).collect();
+//         let op = TensorExpr::binary_scalar_c(self.clone(), exp, BinaryOp::Pow);
+//         TensorBase {
+//             id: TensorId::new(),
+//             data: store,
+//             kind: TensorKind::default(),
+//             layout: Layout::contiguous(shape),
+//             op: BackpropOp::new(op)
+//         }
+//     }
+// }
 
 impl<T> Pow<T> for TensorBase<T>
 where

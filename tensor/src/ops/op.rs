@@ -6,57 +6,66 @@ use crate::ops::kinds::reshape::*;
 use crate::shape::{Axis, Shape};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, UnaryOp};
+use num::Complex;
 
 pub type BoxTensor<T = f64> = Box<TensorBase<T>>;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[non_exhaustive]
-pub enum TensorExpr<T> {
-    Binary(BoxTensor<T>, BoxTensor<T>, BinaryOp),
-    BinaryScalar(BoxTensor<T>, T, BinaryOp),
-    Unary(BoxTensor<T>, UnaryOp),
-    Broadcast(BoxTensor<T>, Shape),
-    Matmul(BoxTensor<T>, BoxTensor<T>),
-    Reshape(BoxTensor<T>, Shape),
-    Shape(ReshapeExpr<T>),
-    SwapAxes(BoxTensor<T>, Axis, Axis),
-    Transpose(BoxTensor<T>),
+pub enum TensorExpr<A, B = A> {
+    Binary(BoxTensor<A>, BoxTensor<B>, BinaryOp),
+    BinaryScalar(BoxTensor<A>, B, BinaryOp),
+    Unary(BoxTensor<A>, UnaryOp),
+    Broadcast(BoxTensor<A>, Shape),
+    Matmul(BoxTensor<A>, BoxTensor<B>),
+    Reshape(BoxTensor<A>, Shape),
+    Shape(ReshapeExpr<A>),
+    SwapAxes(BoxTensor<A>, Axis, Axis),
+    Transpose(BoxTensor<A>),
 }
 
-impl<T> TensorExpr<T> {
-    pub fn binary(lhs: TensorBase<T>, rhs: TensorBase<T>, op: BinaryOp) -> Self {
+impl<A, B> TensorExpr<A, B> {
+    pub fn binary(lhs: TensorBase<A>, rhs: TensorBase<B>, op: BinaryOp) -> Self {
         TensorExpr::Binary(Box::new(lhs), Box::new(rhs), op)
     }
 
-    pub fn binary_scalar(lhs: TensorBase<T>, rhs: T, op: BinaryOp) -> Self {
+    pub fn binary_scalar(lhs: TensorBase<A>, rhs: B, op: BinaryOp) -> Self {
         TensorExpr::BinaryScalar(Box::new(lhs), rhs, op)
     }
 
-    pub fn broadcast(tensor: TensorBase<T>, shape: Shape) -> Self {
+    pub fn binary_scalar_c(
+        lhs: TensorBase<A>,
+        rhs: Complex<A>,
+        op: BinaryOp,
+    ) -> TensorExpr<A, Complex<A>> {
+        TensorExpr::BinaryScalar(Box::new(lhs), rhs, op)
+    }
+
+    pub fn broadcast(tensor: TensorBase<A>, shape: Shape) -> Self {
         TensorExpr::Broadcast(Box::new(tensor), shape)
     }
 
-    pub fn matmul(lhs: TensorBase<T>, rhs: TensorBase<T>) -> Self {
+    pub fn matmul(lhs: TensorBase<A>, rhs: TensorBase<B>) -> Self {
         TensorExpr::Matmul(Box::new(lhs), Box::new(rhs))
     }
 
-    pub fn reshape(tensor: TensorBase<T>, shape: Shape) -> Self {
+    pub fn reshape(tensor: TensorBase<A>, shape: Shape) -> Self {
         TensorExpr::Reshape(Box::new(tensor), shape)
     }
 
-    pub fn shape(expr: ReshapeExpr<T>) -> Self {
+    pub fn shape(expr: ReshapeExpr<A>) -> Self {
         TensorExpr::Shape(expr)
     }
 
-    pub fn swap_axes(tensor: TensorBase<T>, swap: Axis, with: Axis) -> Self {
+    pub fn swap_axes(tensor: TensorBase<A>, swap: Axis, with: Axis) -> Self {
         TensorExpr::SwapAxes(Box::new(tensor), swap, with)
     }
 
-    pub fn transpose(scope: TensorBase<T>) -> Self {
+    pub fn transpose(scope: TensorBase<A>) -> Self {
         TensorExpr::Transpose(Box::new(scope))
     }
 
-    pub fn unary(tensor: TensorBase<T>, op: UnaryOp) -> Self {
+    pub fn unary(tensor: TensorBase<A>, op: UnaryOp) -> Self {
         TensorExpr::Unary(Box::new(tensor), op)
     }
 }

@@ -8,7 +8,7 @@
 use crate::prelude::{Matmul, Scalar, ShapeError, TensorError, TensorExpr, TensorResult};
 use crate::tensor::{self, TensorBase};
 use acme::prelude::UnaryOp;
-use num::traits::{Num, NumAssign, Zero};
+use num::traits::{Num, NumAssign};
 
 fn inverse_impl<T>(matrix: &TensorBase<T>) -> TensorResult<TensorBase<T>>
 where
@@ -70,32 +70,6 @@ where
 
     Ok(inverted.to_owned())
 }
-/// Returns the lower triangular portion of a matrix.
-pub fn tril<T>(a: &TensorBase<T>) -> TensorBase<T>
-where
-    T: Clone + Zero,
-{
-    let mut out = a.clone();
-    for i in 0..a.shape()[0] {
-        for j in i + 1..a.shape()[1] {
-            out[[i, j]] = T::zero();
-        }
-    }
-    out
-}
-/// Returns the upper triangular portion of a matrix.
-pub fn triu<T>(a: &TensorBase<T>) -> TensorBase<T>
-where
-    T: Clone + Zero,
-{
-    let mut out = a.clone();
-    for i in 0..a.shape()[0] {
-        for j in 0..i {
-            out[[i, j]] = T::zero();
-        }
-    }
-    out
-}
 
 impl<T> TensorBase<T>
 where
@@ -128,11 +102,13 @@ where
         let shape = self.shape().matmul_shape(&other.shape()).unwrap();
         let mut result = vec![T::zero(); shape.size()];
 
-        for i in 0..self.shape()[0] {
-            for j in 0..other.shape()[1] {
-                for k in 0..self.shape()[1] {
-                    result[i * other.shape()[1] + j] +=
-                        self.data[i * self.shape()[1] + k] * other.data[k * other.shape()[1] + j];
+        for i in 0..self.nrows() {
+            for j in 0..other.ncols() {
+                for k in 0..self.ncols() {
+                    let scope = i * other.ncols() + j;
+                    let xi = i * self.ncols() + k;
+                    let yi = k * other.ncols() + j;
+                    result[scope] += self.data[xi] * other.data[yi];
                 }
             }
         }

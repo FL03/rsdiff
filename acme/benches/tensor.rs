@@ -21,7 +21,7 @@ fn bench_iter(b: &mut Bencher) {
     let shape = SHAPE_3D.clone();
     let n = shape.size();
     let tensor = Tensor::linspace(0f64, n as f64, n);
-    b.iter(|| tensor.strided().take(n))
+    b.iter(|| tensor.iter().take(n))
 }
 
 #[bench]
@@ -29,5 +29,5 @@ fn bench_iter_rev(b: &mut Bencher) {
     let shape = SHAPE_3D.clone();
     let n = shape.size();
     let tensor = Tensor::linspace(0f64, n as f64, n);
-    b.iter(|| tensor.strided().rev().take(n))
+    b.iter(|| tensor.iter().rev().take(n))
 }

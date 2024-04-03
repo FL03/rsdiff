@@ -8,11 +8,11 @@ use acme::prelude::BinaryOp;
 use core::borrow::Borrow;
 use core::ops::{Deref, DerefMut};
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct BackpropOp<T = f64>(Option<TensorExpr<T>>);
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct BackpropOp<A = f64, B = A>(Option<TensorExpr<A, B>>);
 
-impl<T> BackpropOp<T> {
-    pub fn new(op: TensorExpr<T>) -> Self {
+impl<A, B> BackpropOp<A, B> {
+    pub fn new(op: TensorExpr<A, B>) -> Self {
         BackpropOp(Some(op))
     }
 
@@ -20,7 +20,7 @@ impl<T> BackpropOp<T> {
         BackpropOp(None)
     }
 
-    pub fn binary(lhs: TensorBase<T>, rhs: TensorBase<T>, kind: BinaryOp) -> Self {
+    pub fn binary(lhs: TensorBase<A>, rhs: TensorBase<B>, kind: BinaryOp) -> Self {
         BackpropOp(Some(TensorExpr::binary(lhs, rhs, kind)))
     }
 
@@ -28,34 +28,34 @@ impl<T> BackpropOp<T> {
         self.0.is_none()
     }
 
-    pub fn op(&self) -> Option<&TensorExpr<T>> {
+    pub fn op(&self) -> Option<&TensorExpr<A, B>> {
         self.0.as_ref()
     }
 
-    pub fn op_mut(&mut self) -> Option<&mut TensorExpr<T>> {
+    pub fn op_mut(&mut self) -> Option<&mut TensorExpr<A, B>> {
         self.0.as_mut()
     }
 
-    pub fn into_inner(self) -> Option<TensorExpr<T>> {
+    pub fn into_inner(self) -> Option<TensorExpr<A, B>> {
         self.0
     }
 
-    pub fn take(&mut self) -> Option<TensorExpr<T>> {
+    pub fn take(&mut self) -> Option<TensorExpr<A, B>> {
         self.0.take()
     }
 }
 
-impl<T> BackpropOp<T>
+impl<A> BackpropOp<A>
 where
-    T: Clone,
+    A: Clone,
 {
-    pub fn view(&self) -> BackpropOp<&T> {
+    pub fn view(&self) -> BackpropOp<&A> {
         BackpropOp(self.0.as_ref().map(|op| op.view()))
     }
 }
 
-impl<T> Borrow<Option<TensorExpr<T>>> for BackpropOp<T> {
-    fn borrow(&self) -> &Option<TensorExpr<T>> {
+impl<S, T> Borrow<Option<TensorExpr<S, T>>> for BackpropOp<S, T> {
+    fn borrow(&self) -> &Option<TensorExpr<S, T>> {
         &self.0
     }
 }

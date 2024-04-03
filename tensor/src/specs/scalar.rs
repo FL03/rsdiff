@@ -6,7 +6,7 @@ use crate::tensor::TensorBase;
 use core::iter::{Product, Sum};
 use core::ops::Neg;
 use num::complex::Complex;
-use num::traits::{Float, FromPrimitive, NumAssign, NumCast, NumOps};
+use num::traits::{Float, FromPrimitive, NumAssign, NumCast, NumOps, Pow};
 
 pub trait Scalar:
     Copy
@@ -16,6 +16,7 @@ pub trait Scalar:
     + NumAssign
     + NumCast
     + NumOps
+    + Pow<Self, Output = Self>
     + Product
     + Sum
     + 'static

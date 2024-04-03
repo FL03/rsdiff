@@ -31,7 +31,7 @@ pub(crate) fn create_with<T>(
         op: op.into(),
     }
 }
-
+#[allow(dead_code)]
 pub(crate) fn from_scalar_with_op<T>(
     kind: impl Into<TensorKind>,
     op: TensorExpr<T>,
@@ -62,7 +62,7 @@ pub(crate) fn from_vec_with_op<T>(
     create_with(kind.into(), BackpropOp::new(op), shape, data)
 }
 
-#[derive(Clone, Debug, Hash, Ord, PartialOrd)]
+#[derive(Clone, Debug, Hash)]
 pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) data: Vec<T>,
@@ -246,10 +246,6 @@ impl<T> TensorBase<T> {
     /// Get a reference to the stride of the tensor
     pub fn stride(&self) -> &Stride {
         self.layout().stride()
-    }
-    /// Create an iterator over the tensor
-    pub fn strided(&self) -> StrideIter<'_, T> {
-        StrideIter::new(self)
     }
     /// Turn the tensor into a scalar
     /// If the tensor has a rank greater than 0, this will return an error

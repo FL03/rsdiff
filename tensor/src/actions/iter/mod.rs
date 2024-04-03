@@ -5,11 +5,11 @@
 //! # Iter
 //!
 //!
-pub use self::{indexed::*, iterator::*, strides::*, utils::*};
+pub use self::{axis::*, iterator::*, position::*, utils::*};
 
-pub(crate) mod indexed;
+pub(crate) mod axis;
 pub(crate) mod iterator;
-pub(crate) mod strides;
+pub(crate) mod position;
 
 pub trait IterTensor {
     type Item;
@@ -47,24 +47,24 @@ mod tests {
     use crate::prelude::{Shape, Tensor};
 
     #[test]
-    fn test_strided() {
+    fn test_iter() {
         let shape = Shape::from_iter([2, 2, 2, 2]);
         let n = shape.size();
         let exp = Vec::linspace(0f64, n as f64, n);
         let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
-        for (elem, val) in tensor.strided().zip(exp.iter()) {
+        for (elem, val) in tensor.iter().zip(exp.iter()) {
             assert_eq!(elem, val);
         }
     }
 
     #[test]
-    fn test_strided_rev() {
+    fn test_iter_rev() {
         let shape = Shape::from_iter([2, 2]);
         let n = shape.size();
         let exp = Vec::linspace(0f64, n as f64, n);
         let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
 
-        for (i, j) in tensor.strided().rev().zip(exp.iter().rev()) {
+        for (i, j) in tensor.iter().rev().zip(exp.iter().rev()) {
             assert_eq!(i, j);
         }
     }

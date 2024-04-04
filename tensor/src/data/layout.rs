@@ -58,37 +58,17 @@ impl Layout {
             stride,
         }
     }
+
     /// Determine if the current layout is contiguous or not.
     pub fn is_contiguous(&self) -> bool {
-        self.shape.is_contiguous(&self.stride)
+        self.shape().is_contiguous(&self.stride)
     }
     pub fn is_layout_c(&self) -> bool {
-        if let 1 = *self.shape.rank() {
-            return self.stride[0] == 1 || self.shape[0] <= 1;
-        }
-
-        for d in self.shape().iter() {
-            if *d == 0 {
-                return true;
-            }
-        }
-
-        let mut contig_stride = 1_isize;
-        // check all dimensions -- a dimension of length 1 can have unequal strides
-        for (dim, s) in izip!(self.shape().iter().rev(), self.stride().iter().rev()) {
-            if *dim != 1 {
-                let s = *s as isize;
-                if s != contig_stride {
-                    return false;
-                }
-                contig_stride *= *dim as isize;
-            }
-        }
-        true
+        super::is_layout_c(self)
     }
     /// Determine if the current layout is square or not.
     pub fn is_square(&self) -> bool {
-        self.shape.is_square()
+        self.shape().is_square()
     }
     /// Get a peek at the offset of the layout.
     pub fn offset(&self) -> usize {
@@ -98,7 +78,7 @@ impl Layout {
     /// element.
     pub fn offset_from_low_addr_ptr_to_logical_ptr(&self) -> usize {
         let offset =
-            izip!(self.shape().slice(), self.stride().slice()).fold(0, |_offset, (d, s)| {
+            izip!(self.shape().as_slice(), self.stride().as_slice()).fold(0, |_offset, (d, s)| {
                 let d = *d as isize;
                 let s = *s as isize;
                 if s < 0 && d > 1 {
@@ -132,13 +112,13 @@ impl Layout {
     }
     /// Get a reference to the number of elements in the layout.
     pub fn size(&self) -> usize {
-        self.shape.size()
+        self.shape().size()
     }
     /// Get a reference to the stride of the layout.
     pub const fn stride(&self) -> &Stride {
         &self.stride
     }
-
+    /// Swap the axes of the layout.
     pub fn swap_axes(&self, a: Axis, b: Axis) -> Layout {
         Layout {
             offset: self.offset,
@@ -148,10 +128,7 @@ impl Layout {
     }
 
     pub fn transpose(&self) -> Layout {
-        let mut layout = self.clone();
-        layout.shape.reverse();
-        layout.stride.reverse();
-        layout
+        self.clone().reverse_axes()
     }
 
     pub fn with_offset(mut self, offset: usize) -> Self {
@@ -167,20 +144,19 @@ impl Layout {
 }
 
 // Internal methods
-#[allow(dead_code)]
 impl Layout {
     pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
         let idx = idx.as_ref();
-        if idx.len() != *self.shape.rank() {
+        if idx.len() != *self.rank() {
             panic!("Dimension mismatch");
         }
-        idx.iter().zip(self.stride.iter()).map(|(i, s)| i * s).sum()
+        self.index_unchecked(idx)
     }
 
     pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
         idx.as_ref()
             .iter()
-            .zip(self.stride.iter())
+            .zip(self.stride().iter())
             .map(|(i, s)| i * s)
             .sum()
     }

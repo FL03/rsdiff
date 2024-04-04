@@ -7,10 +7,7 @@
 //! This module implements fundamental linear algebra concepts and operations.
 //!
 pub mod fields;
-
-pub trait VectorSpace {}
-
-pub trait Subspace: VectorSpace {}
+pub mod vs;
 
 #[cfg(test)]
 mod tests {}

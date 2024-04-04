@@ -43,13 +43,8 @@ impl<A, B> BackpropOp<A, B> {
     pub fn take(&mut self) -> Option<TensorExpr<A, B>> {
         self.0.take()
     }
-}
 
-impl<A> BackpropOp<A>
-where
-    A: Clone,
-{
-    pub fn view(&self) -> BackpropOp<&A> {
+    pub fn view(&self) -> BackpropOp<&A, &B> {
         BackpropOp(self.0.as_ref().map(|op| op.view()))
     }
 }

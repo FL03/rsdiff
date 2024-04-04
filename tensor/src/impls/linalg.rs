@@ -10,19 +10,19 @@ use crate::tensor::{self, TensorBase};
 use acme::prelude::UnaryOp;
 use num::traits::{Num, NumAssign};
 
-fn inverse_impl<T>(matrix: &TensorBase<T>) -> TensorResult<TensorBase<T>>
+fn inverse_impl<T>(tensor: &TensorBase<T>) -> TensorResult<TensorBase<T>>
 where
     T: Copy + Num + NumAssign + PartialOrd,
 {
-    let op = TensorExpr::unary(matrix.clone(), UnaryOp::Inv);
-    let rows = matrix.nrows();
-    let cols = matrix.ncols();
+    let op = TensorExpr::unary(tensor.clone(), UnaryOp::Inv);
+    let rows = tensor.nrows();
+    let cols = tensor.ncols();
 
-    if !matrix.is_square() {
+    if !tensor.is_square() {
         return Err(ShapeError::IncompatibleShapes.into()); // Matrix must be square for inversion
     }
 
-    let identity = TensorBase::eye(rows);
+    let eye = TensorBase::eye(rows);
 
     // Construct an augmented matrix by concatenating the original matrix with an identity matrix
     let mut aug = TensorBase::zeros((rows, 2 * cols));
@@ -30,10 +30,10 @@ where
     // aug.slice_mut(s![.., ..cols]).assign(matrix);
     for i in 0..rows {
         for j in 0..cols {
-            aug[[i, j]] = matrix[[i, j]];
+            aug[[i, j]] = tensor[[i, j]];
         }
         for j in cols..acols {
-            aug[[i, j]] = identity[[i, j - cols]];
+            aug[[i, j]] = eye[[i, j - cols]];
         }
     }
 
@@ -61,14 +61,14 @@ where
     }
 
     // Extract the inverted matrix from the augmented matrix
-    let mut inverted = matrix.zeros_like().with_op(op.into());
+    let mut inv = tensor.zeros_like().with_op(op.into());
     for i in 0..rows {
         for j in 0..cols {
-            inverted[[i, j]] = aug[[i, j + cols]];
+            inv[[i, j]] = aug[[i, j + cols]];
         }
     }
 
-    Ok(inverted.to_owned())
+    Ok(inv.to_owned())
 }
 
 impl<T> TensorBase<T>

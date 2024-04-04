@@ -2,9 +2,6 @@
     Appellation: utils <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Utilities
-//!
-//!
 use crate::prelude::{Scalar, TensorExpr, TensorResult};
 use crate::shape::ShapeError;
 use crate::tensor::{from_vec_with_op, TensorBase};
@@ -61,32 +58,6 @@ where
         }
     }
     out
-}
-
-pub fn dot_product<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) -> TensorResult<TensorBase<T>>
-where
-    T: Scalar,
-{
-    if lhs.shape().rank() != rhs.shape().rank() {
-        return Err(ShapeError::IncompatibleShapes.into());
-    }
-
-    let shape = lhs.shape().matmul_shape(&rhs.shape()).unwrap();
-    let mut result = vec![T::zero(); shape.size()];
-
-    for i in 0..lhs.shape().nrows() {
-        for j in 0..rhs.shape().ncols() {
-            for k in 0..lhs.shape().ncols() {
-                let pos = i * rhs.shape().ncols() + j;
-                let left = i * lhs.shape().ncols() + k;
-                let right = k * rhs.shape().ncols() + j;
-                result[pos] += lhs.data[left] * rhs.data[right];
-            }
-        }
-    }
-    let op = TensorExpr::matmul(lhs.clone(), rhs.clone());
-    let tensor = from_vec_with_op(false, op, shape, result);
-    Ok(tensor)
 }
 
 macro_rules! izip {

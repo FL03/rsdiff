@@ -9,13 +9,15 @@ pub(crate) mod kinds;
 pub(crate) mod operator;
 pub(crate) mod specs;
 
-pub trait BinaryOperation<A, B> {
+pub type BoxedBinOp<A, B, C> = Box<dyn BinOp<A, B, Output = C>>;
+
+pub trait BinOp<A, B> {
     type Output;
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output;
 }
 
-impl<S, A, B, C> BinaryOperation<A, B> for S
+impl<S, A, B, C> BinOp<A, B> for S
 where
     S: Fn(A, B) -> C,
 {
@@ -26,7 +28,7 @@ where
     }
 }
 
-impl<A, B, C> BinaryOperation<A, B> for Box<dyn BinaryOperation<A, B, Output = C>> {
+impl<A, B, C> BinOp<A, B> for Box<dyn BinOp<A, B, Output = C>> {
     type Output = C;
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output {

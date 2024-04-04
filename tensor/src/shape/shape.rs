@@ -30,25 +30,13 @@ impl Shape {
     pub fn zeros(rank: usize) -> Self {
         Self(vec![0; rank])
     }
-    #[doc(hidden)]
-    pub(crate) fn default_strides(&self) -> Stride {
-        // Compute default array strides
-        // Shape (a, b, c) => Give strides (b * c, c, 1)
-        let mut strides = Stride::zeros(self.rank());
-        // For empty arrays, use all zero strides.
-        if self.slice().iter().all(|&d| d != 0) {
-            let mut it = strides.slice_mut().iter_mut().rev();
-            // Set first element to 1
-            if let Some(rs) = it.next() {
-                *rs = 1;
-            }
-            let mut cum_prod = 1;
-            for (rs, dim) in it.zip(self.slice().iter().rev()) {
-                cum_prod *= *dim;
-                *rs = cum_prod;
-            }
-        }
-        strides
+    /// Get a reference to the shape as a slice.
+    pub fn as_slice(&self) -> &[usize] {
+        &self.0
+    }
+    /// Get a mutable reference to the shape as a slice.
+    pub fn as_slice_mut(&mut self) -> &mut [usize] {
+        &mut self.0
     }
 
     pub fn diagonalize(&self) -> Shape {
@@ -135,14 +123,7 @@ impl Shape {
     pub fn size(&self) -> usize {
         self.0.iter().product()
     }
-    /// Get a reference to the shape as a slice.
-    pub fn slice(&self) -> &[usize] {
-        &self.0
-    }
-    /// Get a mutable reference to the shape as a slice.
-    pub fn slice_mut(&mut self) -> &mut [usize] {
-        &mut self.0
-    }
+
     /// Swap the dimensions of the current [Shape] at the given [Axis].
     pub fn swap(&mut self, a: Axis, b: Axis) {
         self.0.swap(a.axis(), b.axis())
@@ -155,7 +136,7 @@ impl Shape {
     }
 
     pub fn upcast(&self, to: &Shape, stride: &Stride) -> Option<Stride> {
-        let mut new_stride = to.slice().to_vec();
+        let mut new_stride = to.as_slice().to_vec();
         // begin at the back (the least significant dimension)
         // size of the axis has to either agree or `from` has to be 1
         if to.rank() < self.rank() {
@@ -164,10 +145,10 @@ impl Shape {
 
         let mut iter = new_stride.as_mut_slice().iter_mut().rev();
         for ((er, es), dr) in self
-            .slice()
+            .as_slice()
             .iter()
             .rev()
-            .zip(stride.slice().iter().rev())
+            .zip(stride.as_slice().iter().rev())
             .zip(iter.by_ref())
         {
             /* update strides */
@@ -193,6 +174,27 @@ impl Shape {
 
 // Internal methods
 impl Shape {
+    #[doc(hidden)]
+    pub(crate) fn default_strides(&self) -> Stride {
+        // Compute default array strides
+        // Shape (a, b, c) => Give strides (b * c, c, 1)
+        let mut strides = Stride::zeros(self.rank());
+        // For empty arrays, use all zero strides.
+        if self.as_slice().iter().all(|&d| d != 0) {
+            let mut it = strides.as_slice_mut().iter_mut().rev();
+            // Set first element to 1
+            if let Some(rs) = it.next() {
+                *rs = 1;
+            }
+            let mut cum_prod = 1;
+            for (rs, dim) in it.zip(self.as_slice().iter().rev()) {
+                cum_prod *= *dim;
+                *rs = cum_prod;
+            }
+        }
+        strides
+    }
+
     pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
         if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
             return Err(ShapeError::IncompatibleShapes.into());

@@ -13,5 +13,5 @@ pub enum OperatorKind {
 pub trait Operator {
     fn kind(&self) -> OperatorKind;
 
-    fn name(&self) -> String;
+    fn name(&self) -> &str;
 }

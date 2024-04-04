@@ -207,12 +207,12 @@ impl<T> TensorBase<T> {
     }
     /// Get a reference to the last element of the tensor
     pub fn last(&self) -> Option<&T> {
-        let pos = self.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
+        let pos = self.shape().get_final_position();
         self.get(pos)
     }
     /// Get a mutable reference to the last element of the tensor
     pub fn last_mut(&mut self) -> Option<&mut T> {
-        let pos = self.shape().iter().map(|d| d - 1).collect::<Vec<_>>();
+        let pos = self.shape().get_final_position();
         self.get_mut(pos)
     }
     /// Get a reference to the [Layout] of the tensor
@@ -230,6 +230,10 @@ impl<T> TensorBase<T> {
     /// Get a reference to the operation of the tensor
     pub const fn op(&self) -> &BackpropOp<T> {
         &self.op
+    }
+    /// Get a reference to the operation of the tensor
+    pub fn op_view(&self) -> BackpropOp<&T> {
+        self.op().view()
     }
     /// Get an owned reference to the [Rank] of the tensor
     pub fn rank(&self) -> Rank {
@@ -260,7 +264,7 @@ impl<T> TensorBase<T> {
     where
         T: Clone,
     {
-        self.data.to_vec()
+        self.data().to_vec()
     }
     /// Changes the kind of tensor to a variable
     pub fn variable(mut self) -> Self {
@@ -268,7 +272,7 @@ impl<T> TensorBase<T> {
         self
     }
     ///
-    pub unsafe fn with_layout(mut self, layout: Layout) -> Self {
+    pub unsafe fn with_layout_unchecked(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
     }
@@ -278,17 +282,17 @@ impl<T> TensorBase<T> {
         self
     }
 
-    pub fn with_shape(mut self, shape: impl IntoShape) -> Self {
+    pub unsafe fn with_shape_unchecked(mut self, shape: impl IntoShape) -> Self {
         self.layout = Layout::contiguous(shape);
         self
     }
 }
 
-impl<T> TensorBase<T>
-where
-    T: Clone,
-{
-    pub fn to_owned(&self) -> TensorBase<T> {
+impl<T> TensorBase<T> {
+    pub fn to_owned(&self) -> TensorBase<T>
+    where
+        T: Clone,
+    {
         self.clone()
     }
 
@@ -339,6 +343,12 @@ impl<T> TensorBase<T> {
             op: self.op.clone(),
             data: store,
         }
+    }
+}
+
+impl<'a, T> AsRef<TensorBase<T>> for TensorBase<&'a T> {
+    fn as_ref(&self) -> &TensorBase<T> {
+        unsafe { &*(self as *const TensorBase<&'a T> as *const TensorBase<T>) }
     }
 }
 

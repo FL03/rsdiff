@@ -48,12 +48,12 @@ fn test_index() {
     let shape = (2, 3).into_shape();
     let n = shape.size();
     let a = Tensor::<f64>::linspace(0f64, n as f64, n)
-        .reshape(shape)
+        .reshape(shape.clone())
         .unwrap();
 
     assert_eq!(a[[0, 0]], 0f64);
     assert_eq!(a[&[0, 1]], 1f64);
-    assert_eq!(a[vec![1, 2]], 5f64);
+    assert_eq!(a[shape.get_final_position()], 5f64);
 }
 
 #[test]

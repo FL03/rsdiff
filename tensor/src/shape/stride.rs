@@ -4,7 +4,8 @@
 */
 use super::{Axis, Rank};
 use core::borrow::{Borrow, BorrowMut};
-use core::ops::{Deref, DerefMut};
+use core::ops::{Deref, DerefMut, Index, IndexMut};
+use core::slice::{Iter as SliceIter, IterMut as SliceIterMut};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -37,28 +38,32 @@ impl Stride {
     pub fn zeros(rank: Rank) -> Self {
         Self(vec![0; *rank])
     }
-
-    pub(crate) fn _fastest_varying_stride_order(&self) -> Self {
-        let mut indices = self.clone();
-        for (i, elt) in indices.slice_mut().into_iter().enumerate() {
-            *elt = i;
-        }
-        let strides = self.slice();
-        indices
-            .slice_mut()
-            .sort_by_key(|&i| (strides[i] as isize).abs());
-        indices
+    /// Returns a reference to the stride.
+    pub fn as_slice(&self) -> &[usize] {
+        &self.0
     }
-
-    pub fn get(&self, index: usize) -> Option<&usize> {
-        self.0.get(index)
+    /// Returns a mutable reference to the stride.
+    pub fn as_slice_mut(&mut self) -> &mut [usize] {
+        &mut self.0
     }
-
-    pub fn iter(&self) -> std::slice::Iter<usize> {
+    /// Returns the capacity of the stride.
+    pub fn capacity(&self) -> usize {
+        self.0.capacity()
+    }
+    /// Clears the stride, removing all elements.
+    pub fn clear(&mut self) {
+        self.0.clear()
+    }
+    /// Gets the element at the specified axis, returning None if the axis is out of bounds.
+    pub fn get(&self, axis: Axis) -> Option<&usize> {
+        self.0.get(*axis)
+    }
+    /// Returns an iterator over references to the elements of the stride.
+    pub fn iter(&self) -> SliceIter<usize> {
         self.0.iter()
     }
-
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<usize> {
+    /// Returns an iterator over mutable references to the elements of the stride.
+    pub fn iter_mut(&mut self) -> SliceIterMut<usize> {
         self.0.iter_mut()
     }
     /// Returns the rank of the stride; i.e., the number of dimensions.
@@ -69,23 +74,30 @@ impl Stride {
     pub fn reverse(&mut self) {
         self.0.reverse()
     }
-    /// Returns a reference to the stride.
-    pub fn slice(&self) -> &[usize] {
-        &self.0
-    }
-    /// Returns a mutable reference to the stride.
-    pub fn slice_mut(&mut self) -> &mut [usize] {
-        &mut self.0
-    }
-    /// Swaps two elements in the stride.
+    /// Swaps two elements in the stride, inplace.
     pub fn swap(&mut self, a: usize, b: usize) {
         self.0.swap(a, b)
     }
-
+    /// Returns a new shape with the two axes swapped.
     pub fn swap_axes(&self, a: Axis, b: Axis) -> Self {
         let mut stride = self.clone();
         stride.swap(a.axis(), b.axis());
         stride
+    }
+}
+
+// Internal methods
+impl Stride {
+    pub(crate) fn _fastest_varying_stride_order(&self) -> Self {
+        let mut indices = self.clone();
+        for (i, elt) in indices.as_slice_mut().into_iter().enumerate() {
+            *elt = i;
+        }
+        let strides = self.as_slice();
+        indices
+            .as_slice_mut()
+            .sort_by_key(|&i| (strides[i] as isize).abs());
+        indices
     }
 }
 
@@ -139,13 +151,33 @@ impl FromIterator<usize> for Stride {
     }
 }
 
-// impl Iterator for Stride {
-//     type Item = usize;
+impl Index<usize> for Stride {
+    type Output = usize;
 
-//     fn next(&mut self) -> Option<Self::Item> {
-//         self.0.next()
-//     }
-// }
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+impl IndexMut<usize> for Stride {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index]
+    }
+}
+
+impl Index<Axis> for Stride {
+    type Output = usize;
+
+    fn index(&self, index: Axis) -> &Self::Output {
+        &self.0[*index]
+    }
+}
+
+impl IndexMut<Axis> for Stride {
+    fn index_mut(&mut self, index: Axis) -> &mut Self::Output {
+        &mut self.0[*index]
+    }
+}
 
 impl IntoIterator for Stride {
     type Item = usize;

@@ -32,15 +32,15 @@ fn test_reshape() {
 #[test]
 fn test_transpose() {
     let shape = (2, 3);
-    let a = Tensor::<f64>::linspace(0f64, 6f64, 6).with_shape(shape);
+    let a = Tensor::<f64>::linspace(0f64, 6f64, 6)
+        .reshape(shape)
+        .unwrap();
     let at = a.t();
 
     let exp = Tensor::from_shape_vec((3, 2), vec![0.0, 3.0, 1.0, 4.0, 2.0, 5.0]);
     assert_ne!(&a, &at);
     assert_eq!(at.shape(), &Shape::new(vec![3, 2]));
-    for i in 0..shape.0 {
-        for j in 0..shape.1 {
-            assert_eq!(a[&[i, j]], exp[&[j, i]]);
-        }
+    for (i, j) in at.iter().zip(exp.iter()) {
+        assert_eq!(i, j);
     }
 }

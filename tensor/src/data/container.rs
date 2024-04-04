@@ -104,7 +104,7 @@ where
         unsafe {
             if let Some(slc) = self.as_slice_memory_order() {
                 ContainerBase::from_shape_trusted_iter_unchecked(
-                    self.shape().slice(),
+                    self.shape().as_slice(),
                     slc.iter(),
                     f,
                 )

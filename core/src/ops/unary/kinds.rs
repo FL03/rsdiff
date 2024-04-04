@@ -58,4 +58,22 @@ impl UnaryOp {
             _ => true,
         }
     }
+
+    enum_fn_constructor!(
+        (Abs, abs),
+        (Cos, cos),
+        (Cosh, cosh),
+        (Exp, exp),
+        (Floor, floor),
+        (Inv, inv),
+        (Ln, ln),
+        (Neg, neg),
+        (Not, not),
+        (Sin, sin),
+        (Sinh, sinh),
+        (Sqrt, sqrt),
+        (Square, square),
+        (Tan, tan),
+        (Tanh, tanh)
+    );
 }

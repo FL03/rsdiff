@@ -19,7 +19,7 @@ where
 
 impl<T> One for TensorBase<T>
 where
-    T: Scalar,
+    T: Copy + One,
 {
     fn one() -> Self {
         Self::from_scalar(T::one())
@@ -28,7 +28,7 @@ where
 
 impl<T> Zero for TensorBase<T>
 where
-    T: Scalar,
+    T: Copy + Zero,
 {
     fn zero() -> Self {
         Self::from_scalar(T::zero())

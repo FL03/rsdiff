@@ -2,19 +2,27 @@
     Appellation: iter <impls>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::Scalar;
+use crate::prelude::{Axis, Scalar};
 use crate::tensor::TensorBase;
 
 impl<T> TensorBase<T>
 where
     T: Scalar,
 {
+    pub fn product(&self) -> T {
+        self.data().iter().copied().product()
+    }
+
+    pub fn product_axis(&self, _axis: Axis) -> T {
+        unimplemented!("product_axis")
+    }
+
     pub fn sum(&self) -> T {
         self.data().iter().copied().sum()
     }
 
-    pub fn product(&self) -> T {
-        self.data().iter().copied().product()
+    pub fn sum_axis(&self, _axis: Axis) -> T {
+        unimplemented!("sum_axis")
     }
 }
 

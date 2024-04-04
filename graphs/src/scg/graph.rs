@@ -5,7 +5,7 @@
 use super::Node;
 use crate::ops::{BinaryExpr, Operations};
 use crate::prelude::GraphResult as Result;
-use acme::ops::binary::BinaryOperation;
+use acme::ops::binary::BinOp;
 use num::traits::{NumAssign, NumOps, Signed};
 use petgraph::algo::toposort;
 use petgraph::prelude::{DiGraph, NodeIndex};

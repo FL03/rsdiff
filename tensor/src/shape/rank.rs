@@ -6,7 +6,8 @@
 //!
 //! The rank of a n-dimensional array describes the number of dimensions
 use core::borrow::Borrow;
-use core::ops::{Deref, DerefMut};
+use core::ops::{Deref, DerefMut, Not};
+use num::traits::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -101,8 +102,13 @@ unsafe impl Send for Rank {}
 unsafe impl Sync for Rank {}
 
 macro_rules! impl_std_ops {
+    ($(($trait:tt, $method:ident, $e:tt)),*) => {
+        $(
+           impl_std_ops!($trait, $method, $e);
+        )*
+    };
     ($trait:tt, $method:ident, $e:tt) => {
-        impl std::ops::$trait<usize> for Rank {
+        impl core::ops::$trait<usize> for Rank {
             type Output = Rank;
 
             fn $method(self, rhs: usize) -> Self::Output {
@@ -111,7 +117,16 @@ macro_rules! impl_std_ops {
             }
         }
 
-        impl std::ops::$trait<Rank> for Rank {
+        impl<'a> core::ops::$trait<usize> for &'a Rank {
+            type Output = Rank;
+
+            fn $method(self, rhs: usize) -> Self::Output {
+                let rank = self.0 $e rhs;
+                Rank(rank)
+            }
+        }
+
+        impl core::ops::$trait for Rank {
             type Output = Rank;
 
             fn $method(self, rhs: Rank) -> Self::Output {
@@ -120,7 +135,7 @@ macro_rules! impl_std_ops {
             }
         }
 
-        impl<'a> std::ops::$trait<Rank> for &'a Rank {
+        impl<'a> core::ops::$trait<Rank> for &'a Rank {
             type Output = Rank;
 
             fn $method(self, rhs: Rank) -> Self::Output {
@@ -129,7 +144,7 @@ macro_rules! impl_std_ops {
             }
         }
 
-        impl<'a> std::ops::$trait<&'a Rank> for Rank {
+        impl<'a> core::ops::$trait<&'a Rank> for Rank {
             type Output = Rank;
 
             fn $method(self, rhs: &'a Rank) -> Self::Output {
@@ -138,7 +153,7 @@ macro_rules! impl_std_ops {
             }
         }
 
-        impl<'a> std::ops::$trait<&'a Rank> for &'a Rank {
+        impl<'a> core::ops::$trait<&'a Rank> for &'a Rank {
             type Output = Rank;
 
             fn $method(self, rhs: &'a Rank) -> Self::Output {
@@ -146,12 +161,39 @@ macro_rules! impl_std_ops {
                 Rank(rank)
             }
         }
-    };
-    (many: $(($trait:tt, $method:ident, $e:tt)),*) => {
-        $(
-           impl_std_ops!($trait, $method, $e);
-        )*
     };
 }
 
-impl_std_ops!(many: (Add, add, +), (Sub, sub, -), (Mul, mul, *), (Div, div, /), (Rem, rem, %));
+impl_std_ops!((Add, add, +), (Sub, sub, -), (Mul, mul, *), (Div, div, /), (Rem, rem, %));
+
+impl Not for Rank {
+    type Output = Rank;
+
+    fn not(self) -> Self::Output {
+        Rank(!self.0)
+    }
+}
+
+impl Num for Rank {
+    type FromStrRadixErr = <usize as Num>::FromStrRadixErr;
+
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        usize::from_str_radix(str, radix).map(Rank)
+    }
+}
+
+impl One for Rank {
+    fn one() -> Self {
+        Self(1)
+    }
+}
+
+impl Zero for Rank {
+    fn zero() -> Self {
+        Self(0)
+    }
+
+    fn is_zero(&self) -> bool {
+        self.0 == 0
+    }
+}

@@ -39,15 +39,10 @@ where
     }
 }
 
-pub trait Operation {
-    type Kind;
-
-    fn kind(&self) -> Self::Kind;
-}
-
 pub(crate) mod prelude {
+    pub use super::{ApplyTo, ApplyWith, IntoOp};
+
     pub use super::binary::*;
     pub use super::kinds::Op;
     pub use super::unary::*;
-    pub use super::Operation;
 }

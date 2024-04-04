@@ -26,11 +26,11 @@ pub enum TensorExpr<A, B = A> {
 
 impl<A, B> TensorExpr<A, B> {
     pub fn binary(lhs: TensorBase<A>, rhs: TensorBase<B>, op: BinaryOp) -> Self {
-        TensorExpr::Binary(Box::new(lhs), Box::new(rhs), op)
+        Self::Binary(Box::new(lhs), Box::new(rhs), op)
     }
 
     pub fn binary_scalar(lhs: TensorBase<A>, rhs: B, op: BinaryOp) -> Self {
-        TensorExpr::BinaryScalar(Box::new(lhs), rhs, op)
+        Self::BinaryScalar(Box::new(lhs), rhs, op)
     }
 
     pub fn binary_scalar_c(
@@ -42,61 +42,54 @@ impl<A, B> TensorExpr<A, B> {
     }
 
     pub fn broadcast(tensor: TensorBase<A>, shape: Shape) -> Self {
-        TensorExpr::Broadcast(Box::new(tensor), shape)
+        Self::Broadcast(Box::new(tensor), shape)
     }
 
     pub fn matmul(lhs: TensorBase<A>, rhs: TensorBase<B>) -> Self {
-        TensorExpr::Matmul(Box::new(lhs), Box::new(rhs))
+        Self::Matmul(Box::new(lhs), Box::new(rhs))
     }
 
     pub fn reshape(tensor: TensorBase<A>, shape: Shape) -> Self {
-        TensorExpr::Reshape(Box::new(tensor), shape)
+        Self::Reshape(Box::new(tensor), shape)
     }
 
     pub fn shape(expr: ReshapeExpr<A>) -> Self {
-        TensorExpr::Shape(expr)
+        Self::Shape(expr)
     }
 
     pub fn swap_axes(tensor: TensorBase<A>, swap: Axis, with: Axis) -> Self {
-        TensorExpr::SwapAxes(Box::new(tensor), swap, with)
+        Self::SwapAxes(Box::new(tensor), swap, with)
     }
 
     pub fn transpose(scope: TensorBase<A>) -> Self {
-        TensorExpr::Transpose(Box::new(scope))
+        Self::Transpose(Box::new(scope))
     }
 
     pub fn unary(tensor: TensorBase<A>, op: UnaryOp) -> Self {
-        TensorExpr::Unary(Box::new(tensor), op)
+        Self::Unary(Box::new(tensor), op)
     }
-}
-impl<T> TensorExpr<T> {
-    pub fn lhs(self) -> Option<TensorBase<T>> {
+
+    pub fn lhs(self) -> Option<TensorBase<A>> {
         match self {
-            TensorExpr::Binary(lhs, _, _) => Some(*lhs),
-            TensorExpr::BinaryScalar(lhs, _, _) => Some(*lhs),
-            TensorExpr::Unary(lhs, _) => Some(*lhs),
-            TensorExpr::Broadcast(tensor, _) => Some(*tensor),
-            TensorExpr::Matmul(lhs, _) => Some(*lhs),
-            TensorExpr::Transpose(lhs) => Some(*lhs),
+            Self::Binary(lhs, _, _) => Some(*lhs),
+            Self::BinaryScalar(lhs, _, _) => Some(*lhs),
+            Self::Unary(lhs, _) => Some(*lhs),
+            Self::Broadcast(tensor, _) => Some(*tensor),
+            Self::Matmul(lhs, _) => Some(*lhs),
+            Self::Transpose(lhs) => Some(*lhs),
             _ => None,
         }
     }
 
-    pub fn rhs(self) -> Option<TensorBase<T>> {
+    pub fn rhs(self) -> Option<TensorBase<B>> {
         match self {
-            TensorExpr::Binary(_, rhs, _) => Some(*rhs),
-            TensorExpr::BinaryScalar(_, scalar, _) => Some(TensorBase::from_scalar(scalar)),
-            TensorExpr::Matmul(_, rhs) => Some(*rhs),
+            Self::Binary(_, rhs, _) => Some(*rhs),
+            Self::BinaryScalar(_, scalar, _) => Some(TensorBase::from_scalar(scalar)),
+            Self::Matmul(_, rhs) => Some(*rhs),
             _ => None,
         }
     }
-}
-
-impl<T> TensorExpr<T>
-where
-    T: Clone,
-{
-    pub fn view<'a>(&'a self) -> TensorExpr<&'a T> {
+    pub fn view<'a>(&'a self) -> TensorExpr<&'a A, &'a B> {
         match self {
             TensorExpr::Binary(lhs, rhs, op) => TensorExpr::binary(lhs.view(), rhs.view(), *op),
             TensorExpr::BinaryScalar(lhs, rhs, op) => {

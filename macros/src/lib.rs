@@ -22,7 +22,7 @@ use syn::parse_macro_input;
 ///
 /// # Examples
 ///
-/// ## Compute the gradient of a simple expression
+/// ### Basic arithmetic
 ///
 /// ```
 /// extern crate acme_macros as macros;
@@ -32,11 +32,25 @@ use syn::parse_macro_input;
 /// fn main() {
 ///     let x = 3f64;
 ///     let y = 4f64;
-///     let dx = autodiff!(x: x * y);
-///     let dy = autodiff!(y: x * y);
 ///
-///     assert_eq!(dx, y);
-///     assert_eq!(dy, x);
+///     assert_eq!(y, autodiff!(x: x * y));
+///     assert_eq!(x, autodiff!(y: x * y));
+///     assert_eq!(1f64, autodiff!(x: x + y));
+/// }
+/// ```
+///
+/// ### Trigonometric functions
+///
+/// ```
+/// extern crate acme_macros as macros;
+///
+/// use macros::autodiff;
+///
+/// fn main() {
+///     let x = 2f64;
+///     assert_eq!(autodiff!(x: x.cos()), -x.sin());
+///     assert_eq!(autodiff!(x: x.sin()), x.cos());
+///     assert_eq!(autodiff!(x: x.tan()), x.cos().powi(2).recip());
 /// }
 /// ```
 #[proc_macro]

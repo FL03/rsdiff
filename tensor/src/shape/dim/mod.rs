@@ -21,9 +21,9 @@ pub trait Dimension: IndexMut<usize, Output = usize> {
     type Pattern;
 
     fn as_slice(&self) -> &[usize];
-
+    /// Return the rank of the dimension; i.e. the number of axes.
     fn rank(&self) -> usize;
-
+    /// Return the size of the dimension; i.e. the number of elements.
     fn size(&self) -> usize;
 
     #[doc(hidden)]
@@ -65,7 +65,7 @@ pub(crate) mod utils {
         strides: &Stride,
     ) -> Result<(), ShapeError> {
         // Check condition 3.
-        let is_empty = dim.slice().iter().any(|&d| d == 0);
+        let is_empty = dim.as_slice().iter().any(|&d| d == 0);
         if is_empty && max_offset > data_len {
             return Err(ShapeError::OutOfBounds);
         }
@@ -84,7 +84,7 @@ pub(crate) mod utils {
     pub fn dim_stride_overlap(dim: &Shape, strides: &Stride) -> bool {
         let order = strides._fastest_varying_stride_order();
         let mut sum_prev_offsets = 0;
-        for &index in order.slice() {
+        for &index in order.as_slice() {
             let d = dim[index];
             let s = (strides[index] as isize).abs();
             match d {
@@ -123,7 +123,7 @@ pub(crate) mod utils {
 
         // Determine absolute difference in units of `A` between least and greatest
         // address accessible by moving along all axes.
-        let max_offset: usize = izip!(dim.slice(), strides.slice())
+        let max_offset: usize = izip!(dim.as_slice(), strides.as_slice())
             .try_fold(0usize, |acc, (&d, &s)| {
                 let s = s as isize;
                 // Calculate maximum possible absolute movement along this axis.
@@ -151,7 +151,7 @@ pub(crate) mod utils {
 
     pub fn size_of_shape_checked(dim: &Shape) -> Result<usize, ShapeError> {
         let size_nonzero = dim
-            .slice()
+            .as_slice()
             .iter()
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))

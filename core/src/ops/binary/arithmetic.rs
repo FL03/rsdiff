@@ -2,7 +2,7 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::BinaryOperation;
+use super::{BinOp, BoxedBinOp};
 use crate::ops::{Operator, OperatorKind};
 use num::traits::NumOps;
 #[cfg(feature = "serde")]
@@ -21,8 +21,8 @@ macro_rules! operator {
                 Self
             }
 
-            pub fn name(&self) -> String {
-                stringify!($op).to_lowercase()
+            pub fn name(&self) -> &str {
+                stringify!($op)
             }
         }
 
@@ -38,7 +38,7 @@ macro_rules! operator {
                 OperatorKind::$kind
             }
 
-            fn name(&self) -> String {
+            fn name(&self) -> &str {
                 self.name()
             }
         }
@@ -96,7 +96,7 @@ macro_rules! operators {
                 self.op().eval(lhs, rhs)
             }
 
-            pub fn op<A, B, C>(self) -> Box<dyn BinaryOperation<A, B, Output = C>>
+            pub fn op<A, B, C>(self) -> BoxedBinOp<A, B, C>
             where
                 A: NumOps<B, C>,
             {
@@ -107,7 +107,7 @@ macro_rules! operators {
                 }
             }
 
-            pub fn name(&self) -> String {
+            pub fn name(&self) -> &str {
                 match self {
                     $(
                         $group::$variant(op) => op.name(),
@@ -121,7 +121,7 @@ macro_rules! operators {
                 OperatorKind::Binary
             }
 
-            fn name(&self) -> String {
+            fn name(&self) -> &str {
                 self.name()
             }
         }
@@ -138,7 +138,7 @@ macro_rules! impl_binary_op {
     ($op:ident, $bound:ident, $operator:tt) => {
         operator!($op, Binary);
 
-        impl<A, B, C> BinaryOperation<A, B> for $op
+        impl<A, B, C> BinOp<A, B> for $op
         where
             A: core::ops::$bound<B, Output = C>,
         {
@@ -152,7 +152,7 @@ macro_rules! impl_binary_op {
     (expr $op:ident, $bound:ident, $exp:expr) => {
         operator!($op, Binary);
 
-        impl<A, B, C> BinaryOperation<A, B> for $op
+        impl<A, B, C> BinOp<A, B> for $op
         where
             A: core::ops::$bound<B, Output = C>,
         {

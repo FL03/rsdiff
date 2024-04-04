@@ -21,10 +21,10 @@ pub type TensorResult<T = ()> = std::result::Result<T, TensorError>;
 #[strum(serialize_all = "snake_case")]
 pub enum TensorError {
     Arithmetic(ArithmeticError),
-    Indexing(String),
     Shape(ShapeError),
     Singular,
     NotScalar,
+    Unknown(String),
 }
 
 unsafe impl Send for TensorError {}
@@ -35,7 +35,13 @@ impl std::error::Error for TensorError {}
 
 impl From<&str> for TensorError {
     fn from(error: &str) -> Self {
-        TensorError::Indexing(error.to_string())
+        TensorError::Unknown(error.to_string())
+    }
+}
+
+impl From<String> for TensorError {
+    fn from(error: String) -> Self {
+        TensorError::Unknown(error)
     }
 }
 
@@ -69,14 +75,30 @@ pub enum ArithmeticError {
 }
 
 macro_rules! into_tensor_error {
-    ($error:ident, $kind:ident) => {
+    ($(($error:ident => $kind:ident)),*) => {
+        $(into_tensor_error!($error => $kind);)*
+    };
+    ($error:ident => $kind:ident) => {
         impl From<$error> for TensorError {
             fn from(error: $error) -> Self {
                 TensorError::$kind(error)
             }
         }
+
+        impl TryFrom<TensorError> for $error {
+            type Error = TensorError;
+
+            fn try_from(error: TensorError) -> TensorResult<$error> {
+                match error {
+                    TensorError::$kind(error) => Ok(error),
+                    error => Err(error),
+                }
+            }
+        }
     };
 }
 
-into_tensor_error!(ArithmeticError, Arithmetic);
-into_tensor_error!(ShapeError, Shape);
+into_tensor_error!(
+    (ArithmeticError => Arithmetic),
+    (ShapeError => Shape)
+);

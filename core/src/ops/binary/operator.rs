@@ -3,7 +3,43 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::BinaryOp;
+use core::marker::PhantomData;
+use core::mem;
 
+pub trait BinArgs {
+    type Lhs;
+    type Rhs;
+
+    fn lhs(&self) -> &Self::Lhs;
+
+    fn rhs(&self) -> &Self::Rhs;
+}
+
+impl<A, B> BinArgs for (A, B) {
+    type Lhs = A;
+    type Rhs = B;
+
+    fn lhs(&self) -> &Self::Lhs {
+        &self.0
+    }
+
+    fn rhs(&self) -> &Self::Rhs {
+        &self.1
+    }
+}
+
+impl<A, B> BinArgs for BinaryArgs<A, B> {
+    type Lhs = A;
+    type Rhs = B;
+
+    fn lhs(&self) -> &Self::Lhs {
+        self.lhs()
+    }
+
+    fn rhs(&self) -> &Self::Rhs {
+        self.rhs()
+    }
+}
 pub struct BinaryArgs<A, B = A> {
     pub lhs: A,
     pub rhs: B,
@@ -33,7 +69,7 @@ impl<A, B> BinaryArgs<A, B> {
 
 impl<T> BinaryArgs<T, T> {
     pub fn swap(&mut self) {
-        std::mem::swap(&mut self.lhs, &mut self.rhs);
+        mem::swap(&mut self.lhs, &mut self.rhs);
     }
 }
 
@@ -69,8 +105,12 @@ where
     }
 }
 
-pub struct BinaryOperator<A, B = A> {
-    pub args: BinaryArgs<A, B>,
+pub struct BinaryOperator<Args, C>
+where
+    Args: BinArgs,
+{
+    pub args: Args,
     pub communitative: bool,
     pub op: BinaryOp,
+    pub output: PhantomData<C>,
 }

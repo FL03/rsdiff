@@ -6,8 +6,8 @@
 //!
 //! A computational graph relies on weighted nodes to represent constants, operations, and variables.
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
+use crate::id::EntryId;
 use crate::ops::Operations;
-use acme::id::AtomicId;
 use petgraph::prelude::NodeIndex;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Node {
-    id: AtomicId,
+    id: EntryId,
     inputs: Vec<NodeIndex>,
     name: String,
     op: Option<Operations>,
@@ -24,7 +24,7 @@ pub struct Node {
 impl Node {
     pub fn new(name: impl ToString) -> Self {
         Self {
-            id: AtomicId::new(),
+            id: EntryId::new(),
             inputs: Vec::new(),
             name: name.to_string(),
             op: None,

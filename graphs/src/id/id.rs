@@ -4,6 +4,7 @@
 */
 use super::EntryId;
 use crate::NodeIndex;
+use core::fmt;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -40,11 +41,11 @@ where
     }
 }
 
-impl<Idx> std::fmt::Display for Id<Idx>
+impl<Idx> fmt::Display for Id<Idx>
 where
-    Idx: std::fmt::Display,
+    Idx: fmt::Display,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if f.alternate() {
             write!(f, "{}.{}", self.index(), self.id)
         } else {

@@ -8,10 +8,11 @@ use super::DynamicGraph;
 use crate::ops::*;
 use crate::prelude::GraphResult as Result;
 use crate::NodeIndex;
+
+use core::ops::{Index, Neg};
 use num::traits::NumAssign;
 use petgraph::algo::toposort;
 use std::collections::HashMap;
-use std::ops::{Index, Neg};
 
 pub struct Dcg<T> {
     store: DynamicGraph<T>,

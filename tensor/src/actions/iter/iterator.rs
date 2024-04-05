@@ -46,20 +46,13 @@ impl<'a, T> From<&'a TensorBase<T>> for Iter<'a, T> {
     }
 }
 
-#[allow(dead_code)]
-pub struct IterMut<'a, T> {
-    scope: Option<&'a mut T>,
+pub struct IterMut<'a, T: 'a> {
     strides: IndexIter<'a>,
     tensor: &'a mut TensorBase<T>,
 }
-#[allow(dead_code)]
 impl<'a, T> IterMut<'a, T> {
     pub fn new(strides: IndexIter<'a>, tensor: &'a mut TensorBase<T>) -> Self {
-        Self {
-            scope: None,
-            strides,
-            tensor,
-        }
+        Self { strides, tensor }
     }
 }
 
@@ -68,6 +61,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let (_pos, _idx) = self.strides.next()?;
+        let _scope = self.tensor.get_by_index_mut(_idx);
         unimplemented!()
     }
 }

@@ -116,6 +116,14 @@ impl<T> TensorBase<T> {
             op: BackpropOp::none(),
         }
     }
+    /// Return a mutable pointer to the tensor's data.
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        self.data_mut().as_mut_ptr()
+    }
+    /// Return a pointer to the tensor's data.
+    pub fn as_ptr(&self) -> *const T {
+        self.data().as_ptr()
+    }
     /// Return a reference to the tensor's data.
     pub fn as_slice(&self) -> &[T] {
         &self.data
@@ -123,6 +131,16 @@ impl<T> TensorBase<T> {
     /// Return a mutable reference to the tensor's data.
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         &mut self.data
+    }
+    /// Assign the values of another tensor to this tensor.
+    pub fn assign(&mut self, other: &Self)
+    where
+        T: Clone,
+    {
+        self.data_mut()
+            .iter_mut()
+            .zip(other.data())
+            .for_each(|(a, b)| *a = b.clone());
     }
     /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
@@ -227,6 +245,11 @@ impl<T> TensorBase<T> {
     pub fn rank(&self) -> Rank {
         self.shape().rank()
     }
+    /// Set the value of the tensor at the specified index
+    pub fn set(&mut self, index: impl AsRef<[usize]>, value: T) {
+        let i = self.layout().index(index);
+        self.data_mut()[i] = value;
+    }
     /// An owned reference of the tensors [Shape]
     pub fn shape(&self) -> &Shape {
         self.layout().shape()
@@ -278,9 +301,22 @@ impl<T> TensorBase<T> {
     }
 
     pub unsafe fn with_shape_unchecked(mut self, shape: impl IntoShape) -> Self {
-        self.layout = Layout::contiguous(shape);
+        self.layout = self.layout.with_shape_c(shape);
         self
     }
+}
+
+impl<'a, T> TensorBase<&'a T> {
+    // pub fn as_tensor(&self) -> TensorBase<T> where T: Copy {
+    //     let store = self.data.iter().copied().collect();
+    //     TensorBase {
+    //         id: self.id,
+    //         kind: self.kind,
+    //         layout: self.layout.clone(),
+    //         op: self.op.clone(),
+    //         data: store,
+    //     }
+    // }
 }
 
 impl<T> TensorBase<T> {
@@ -292,13 +328,12 @@ impl<T> TensorBase<T> {
     }
 
     pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
-        let store = self.data.iter().collect();
         TensorBase {
-            id: self.id,
-            kind: self.kind,
-            layout: self.layout.clone(),
-            op: self.op.view(),
-            data: store,
+            id: self.id(),
+            kind: self.kind(),
+            layout: self.layout().clone(),
+            op: self.op().view(),
+            data: self.data().iter().collect(),
         }
     }
 }

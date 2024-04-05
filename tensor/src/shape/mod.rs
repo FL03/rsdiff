@@ -15,6 +15,7 @@ pub(crate) mod rank;
 pub(crate) mod shape;
 pub(crate) mod stride;
 
+#[doc(hidden)]
 pub mod dim;
 
 pub trait IntoShape {
@@ -40,12 +41,11 @@ pub(crate) mod prelude {
     pub use super::IntoShape;
 
     pub use super::axis::{Axis, IntoAxis};
-    pub use super::dim::*;
-    pub use super::error::*;
+    pub use super::error::{ShapeError, ShapeResult};
     pub use super::layout::Layout;
     pub use super::rank::{IntoRank, Rank};
-    pub use super::shape::*;
-    pub use super::stride::*;
+    pub use super::shape::Shape;
+    pub use super::stride::{IntoStride, Stride};
 }
 
 #[cfg(test)]

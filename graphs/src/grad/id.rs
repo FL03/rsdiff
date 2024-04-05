@@ -2,11 +2,12 @@
     Appellation: id <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use acme::id::Id;
+use crate::id::Id;
+use core::fmt;
+use core::marker::PhantomData;
+use core::ops::Deref;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::marker::PhantomData;
-use std::ops::Deref;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
@@ -28,9 +29,9 @@ impl<T> GradientId<T> {
     }
 }
 
-impl<T> std::fmt::Display for GradientId<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.inner)
+impl<T> fmt::Display for GradientId<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.inner)
     }
 }
 

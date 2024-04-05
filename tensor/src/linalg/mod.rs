@@ -5,23 +5,16 @@
 //! # Linear Algebra
 //!
 //!
+pub use self::specs::*;
+
+pub(crate) mod specs;
+
 pub mod tri;
 pub mod uplo;
 
-pub trait Inverse {
-    fn inv(&self) -> Self;
-}
-
-/// Matrix multiplication
-pub trait Matmul<Rhs = Self> {
-    type Output;
-
-    fn matmul(&self, rhs: &Rhs) -> Self::Output;
-}
-
 pub(crate) mod prelude {
+    pub use super::specs::*;
     pub use super::uplo::UPLO;
-    pub use super::{Inverse, Matmul};
 }
 
 #[cfg(test)]

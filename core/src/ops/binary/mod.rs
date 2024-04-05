@@ -9,7 +9,28 @@ pub(crate) mod kinds;
 pub(crate) mod operator;
 pub(crate) mod specs;
 
-pub type BoxedBinOp<A, B, C> = Box<dyn BinOp<A, B, Output = C>>;
+pub type BoxedBinOp<A, B = A, C = A> = Box<dyn BinOp<A, B, Output = C>>;
+
+#[derive(Clone, Debug)]
+#[allow(dead_code)]
+enum Bop<Kind>
+where
+    Kind: BinaryOperand,
+{
+    Custom { name: String, op: Kind },
+}
+
+#[allow(dead_code)]
+pub(crate) trait BinaryOperand {
+    type Args: BinArgs;
+    type Output;
+
+    fn eval(
+        &self,
+        lhs: <Self::Args as BinArgs>::Lhs,
+        rhs: <Self::Args as BinArgs>::Rhs,
+    ) -> Self::Output;
+}
 
 pub trait BinOp<A, B = A> {
     type Output;

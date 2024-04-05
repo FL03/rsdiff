@@ -45,6 +45,6 @@ impl From<UnaryOp> for Op {
     }
 }
 
-pub enum Expr {
-    Binary(BinaryOperator<Box<dyn std::any::Any>>),
+pub enum Expr<A, B, C> {
+    Binary(BinaryOperator<(A, B), C>),
 }

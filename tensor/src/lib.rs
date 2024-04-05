@@ -70,6 +70,8 @@ pub mod prelude {
     #[doc(inline)]
     pub use crate::specs::prelude::*;
     #[doc(inline)]
+    pub use crate::stats::prelude::*;
+    #[doc(inline)]
     pub use crate::types::prelude::*;
     pub use crate::utils::*;
     #[doc(inline)]

@@ -8,6 +8,10 @@ use crate::shape::{Rank, Shape, Stride};
 pub trait NdTensor {
     type Data: TensorData;
 
+    fn as_mut_ptr(&mut self) -> *mut <Self::Data as TensorData>::Elem;
+
+    fn as_ptr(&self) -> *const <Self::Data as TensorData>::Elem;
+
     fn id(&self) -> TensorId;
 
     fn layout(&self) -> &Layout;

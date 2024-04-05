@@ -11,8 +11,6 @@ extern crate alloc;
 // pub use self::utils::*;
 
 #[macro_use]
-pub(crate) mod seal;
-#[macro_use]
 pub(crate) mod utils;
 
 pub mod error;

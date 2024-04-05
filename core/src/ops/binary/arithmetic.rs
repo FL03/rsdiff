@@ -10,6 +10,11 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 macro_rules! operator {
+    ($kind:ident: $($op:ident),*) => {
+        $(
+            operator!($op, $kind);
+        )*
+    };
     ($op:ident, $kind:ident) => {
 
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -43,15 +48,11 @@ macro_rules! operator {
             }
         }
     };
-    ($kind:ident: $($op:ident),*) => {
-        $(
-            operator!($op, $kind);
-        )*
-    };
+
 }
 
 macro_rules! operators {
-    ($group:ident; {$($variant:ident: $op:ident => $method:ident),*}) => {
+    ($group:ident: [$(($variant:ident, $op:ident, $method:ident)),*]) => {
         #[derive(
             Clone,
             Copy,
@@ -148,7 +149,7 @@ macro_rules! impl_binary_op {
             }
         }
     };
-    (other: $op:ident, $bound:tt, $call:ident) => {
+    (other: $op:ident, $bound:ident, $call:ident) => {
         operator!($op, Binary);
 
         impl<A, B, C> BinOp<A, B> for $op
@@ -164,13 +165,21 @@ macro_rules! impl_binary_op {
     };
 }
 
-operators!(Arithmetic; {Add: Addition => add, Div: Division => div, Mul: Multiplication => mul, Rem: Remainder => rem, Sub: Subtraction => sub});
-
 impl_binary_op!((Addition, Add, +), (Division, Div, /), (Multiplication, Mul, *), (Remainder, Rem, %), (Subtraction, Sub, -));
 
 use num::traits::Pow;
 
 impl_binary_op!(other: Power, Pow, pow);
+
+operators!(
+    Arithmetic: [
+        (Add, Addition, add),
+        (Div, Division, div),
+        (Mul, Multiplication, mul),
+        (Rem, Remainder, rem),
+        (Sub, Subtraction, sub)
+    ]
+);
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {

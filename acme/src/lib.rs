@@ -23,6 +23,9 @@ pub use acme_macros::*;
 pub use acme_tensor as tensor;
 
 pub mod prelude {
+    #[cfg(feature = "tensor")]
+    #[doc(inline)]
+    pub use crate::tensor::prelude::*;
     #[doc(inline)]
     pub use acme_core::prelude::*;
     #[cfg(feature = "derive")]
@@ -32,7 +35,4 @@ pub mod prelude {
     pub use acme_graphs::prelude::*;
     #[cfg(feature = "macros")]
     pub use acme_macros::*;
-    #[cfg(feature = "tensor")]
-    #[doc(inline)]
-    pub use acme_tensor::prelude::*;
 }

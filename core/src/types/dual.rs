@@ -22,30 +22,35 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 pub struct Dual<T> {
     dual: T,
-    real: T,
+    value: T,
 }
 
 impl<T> Dual<T> {
-    pub fn new(real: T, dual: T) -> Self {
-        Self { dual, real }
+    pub fn new(value: T, dual: T) -> Self {
+        Self { dual, value }
     }
 
-    pub fn real(real: T) -> Self
+    pub fn from_real(value: T) -> Self
     where
         T: Default,
     {
-        Self {
-            dual: T::default(),
-            real,
-        }
+        Self::new(value, T::default())
+    }
+
+    pub fn dual(&self) -> &T {
+        &self.dual
+    }
+
+    pub fn dual_mut(&mut self) -> &mut T {
+        &mut self.dual
     }
 
     pub fn value(&self) -> &T {
-        &self.real
+        &self.value
     }
 
     pub fn value_mut(&mut self) -> &mut T {
-        &mut self.real
+        &mut self.value
     }
 }
 
@@ -54,7 +59,7 @@ where
     T: std::fmt::Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "({}, {})", self.real, self.dual)
+        write!(f, "({}, {})", self.value, self.dual)
     }
 }
 
@@ -62,7 +67,7 @@ impl<T> EvaluateOnce for Dual<T> {
     type Output = T;
 
     fn eval_once(self) -> Self::Output {
-        self.real
+        self.value
     }
 }
 
@@ -73,7 +78,7 @@ where
     type Gradient = Dual<T>;
 
     fn grad(&self, _: T) -> Self::Gradient {
-        Dual::real(T::default())
+        Dual::from_real(T::default())
     }
 }
 
@@ -84,7 +89,7 @@ where
     type Output = Dual<T>;
 
     fn neg(self) -> Self::Output {
-        Dual::new(-self.real, -self.dual)
+        Dual::new(-self.value, -self.dual)
     }
 }
 
@@ -95,7 +100,7 @@ where
     type Output = Dual<T>;
 
     fn not(self) -> Self::Output {
-        Dual::new(!self.real, !self.dual)
+        Dual::new(!self.value, !self.dual)
     }
 }
 
@@ -108,7 +113,7 @@ where
     T: Default,
 {
     fn from(value: T) -> Self {
-        Self::real(value)
+        Self::from_real(value)
     }
 }
 
@@ -120,8 +125,8 @@ where
 
     fn div(self, rhs: Self) -> Self::Output {
         Dual::new(
-            self.real / rhs.real,
-            (self.dual * rhs.real - self.real * rhs.dual) / (rhs.real * rhs.real),
+            self.value / rhs.value,
+            (self.dual * rhs.value - self.value * rhs.dual) / (rhs.value * rhs.value),
         )
     }
 }
@@ -133,7 +138,7 @@ where
     type Output = Dual<T>;
 
     fn div(self, rhs: T) -> Self::Output {
-        Dual::new(self.real / rhs, self.dual / rhs)
+        Dual::new(self.value / rhs, self.dual / rhs)
     }
 }
 
@@ -142,8 +147,8 @@ where
     T: Copy + ops::DivAssign + num::traits::NumOps,
 {
     fn div_assign(&mut self, rhs: Self) {
-        self.real /= rhs.real;
-        self.dual = (self.dual * rhs.real - self.real * rhs.dual) / (rhs.real * rhs.real);
+        self.value /= rhs.value;
+        self.dual = (self.dual * rhs.value - self.value * rhs.dual) / (rhs.value * rhs.value);
     }
 }
 
@@ -152,7 +157,7 @@ where
     T: Copy + ops::DivAssign,
 {
     fn div_assign(&mut self, rhs: T) {
-        self.real /= rhs;
+        self.value /= rhs;
         self.dual /= rhs;
     }
 }
@@ -164,7 +169,7 @@ where
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(Dual::real)
+        T::from_str_radix(str, radix).map(Dual::from_real)
     }
 }
 
@@ -177,7 +182,7 @@ where
     }
 
     fn is_one(&self) -> bool {
-        self.real.is_one()
+        self.value.is_one()
     }
 }
 
@@ -190,7 +195,7 @@ where
     }
 
     fn is_zero(&self) -> bool {
-        self.real.is_zero()
+        self.value.is_zero()
     }
 }
 
@@ -199,78 +204,78 @@ macro_rules! impl_binary_op {
         $(impl_binary_op!($op, $method, $e);)*
     };
     ($trait:ident, $method:ident, $e:tt) => {
-        impl<T> std::ops::$trait<Dual<T>> for Dual<T>
+        impl<T> ops::$trait<Dual<T>> for Dual<T>
         where
-            T: Copy + std::ops::$trait<T, Output = T>,
+            T: Copy + ops::$trait<T, Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: Self) -> Self::Output {
-                let real = self.real $e rhs.real;
+                let real = self.value $e rhs.value;
                 let dual = self.dual $e rhs.dual;
                 Dual::new(real, dual)
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a Dual<T>> for Dual<T>
+        impl<'a, T> ops::$trait<&'a Dual<T>> for Dual<T>
         where
-            T: Copy + std::ops::$trait<T, Output = T>,
+            T: Copy + ops::$trait<T, Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: &'a Dual<T>) -> Self::Output {
-                let real = self.real $e rhs.real;
+                let real = self.value $e rhs.value;
                 let dual = self.dual $e rhs.dual;
                 Dual::new(real, dual)
             }
         }
 
-        impl<'a, T> std::ops::$trait<Dual<T>> for &'a Dual<T>
+        impl<'a, T> ops::$trait<Dual<T>> for &'a Dual<T>
         where
-            T: Copy + std::ops::$trait<T, Output = T>,
+            T: Copy + ops::$trait<T, Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: Dual<T>) -> Self::Output {
-                let real = self.real $e rhs.real;
+                let real = self.value $e rhs.value;
                 let dual = self.dual $e rhs.dual;
                 Dual::new(real, dual)
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a Dual<T>> for &'a Dual<T>
+        impl<'a, T> ops::$trait<&'a Dual<T>> for &'a Dual<T>
         where
-            T: Copy + std::ops::$trait<T, Output = T>,
+            T: Copy + ops::$trait<T, Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: &'a Dual<T>) -> Self::Output {
-                let real = self.real $e rhs.real;
+                let real = self.value $e rhs.value;
                 let dual = self.dual $e rhs.dual;
                 Dual::new(real, dual)
             }
         }
 
-        impl<T> std::ops::$trait<T> for Dual<T>
+        impl<T> ops::$trait<T> for Dual<T>
         where
-            T: Copy + std::ops::$trait<Output = T>,
+            T: Copy + ops::$trait<Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: T) -> Self::Output {
-                let real = self.real $e rhs;
+                let real = self.value $e rhs;
                 Dual::new(real, self.dual)
             }
         }
 
-        impl<'a, T> std::ops::$trait<T> for &'a Dual<T>
+        impl<'a, T> ops::$trait<T> for &'a Dual<T>
         where
-            T: Copy + std::ops::$trait<T, Output = T>,
+            T: Copy + ops::$trait<T, Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: T) -> Self::Output {
-                let real = self.real $e rhs;
+                let real = self.value $e rhs;
                 Dual::new(real, self.dual)
             }
         }
@@ -282,32 +287,32 @@ macro_rules! impl_assign_op {
         $(impl_assign_op!($op, $method, $e);)*
     };
     ($trait:ident, $method:ident, $e:tt) => {
-        impl<T> std::ops::$trait<Dual<T>> for Dual<T>
+        impl<T> ops::$trait<Dual<T>> for Dual<T>
         where
-            T: Copy + std::ops::$trait<T>,
+            T: Copy + ops::$trait<T>,
         {
             fn $method(&mut self, rhs: Self) {
-                self.real $e rhs.real;
+                self.value $e rhs.value;
                 self.dual $e rhs.dual;
             }
         }
 
-        impl<'a, T> std::ops::$trait<&'a Dual<T>> for Dual<T>
+        impl<'a, T> ops::$trait<&'a Dual<T>> for Dual<T>
         where
-            T: Copy + std::ops::$trait<T>,
+            T: Copy + ops::$trait<T>,
         {
             fn $method(&mut self, rhs: &'a Dual<T>) {
-                self.real $e rhs.real;
+                self.value $e rhs.value;
                 self.dual $e rhs.dual;
             }
         }
 
-        impl<T> std::ops::$trait<T> for Dual<T>
+        impl<T> ops::$trait<T> for Dual<T>
         where
-            T: Copy + std::ops::$trait,
+            T: Copy + ops::$trait,
         {
             fn $method(&mut self, rhs: T) {
-                self.real $e rhs;
+                self.value $e rhs;
             }
         }
     };

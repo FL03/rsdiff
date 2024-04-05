@@ -37,19 +37,12 @@ pub trait Dimension: IndexMut<usize, Output = usize> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) mod utils {
     use crate::index::{Ix, Ixs};
     use crate::shape::{Shape, ShapeError, Stride};
     use core::mem;
 
-    /// Calculate offset from `Ix` stride converting sign properly
-    #[inline(always)]
-    pub fn stride_offset(n: Ix, stride: Ix) -> isize {
-        (n as isize) * (stride as Ixs)
-    }
-
-    pub(crate) fn can_index_slice<A>(
+    pub fn can_index_slice<A>(
         data: &[A],
         shape: &Shape,
         stride: &Stride,
@@ -57,29 +50,6 @@ pub(crate) mod utils {
         // Check conditions 1 and 2 and calculate `max_offset`.
         let max_offset = max_abs_offset_check_overflow::<A>(shape, stride)?;
         can_index_slice_impl(max_offset, data.len(), shape, stride)
-    }
-
-    fn can_index_slice_impl(
-        max_offset: usize,
-        data_len: usize,
-        dim: &Shape,
-        strides: &Stride,
-    ) -> Result<(), ShapeError> {
-        // Check condition 3.
-        let is_empty = dim.as_slice().iter().any(|&d| d == 0);
-        if is_empty && max_offset > data_len {
-            return Err(ShapeError::OutOfBounds);
-        }
-        if !is_empty && max_offset >= data_len {
-            return Err(ShapeError::OutOfBounds);
-        }
-
-        // Check condition 4.
-        if !is_empty && dim_stride_overlap(dim, strides) {
-            return Err(ShapeError::Unsupported);
-        }
-
-        Ok(())
     }
 
     pub fn dim_stride_overlap(dim: &Shape, strides: &Stride) -> bool {
@@ -107,6 +77,49 @@ pub(crate) mod utils {
         strides: &Stride,
     ) -> Result<usize, ShapeError> {
         max_abs_offset_check_overflow_impl(mem::size_of::<A>(), dim, strides)
+    }
+
+    pub fn size_of_shape_checked(dim: &Shape) -> Result<usize, ShapeError> {
+        let size_nonzero = dim
+            .as_slice()
+            .iter()
+            .filter(|&&d| d != 0)
+            .try_fold(1usize, |acc, &d| acc.checked_mul(d))
+            .ok_or_else(|| ShapeError::Overflow)?;
+        if size_nonzero > ::std::isize::MAX as usize {
+            Err(ShapeError::Overflow)
+        } else {
+            Ok(dim.size())
+        }
+    }
+
+    /// Calculate offset from `Ix` stride converting sign properly
+    #[inline(always)]
+    pub fn stride_offset(n: Ix, stride: Ix) -> isize {
+        (n as isize) * (stride as Ixs)
+    }
+
+    fn can_index_slice_impl(
+        max_offset: usize,
+        data_len: usize,
+        dim: &Shape,
+        strides: &Stride,
+    ) -> Result<(), ShapeError> {
+        // Check condition 3.
+        let is_empty = dim.as_slice().iter().any(|&d| d == 0);
+        if is_empty && max_offset > data_len {
+            return Err(ShapeError::OutOfBounds);
+        }
+        if !is_empty && max_offset >= data_len {
+            return Err(ShapeError::OutOfBounds);
+        }
+
+        // Check condition 4.
+        if !is_empty && dim_stride_overlap(dim, strides) {
+            return Err(ShapeError::Unsupported);
+        }
+
+        Ok(())
     }
 
     fn max_abs_offset_check_overflow_impl(
@@ -148,19 +161,5 @@ pub(crate) mod utils {
         }
 
         Ok(max_offset)
-    }
-
-    pub fn size_of_shape_checked(dim: &Shape) -> Result<usize, ShapeError> {
-        let size_nonzero = dim
-            .as_slice()
-            .iter()
-            .filter(|&&d| d != 0)
-            .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| ShapeError::Overflow)?;
-        if size_nonzero > ::std::isize::MAX as usize {
-            Err(ShapeError::Overflow)
-        } else {
-            Ok(dim.size())
-        }
     }
 }

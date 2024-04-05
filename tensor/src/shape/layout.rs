@@ -12,15 +12,25 @@ use serde::{Deserialize, Serialize};
 pub struct Layout {
     pub(crate) offset: usize,
     pub(crate) shape: Shape,
-    pub(crate) stride: Stride,
+    pub(crate) strides: Stride,
 }
 
 impl Layout {
-    pub fn new(offset: usize, shape: impl IntoShape, stride: impl IntoStride) -> Self {
+    pub fn new(offset: usize, shape: impl IntoShape, strides: impl IntoStride) -> Self {
         Self {
             offset,
             shape: shape.into_shape(),
-            stride: stride.into_stride(),
+            strides: strides.into_stride(),
+        }
+    }
+    /// Create a new layout with a contiguous stride.
+    pub fn contiguous(shape: impl IntoShape) -> Self {
+        let shape = shape.into_shape();
+        let stride = shape.stride_contiguous();
+        Self {
+            offset: 0,
+            shape,
+            strides: stride,
         }
     }
     /// Broadcast the layout to a new shape.
@@ -48,27 +58,16 @@ impl Layout {
         }
         Ok(Self::new(self.offset, shape, stride))
     }
-    /// Create a new layout with a contiguous stride.
-    pub fn contiguous(shape: impl IntoShape) -> Self {
-        let shape = shape.into_shape();
-        let stride = shape.stride_contiguous();
-        Self {
-            offset: 0,
-            shape,
-            stride,
-        }
-    }
-
     /// Determine if the current layout is contiguous or not.
     pub fn is_contiguous(&self) -> bool {
-        self.shape().is_contiguous(&self.stride)
+        self.shape().is_contiguous(&self.strides)
     }
-
-    /// Determine if the current layout is square or not.
+    /// A function for determining if the layout is square.
+    /// An n-dimensional object is square if all of its dimensions are equal.
     pub fn is_square(&self) -> bool {
         self.shape().is_square()
     }
-    /// Get a peek at the offset of the layout.
+    /// Peek the offset of the layout.
     pub fn offset(&self) -> usize {
         self.offset
     }
@@ -76,13 +75,13 @@ impl Layout {
     /// element.
     pub fn offset_from_low_addr_ptr_to_logical_ptr(&self) -> usize {
         let offset =
-            izip!(self.shape().as_slice(), self.strides().as_slice()).fold(0, |_offset, (d, s)| {
+            izip!(self.shape().as_slice(), self.strides().as_slice()).fold(0, |acc, (d, s)| {
                 let d = *d as isize;
                 let s = *s as isize;
                 if s < 0 && d > 1 {
-                    _offset - s * (d - 1)
+                    acc - s * (d - 1)
                 } else {
-                    _offset
+                    acc
                 }
             });
         debug_assert!(offset >= 0);
@@ -90,25 +89,30 @@ impl Layout {
     }
     /// Return the rank (number of dimensions) of the layout.
     pub fn rank(&self) -> Rank {
-        debug_assert_eq!(self.stride.len(), *self.shape.rank());
+        debug_assert_eq!(self.strides.len(), *self.shape.rank());
         self.shape.rank()
     }
+    /// Remove an axis from the current layout, returning the new layout.
     pub fn remove_axis(&self, axis: Axis) -> Self {
         Self {
             offset: self.offset,
             shape: self.shape().remove_axis(axis),
-            stride: self.strides().remove_axis(axis),
+            strides: self.strides().remove_axis(axis),
         }
     }
     /// Reshape the layout to a new shape.
     pub fn reshape(&mut self, shape: impl IntoShape) {
         self.shape = shape.into_shape();
-        self.stride = self.shape.stride_contiguous();
+        self.strides = self.shape.stride_contiguous();
+    }
+    /// Reverse the order of the axes.
+    pub fn reverse(&mut self) {
+        self.shape.reverse();
+        self.strides.reverse();
     }
     /// Reverse the order of the axes.
     pub fn reverse_axes(mut self) -> Layout {
-        self.shape.reverse();
-        self.stride.reverse();
+        self.reverse();
         self
     }
     /// Get a reference to the shape of the layout.
@@ -121,14 +125,14 @@ impl Layout {
     }
     /// Get a reference to the stride of the layout.
     pub const fn strides(&self) -> &Stride {
-        &self.stride
+        &self.strides
     }
     /// Swap the axes of the layout.
     pub fn swap_axes(&self, a: Axis, b: Axis) -> Layout {
         Layout {
             offset: self.offset,
             shape: self.shape.swap_axes(a, b),
-            stride: self.stride.swap_axes(a, b),
+            strides: self.strides.swap_axes(a, b),
         }
     }
     /// Transpose the layout.
@@ -141,9 +145,19 @@ impl Layout {
         self
     }
 
-    pub fn with_shape(mut self, shape: impl IntoShape) -> Self {
+    pub fn with_shape_c(mut self, shape: impl IntoShape) -> Self {
         self.shape = shape.into_shape();
-        self.stride = self.shape.stride_contiguous();
+        self.strides = self.shape.stride_contiguous();
+        self
+    }
+
+    pub unsafe fn with_shape_unchecked(mut self, shape: impl IntoShape) -> Self {
+        self.shape = shape.into_shape();
+        self
+    }
+
+    pub unsafe fn with_strides_unchecked(mut self, stride: impl IntoStride) -> Self {
+        self.strides = stride.into_stride();
         self
     }
 }

@@ -19,13 +19,6 @@ pub trait ApplyTo<T> {
     fn apply_to(&self, other: T) -> Self::Output;
 }
 
-pub trait ApplyWith<T> {
-    type Output;
-    type With;
-
-    fn apply_with(&self, other: T, with: Self::With) -> Self::Output;
-}
-
 pub trait IntoOp {
     fn into_op(self) -> Op;
 }
@@ -40,7 +33,7 @@ where
 }
 
 pub(crate) mod prelude {
-    pub use super::{ApplyTo, ApplyWith, IntoOp};
+    pub use super::{ApplyTo, IntoOp};
 
     pub use super::binary::*;
     pub use super::kinds::Op;

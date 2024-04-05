@@ -6,7 +6,9 @@
 //!
 //!
 
-pub trait Field {}
+pub trait Field {
+    type Elem;
+}
 
 #[cfg(test)]
 mod tests {}

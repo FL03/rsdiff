@@ -2,15 +2,13 @@
     Appellation: specs <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{affine::*, moves::*, ndtensor::*, scalar::*};
+pub use self::{moves::*, ndtensor::*, scalar::*};
 
-pub(crate) mod affine;
 pub(crate) mod moves;
 pub(crate) mod ndtensor;
 pub(crate) mod scalar;
 
 pub(crate) mod prelude {
-    pub use super::affine::*;
     pub use super::moves::*;
     pub use super::ndtensor::*;
     pub use super::scalar::*;

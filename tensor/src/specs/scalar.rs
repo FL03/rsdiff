@@ -27,7 +27,27 @@ pub trait Scalar:
     type Real: Scalar<Complex = Self::Complex, Real = Self::Real>
         + NumOps<Self::Complex, Self::Complex>;
 
+    fn from_real(re: Self::Real) -> Self;
+
     fn abs(self) -> Self::Real;
+
+    fn add_complex(&self, other: Self::Complex) -> Self::Complex {
+        self.as_complex() + other
+    }
+
+    fn div_complex(&self, other: Self::Complex) -> Self::Complex {
+        self.as_complex() / other
+    }
+
+    fn mul_complex(&self, other: Self::Complex) -> Self::Complex {
+        self.as_complex() * other
+    }
+
+    fn sub_complex(&self, other: Self::Complex) -> Self::Complex {
+        self.as_complex() - other
+    }
+
+    fn as_complex(&self) -> Self::Complex;
 
     fn conj(&self) -> Self::Complex;
 
@@ -42,6 +62,10 @@ pub trait Scalar:
     fn cosh(self) -> Self;
 
     fn exp(self) -> Self;
+
+    fn inv(self) -> Self {
+        Inv::inv(self)
+    }
 
     fn ln(self) -> Self;
 
@@ -87,8 +111,16 @@ where
     type Complex = Self;
     type Real = T;
 
+    fn from_real(re: Self::Real) -> Self {
+        Complex::new(re, Default::default())
+    }
+
     fn abs(self) -> Self::Real {
         Complex::norm(self)
+    }
+
+    fn as_complex(&self) -> Self::Complex {
+        *self
     }
 
     fn conj(&self) -> Self::Complex {
@@ -162,8 +194,16 @@ macro_rules! impl_scalar {
             type Complex = Complex<$re>;
             type Real = $re;
 
+            fn from_real(re: Self::Real) -> Self {
+                re
+            }
+
             fn abs(self) -> Self::Real {
                 <$re>::abs(self)
+            }
+
+            fn as_complex(&self) -> Self::Complex {
+                Complex::new(*self, <$re>::default())
             }
 
             fn conj(&self) -> Self::Complex {

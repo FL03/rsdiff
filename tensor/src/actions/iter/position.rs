@@ -92,6 +92,6 @@ impl<'a> Iterator for IndexIter<'a> {
 
 impl<'a> From<&'a Layout> for IndexIter<'a> {
     fn from(layout: &'a Layout) -> Self {
-        Self::new(layout.offset, &layout.shape, &layout.stride)
+        Self::new(layout.offset, &layout.shape, &layout.strides)
     }
 }

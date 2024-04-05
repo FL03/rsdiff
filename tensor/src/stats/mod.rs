@@ -97,5 +97,9 @@ pub trait StatisticsExt<T>: Statistics<T> {
     fn mean_axis(&self, axis: Axis) -> T;
 }
 
+pub(crate) mod prelude {
+    pub use super::{Statistics, StatisticsExt};
+}
+
 #[cfg(test)]
 mod tests {}

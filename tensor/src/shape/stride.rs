@@ -70,6 +70,16 @@ impl Stride {
     pub fn rank(&self) -> Rank {
         self.0.len().into()
     }
+    /// Removes and returns the stride of the axis.
+    pub fn remove(&mut self, axis: Axis) -> usize {
+        self.0.remove(*axis)
+    }
+    /// Returns a new stride with the axis removed.
+    pub fn remove_axis(&self, axis: Axis) -> Self {
+        let mut stride = self.clone();
+        stride.remove(axis);
+        stride
+    }
     /// Reverses the stride.
     pub fn reverse(&mut self) {
         self.0.reverse()

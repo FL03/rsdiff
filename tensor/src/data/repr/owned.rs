@@ -50,6 +50,7 @@ impl<A> OwnedRepr<A> {
 }
 
 // Internal methods
+#[allow(dead_code)]
 impl<A> OwnedRepr<A> {
     pub(crate) fn as_nonnull_mut(&mut self) -> NonNull<A> {
         self.ptr
@@ -75,7 +76,7 @@ impl<A> OwnedRepr<A> {
             capacity: self_.capacity,
         }
     }
-    #[allow(dead_code)]
+
     pub(crate) fn into_vec(self) -> Vec<A> {
         ManuallyDrop::new(self).take_as_vec()
     }
@@ -84,7 +85,6 @@ impl<A> OwnedRepr<A> {
     /// ## Safety
     ///
     /// The first `new_len` elements of the data should be valid.
-    #[allow(dead_code)]
     pub(crate) unsafe fn set_len(&mut self, new_len: usize) {
         debug_assert!(new_len <= self.capacity);
         self.len = new_len;

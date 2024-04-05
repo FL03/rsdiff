@@ -224,7 +224,7 @@ macro_rules! impl_std_op {
             fn $method(self, rhs: Variable<T>) -> Self::Output {
                 let name = format!("{}", stringify!($method));
                 let value = self.eval_once() $e rhs.eval_once();
-                Variable::new(name).with_op(BinaryOp::$trait).with_value(value)
+                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -237,7 +237,7 @@ macro_rules! impl_std_op {
             fn $method(self, rhs: &'a Variable<T>) -> Self::Output {
                 let name = format!("{}", stringify!($method));
                 let value = self.eval_once() $e rhs.eval();
-                Variable::new(name).with_op(BinaryOp::$trait).with_value(value)
+                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -250,7 +250,7 @@ macro_rules! impl_std_op {
             fn $method(self, rhs: Variable<T>) -> Self::Output {
                 let name = format!("{}", stringify!($method));
                 let value = self.eval() $e rhs.eval_once();
-                Variable::new(name).with_op(BinaryOp::$trait).with_value(value)
+                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -263,7 +263,7 @@ macro_rules! impl_std_op {
             fn $method(self, rhs: &'a Variable<T>) -> Self::Output {
                 let name = format!("{}", stringify!($method));
                 let value = self.eval() $e rhs.eval();
-                Variable::new(name).with_op(BinaryOp::$trait).with_value(value)
+                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -276,7 +276,7 @@ macro_rules! impl_std_op {
             fn $method(self, rhs: T) -> Self::Output {
                 let name = format!("{}", stringify!($method));
                 let value = self.eval_once() $e rhs;
-                Variable::new(name).with_op(BinaryOp::$trait).with_value(value)
+                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
             }
         }
     };

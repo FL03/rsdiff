@@ -5,6 +5,7 @@
 //! # Linear Algebra
 //!
 //!
+pub mod tri;
 pub mod uplo;
 
 pub trait Inverse {

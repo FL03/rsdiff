@@ -14,7 +14,11 @@ impl<A, B> BinaryArgs<A, B> {
         Self { lhs, rhs }
     }
 
-    pub fn swap(self) -> BinaryArgs<B, A> {
+    pub fn into_args(self) -> (A, B) {
+        (self.lhs, self.rhs)
+    }
+
+    pub fn reverse(self) -> BinaryArgs<B, A> {
         BinaryArgs::new(self.rhs, self.lhs)
     }
 
@@ -24,6 +28,12 @@ impl<A, B> BinaryArgs<A, B> {
 
     pub fn rhs(&self) -> &B {
         &self.rhs
+    }
+}
+
+impl<T> BinaryArgs<T, T> {
+    pub fn swap(&mut self) {
+        std::mem::swap(&mut self.lhs, &mut self.rhs);
     }
 }
 

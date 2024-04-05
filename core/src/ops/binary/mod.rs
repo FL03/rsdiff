@@ -11,7 +11,7 @@ pub(crate) mod specs;
 
 pub type BoxedBinOp<A, B, C> = Box<dyn BinOp<A, B, Output = C>>;
 
-pub trait BinOp<A, B> {
+pub trait BinOp<A, B = A> {
     type Output;
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output;

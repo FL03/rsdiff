@@ -48,7 +48,6 @@ macro_rules! operator {
             operator!($op, $kind);
         )*
     };
-
 }
 
 macro_rules! operators {
@@ -149,17 +148,17 @@ macro_rules! impl_binary_op {
             }
         }
     };
-    (expr $op:ident, $bound:ident, $exp:expr) => {
+    (other: $op:ident, $bound:tt, $call:ident) => {
         operator!($op, Binary);
 
         impl<A, B, C> BinOp<A, B> for $op
         where
-            A: core::ops::$bound<B, Output = C>,
+            A: $bound<B, Output = C>,
         {
             type Output = C;
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                $exp(lhs, rhs)
+                $bound::$call(lhs, rhs)
             }
         }
     };
@@ -168,6 +167,10 @@ macro_rules! impl_binary_op {
 operators!(Arithmetic; {Add: Addition => add, Div: Division => div, Mul: Multiplication => mul, Rem: Remainder => rem, Sub: Subtraction => sub});
 
 impl_binary_op!((Addition, Add, +), (Division, Div, /), (Multiplication, Mul, *), (Remainder, Rem, %), (Subtraction, Sub, -));
+
+use num::traits::Pow;
+
+impl_binary_op!(other: Power, Pow, pow);
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {

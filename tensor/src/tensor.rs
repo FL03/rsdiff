@@ -2,12 +2,11 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::iter::StrideIter;
-use crate::data::Layout;
+use crate::actions::iter::Iter;
 use crate::error::{TensorError, TensorResult};
 use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{TensorId, TensorKind};
-use crate::shape::{IntoShape, Rank, Shape, Stride};
+use crate::shape::{IntoShape, Layout, Rank, Shape, Stride};
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::{self, Vec};
@@ -17,7 +16,7 @@ use core::slice::Iter as SliceIter;
 #[cfg(feature = "std")]
 use std::vec;
 
-pub(crate) fn create_with<T>(
+pub(crate) fn create<T>(
     kind: impl Into<TensorKind>,
     op: impl Into<BackpropOp<T>>,
     shape: impl IntoShape,
@@ -37,7 +36,7 @@ pub(crate) fn from_scalar_with_op<T>(
     op: TensorExpr<T>,
     data: T,
 ) -> TensorBase<T> {
-    create_with(
+    create(
         kind.into(),
         BackpropOp::new(op),
         Shape::scalar(),
@@ -50,7 +49,7 @@ pub(crate) fn from_vec_with_kind<T>(
     shape: impl IntoShape,
     data: Vec<T>,
 ) -> TensorBase<T> {
-    create_with(kind, BackpropOp::none(), shape, data)
+    create(kind, BackpropOp::none(), shape, data)
 }
 
 pub(crate) fn from_vec_with_op<T>(
@@ -59,7 +58,7 @@ pub(crate) fn from_vec_with_op<T>(
     shape: impl IntoShape,
     data: Vec<T>,
 ) -> TensorBase<T> {
-    create_with(kind.into(), BackpropOp::new(op), shape, data)
+    create(kind.into(), BackpropOp::new(op), shape, data)
 }
 
 #[derive(Clone, Debug, Hash)]
@@ -72,17 +71,6 @@ pub struct TensorBase<T = f64> {
 }
 
 impl<T> TensorBase<T> {
-    pub fn new(kind: TensorKind, shape: impl IntoShape) -> Self {
-        let shape = shape.into_shape();
-        let data = Vec::with_capacity(shape.size());
-        Self {
-            id: TensorId::new(),
-            data,
-            kind,
-            layout: Layout::contiguous(shape),
-            op: BackpropOp::none(),
-        }
-    }
     /// Create a new tensor from an iterator.
     pub fn from_iter<I>(iter: I) -> Self
     where
@@ -198,8 +186,8 @@ impl<T> TensorBase<T> {
         self.kind().is_variable()
     }
     /// Return an iterator over the tensor
-    pub fn iter(&self) -> StrideIter<'_, T> {
-        StrideIter::new(self)
+    pub fn iter(&self) -> Iter<'_, T> {
+        Iter::new(self)
     }
     /// Get the kind of the tensor
     pub const fn kind(&self) -> TensorKind {
@@ -271,7 +259,14 @@ impl<T> TensorBase<T> {
         self.kind = TensorKind::Variable;
         self
     }
-    ///
+    /// Set the layout of the tensor
+    pub fn with_layout(self, layout: Layout) -> Self {
+        if layout.size() != self.size() {
+            panic!("Size mismatch");
+        }
+        unsafe { self.with_layout_unchecked(layout) }
+    }
+    /// Set the layout of the tensor without checking for compatibility
     pub unsafe fn with_layout_unchecked(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
@@ -322,6 +317,10 @@ impl<T> TensorBase<T> {
         self.data.get(index)
     }
 
+    pub(crate) fn get_by_index_mut(&mut self, index: usize) -> Option<&mut T> {
+        self.data.get_mut(index)
+    }
+
     pub(crate) fn map<'a, F>(&'a self, f: F) -> Map<SliceIter<'a, T>, F>
     where
         F: FnMut(&'a T) -> T,
@@ -336,6 +335,25 @@ impl<T> TensorBase<T> {
         T: Copy,
     {
         let store = self.data.iter().copied().map(f).collect();
+        TensorBase {
+            id: TensorId::new(),
+            kind: self.kind,
+            layout: self.layout.clone(),
+            op: self.op.clone(),
+            data: store,
+        }
+    }
+
+    pub(crate) fn map_binary<F>(&self, other: &TensorBase<T>, op: F) -> TensorBase<T>
+    where
+        F: acme::prelude::BinOp<T, T, Output = T>,
+        T: Copy,
+    {
+        let store = self
+            .iter()
+            .zip(other.iter())
+            .map(|(a, b)| op.eval(*a, *b))
+            .collect();
         TensorBase {
             id: TensorId::new(),
             kind: self.kind,
@@ -382,5 +400,14 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self.layout == other.layout && self.data == other.data
+    }
+}
+
+impl<T> PartialOrd for TensorBase<T>
+where
+    T: PartialOrd,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.data.partial_cmp(&other.data)
     }
 }

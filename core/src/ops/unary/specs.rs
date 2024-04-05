@@ -2,7 +2,7 @@
     Appellation: specs <unary>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use core::ops;
+use core::ops::Neg;
 use num::traits::{Inv, Num};
 use num::Complex;
 
@@ -34,7 +34,7 @@ macro_rules! impl_conj {
 
 impl<T> Conjugate for Complex<T>
 where
-    T: Clone + Num + ops::Neg<Output = T>,
+    T: Clone + Neg<Output = T> + Num,
 {
     type Complex = Self;
     type Real = T;

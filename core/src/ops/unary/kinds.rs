@@ -59,7 +59,7 @@ impl UnaryOp {
         }
     }
 
-    enum_fn_constructor!(
+    unit_enum_constructor!(
         (Abs, abs),
         (Cos, cos),
         (Cosh, cosh),

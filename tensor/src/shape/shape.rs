@@ -107,9 +107,15 @@ impl Shape {
     pub fn rank(&self) -> Rank {
         self.0.len().into()
     }
-    /// Remove the dimension at the given [Axis].
+    /// Remove the dimension at the given [Axis],
     pub fn remove(&mut self, index: Axis) -> usize {
         self.0.remove(*index)
+    }
+    /// Remove the dimension at the given [Axis].
+    pub fn remove_axis(&self, index: Axis) -> Shape {
+        let mut shape = self.clone();
+        shape.remove(index);
+        shape
     }
     /// Reverse the dimensions of the shape.
     pub fn reverse(&mut self) {

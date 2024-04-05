@@ -188,7 +188,7 @@ macro_rules! impl_binary_op {
             fn $method(self, other: T) -> Self::Output {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
-                let op = TensorExpr::binary_scalar(self, other, BinaryOp::$trait);
+                let op = TensorExpr::binary_scalar(self, other, BinaryOp::$method());
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -202,7 +202,7 @@ macro_rules! impl_binary_op {
             fn $method(self, other: T) -> Self::Output {
                 let shape = self.shape().clone();
                 let store = self.data().iter().map(|a| *a $op other).collect();
-                let op = TensorExpr::binary_scalar(self.clone(), other, BinaryOp::$trait);
+                let op = TensorExpr::binary_scalar(self.clone(), other, BinaryOp::$method());
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -218,7 +218,7 @@ macro_rules! impl_binary_op {
                 check!(ne: self.shape(), other.shape());
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorExpr::binary(self, other, BinaryOp::$trait);
+                let op = TensorExpr::binary(self, other, BinaryOp::$method());
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -235,7 +235,7 @@ macro_rules! impl_binary_op {
                 }
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorExpr::binary(self, other.clone(), BinaryOp::$trait);
+                let op = TensorExpr::binary(self, other.clone(), BinaryOp::$method());
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -252,7 +252,7 @@ macro_rules! impl_binary_op {
                 }
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorExpr::binary(self.clone(), other, BinaryOp::$trait);
+                let op = TensorExpr::binary(self.clone(), other, BinaryOp::$method());
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -269,7 +269,7 @@ macro_rules! impl_binary_op {
                 }
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$trait);
+                let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$method());
                 from_vec_with_op(false, op, shape, store)
             }
         }
@@ -278,30 +278,30 @@ macro_rules! impl_binary_op {
 }
 
 macro_rules! impl_assign_op {
-    ($trait:ident, $method:ident, $inner:ident, $op:tt) => {
-        impl<T> ops::$trait for TensorBase<T>
+    ($trait:ident, $method:ident, $constructor:ident, $inner:ident, $op:tt) => {
+        impl<T> core::ops::$trait for TensorBase<T>
         where
-            T: Copy + ops::$inner<T, Output = T>,
+            T: Copy + core::ops::$inner<T, Output = T>,
         {
             fn $method(&mut self, other: Self) {
                 check!(ne: self.shape(), other.shape());
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorExpr::binary(self.clone(), other, BinaryOp::$inner);
+                let op = TensorExpr::binary(self.clone(), other, BinaryOp::$constructor());
 
                 *self = from_vec_with_op(false, op, shape, store);
             }
         }
 
-        impl<'a, T> ops::$trait<&'a TensorBase<T>> for TensorBase<T>
+        impl<'a, T> core::ops::$trait<&'a TensorBase<T>> for TensorBase<T>
         where
-            T: Copy + ops::$inner<Output = T>,
+            T: Copy + core::ops::$inner<Output = T>,
         {
             fn $method(&mut self, other: &'a TensorBase<T>) {
                 check!(ne: self.shape(), other.shape());
                 let shape = self.shape().clone();
                 let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-                let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$inner);
+                let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$constructor());
 
                 *self = from_vec_with_op(false, op, shape, store);
             }
@@ -311,21 +311,27 @@ macro_rules! impl_assign_op {
 }
 
 macro_rules! impl_binary_method {
-    (scalar: $variant:ident, $method:ident, $op:tt) => {
+    ($method:ident, $f:expr) => {
+        pub fn $method(&self, other: &Self) -> Self {
+            $f(self, other)
+        }
+
+    };
+    (scalar: $variant:tt, $method:ident, $op:tt) => {
         pub fn $method(&self, other: T) -> Self {
             let shape = self.shape();
             let store = self.data().iter().map(| elem | *elem $op other).collect();
-            let op = TensorExpr::binary_scalar(self.clone(), other.clone(), BinaryOp::$variant);
+            let op = TensorExpr::binary_scalar(self.clone(), other, BinaryOp::$variant());
             from_vec_with_op(false, op, shape, store)
         }
 
     };
-    (tensor: $variant:ident, $method:ident, $op:tt) => {
+    (tensor: $method:ident, $op:tt) => {
         pub fn $method(&self, other: &Self) -> Self {
             check!(ne: self.shape(), other.shape());
             let shape = self.shape();
             let store = self.data().iter().zip(other.data().iter()).map(|(a, b)| *a $op *b).collect();
-            let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$variant);
+            let op = TensorExpr::binary(self.clone(), other.clone(), BinaryOp::$method());
             from_vec_with_op(false, op, shape, store)
         }
 
@@ -334,16 +340,16 @@ macro_rules! impl_binary_method {
 
 impl_binary_op!((Add, add, +), (Div, div, /), (Mul, mul, *), (Rem, rem, %), (Sub, sub, -));
 
-impl_assign_op!(AddAssign, add_assign, Add, +);
-impl_assign_op!(DivAssign, div_assign, Div, /);
-impl_assign_op!(MulAssign, mul_assign, Mul, *);
-impl_assign_op!(RemAssign, rem_assign, Rem, %);
-impl_assign_op!(SubAssign, sub_assign, Sub, -);
+impl_assign_op!(AddAssign, add_assign, add, Add, +);
+impl_assign_op!(DivAssign, div_assign, div, Div, /);
+impl_assign_op!(MulAssign, mul_assign, mul, Mul, *);
+impl_assign_op!(RemAssign, rem_assign, rem, Rem, %);
+impl_assign_op!(SubAssign, sub_assign, sub, Sub, -);
 
 impl<T> TensorBase<T>
 where
     T: Scalar,
 {
-    impl_binary_method!(tensor: Add, add, +);
-    impl_binary_method!(scalar: Add, add_scalar, +);
+    impl_binary_method!(tensor: add, +);
+    impl_binary_method!(scalar: add, add_scalar, +);
 }

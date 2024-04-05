@@ -63,9 +63,7 @@ impl Layout {
     pub fn is_contiguous(&self) -> bool {
         self.shape().is_contiguous(&self.stride)
     }
-    pub fn is_layout_c(&self) -> bool {
-        super::is_layout_c(self)
-    }
+
     /// Determine if the current layout is square or not.
     pub fn is_square(&self) -> bool {
         self.shape().is_square()
@@ -94,6 +92,13 @@ impl Layout {
     pub fn rank(&self) -> Rank {
         debug_assert_eq!(self.stride.len(), *self.shape.rank());
         self.shape.rank()
+    }
+    pub fn remove_axis(&self, axis: Axis) -> Self {
+        Self {
+            offset: self.offset,
+            shape: self.shape().remove_axis(axis),
+            stride: self.stride().remove_axis(axis),
+        }
     }
     /// Reshape the layout to a new shape.
     pub fn reshape(&mut self, shape: impl IntoShape) {
@@ -159,6 +164,31 @@ impl Layout {
             .zip(self.stride().iter())
             .map(|(i, s)| i * s)
             .sum()
+    }
+
+    pub(crate) fn is_layout_c(&self) -> bool {
+        if let 1 = *self.rank() {
+            return self.stride[0] == 1 || self.shape[0] <= 1;
+        }
+
+        for d in self.shape().iter() {
+            if *d == 0 {
+                return true;
+            }
+        }
+
+        let mut contig_stride = 1_isize;
+        // check all dimensions -- a dimension of length 1 can have unequal strides
+        for (dim, s) in izip!(self.shape().iter().rev(), self.stride().iter().rev()) {
+            if *dim != 1 {
+                let s = *s as isize;
+                if s != contig_stride {
+                    return false;
+                }
+                contig_stride *= *dim as isize;
+            }
+        }
+        true
     }
 }
 

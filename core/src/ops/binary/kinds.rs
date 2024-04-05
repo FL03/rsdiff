@@ -2,8 +2,10 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::arithmetic::*;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 #[cfg_attr(
@@ -15,7 +17,6 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Clone,
     Copy,
     Debug,
-    Default,
     Display,
     EnumCount,
     EnumIs,
@@ -25,6 +26,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     Ord,
     PartialEq,
     PartialOrd,
+    SmartDefault,
     VariantNames,
 )]
 #[repr(u8)]
@@ -32,12 +34,12 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 pub enum BinaryOp {
     // <Kind = String> {
     #[default]
-    Add,
-    Sub,
-    Mul,
-    Div,
+    Add(Addition),
+    Div(Division),
+    Mul(Multiplication),
+    Sub(Subtraction),
     Pow,
-    Rem,
+    Rem(Remainder),
     Max,
     Min,
     And,
@@ -45,14 +47,41 @@ pub enum BinaryOp {
     Xor,
     Shl,
     Shr,
-    // Custom(Kind),
+    Custom(),
 }
 
 impl BinaryOp {
     pub fn differentiable(&self) -> bool {
         match self {
-            BinaryOp::Add | BinaryOp::Sub | BinaryOp::Mul | BinaryOp::Div | BinaryOp::Pow => true,
+            BinaryOp::Add(_) | BinaryOp::Div(_) | Self::Mul(_) | Self::Sub(_) | BinaryOp::Pow => {
+                true
+            }
             _ => false,
         }
     }
+
+    pub fn is_commutative(&self) -> bool {
+        match self {
+            BinaryOp::Add(_) | Self::Mul(_) | BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
+            _ => false,
+        }
+    }
+
+    simple_enum_constructor!(
+        (Add, add, Addition),
+        (Div, div, Division),
+        (Mul, mul, Multiplication),
+        (Rem, rem, Remainder),
+        (Sub, sub, Subtraction)
+    );
+    unit_enum_constructor!(
+        (Pow, pow),
+        (Max, max),
+        (Min, min),
+        (And, bitand),
+        (Or, bitor),
+        (Xor, bitxor),
+        (Shl, shl),
+        (Shr, shr)
+    );
 }

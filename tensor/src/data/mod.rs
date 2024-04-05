@@ -6,10 +6,9 @@
 //!
 //!
 pub(crate) use self::utils::*;
-pub use self::{container::*, layout::*, specs::*};
+pub use self::{container::*, specs::*};
 
 pub(crate) mod container;
-pub(crate) mod layout;
 pub(crate) mod specs;
 
 pub mod elem;
@@ -28,35 +27,9 @@ pub type Container<A = f64> = ContainerBase<repr::OwnedRepr<A>>;
 pub type SharedContainer<A = f64> = ContainerBase<repr::OwnedArcRepr<A>>;
 
 pub(crate) mod utils {
-    use super::Layout;
     #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;
     use core::ptr::NonNull;
-
-    pub(crate) fn is_layout_c(layout: &Layout) -> bool {
-        if let 1 = *layout.shape().rank() {
-            return layout.stride[0] == 1 || layout.shape[0] <= 1;
-        }
-
-        for d in layout.shape().iter() {
-            if *d == 0 {
-                return true;
-            }
-        }
-
-        let mut contig_stride = 1_isize;
-        // check all dimensions -- a dimension of length 1 can have unequal strides
-        for (dim, s) in izip!(layout.shape().iter().rev(), layout.stride().iter().rev()) {
-            if *dim != 1 {
-                let s = *s as isize;
-                if s != contig_stride {
-                    return false;
-                }
-                contig_stride *= *dim as isize;
-            }
-        }
-        true
-    }
 
     /// Return a NonNull<T> pointer to the vector's data
     pub(crate) fn nonnull_from_vec_data<T>(v: &mut Vec<T>) -> NonNull<T> {
@@ -78,7 +51,6 @@ pub(crate) mod utils {
 }
 
 pub(crate) mod prelude {
-    pub use super::layout::Layout;
     pub use super::repr::*;
     pub use super::specs::*;
 }

@@ -95,39 +95,39 @@ where
             if let Some(op) = &*node.op {
                 match op {
                     TensorExpr::Binary(lhs, rhs, kind) => match kind {
-                        BinaryOp::Add => {
+                        BinaryOp::Add(_) => {
                             *entry!(store, lhs) += &grad;
                             *entry!(store, rhs) += &grad;
                         }
-                        BinaryOp::Div => {
+                        BinaryOp::Div(_) => {
                             *entry!(store, lhs) += &grad / rhs.as_ref();
                             *entry!(store, rhs) -=
                                 &grad * lhs.as_ref() / (rhs.as_ref() * rhs.as_ref());
                         }
-                        BinaryOp::Mul => {
+                        BinaryOp::Mul(_) => {
                             *entry!(store, lhs) += &grad * rhs.as_ref();
                             *entry!(store, rhs) += &grad * lhs.as_ref();
                         }
-                        BinaryOp::Sub => {
+                        BinaryOp::Sub(_) => {
                             *entry!(store, lhs) += &grad;
                             *entry!(store, rhs) -= &grad;
                         }
                         _ => todo!(),
                     },
                     TensorExpr::BinaryScalar(lhs, rhs, kind) => match kind {
-                        BinaryOp::Add => {
+                        BinaryOp::Add(_) => {
                             *entry!(store, lhs) += &grad;
                         }
-                        BinaryOp::Div => {
+                        BinaryOp::Div(_) => {
                             *entry!(store, lhs) += &grad / *rhs;
                         }
-                        BinaryOp::Mul => {
+                        BinaryOp::Mul(_) => {
                             *entry!(store, lhs) += &grad * *rhs;
                         }
                         BinaryOp::Pow => {
                             *entry!(store, lhs) += &grad * *rhs * lhs.pow(*rhs - T::one());
                         }
-                        BinaryOp::Sub => {
+                        BinaryOp::Sub(_) => {
                             *entry!(store, lhs) += &grad;
                         }
                         _ => todo!(),

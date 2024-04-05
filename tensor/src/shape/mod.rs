@@ -6,10 +6,11 @@
 //!
 //! This modules provides implements several useful primitives for working with
 //! the shape of a [Tensor](crate::tensor::TensorBase).
-pub use self::{axis::*, error::*, rank::*, shape::Shape, stride::*};
+pub use self::{axis::*, error::*, layout::Layout, rank::*, shape::Shape, stride::*};
 
 pub(crate) mod axis;
 pub(crate) mod error;
+pub(crate) mod layout;
 pub(crate) mod rank;
 pub(crate) mod shape;
 pub(crate) mod stride;
@@ -41,6 +42,7 @@ pub(crate) mod prelude {
     pub use super::axis::{Axis, IntoAxis};
     pub use super::dim::*;
     pub use super::error::*;
+    pub use super::layout::Layout;
     pub use super::rank::{IntoRank, Rank};
     pub use super::shape::*;
     pub use super::stride::*;

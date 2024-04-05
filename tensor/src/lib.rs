@@ -12,7 +12,7 @@ extern crate alloc;
 extern crate acme_core as acme;
 
 #[doc(inline)]
-pub use self::{tensor::*, utils::*};
+pub use self::{actions::*, tensor::*, utils::*};
 
 #[macro_use]
 pub(crate) mod seal;
@@ -20,7 +20,6 @@ pub(crate) mod tensor;
 #[macro_use]
 pub(crate) mod utils;
 
-pub mod actions;
 pub mod backend;
 pub mod data;
 pub mod error;
@@ -32,6 +31,14 @@ pub mod shape;
 pub mod specs;
 pub mod stats;
 pub mod types;
+
+pub(crate) mod actions {
+
+    pub mod create;
+    pub mod grad;
+    pub mod index;
+    pub mod iter;
+}
 
 mod impls {
     mod ops {
@@ -50,7 +57,7 @@ pub type Tensor<T = f64> = tensor::TensorBase<T>;
 
 pub mod prelude {
     #[doc(inline)]
-    pub use crate::actions::prelude::*;
+    pub use crate::actions::{create::*, grad::*, index::*, iter::*};
     #[doc(inline)]
     pub use crate::data::prelude::*;
     #[doc(inline)]

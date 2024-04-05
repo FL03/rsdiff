@@ -12,16 +12,30 @@ pub(crate) mod store;
 
 pub mod func;
 
-use core::borrow::Borrow;
-
-pub trait Idx {
-    type Index;
+pub trait AsSlice<T> {
+    fn as_slice(&self) -> &[T];
 }
 
-pub trait IdxExt: Idx
+impl<S, T> AsSlice<T> for S
 where
-    Self: Borrow<Self::Index> + Copy,
+    S: AsRef<[T]>,
 {
+    fn as_slice(&self) -> &[T] {
+        self.as_ref()
+    }
+}
+
+pub trait AsSliceMut<T> {
+    fn as_slice_mut(&mut self) -> &mut [T];
+}
+
+impl<S, T> AsSliceMut<T> for S
+where
+    S: AsMut<[T]>,
+{
+    fn as_slice_mut(&mut self) -> &mut [T] {
+        self.as_mut()
+    }
 }
 
 pub(crate) mod prelude {

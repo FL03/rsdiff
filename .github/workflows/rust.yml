@@ -65,6 +65,7 @@ jobs:
       - name: Test
         run: cargo test --all-features -v --workspace
   bench:
+    continue-on-error: true
     name: Benchmark
     needs: [ builder ]
     runs-on: ubuntu-latest

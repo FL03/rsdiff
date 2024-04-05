@@ -10,7 +10,7 @@ pub trait Linspace<T> {
 }
 
 pub trait LinspaceExt<T>: Linspace<T> {
-    fn linspace_until(&self, stop: T, steps: usize) -> Self;
+    fn linspace_until(stop: T, steps: usize) -> Self;
 }
 
 impl<S, T> LinspaceExt<T> for S
@@ -18,7 +18,7 @@ where
     S: Linspace<T>,
     T: Default,
 {
-    fn linspace_until(&self, stop: T, steps: usize) -> Self {
+    fn linspace_until(stop: T, steps: usize) -> Self {
         S::linspace(T::default(), stop, steps)
     }
 }

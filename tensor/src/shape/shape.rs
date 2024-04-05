@@ -2,13 +2,15 @@
    Appellation: shape <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Axis, Rank, Stride};
-use crate::prelude::{ShapeError, SwapAxes, TensorResult};
-
+use super::{Axis, Rank, ShapeError, Stride};
+use crate::prelude::{SwapAxes, TensorResult};
+#[cfg(not(feature = "std"))]
+use alloc::vec;
 use core::ops::{self, Deref};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
+#[cfg(feature = "std")]
+use std::vec;
 /// A shape is a description of the number of elements in each dimension.
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -38,9 +40,10 @@ impl Shape {
     pub fn as_slice_mut(&mut self) -> &mut [usize] {
         &mut self.0
     }
-
-    pub fn diagonalize(&self) -> Shape {
-        Self::new(vec![self.size()])
+    /// Attempts to create a one-dimensional shape that describes the
+    /// diagonal of the current shape.
+    pub fn diag(&self) -> Shape {
+        Self::new(i![self.nrows()])
     }
     pub fn get_final_position(&self) -> Vec<usize> {
         self.iter().map(|&dim| dim - 1).collect()
@@ -58,6 +61,10 @@ impl Shape {
     /// Returns true if the shape is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+    /// Returns true if the shape is a scalar.
+    pub fn is_scalar(&self) -> bool {
+        self.is_empty()
     }
     /// Checks to see if the shape is square
     pub fn is_square(&self) -> bool {
@@ -140,47 +147,12 @@ impl Shape {
         shape.swap(swap, with);
         shape
     }
-
-    pub fn upcast(&self, to: &Shape, stride: &Stride) -> Option<Stride> {
-        let mut new_stride = to.as_slice().to_vec();
-        // begin at the back (the least significant dimension)
-        // size of the axis has to either agree or `from` has to be 1
-        if to.rank() < self.rank() {
-            return None;
-        }
-
-        let mut iter = new_stride.as_mut_slice().iter_mut().rev();
-        for ((er, es), dr) in self
-            .as_slice()
-            .iter()
-            .rev()
-            .zip(stride.as_slice().iter().rev())
-            .zip(iter.by_ref())
-        {
-            /* update strides */
-            if *dr == *er {
-                /* keep stride */
-                *dr = *es;
-            } else if *er == 1 {
-                /* dead dimension, zero stride */
-                *dr = 0
-            } else {
-                return None;
-            }
-        }
-
-        /* set remaining strides to zero */
-        for dr in iter {
-            *dr = 0;
-        }
-
-        Some(new_stride.into())
-    }
 }
 
 // Internal methods
+#[allow(dead_code)]
+#[doc(hidden)]
 impl Shape {
-    #[doc(hidden)]
     pub(crate) fn default_strides(&self) -> Stride {
         // Compute default array strides
         // Shape (a, b, c) => Give strides (b * c, c, 1)
@@ -222,6 +194,42 @@ impl Shape {
         stride.reverse();
         stride.into()
     }
+
+    pub(crate) fn upcast(&self, to: &Shape, stride: &Stride) -> Option<Stride> {
+        let mut new_stride = to.as_slice().to_vec();
+        // begin at the back (the least significant dimension)
+        // size of the axis has to either agree or `from` has to be 1
+        if to.rank() < self.rank() {
+            return None;
+        }
+
+        let mut iter = new_stride.as_mut_slice().iter_mut().rev();
+        for ((er, es), dr) in self
+            .as_slice()
+            .iter()
+            .rev()
+            .zip(stride.as_slice().iter().rev())
+            .zip(iter.by_ref())
+        {
+            /* update strides */
+            if *dr == *er {
+                /* keep stride */
+                *dr = *es;
+            } else if *er == 1 {
+                /* dead dimension, zero stride */
+                *dr = 0
+            } else {
+                return None;
+            }
+        }
+
+        /* set remaining strides to zero */
+        for dr in iter {
+            *dr = 0;
+        }
+
+        Some(new_stride.into())
+    }
 }
 
 impl AsRef<[usize]> for Shape {
@@ -252,9 +260,7 @@ impl Extend<usize> for Shape {
 
 impl SwapAxes for Shape {
     fn swap_axes(&self, a: Axis, b: Axis) -> Self {
-        let mut shape = self.clone();
-        shape.swap(a, b);
-        shape
+        self.swap_axes(a, b)
     }
 }
 
@@ -266,7 +272,7 @@ impl FromIterator<usize> for Shape {
 
 impl IntoIterator for Shape {
     type Item = usize;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
+    type IntoIter = vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -275,7 +281,7 @@ impl IntoIterator for Shape {
 
 impl<'a> IntoIterator for &'a mut Shape {
     type Item = &'a mut usize;
-    type IntoIter = std::slice::IterMut<'a, usize>;
+    type IntoIter = core::slice::IterMut<'a, usize>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.iter_mut()

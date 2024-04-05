@@ -128,7 +128,7 @@ where
     }
 
     pub fn stride(&self) -> &Stride {
-        self.layout().stride()
+        self.layout().strides()
     }
 
     pub fn size(&self) -> usize {
@@ -148,7 +148,7 @@ where
     ) -> Self {
         let layout = Layout::new(0, dim, strides);
         // debug check for issues that indicates wrong use of this constructor
-        debug_assert!(can_index_slice(&v, &layout.shape(), &layout.stride()).is_ok());
+        debug_assert!(can_index_slice(&v, &layout.shape(), &layout.strides()).is_ok());
 
         let ptr = {
             let tmp = nonnull_from_vec_data(&mut v);
@@ -198,9 +198,13 @@ where
         self.data._is_pointer_inbounds(self.as_ptr())
     }
 
-    pub(crate) unsafe fn with_layout(self, layout: Layout) -> ContainerBase<S> {
-        debug_assert_eq!(self.layout().rank(), layout.rank());
+    pub(crate) fn with_layout(self, layout: Layout) -> ContainerBase<S> {
+        debug_assert_eq!(self.layout().size(), layout.size());
 
+        unsafe { self.with_layout_unchecked(layout) }
+    }
+
+    pub(crate) unsafe fn with_layout_unchecked(self, layout: Layout) -> ContainerBase<S> {
         Self {
             data: self.data,
             layout,

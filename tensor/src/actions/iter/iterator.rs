@@ -52,7 +52,7 @@ pub struct IterMut<'a, T> {
     strides: IndexIter<'a>,
     tensor: &'a mut TensorBase<T>,
 }
-
+#[allow(dead_code)]
 impl<'a, T> IterMut<'a, T> {
     pub fn new(strides: IndexIter<'a>, tensor: &'a mut TensorBase<T>) -> Self {
         Self {
@@ -67,7 +67,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (_pos, idx) = self.strides.next()?;
+        let (_pos, _idx) = self.strides.next()?;
         unimplemented!()
     }
 }

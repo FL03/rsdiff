@@ -20,7 +20,9 @@ pub(crate) mod tensor;
 #[macro_use]
 pub(crate) mod utils;
 
+#[doc(hidden)]
 pub mod backend;
+#[doc(hidden)]
 pub mod data;
 pub mod error;
 #[cfg(feature = "io")]

@@ -5,15 +5,13 @@
 //! # Iter
 //!
 //!
-pub use self::{axis::*, iterator::*, position::*, utils::*};
+// pub use self::{axis::*, iterator::*, position::*, utils::*};
+pub use self::{iterator::Iter, position::IndexIter, utils::*};
 
+#[allow(dead_code, unused)]
 pub(crate) mod axis;
 pub(crate) mod iterator;
 pub(crate) mod position;
-
-pub trait IterTensor {
-    type Item;
-}
 
 pub(crate) mod utils {
     use core::ptr;

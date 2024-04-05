@@ -41,6 +41,7 @@ pub enum ShapeError {
     InvalidAxis,
     InvalidShape,
     MismatchedElements,
+    NotSquare,
     OutOfBounds,
     Overflow,
     Unsupported,

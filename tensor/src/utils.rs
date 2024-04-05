@@ -60,6 +60,13 @@ where
     out
 }
 
+macro_rules! i {
+    ($($x:expr),*) => {
+        vec![$($x),*]
+    };
+
+}
+
 macro_rules! izip {
     // @closure creates a tuple-flattening closure for .map() call. usage:
     // @closure partial_pattern => partial_tuple , rest , of , iterators

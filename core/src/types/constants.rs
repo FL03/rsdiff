@@ -4,10 +4,36 @@
 */
 use crate::prelude::{EvaluateOnce, Gradient};
 use core::borrow::{Borrow, BorrowMut};
-use core::ops::{Deref, DerefMut, Neg, Not};
+use core::ops::{self, Deref, DerefMut, Neg, Not};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+pub struct ConstantPtr<T> {
+    ptr: *const T,
+}
+
+impl<T> ConstantPtr<T> {
+    pub fn new(ptr: *const T) -> Self {
+        Self { ptr }
+    }
+
+    pub fn as_ptr(&self) -> *const T {
+        self.ptr
+    }
+
+    pub fn as_mut_ptr(&self) -> *mut T {
+        self.ptr as *mut T
+    }
+}
+
+impl<T> ops::Add<usize> for ConstantPtr<T> {
+    type Output = ConstantPtr<T>;
+
+    fn add(self, rhs: usize) -> Self::Output {
+        ConstantPtr::new(self.ptr.wrapping_add(rhs))
+    }
+}
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]

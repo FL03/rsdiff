@@ -13,10 +13,10 @@
 //!         e^2 = 0
 
 use crate::prelude::{EvaluateOnce, Gradient};
+use core::ops::{self, Neg, Not};
 use num::{Num, One, Zero};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use std::ops::{self, Neg, Not};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]

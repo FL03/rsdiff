@@ -24,8 +24,8 @@ pub trait NdTensor {
         self.shape().size()
     }
 
-    fn stride(&self) -> &Stride {
-        self.layout().stride()
+    fn strides(&self) -> &Stride {
+        self.layout().strides()
     }
 }
 

@@ -236,8 +236,8 @@ impl<T> TensorBase<T> {
         self.layout().size()
     }
     /// Get a reference to the stride of the tensor
-    pub fn stride(&self) -> &Stride {
-        self.layout().stride()
+    pub fn strides(&self) -> &Stride {
+        self.layout().strides()
     }
     /// Turn the tensor into a scalar
     /// If the tensor has a rank greater than 0, this will return an error
@@ -394,12 +394,31 @@ where
 
 impl<T> Eq for TensorBase<T> where T: Eq {}
 
+impl<T> Ord for TensorBase<T>
+where
+    T: Ord,
+{
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.data.cmp(&other.data)
+    }
+}
+
 impl<T> PartialEq for TensorBase<T>
 where
     T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         self.layout == other.layout && self.data == other.data
+    }
+}
+
+impl<S, T> PartialEq<S> for TensorBase<T>
+where
+    S: AsRef<[T]>,
+    T: PartialEq,
+{
+    fn eq(&self, other: &S) -> bool {
+        &self.data == other.as_ref()
     }
 }
 

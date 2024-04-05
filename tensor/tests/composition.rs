@@ -17,7 +17,7 @@ fn test_ones_and_zeros() {
     assert_ne!(a.id(), b.id());
     assert_eq!(a.shape(), b.shape());
     assert_eq!(a.size(), b.size());
-    assert_eq!(a.stride(), b.stride());
+    assert_eq!(a.strides(), b.strides());
     assert_eq!(a, Tensor::ones(shape));
     assert_eq!(b, Tensor::zeros(shape));
 

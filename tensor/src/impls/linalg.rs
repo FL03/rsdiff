@@ -76,10 +76,8 @@ where
     T: Copy,
 {
     pub fn diag(&self) -> Self {
-        let rank = *self.rank();
-
-        let store = (0..rank).map(|i| self[vec![i; rank]]).collect::<Vec<T>>();
-        tensor::from_vec_with_kind(false, self.shape().diagonalize(), store)
+        let n = self.nrows();
+        Self::from_shape_iter(self.shape().diag(), (0..n).map(|i| self[vec![i; n]]))
     }
 }
 
@@ -99,16 +97,16 @@ where
     type Output = Self;
 
     fn matmul(&self, other: &Self) -> Self {
+        let sc = |m: usize, n: usize| m * self.ncols() + n;
+        let oc = |m: usize, n: usize| m * other.ncols() + n;
+
         let shape = self.shape().matmul_shape(&other.shape()).unwrap();
         let mut result = vec![T::zero(); shape.size()];
 
         for i in 0..self.nrows() {
             for j in 0..other.ncols() {
                 for k in 0..self.ncols() {
-                    let scope = i * other.ncols() + j;
-                    let xi = i * self.ncols() + k;
-                    let yi = k * other.ncols() + j;
-                    result[scope] += self.data[xi] * other.data[yi];
+                    result[oc(i, j)] += self.data[sc(i, k)] * other.data[oc(k, j)];
                 }
             }
         }

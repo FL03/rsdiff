@@ -35,7 +35,7 @@ impl Layout {
         let mut stride = vec![0; *diff];
         for (&dst_dim, (&src_dim, &src_stride)) in shape[*diff..]
             .iter()
-            .zip(self.shape().iter().zip(self.stride().iter()))
+            .zip(self.shape().iter().zip(self.strides().iter()))
         {
             let s = if dst_dim == src_dim {
                 src_stride
@@ -76,7 +76,7 @@ impl Layout {
     /// element.
     pub fn offset_from_low_addr_ptr_to_logical_ptr(&self) -> usize {
         let offset =
-            izip!(self.shape().as_slice(), self.stride().as_slice()).fold(0, |_offset, (d, s)| {
+            izip!(self.shape().as_slice(), self.strides().as_slice()).fold(0, |_offset, (d, s)| {
                 let d = *d as isize;
                 let s = *s as isize;
                 if s < 0 && d > 1 {
@@ -97,7 +97,7 @@ impl Layout {
         Self {
             offset: self.offset,
             shape: self.shape().remove_axis(axis),
-            stride: self.stride().remove_axis(axis),
+            stride: self.strides().remove_axis(axis),
         }
     }
     /// Reshape the layout to a new shape.
@@ -120,7 +120,7 @@ impl Layout {
         self.shape().size()
     }
     /// Get a reference to the stride of the layout.
-    pub const fn stride(&self) -> &Stride {
+    pub const fn strides(&self) -> &Stride {
         &self.stride
     }
     /// Swap the axes of the layout.
@@ -131,7 +131,7 @@ impl Layout {
             stride: self.stride.swap_axes(a, b),
         }
     }
-
+    /// Transpose the layout.
     pub fn transpose(&self) -> Layout {
         self.clone().reverse_axes()
     }
@@ -161,7 +161,7 @@ impl Layout {
     pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
         idx.as_ref()
             .iter()
-            .zip(self.stride().iter())
+            .zip(self.strides().iter())
             .map(|(i, s)| i * s)
             .sum()
     }
@@ -179,7 +179,7 @@ impl Layout {
 
         let mut contig_stride = 1_isize;
         // check all dimensions -- a dimension of length 1 can have unequal strides
-        for (dim, s) in izip!(self.shape().iter().rev(), self.stride().iter().rev()) {
+        for (dim, s) in izip!(self.shape().iter().rev(), self.strides().iter().rev()) {
             if *dim != 1 {
                 let s = *s as isize;
                 if s != contig_stride {

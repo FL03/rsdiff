@@ -72,6 +72,10 @@ impl Layout {
     pub fn is_contiguous(&self) -> bool {
         self.shape().is_contiguous(&self.strides)
     }
+    /// Checks to see if the layout is empy; i.e. a scalar of Rank(0)
+    pub fn is_scalar(&self) -> bool {
+        self.shape().is_scalar()
+    }
     /// A function for determining if the layout is square.
     /// An n-dimensional object is square if all of its dimensions are equal.
     pub fn is_square(&self) -> bool {

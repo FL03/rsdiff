@@ -22,6 +22,14 @@ where
     }
 }
 
+pub enum Strides {
+    Contiguous,
+    Fortran,
+    Stride(Stride),
+}
+
+
+
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Stride(pub(crate) Vec<usize>);

@@ -78,12 +78,12 @@ impl<T> TensorBase<T> {
     {
         Self::from_vec(Vec::from_iter(iter))
     }
-    pub fn from_raw_parts(layout: Layout, data: Vec<T>) -> Self {
+    pub unsafe fn from_raw_parts(ptr: *mut T, len: usize, cap: usize) -> Self {
         Self {
             id: TensorId::new(),
             kind: TensorKind::default(),
-            layout,
-            data,
+            layout: Layout::contiguous(Shape::from(len)),
+            data: Vec::from_raw_parts(ptr, len, cap),
             op: BackpropOp::none(),
         }
     }
@@ -103,6 +103,17 @@ impl<T> TensorBase<T> {
         I: IntoIterator<Item = T>,
     {
         Self::from_shape_vec(shape, Vec::from_iter(iter))
+    }
+    pub unsafe fn from_shape_ptr(shape: impl IntoShape, ptr: *mut T) -> Self {
+        let layout = Layout::contiguous(shape);
+        let data = Vec::from_raw_parts(ptr, layout.size(), layout.size());
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: layout.clone(),
+            data,
+            op: BackpropOp::none(),
+        }
     }
     /// Create a new tensor from a [Vec], with a specified [shape](Shape).
     pub fn from_shape_vec(shape: impl IntoShape, data: Vec<T>) -> Self {

@@ -20,6 +20,7 @@ on:
 
 jobs:
   builder:
+
     name: Build
     strategy:
       matrix:
@@ -33,6 +34,11 @@ jobs:
           rustup update
           rustup default ${{ matrix.toolchain }}
       - name: Build
+        if: matrix.toolchain == 'stable'
+        run: cargo build --all-features -r -v --workspace
+      - name: Build (nightly)
+        continue-on-error: true
+        if: matrix.toolchain == 'nightly'
         run: cargo build --all-features -r -v --workspace
       - name: Cache build
         id: cache-build

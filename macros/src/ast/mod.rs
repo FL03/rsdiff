@@ -2,7 +2,7 @@
     Appellation: ast <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
+#![allow(dead_code)]
 pub mod gradient;
 pub mod partials;
 

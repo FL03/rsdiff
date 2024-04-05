@@ -26,6 +26,10 @@ pub type Container<A = f64> = ContainerBase<repr::OwnedRepr<A>>;
 
 pub type SharedContainer<A = f64> = ContainerBase<repr::OwnedArcRepr<A>>;
 
+pub type ContainerView<'a, A = f64> = ContainerBase<repr::ViewRepr<&'a A>>;
+
+pub type ContainerViewMut<'a, A = f64> = ContainerBase<repr::ViewRepr<&'a mut A>>;
+
 pub(crate) mod utils {
     #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;

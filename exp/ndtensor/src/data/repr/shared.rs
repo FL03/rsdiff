@@ -33,7 +33,7 @@ unsafe impl<A> Data for OwnedArcRepr<A> {
         unsafe { ContainerBase::from_data_ptr(data, self_.ptr).with_layout(self_.layout) }
     }
 
-    fn try_into_owned_nocopy<D>(
+    fn try_into_owned_nocopy(
         self_: ContainerBase<Self>,
     ) -> Result<Container<Self::Elem>, ContainerBase<Self>> {
         match Arc::try_unwrap(self_.data.0) {

@@ -154,7 +154,7 @@ unsafe impl<A> Data for OwnedRepr<A> {
     }
 
     #[inline]
-    fn try_into_owned_nocopy<D>(
+    fn try_into_owned_nocopy(
         self_: ContainerBase<Self>,
     ) -> Result<Container<Self::Elem>, ContainerBase<Self>> {
         Ok(self_)

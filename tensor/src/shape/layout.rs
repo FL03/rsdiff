@@ -2,6 +2,7 @@
     Appellation: layout <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::shape::dim::stride_offset;
 use crate::shape::{Axis, IntoShape, IntoStride, Rank, Shape, ShapeError, ShapeResult, Stride};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -32,6 +33,15 @@ impl Layout {
             shape,
             strides: stride,
         }
+    }
+    #[doc(hidden)]
+    /// Return stride offset for index.
+    pub fn stride_offset(index: impl AsRef<[usize]>, strides: &Stride) -> isize {
+        let mut offset = 0;
+        for (&i, &s) in izip!(index.as_ref(), strides.as_slice()) {
+            offset += stride_offset(i, s);
+        }
+        offset
     }
     /// Broadcast the layout to a new shape.
     ///

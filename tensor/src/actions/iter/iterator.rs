@@ -4,10 +4,11 @@
 */
 use super::IndexIter;
 use crate::TensorBase;
-
+use core::marker::PhantomData;
+use core::ptr::NonNull;
 pub struct Iter<'a, T> {
     scope: Option<&'a T>,
-    strides: IndexIter<'a>,
+    strides: IndexIter,
     tensor: &'a TensorBase<T>,
 }
 
@@ -47,12 +48,20 @@ impl<'a, T> From<&'a TensorBase<T>> for Iter<'a, T> {
 }
 
 pub struct IterMut<'a, T: 'a> {
-    strides: IndexIter<'a>,
+    ptr: NonNull<T>,
+    strides: IndexIter,
     tensor: &'a mut TensorBase<T>,
+    _marker: PhantomData<&'a mut T>,
 }
 impl<'a, T> IterMut<'a, T> {
-    pub fn new(strides: IndexIter<'a>, tensor: &'a mut TensorBase<T>) -> Self {
-        Self { strides, tensor }
+    pub fn new(strides: IndexIter, tensor: &'a mut TensorBase<T>) -> Self {
+        let ptr = NonNull::new(tensor.as_mut_ptr()).expect("TensorBase pointer is null");
+        Self {
+            ptr,
+            strides,
+            tensor,
+            _marker: PhantomData,
+        }
     }
 }
 
@@ -61,7 +70,6 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let (_pos, _idx) = self.strides.next()?;
-        let _scope = self.tensor.get_by_index_mut(_idx);
         unimplemented!()
     }
 }

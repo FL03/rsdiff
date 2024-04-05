@@ -130,8 +130,27 @@ where
         self.layout().strides()
     }
 
+    /// Return the strides of the array as a slice.
+    pub fn strides(&self) -> &[isize] {
+        let s = self.stride().as_slice();
+        // reinterpret unsigned integer as signed
+        unsafe { slice::from_raw_parts(s.as_ptr() as *const _, s.len()) }
+    }
+
     pub fn size(&self) -> usize {
         self.layout.size()
+    }
+
+    pub fn to_owned(&self) -> Container<A>
+    where
+        A: Clone,
+        S: Data,
+    {
+        if let Some(slc) = self.as_slice_memory_order() {
+            unsafe { Container::from_shape_vec_unchecked(self.shape(), slc.to_vec()) }
+        } else {
+            self.map(A::clone)
+        }
     }
 }
 
@@ -175,6 +194,17 @@ where
         let shape = shape.into_shape();
         let strides = crate::dim::default_strides(&shape); // shape.stride().strides_for_dim(&dim);
         let v = to_vec_mapped(iter, map);
+        Self::from_vec_dim_stride_unchecked(shape, strides, v)
+    }
+}
+
+impl<A, S> ContainerBase<S>
+where
+    S: DataOwned<Elem = A>,
+{
+    pub unsafe fn from_shape_vec_unchecked(shape: impl IntoShape, v: Vec<A>) -> Self {
+        let shape = shape.into_shape();
+        let strides = crate::default_strides(&shape);
         Self::from_vec_dim_stride_unchecked(shape, strides, v)
     }
 }

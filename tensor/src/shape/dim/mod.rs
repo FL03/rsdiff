@@ -9,15 +9,13 @@ pub use self::{dimension::Dim, utils::*};
 
 pub(crate) mod dimension;
 
-use core::ops::IndexMut;
-
 pub trait IntoDimension {
     type Dim: Dimension;
 
     fn into_dimension(self) -> Self::Dim;
 }
 
-pub trait Dimension: IndexMut<usize, Output = usize> {
+pub trait Dimension {
     type Pattern;
 
     fn as_slice(&self) -> &[usize];

@@ -12,7 +12,6 @@ pub(crate) mod diff;
 pub(crate) mod grad;
 pub(crate) mod ops;
 
-// use ast::gradient::GradientAst;
 use ast::partials::PartialAst;
 use proc_macro::TokenStream;
 use syn::parse_macro_input;

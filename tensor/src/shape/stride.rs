@@ -84,6 +84,24 @@ impl Stride {
     pub fn reverse(&mut self) {
         self.0.reverse()
     }
+    /// Returns a new stride with the elements reversed.
+    pub fn reversed(&self) -> Self {
+        let mut stride = self.clone();
+        stride.reverse();
+        stride
+    }
+    /// Sets the element at the specified axis, returning None if the axis is out of bounds.
+    pub fn set(&mut self, axis: Axis, value: usize) -> Option<usize> {
+        self.0.get_mut(*axis).map(|v| core::mem::replace(v, value))
+    }
+    ///
+    pub fn stride_offset(index: &[usize], strides: &Stride) -> isize {
+        let mut offset = 0;
+        for (&i, &s) in index.iter().zip(strides.as_slice()) {
+            offset += super::dim::stride_offset(i, s);
+        }
+        offset
+    }
     /// Swaps two elements in the stride, inplace.
     pub fn swap(&mut self, a: usize, b: usize) {
         self.0.swap(a, b)

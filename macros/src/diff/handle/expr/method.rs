@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::handle_expr;
-use crate::ops::{Methods, UnaryMethod};
+use crate::ops::{BinaryOp, Methods, UnaryOp};
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
@@ -34,7 +34,9 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
     let dr = handle_expr(&receiver, var);
     if let Ok(method) = Methods::from_str(&method_name) {
         let dm = match method {
-            Methods::Unary(method) => handle_unary_method(&method, &receiver, var),
+            Methods::Binary(method) => handle_method_binary(&method, &receiver, &args[0], var),
+            Methods::Unary(method) => handle_method_unary(&method, &receiver, var),
+            // _ => panic!("Unsupported method"),
         };
 
         return quote! { #dm * #dr };
@@ -47,12 +49,24 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
     quote! { #dr + #grad }
 }
 
-pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr, _var: &Ident) -> TokenStream {
+pub fn handle_method_binary(method: &BinaryOp, lhs: &Expr, rhs: &Expr, var: &Ident) -> TokenStream {
+    let dl = handle_expr(&lhs, var);
+    let dr = handle_expr(&rhs, var);
+    println!("(dl, dr): ({}, {}) w.r.t {}", &dl, &dr, &var);
     match method {
-        UnaryMethod::Abs => quote! { #recv / #recv.abs() },
-        UnaryMethod::Cos => quote! { -#recv.sin() },
-        UnaryMethod::Cosh => quote! { #recv.sinh() },
-        UnaryMethod::Exp => {
+        BinaryOp::Pow => {
+            quote! {
+               #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.ln() * #lhs.powf(#rhs) * #dr
+            }
+        }
+    }
+}
+pub fn handle_method_unary(method: &UnaryOp, recv: &Expr, _var: &Ident) -> TokenStream {
+    match method {
+        UnaryOp::Abs => quote! { #recv / #recv.abs() },
+        UnaryOp::Cos => quote! { -#recv.sin() },
+        UnaryOp::Cosh => quote! { #recv.sinh() },
+        UnaryOp::Exp => {
             quote! {
                 if #recv.is_sign_negative() {
                     -#recv.exp()
@@ -61,12 +75,12 @@ pub fn handle_unary_method(method: &UnaryMethod, recv: &Expr, _var: &Ident) -> T
                 }
             }
         }
-        UnaryMethod::Inverse | UnaryMethod::Recip => quote! { -#recv.powi(-2) },
-        UnaryMethod::Ln => quote! { #recv.recip() },
-        UnaryMethod::Sin => quote! { #recv.cos() },
-        UnaryMethod::Sinh => quote! { #recv.cosh() },
-        UnaryMethod::Sqrt => quote! { (2.0 * #recv.sqrt()).recip() },
-        UnaryMethod::Tan => quote! { #recv.cos().powi(2).recip() },
-        UnaryMethod::Tanh => quote! { #recv.cosh().powi(2).recip() },
+        UnaryOp::Inverse | UnaryOp::Recip => quote! { -#recv.powi(-2) },
+        UnaryOp::Ln => quote! { #recv.recip() },
+        UnaryOp::Sin => quote! { #recv.cos() },
+        UnaryOp::Sinh => quote! { #recv.cosh() },
+        UnaryOp::Sqrt => quote! { (2.0 * #recv.sqrt()).recip() },
+        UnaryOp::Tan => quote! { #recv.cos().powi(2).recip() },
+        UnaryOp::Tanh => quote! { #recv.cosh().powi(2).recip() },
     }
 }

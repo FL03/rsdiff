@@ -2,7 +2,27 @@
     Appellation: utils <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use acme::prelude::Stride;
+use acme::prelude::{Shape, Stride};
+
+pub(crate) fn default_strides(shape: &Shape) -> Stride {
+    // Compute default array strides
+    // Shape (a, b, c) => Give strides (b * c, c, 1)
+    let mut strides = Stride::zeros(shape.rank());
+    // For empty arrays, use all zero strides.
+    if shape.iter().all(|&d| d != 0) {
+        let mut it = strides.as_slice_mut().iter_mut().rev();
+        // Set first element to 1
+        if let Some(rs) = it.next() {
+            *rs = 1;
+        }
+        let mut cum_prod = 1;
+        for (rs, dim) in it.zip(shape.iter().rev()) {
+            cum_prod *= *dim;
+            *rs = cum_prod;
+        }
+    }
+    strides
+}
 
 pub(crate) fn _fastest_varying_stride_order(strides: &Stride) -> Stride {
     let mut indices = strides.clone();

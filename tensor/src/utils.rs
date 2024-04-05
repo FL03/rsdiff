@@ -67,6 +67,27 @@ macro_rules! i {
 
 }
 
+macro_rules! impl_partial_eq {
+    ($s:ident -> $cmp:tt: [$($t:ty),*]) => {
+        $(
+            impl_partial_eq!($s -> $cmp, $t);
+        )*
+    };
+    ($s:ident -> $cmp:tt, $t:ty) => {
+        impl PartialEq<$t> for $s {
+            fn eq(&self, other: &$t) -> bool {
+                self.$cmp == *other
+            }
+        }
+
+        impl PartialEq<$s> for $t {
+            fn eq(&self, other: &$s) -> bool {
+                *self == other.$cmp
+            }
+        }
+    };
+}
+
 macro_rules! izip {
     // @closure creates a tuple-flattening closure for .map() call. usage:
     // @closure partial_pattern => partial_tuple , rest , of , iterators

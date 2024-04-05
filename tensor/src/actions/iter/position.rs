@@ -5,16 +5,16 @@
 use crate::prelude::{Layout, Shape, Stride};
 
 ///
-pub struct IndexIter<'a> {
+pub struct IndexIter {
     next: Option<usize>,
     position: Vec<usize>,
-    shape: &'a Shape,
-    stride: &'a Stride,
+    shape: Shape,
+    stride: Stride,
 }
 
-impl<'a> IndexIter<'a> {
-    pub fn new(offset: usize, shape: &'a Shape, stride: &'a Stride) -> Self {
-        let elem_count: usize = shape.iter().product();
+impl IndexIter {
+    pub fn new(offset: usize, shape: Shape, stride: Stride) -> Self {
+        let elem_count: usize = shape.size();
         let next = if elem_count == 0 {
             None
         } else {
@@ -39,7 +39,7 @@ impl<'a> IndexIter<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for IndexIter<'a> {
+impl DoubleEndedIterator for IndexIter {
     fn next_back(&mut self) -> Option<Self::Item> {
         let (pos, _idx) = if let Some(item) = self.next() {
             item
@@ -57,7 +57,7 @@ impl<'a> DoubleEndedIterator for IndexIter<'a> {
     }
 }
 
-impl<'a> Iterator for IndexIter<'a> {
+impl Iterator for IndexIter {
     type Item = (Vec<usize>, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -90,8 +90,20 @@ impl<'a> Iterator for IndexIter<'a> {
     }
 }
 
-impl<'a> From<&'a Layout> for IndexIter<'a> {
+impl From<Layout> for IndexIter {
+    fn from(layout: Layout) -> Self {
+        let Layout {
+            offset,
+            shape,
+            strides,
+        } = layout;
+
+        Self::new(offset, shape, strides)
+    }
+}
+
+impl<'a> From<&'a Layout> for IndexIter {
     fn from(layout: &'a Layout) -> Self {
-        Self::new(layout.offset, &layout.shape, &layout.strides)
+        Self::from(layout.clone())
     }
 }

@@ -24,7 +24,7 @@ pub unsafe trait Data: RawData {
     /// Converts the array into `Array<A, D>` if this is possible without
     /// cloning the array elements. Otherwise, returns `self_` unchanged.
     #[doc(hidden)]
-    fn try_into_owned_nocopy<D>(
+    fn try_into_owned_nocopy(
         self_: ContainerBase<Self>,
     ) -> Result<Container<Self::Elem>, ContainerBase<Self>>;
 
@@ -34,7 +34,11 @@ pub unsafe trait Data: RawData {
     #[allow(clippy::wrong_self_convention)]
     fn to_shared(self_: &ContainerBase<Self>) -> SharedContainer<Self::Elem>
     where
-        Self::Elem: Clone;
+        Self::Elem: Clone,
+    {
+        // clone to shared
+        self_.to_owned().into_shared()
+    }
 }
 
 #[allow(clippy::missing_safety_doc)] // not implementable downstream

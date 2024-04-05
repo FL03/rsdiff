@@ -78,6 +78,15 @@ impl<T> TensorBase<T> {
     {
         Self::from_vec(Vec::from_iter(iter))
     }
+    pub fn from_raw_parts(layout: Layout, data: Vec<T>) -> Self {
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout,
+            data,
+            op: BackpropOp::none(),
+        }
+    }
     /// Create a new tensor from a scalar value.
     pub fn from_scalar(value: T) -> Self {
         Self {
@@ -352,7 +361,7 @@ impl<T> TensorBase<T> {
         self.data.get(index)
     }
 
-    pub(crate) fn get_by_index_mut(&mut self, index: usize) -> Option<&mut T> {
+    pub(crate) fn get_mut_by_index(&mut self, index: usize) -> Option<&mut T> {
         self.data.get_mut(index)
     }
 

@@ -6,10 +6,11 @@
 //!
 //!
 // pub use self::{axis::*, iterator::*, position::*, utils::*};
-pub use self::{iterator::*, position::IndexIter, utils::*};
+pub use self::{base::*, iterator::*, position::IndexIter, utils::*};
 
 #[allow(dead_code, unused)]
 pub(crate) mod axis;
+pub(crate) mod base;
 pub(crate) mod iterator;
 pub(crate) mod position;
 

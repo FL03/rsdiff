@@ -116,6 +116,18 @@ fn test_trig() {
 }
 
 #[test]
+fn test_pow() {
+    use num::traits::Pow;
+
+    let (x, y) = (2f64, 3f64);
+    let y_i: i32 = 3;
+    assert_eq!(autodiff!(x: x.pow(y)), y * x.pow(2));
+    // assert_eq!(autodiff!(y: x.pow(y)), x.pow(y) * y.ln());
+    assert_eq!(autodiff!(x: 2f64.powf(y)), 0f64);
+    assert_eq!(autodiff!(x: x.powi(y)), y * x.pow(2));
+}
+
+#[test]
 fn test_log() {
     let x: f64 = 2.0;
 

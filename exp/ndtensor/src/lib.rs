@@ -5,6 +5,9 @@ extern crate alloc;
 #[allow(unused_imports)]
 pub use self::utils::*;
 
+#[allow(unused_macros)]
+#[macro_use]
+pub(crate) mod macros;
 #[macro_use]
 pub(crate) mod seal;
 #[macro_use]
@@ -13,6 +16,7 @@ pub(crate) mod utils;
 pub mod data;
 pub mod dim;
 pub mod index;
+#[macro_use]
 pub mod iter;
 
 pub mod prelude {

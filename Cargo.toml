@@ -15,7 +15,9 @@ version = "0.3.1"
 default-members = [
     "acme"
 ]
-exclude = [ ]
+exclude = [ 
+    
+]
 members = [
     "acme", 
     "core",
@@ -23,7 +25,7 @@ members = [
     "graphs",
     "macros",
     "tensor",
-    "exp/ndtensor"
+    "exp/ndtensor",
 ]
 resolver = "2"
 

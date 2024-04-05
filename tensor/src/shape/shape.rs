@@ -3,6 +3,7 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{Axis, Rank, ShapeError, Stride};
+use crate::iter::zip;
 use crate::prelude::{SwapAxes, TensorResult};
 #[cfg(not(feature = "std"))]
 use alloc::vec;
@@ -48,16 +49,31 @@ impl Shape {
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))
             .ok_or_else(|| ShapeError::Overflow)?;
-        if size_nonzero > ::std::isize::MAX as usize {
+        if size_nonzero > core::isize::MAX as usize {
             Err(ShapeError::Overflow)
         } else {
             Ok(self.size())
         }
     }
+    pub fn dec(&mut self) {
+        for dim in self.iter_mut() {
+            *dim -= 1;
+        }
+    }
+    pub fn dec_axis(&mut self, axis: Axis) {
+        self[axis] -= 1;
+    }
     /// Attempts to create a one-dimensional shape that describes the
     /// diagonal of the current shape.
     pub fn diag(&self) -> Shape {
         Self::new(i![self.nrows()])
+    }
+
+    pub fn first_index(&self) -> Option<Vec<usize>> {
+        if self.is_empty() {
+            return None;
+        }
+        Some(vec![0; *self.rank()])
     }
     pub fn get_final_position(&self) -> Vec<usize> {
         self.iter().map(|&dim| dim - 1).collect()
@@ -71,18 +87,6 @@ impl Shape {
         let mut shape = self.clone();
         shape.insert(index, 1);
         shape
-    }
-    /// Returns true if the shape is empty.
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-    /// Returns true if the shape is a scalar.
-    pub fn is_scalar(&self) -> bool {
-        self.is_empty()
-    }
-    /// Checks to see if the shape is square
-    pub fn is_square(&self) -> bool {
-        self.iter().all(|&dim| dim == self[0])
     }
     /// Returns true if the strides are C contiguous (aka row major).
     pub fn is_contiguous(&self, stride: &Stride) -> bool {
@@ -98,6 +102,21 @@ impl Shape {
         }
         true
     }
+    /// Returns true if the shape is a scalar.
+    pub fn is_scalar(&self) -> bool {
+        self.0.is_empty()
+    }
+    /// Checks to see if the shape is square
+    pub fn is_square(&self) -> bool {
+        self.iter().all(|&dim| dim == self[0])
+    }
+    pub fn iter(&self) -> core::slice::Iter<usize> {
+        self.0.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> core::slice::IterMut<usize> {
+        self.0.iter_mut()
+    }
     /// The number of columns in the shape.
     pub fn ncols(&self) -> usize {
         if self.len() >= 2 {
@@ -106,6 +125,29 @@ impl Shape {
             1
         } else {
             0
+        }
+    }
+    #[doc(hidden)]
+    /// Iteration -- Use self as size, and return next index after `index`
+    /// or None if there are no more.
+    // FIXME: use &Self for index or even &mut?
+    #[inline]
+    pub fn next_for(&self, index: Vec<usize>) -> Option<Vec<usize>> {
+        let mut index = index;
+        let mut done = false;
+        for (&dim, ix) in zip(self.as_slice(), index.as_mut_slice()).rev() {
+            *ix += 1;
+            if *ix == dim {
+                *ix = 0;
+            } else {
+                done = true;
+                break;
+            }
+        }
+        if done {
+            Some(index.to_vec())
+        } else {
+            None
         }
     }
     /// The number of rows in the shape.
@@ -149,6 +191,14 @@ impl Shape {
     /// The number of elements in the shape.
     pub fn size(&self) -> usize {
         self.0.iter().product()
+    }
+
+    pub fn stride_offset(index: &[usize], strides: &Stride) -> isize {
+        let mut offset = 0;
+        for (&i, &s) in index.iter().zip(strides.as_slice()) {
+            offset += super::dim::stride_offset(i, s);
+        }
+        offset
     }
 
     /// Swap the dimensions of the current [Shape] at the given [Axis].
@@ -271,6 +321,14 @@ impl Extend<usize> for Shape {
         self.0.extend(iter)
     }
 }
+
+impl From<Shape> for Vec<usize> {
+    fn from(shape: Shape) -> Self {
+        shape.0
+    }
+}
+
+impl_partial_eq!(Shape -> 0: [[usize], Vec<usize>]);
 
 impl SwapAxes for Shape {
     fn swap_axes(&self, a: Axis, b: Axis) -> Self {

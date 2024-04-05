@@ -101,6 +101,8 @@ unsafe impl Send for Rank {}
 
 unsafe impl Sync for Rank {}
 
+impl_partial_eq!(Rank -> 0: [usize]);
+
 macro_rules! impl_std_ops {
     ($(($trait:tt, $method:ident, $e:tt)),*) => {
         $(

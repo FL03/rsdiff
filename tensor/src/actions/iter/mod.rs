@@ -16,6 +16,14 @@ pub(crate) mod position;
 pub(crate) mod utils {
     use core::ptr;
 
+    pub(crate) fn zip<I, J>(i: I, j: J) -> core::iter::Zip<I::IntoIter, J::IntoIter>
+    where
+        I: IntoIterator,
+        J: IntoIterator,
+    {
+        i.into_iter().zip(j)
+    }
+
     pub fn to_vec_mapped<I, F, B>(iter: I, mut f: F) -> Vec<B>
     where
         I: ExactSizeIterator, // + TrustedIterator

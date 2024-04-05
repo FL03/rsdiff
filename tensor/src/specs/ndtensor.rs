@@ -29,15 +29,6 @@ pub trait NdTensor {
     }
 }
 
-pub trait NdStore {
-    type Container;
-    type Elem;
-}
-
-pub trait NdIterator {
-    type Item;
-}
-
 pub trait TensorData {
     type Elem;
 }

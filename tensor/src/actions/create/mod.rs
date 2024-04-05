@@ -11,7 +11,7 @@ pub(crate) mod stack;
 pub(crate) mod utils {
     use core::ops::{Div, Sub};
     use num::traits::{FromPrimitive, ToPrimitive};
-
+    /// Calculate the step size for a given range and number of steps.
     pub fn step_size<T>(start: T, stop: T, steps: usize) -> T
     where
         T: FromPrimitive + Div<Output = T> + Sub<Output = T>,

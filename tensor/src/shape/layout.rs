@@ -165,31 +165,6 @@ impl Layout {
             .map(|(i, s)| i * s)
             .sum()
     }
-
-    pub(crate) fn is_layout_c(&self) -> bool {
-        if let 1 = *self.rank() {
-            return self.stride[0] == 1 || self.shape[0] <= 1;
-        }
-
-        for d in self.shape().iter() {
-            if *d == 0 {
-                return true;
-            }
-        }
-
-        let mut contig_stride = 1_isize;
-        // check all dimensions -- a dimension of length 1 can have unequal strides
-        for (dim, s) in izip!(self.shape().iter().rev(), self.strides().iter().rev()) {
-            if *dim != 1 {
-                let s = *s as isize;
-                if s != contig_stride {
-                    return false;
-                }
-                contig_stride *= *dim as isize;
-            }
-        }
-        true
-    }
 }
 
 #[cfg(test)]

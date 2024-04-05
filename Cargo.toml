@@ -21,8 +21,9 @@ members = [
     "core",
     "derive",
     "graphs",
-    "macros", 
-    "tensor"
+    "macros",
+    "tensor",
+    "exp/ndtensor"
 ]
 resolver = "2"
 

@@ -4,10 +4,9 @@
 */
 use super::specs::{Data, DataOwned, RawData, RawDataMut};
 use super::{nonnull_from_vec_data, Container, SharedContainer};
-use crate::actions::iter::to_vec_mapped;
-use crate::prelude::Layout;
-use crate::shape::dim::can_index_slice;
-use crate::shape::{IntoShape, IntoStride, Shape, Stride};
+use crate::dim::can_index_slice;
+use crate::iter::to_vec_mapped;
+use acme::prelude::{IntoShape, IntoStride, Layout, Shape, Stride};
 use core::ptr::NonNull;
 use core::slice;
 use rawpointer::PointerExt;
@@ -80,7 +79,7 @@ where
     }
     /// Return true if the array is known to be c-contiguous (Row Major)
     pub fn is_standard_layout(&self) -> bool {
-        self.layout().is_layout_c()
+        crate::dim::is_layout_c(self.layout())
     }
     ///
     pub fn iter(&self) -> slice::Iter<'_, A>
@@ -174,7 +173,7 @@ where
         F: FnMut(I::Item) -> A,
     {
         let shape = shape.into_shape();
-        let strides = shape.default_strides(); // shape.stride().strides_for_dim(&dim);
+        let strides = crate::dim::default_strides(&shape); // shape.stride().strides_for_dim(&dim);
         let v = to_vec_mapped(iter, map);
         Self::from_vec_dim_stride_unchecked(shape, strides, v)
     }

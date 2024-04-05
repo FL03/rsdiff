@@ -37,16 +37,60 @@ pub trait Dimension: IndexMut<usize, Output = usize> {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) mod utils {
     use crate::index::{Ix, Ixs};
-    use crate::shape::{Shape, ShapeError, Stride};
+    use acme::prelude::{Layout, Shape, ShapeError, Stride};
     use core::mem;
 
     /// Calculate offset from `Ix` stride converting sign properly
     #[inline(always)]
     pub fn stride_offset(n: Ix, stride: Ix) -> isize {
         (n as isize) * (stride as Ixs)
+    }
+
+    pub(crate) fn default_strides(shape: &Shape) -> Stride {
+        // Compute default array strides
+        // Shape (a, b, c) => Give strides (b * c, c, 1)
+        let mut strides = Stride::zeros(shape.rank());
+        // For empty arrays, use all zero strides.
+        if shape.iter().all(|&d| d != 0) {
+            let mut it = strides.as_slice_mut().iter_mut().rev();
+            // Set first element to 1
+            if let Some(rs) = it.next() {
+                *rs = 1;
+            }
+            let mut cum_prod = 1;
+            for (rs, dim) in it.zip(shape.iter().rev()) {
+                cum_prod *= *dim;
+                *rs = cum_prod;
+            }
+        }
+        strides
+    }
+
+    pub(crate) fn is_layout_c(layout: &Layout) -> bool {
+        if let 1 = *layout.rank() {
+            return layout.strides()[0] == 1 || layout.shape()[0] <= 1;
+        }
+
+        for d in layout.shape().iter() {
+            if *d == 0 {
+                return true;
+            }
+        }
+
+        let mut contig_stride = 1_isize;
+        // check all dimensions -- a dimension of length 1 can have unequal strides
+        for (dim, s) in izip!(layout.shape().iter().rev(), layout.strides().iter().rev()) {
+            if *dim != 1 {
+                let s = *s as isize;
+                if s != contig_stride {
+                    return false;
+                }
+                contig_stride *= *dim as isize;
+            }
+        }
+        true
     }
 
     pub(crate) fn can_index_slice<A>(
@@ -83,7 +127,7 @@ pub(crate) mod utils {
     }
 
     pub fn dim_stride_overlap(dim: &Shape, strides: &Stride) -> bool {
-        let order = strides._fastest_varying_stride_order();
+        let order = crate::_fastest_varying_stride_order(strides);
         let mut sum_prev_offsets = 0;
         for &index in order.as_slice() {
             let d = dim[index];

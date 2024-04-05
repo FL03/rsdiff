@@ -3,9 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-pub use self::{arith::*, gradient::*, prop::*, store::*};
+pub use self::{arith::*, eval::*, gradient::*, prop::*, store::*};
 
 pub(crate) mod arith;
+pub(crate) mod eval;
 pub(crate) mod gradient;
 pub(crate) mod prop;
 pub(crate) mod store;
@@ -39,6 +40,8 @@ where
 }
 
 pub(crate) mod prelude {
+    pub use super::arith::*;
+    pub use super::eval::*;
     pub use super::func::*;
     pub use super::gradient::*;
     pub use super::prop::*;

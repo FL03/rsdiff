@@ -2,9 +2,9 @@
     Appellation: axis <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::data::{ContainerBase, RawData};
 use crate::index::{Ix, Ixs};
-use crate::shape::{Axis, Layout};
-use crate::TensorBase;
+use acme::tensor::shape::{Axis, Layout};
 
 pub struct AxisIter<A> {
     index: Ix,
@@ -15,8 +15,11 @@ pub struct AxisIter<A> {
 }
 
 impl<A> AxisIter<A> {
-    pub fn new<S>(v: TensorBase<S>, axis: Axis) -> Self {
-        let stride = v.strides()[axis];
+    pub fn new<S>(v: ContainerBase<S>, axis: Axis) -> Self
+    where
+        S: RawData<Elem = A>,
+    {
+        let stride = v.stride()[axis];
         let end = v.shape()[axis];
         // Self {
         //     index: 0,

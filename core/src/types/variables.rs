@@ -2,8 +2,8 @@
     Appellation: variables <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::eval::{Evaluate, EvaluateMut, EvaluateOnce};
 use crate::prelude::{BinaryOp, Gradient, Op, UnaryOp};
+use crate::specs::{Evaluate, EvaluateMut, EvaluateOnce};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Neg, Not};
 use num::{Num, One, Zero};

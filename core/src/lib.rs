@@ -16,7 +16,6 @@ pub(crate) mod seal;
 pub(crate) mod utils;
 
 pub mod error;
-pub mod eval;
 pub mod id;
 pub mod math;
 pub mod ops;
@@ -25,7 +24,6 @@ pub mod types;
 
 pub mod prelude {
     pub use crate::error::*;
-    pub use crate::eval::*;
     pub use crate::id::*;
     pub use crate::ops::prelude::*;
     pub use crate::specs::prelude::*;

@@ -5,7 +5,7 @@
 //! # Elements
 //!
 //!
-use crate::prelude::DType;
+use acme::prelude::DType;
 
 pub trait Element {
     type Elem;

@@ -2,7 +2,7 @@
     Appellation: position <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{Layout, Shape, Stride};
+use acme::prelude::{Layout, Shape, Stride};
 
 ///
 pub struct IndexIter<'a> {
@@ -53,7 +53,9 @@ impl<'a> DoubleEndedIterator for IndexIter<'a> {
             .map(|(s, p)| s - p)
             .collect();
         let scope = self.index(&position);
+        println!("{:?}", &position);
         Some((position, scope))
+        // unimplemented!()
     }
 }
 
@@ -92,6 +94,6 @@ impl<'a> Iterator for IndexIter<'a> {
 
 impl<'a> From<&'a Layout> for IndexIter<'a> {
     fn from(layout: &'a Layout) -> Self {
-        Self::new(layout.offset, &layout.shape, &layout.stride)
+        Self::new(layout.offset(), layout.shape(), layout.strides())
     }
 }

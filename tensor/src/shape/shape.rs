@@ -40,6 +40,20 @@ impl Shape {
     pub fn as_slice_mut(&mut self) -> &mut [usize] {
         &mut self.0
     }
+
+    pub fn check_size(&self) -> Result<usize, ShapeError> {
+        let size_nonzero = self
+            .as_slice()
+            .iter()
+            .filter(|&&d| d != 0)
+            .try_fold(1usize, |acc, &d| acc.checked_mul(d))
+            .ok_or_else(|| ShapeError::Overflow)?;
+        if size_nonzero > ::std::isize::MAX as usize {
+            Err(ShapeError::Overflow)
+        } else {
+            Ok(self.size())
+        }
+    }
     /// Attempts to create a one-dimensional shape that describes the
     /// diagonal of the current shape.
     pub fn diag(&self) -> Shape {
@@ -158,14 +172,14 @@ impl Shape {
         // Shape (a, b, c) => Give strides (b * c, c, 1)
         let mut strides = Stride::zeros(self.rank());
         // For empty arrays, use all zero strides.
-        if self.as_slice().iter().all(|&d| d != 0) {
+        if self.iter().all(|&d| d != 0) {
             let mut it = strides.as_slice_mut().iter_mut().rev();
             // Set first element to 1
             if let Some(rs) = it.next() {
                 *rs = 1;
             }
             let mut cum_prod = 1;
-            for (rs, dim) in it.zip(self.as_slice().iter().rev()) {
+            for (rs, dim) in it.zip(self.iter().rev()) {
                 cum_prod *= *dim;
                 *rs = cum_prod;
             }

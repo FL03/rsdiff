@@ -5,55 +5,37 @@
 //! # Operations
 //!
 //!
-pub use self::{arithmetic::*, gradient::*, kinds::*, operator::*};
+pub use self::{kinds::*, operator::*};
 
-pub(crate) mod arithmetic;
-pub(crate) mod gradient;
 pub(crate) mod kinds;
 pub(crate) mod operator;
 
-use crate::prelude::Result;
+pub mod binary;
+pub mod unary;
 
-pub trait Expressive {
-    type Graph;
-
-    fn expand(&self) -> Self::Graph;
-}
-
-pub trait Backward {
-    type Store;
-
-    fn backward(&self) -> Result<Self::Store>;
-}
-
-pub trait Compute<T> {
+pub trait ApplyTo<T> {
     type Output;
 
-    fn compute(&self, args: T) -> Self::Output;
+    fn apply_to(&self, other: T) -> Self::Output;
 }
 
-pub trait Evaluate {
-    type Output;
-
-    fn eval(self) -> Self::Output;
+pub trait IntoOp {
+    fn into_op(self) -> Op;
 }
 
-impl Evaluate for f64 {
-    type Output = f64;
-
-    fn eval(self) -> Self::Output {
-        self
+impl<S> IntoOp for S
+where
+    S: Into<Op>,
+{
+    fn into_op(self) -> Op {
+        self.into()
     }
 }
 
-pub trait BinaryOperation<T> {
-    type Output;
+pub(crate) mod prelude {
+    pub use super::{ApplyTo, IntoOp};
 
-    fn eval(&self, lhs: T, rhs: T) -> Self::Output;
-}
-
-pub trait UnaryOperation {
-    type Output;
-
-    fn eval(self) -> Self::Output;
+    pub use super::binary::*;
+    pub use super::kinds::Op;
+    pub use super::unary::*;
 }

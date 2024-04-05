@@ -2,36 +2,28 @@
     Appellation: acme-core <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # acme-core
+//! # Core
 //!
 //!
-#![allow(incomplete_features)]
-#![feature(adt_const_params, fn_traits, tuple_trait, unboxed_closures)]
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
-pub use self::primitives::*;
+// pub use self::utils::*;
 
-pub(crate) mod primitives;
-pub(crate) mod specs;
+#[macro_use]
 pub(crate) mod utils;
 
-pub(crate) mod exp;
-
-pub mod cmp;
-pub mod errors;
-pub mod graphs;
-pub mod hkt;
+pub mod error;
+pub mod id;
+pub mod math;
 pub mod ops;
-pub mod stores;
+pub mod specs;
+pub mod types;
 
 pub mod prelude {
-    pub use crate::primitives::*;
-    // pub use crate::specs::*;
-    pub use crate::utils::*;
-
-    pub use crate::cmp::*;
-    pub use crate::errors::*;
-    pub use crate::graphs::scg::Scg;
-    pub use crate::graphs::*;
-    pub use crate::ops::*;
-    pub use crate::stores::*;
+    pub use crate::error::*;
+    pub use crate::id::*;
+    pub use crate::ops::prelude::*;
+    pub use crate::specs::prelude::*;
+    pub use crate::types::*;
 }

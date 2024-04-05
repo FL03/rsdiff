@@ -1,0 +1,56 @@
+[package]
+authors.workspace = true
+categories.workspace = true
+description = "Computational graphs for Rust"
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+name = "acme-graphs"
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[features]
+default = []
+
+serde = [
+    "dep:serde",
+    "serde-ext",
+]
+
+serde-ext = [
+    "dep:serde_json",
+    "petgraph/serde-1",
+    "acme-core/serde",
+]
+
+[lib]
+bench = false
+crate-type = ["cdylib", "rlib"]
+doctest = true
+test = true
+
+[build-dependencies]
+
+[dev-dependencies]
+
+[dependencies]
+num = "0.4"
+petgraph = "0.6"
+serde = { optional = true, features = ["derive"], version = "1" }
+serde_json = { optional = true, version = "1" }
+smart-default.workspace = true
+strum.workspace = true
+
+[dependencies.acme-core]
+path = "../core"
+version = "0.3.0"
+# version = "0.3.0-nightly.5"
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

@@ -7,7 +7,7 @@
 
 ***
 
-Acme is an application toolkit for building cloud-native applications in Rust designed for complete integration with the scsys ecosystem.
+Acme aims to be a complete auto-differentiation library for Rust. The library is designed to be simple to use and easy to integrate into existing projects. The library is still in its early stages and is not yet ready for production use.
 
 ## Getting Started
 

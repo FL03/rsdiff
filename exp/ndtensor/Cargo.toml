@@ -21,5 +21,7 @@ std = [
 ]
 
 [dependencies]
-acme = { path = "../../acme" }
 rawpointer = "0.2.1"
+
+[dependencies.acme]
+path = "../../acme"

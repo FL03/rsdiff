@@ -20,9 +20,7 @@ pub enum IndexItem<T> {
     Tensor(TensorBase<T>),
 }
 
-pub trait TensorIndex {
-    
-}
+pub trait TensorIndex {}
 
 #[cfg(test)]
 mod tests {}

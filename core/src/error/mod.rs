@@ -10,7 +10,7 @@ pub use self::{err::*, kinds::*};
 pub(crate) mod err;
 pub(crate) mod kinds;
 
-pub type Result<T = ()> = std::result::Result<T, Error>;
+pub type Result<T = ()> = core::result::Result<T, Error>;
 
 #[cfg(test)]
 mod tests {}

@@ -2,7 +2,7 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::iter::Iter;
+use crate::actions::iter::{Iter, IterMut};
 use crate::error::{TensorError, TensorResult};
 use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{TensorId, TensorKind};
@@ -78,10 +78,14 @@ impl<T> TensorBase<T> {
     {
         Self::from_vec(Vec::from_iter(iter))
     }
-    pub unsafe fn from_raw_parts(ptr: *mut T, shape: impl IntoShape, stride: impl IntoStride) -> Self {
+    pub unsafe fn from_raw_parts(
+        ptr: *mut T,
+        shape: impl IntoShape,
+        stride: impl IntoStride,
+    ) -> Self {
         let shape = shape.into_shape();
         let stride = stride.into_stride();
-        
+
         let data = Vec::from_raw_parts(ptr, shape.size(), shape.size());
         Self {
             id: TensorId::new(),
@@ -230,6 +234,10 @@ impl<T> TensorBase<T> {
     /// Return an iterator over the tensor
     pub fn iter(&self) -> Iter<'_, T> {
         Iter::new(self)
+    }
+    /// Create a mutable iterator over the elements in the tensor.
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+        IterMut::new(self)
     }
     /// Get the kind of the tensor
     pub const fn kind(&self) -> TensorKind {

@@ -5,7 +5,7 @@
 use super::PositionIter;
 use crate::TensorBase;
 use core::marker::PhantomData;
-use core::ptr::NonNull;
+use core::ptr::{self, NonNull};
 
 pub struct Iter<'a, T> {
     pos: PositionIter,
@@ -49,18 +49,18 @@ impl<'a, T> From<&'a TensorBase<T>> for Iter<'a, T> {
 }
 
 pub struct IterMut<'a, T: 'a> {
-    ptr: NonNull<T>,
-    scope: Option<&'a mut T>,
+    ptr: *mut T,
     strides: PositionIter,
     tensor: &'a mut TensorBase<T>,
     _marker: PhantomData<&'a mut T>,
 }
 impl<'a, T> IterMut<'a, T> {
-    pub fn new(strides: PositionIter, tensor: &'a mut TensorBase<T>) -> Self {
-        let ptr = NonNull::new(tensor.as_mut_ptr()).expect("TensorBase pointer is null");
+    pub(crate) fn new(tensor: &'a mut TensorBase<T>) -> Self {
+        // let ptr = NonNull::new(tensor.as_mut_ptr()).expect("TensorBase pointer is null");
+        let strides = PositionIter::from(tensor.layout());
+        let ptr = tensor.as_mut_ptr();
         Self {
             ptr,
-            scope: None,
             strides,
             tensor,
             _marker: PhantomData,
@@ -72,8 +72,10 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (_pos, _idx) = self.strides.next()?;
-        let scope = unsafe { self.ptr.as_mut() };
-        Some(scope)
+        let (_pos, idx) = self.strides.next()?;
+        let elem = self.tensor.get_mut_by_index(idx)?;
+
+        self.ptr = ptr::from_mut(elem);
+        unsafe { self.ptr.as_mut() }
     }
 }

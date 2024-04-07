@@ -18,8 +18,6 @@ pub(crate) mod stride;
 #[doc(hidden)]
 pub mod dim;
 
-
-
 pub trait IntoShape {
     fn into_shape(self) -> Shape;
 }

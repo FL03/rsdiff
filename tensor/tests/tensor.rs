@@ -27,11 +27,10 @@ fn test_raw_tensor() {
     let mut data = vec![1f64, 2f64, 3f64, 4f64];
     let exp = Tensor::<f64>::from_shape_vec(shape.clone(), data.clone());
 
-    unsafe { 
+    unsafe {
         let ptr = data.as_mut_ptr();
         let a = Tensor::<f64>::from_raw_parts(ptr, shape, stride);
         assert_eq!(a, exp);
-
     }
 }
 

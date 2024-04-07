@@ -12,6 +12,7 @@ pub type BoxError = Box<dyn std::error::Error>;
 #[non_exhaustive]
 pub enum BinaryOp {
     Pow,
+    
 }
 
 impl core::fmt::Display for BinaryOp {

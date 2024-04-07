@@ -20,6 +20,22 @@ fn test_tensor() {
 }
 
 #[test]
+#[ignore = "reason"]
+fn test_raw_tensor() {
+    let shape = (2, 2).into_shape();
+    let stride = shape.default_strides();
+    let mut data = vec![1f64, 2f64, 3f64, 4f64];
+    let exp = Tensor::<f64>::from_shape_vec(shape.clone(), data.clone());
+
+    unsafe { 
+        let ptr = data.as_mut_ptr();
+        let a = Tensor::<f64>::from_raw_parts(ptr, shape, stride);
+        assert_eq!(a, exp);
+
+    }
+}
+
+#[test]
 fn test_scalar_tensor() {
     use num::{One, Zero};
     let one = Tensor::<f64>::one();

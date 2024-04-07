@@ -12,6 +12,7 @@ use core::ops::{self, Deref};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use std::vec;
+
 /// A shape is a description of the number of elements in each dimension.
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -217,7 +218,7 @@ impl Shape {
 #[allow(dead_code)]
 #[doc(hidden)]
 impl Shape {
-    pub(crate) fn default_strides(&self) -> Stride {
+    pub fn default_strides(&self) -> Stride {
         // Compute default array strides
         // Shape (a, b, c) => Give strides (b * c, c, 1)
         let mut strides = Stride::zeros(self.rank());

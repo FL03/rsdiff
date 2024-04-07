@@ -4,7 +4,7 @@
 */
 use crate::data::specs::*;
 use crate::data::{Container, ContainerBase, ContainerView, ContainerViewMut};
-use crate::iter::{Baseiter, ElementsBase, ElementsBaseMut, Iter, IterMut};
+use crate::iter::{BaseIter, ElementsBase, ElementsBaseMut, Iter, IterMut};
 use core::marker::PhantomData;
 use core::ptr::NonNull;
 use core::slice;
@@ -130,9 +130,9 @@ impl<'a, A> ContainerView<'a, A> {
 // Internal Methods
 impl<'a, A> ContainerView<'a, A> {
     #[inline]
-    pub(crate) fn into_base_iter(self) -> Baseiter<A> {
+    pub(crate) fn into_base_iter(self) -> BaseIter<A> {
         unsafe {
-            Baseiter::new(
+            BaseIter::new(
                 self.ptr.as_ptr(),
                 self.shape().clone(),
                 self.stride().clone(),
@@ -152,9 +152,9 @@ impl<'a, A> ContainerView<'a, A> {
 
 impl<'a, A> ContainerViewMut<'a, A> {
     #[inline]
-    pub(crate) fn into_base_iter(self) -> Baseiter<A> {
+    pub(crate) fn into_base_iter(self) -> BaseIter<A> {
         unsafe {
-            Baseiter::new(
+            BaseIter::new(
                 self.ptr.as_ptr(),
                 self.shape().clone(),
                 self.stride().clone(),

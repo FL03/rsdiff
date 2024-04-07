@@ -15,15 +15,15 @@ pub enum ElementsRepr<S, C> {
 /// Counted read only iterator
 #[derive(Debug)]
 pub struct ElementsBase<'a, A> {
-    inner: Baseiter<A>,
-    life: PhantomData<&'a A>,
+    inner: BaseIter<A>,
+    _life: PhantomData<&'a A>,
 }
 
 impl<'a, A> ElementsBase<'a, A> {
     pub fn new(v: ContainerView<'a, A>) -> Self {
         ElementsBase {
             inner: v.into_base_iter(),
-            life: PhantomData,
+            _life: PhantomData,
         }
     }
 }
@@ -72,7 +72,7 @@ impl<'a, A> ExactSizeIterator for ElementsBase<'a, A> {
 /// Iterator element type is `&'a mut A`.
 #[derive(Debug)]
 pub struct ElementsBaseMut<'a, A> {
-    inner: Baseiter<A>,
+    inner: BaseIter<A>,
     life: PhantomData<&'a mut A>,
 }
 
@@ -128,29 +128,29 @@ impl<'a, A> ExactSizeIterator for ElementsBaseMut<'a, A> {
 ///
 /// Iterator element type is `*mut A`.
 #[derive(Debug)]
-pub struct Baseiter<A> {
+pub struct BaseIter<A> {
     ptr: *mut A,
-    dim: Shape,
+    shape: Shape,
     strides: Stride,
     index: Option<Vec<usize>>,
 }
 
-impl<A> Baseiter<A> {
+impl<A> BaseIter<A> {
     /// Creating a Baseiter is unsafe because shape and stride parameters need
     /// to be correct to avoid performing an unsafe pointer offset while
     /// iterating.
     #[inline]
-    pub unsafe fn new(ptr: *mut A, len: Shape, stride: Stride) -> Baseiter<A> {
-        Baseiter {
+    pub unsafe fn new(ptr: *mut A, shape: Shape, strides: Stride) -> BaseIter<A> {
+        BaseIter {
             ptr,
-            index: len.first_index(),
-            dim: len,
-            strides: stride,
+            index: shape.first_index(),
+            shape,
+            strides,
         }
     }
 }
 
-impl<A> Iterator for Baseiter<A> {
+impl<A> Iterator for BaseIter<A> {
     type Item = *mut A;
 
     #[inline]
@@ -160,37 +160,37 @@ impl<A> Iterator for Baseiter<A> {
             Some(ref ix) => ix.clone(),
         };
         let offset = Shape::stride_offset(&index, &self.strides);
-        self.index = self.dim.next_for(index);
+        self.index = self.shape.next_for(index);
         unsafe { Some(self.ptr.offset(offset)) }
     }
 }
 
-impl<A> ExactSizeIterator for Baseiter<A> {
+impl<A> ExactSizeIterator for BaseIter<A> {
     fn len(&self) -> usize {
         match self.index {
             None => 0,
             Some(ref ix) => {
-                let gone = crate::default_strides(&self.dim)
+                let gone = crate::default_strides(&self.shape)
                     .as_slice()
                     .iter()
                     .zip(ix.as_slice().iter())
                     .fold(0, |s, (&a, &b)| s + a * b);
-                self.dim.size() - gone
+                self.shape.size() - gone
             }
         }
     }
 }
 
-impl<A> DoubleEndedIterator for Baseiter<A> {
+impl<A> DoubleEndedIterator for BaseIter<A> {
     #[inline]
     fn next_back(&mut self) -> Option<*mut A> {
         let index = match self.index.as_ref() {
             None => return None,
             Some(ix) => ix.clone(),
         };
-        self.dim[0] -= 1;
-        let offset = Shape::stride_offset(&self.dim, &self.strides);
-        if index == self.dim {
+        self.shape[0] -= 1;
+        let offset = Shape::stride_offset(&self.shape, &self.strides);
+        if index == self.shape {
             self.index = None;
         }
 

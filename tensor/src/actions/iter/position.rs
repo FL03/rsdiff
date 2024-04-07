@@ -4,18 +4,18 @@
 */
 use crate::prelude::{Layout, Shape, Stride};
 
-///
-pub struct IndexIter {
+/// An iterator over the positions of a tensor.
+pub struct PositionIter {
     next: Option<usize>,
     position: Vec<usize>,
     shape: Shape,
     stride: Stride,
 }
 
-impl IndexIter {
+impl PositionIter {
     pub fn new(offset: usize, shape: Shape, stride: Stride) -> Self {
-        let elem_count: usize = shape.size();
-        let next = if elem_count == 0 {
+        let elems: usize = shape.size();
+        let next = if elems == 0 {
             None
         } else {
             // This applies to the scalar case.
@@ -39,7 +39,7 @@ impl IndexIter {
     }
 }
 
-impl DoubleEndedIterator for IndexIter {
+impl DoubleEndedIterator for PositionIter {
     fn next_back(&mut self) -> Option<Self::Item> {
         let (pos, _idx) = if let Some(item) = self.next() {
             item
@@ -57,7 +57,7 @@ impl DoubleEndedIterator for IndexIter {
     }
 }
 
-impl Iterator for IndexIter {
+impl Iterator for PositionIter {
     type Item = (Vec<usize>, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -90,7 +90,7 @@ impl Iterator for IndexIter {
     }
 }
 
-impl From<Layout> for IndexIter {
+impl From<Layout> for PositionIter {
     fn from(layout: Layout) -> Self {
         let Layout {
             offset,
@@ -102,7 +102,7 @@ impl From<Layout> for IndexIter {
     }
 }
 
-impl<'a> From<&'a Layout> for IndexIter {
+impl<'a> From<&'a Layout> for PositionIter {
     fn from(layout: &'a Layout) -> Self {
         Self::from(layout.clone())
     }

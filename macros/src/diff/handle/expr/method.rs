@@ -7,8 +7,9 @@ use crate::ops::{BinaryOp, Methods, UnaryOp};
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
 use syn::{Expr, ExprCall, ExprMethodCall, Ident};
-
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
     let ExprCall { args, func, .. } = expr;
     let mut grad = quote! { 0.0 };
@@ -31,24 +32,29 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
         ..
     } = expr;
     let method_name = method.clone().to_string();
-    
+
     if let Ok(method) = Methods::from_str(&method_name) {
-        let dm = match method {
+        return match method {
             Methods::Binary(method) => handle_method_binary(&method, &receiver, &args[0], var),
             Methods::Unary(method) => handle_method_unary(&method, &receiver, var),
             // _ => panic!("Unsupported method"),
         };
-
-        // return quote! { #dm * (#dr + #da) };
-        return dm;
     }
-    let dr = handle_expr(&receiver, var);
-    let mut da = quote! { 0.0 };
-    for arg in args {
-        let dv = handle_expr(&arg, var);
-        da = quote! { #da + #dv };
-    };
-    quote! { #dr + #da }
+    panic!("Unsupported method");
+    
+}
+
+#[allow(dead_code)]
+fn gradient_args(ctx: &Box<Expr>, args: &Punctuated<Expr, Comma>, var: &Ident) -> TokenStream {
+    let grad = handle_expr(ctx, var);
+    let da = gradient_args_iter(args, var);
+    quote! { #grad + #da }
+}
+
+fn gradient_args_iter(args: &Punctuated<Expr, Comma>, var: &Ident) -> TokenStream {
+    args.iter()
+        .map(|arg| handle_expr(arg, var))
+        .fold(quote! { 0.0 }, |acc, arg| quote! { #acc + #arg })
 }
 
 pub fn handle_method_binary(method: &BinaryOp, lhs: &Expr, rhs: &Expr, var: &Ident) -> TokenStream {
@@ -57,11 +63,16 @@ pub fn handle_method_binary(method: &BinaryOp, lhs: &Expr, rhs: &Expr, var: &Ide
     let dr = handle_expr(&rhs, var);
     // handle various binary operations; returning the gradient
     match method {
+        BinaryOp::Add => quote! { #dl + #dr },
+        BinaryOp::Div => quote! { (#dl * #rhs - #lhs * #dr) / #rhs.powi(2) },
+        BinaryOp::Mul => quote! { #dl * #rhs + #lhs * #dr },
         BinaryOp::Pow => {
             quote! {
                #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.pow(#rhs) * #rhs.ln() * #dr
             }
         }
+        BinaryOp::Sub => quote! { #dl - #dr },
+        _ => panic!("Unsupported binary method"),
     }
 }
 pub fn handle_method_unary(method: &UnaryOp, recv: &Expr, var: &Ident) -> TokenStream {

@@ -7,6 +7,8 @@
 //!
 extern crate proc_macro;
 
+pub(crate) use primitives::*;
+
 pub(crate) mod ast;
 pub(crate) mod diff;
 pub(crate) mod grad;
@@ -80,4 +82,8 @@ pub(crate) mod kw {
     syn::custom_keyword!(ln);
     syn::custom_keyword!(sin);
     syn::custom_keyword!(tan);
+}
+
+pub(crate) mod primitives {
+    pub type BoxError = Box<dyn std::error::Error>;
 }

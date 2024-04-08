@@ -12,14 +12,14 @@ use core::ptr;
 pub struct Iter<'a, T> {
     inner: LayoutIter,
     ptr: *const T,
-    tensor: &'a TensorBase<T>,
+    tensor: TensorBase<&'a T>,
 }
 
 impl<'a, T> Iter<'a, T> {
-    pub fn new(tensor: &'a TensorBase<T>) -> Self {
+    pub fn new(tensor: TensorBase<&'a T>) -> Self {
         Self {
             inner: tensor.layout().iter(),
-            ptr: tensor.as_ptr(),
+            ptr: unsafe { *tensor.as_ptr() },
             tensor,
         }
     }
@@ -51,9 +51,15 @@ impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T> From<TensorBase<&'a T>> for Iter<'a, T> {
+    fn from(tensor: TensorBase<&'a T>) -> Self {
+        Self::new(tensor)
+    }
+}
+
 impl<'a, T> From<&'a TensorBase<T>> for Iter<'a, T> {
     fn from(tensor: &'a TensorBase<T>) -> Self {
-        Self::new(tensor)
+        Self::new(tensor.view())
     }
 }
 

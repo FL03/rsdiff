@@ -231,9 +231,9 @@ impl<T> TensorBase<T> {
     pub const fn is_variable(&self) -> bool {
         self.kind().is_variable()
     }
-    /// Return an iterator over the tensor
+    /// Creates an immutable iterator over the elements in the tensor.
     pub fn iter(&self) -> Iter<'_, T> {
-        Iter::new(self)
+        Iter::new(self.view())
     }
     /// Create a mutable iterator over the elements in the tensor.
     pub fn iter_mut(&mut self) -> IterMut<'_, T> {

@@ -4,7 +4,6 @@
 */
 use crate::shape::{Layout, Shape, Stride};
 
-
 pub struct Position {
     pub(crate) index: usize,
     pub(crate) position: Vec<usize>,
@@ -15,7 +14,6 @@ pub struct LayoutIter {
     layout: Layout,
     next: Option<usize>,
     pos: Vec<usize>,
-
 }
 
 impl LayoutIter {
@@ -27,11 +25,7 @@ impl LayoutIter {
             Some(layout.offset())
         };
         let pos = vec![0; *layout.rank()];
-        Self {
-            next,
-            layout,
-            pos,
-        }
+        Self { next, layout, pos }
     }
 
     pub unsafe fn from_parts(offset: usize, shape: Shape, strides: Stride) -> Self {
@@ -46,7 +40,7 @@ impl LayoutIter {
 
 impl DoubleEndedIterator for LayoutIter {
     fn next_back(&mut self) -> Option<Self::Item> {
-        let Position { position, ..} = if let Some(item) = self.next() {
+        let Position { position, .. } = if let Some(item) = self.next() {
             item
         } else {
             return None;

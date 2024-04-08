@@ -67,7 +67,7 @@ impl Layout {
             };
             stride.push(s)
         }
-        let layout = unsafe { Layout::new(0, shape, stride)};
+        let layout = unsafe { Layout::new(0, shape, stride) };
         Ok(layout)
     }
     /// Determine if the current layout is contiguous or not.

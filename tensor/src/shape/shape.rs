@@ -142,7 +142,10 @@ impl Shape {
     /// or None if there are no more.
     // FIXME: use &Self for index or even &mut?
     #[inline]
-    pub fn next_for<D>(&self, index: D) -> Option<Vec<usize>> where D: AsRef<[usize]> {
+    pub fn next_for<D>(&self, index: D) -> Option<Vec<usize>>
+    where
+        D: AsRef<[usize]>,
+    {
         let mut index = index.as_ref().to_vec();
         let mut done = false;
         for (&dim, ix) in zip(self.as_slice(), index.as_mut_slice()).rev() {

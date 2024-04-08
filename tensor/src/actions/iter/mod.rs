@@ -54,7 +54,10 @@ mod tests {
     use crate::prelude::{IntoShape, Layout, Shape, Tensor};
     use num::traits::{FromPrimitive, Num};
 
-    fn linvec<T>(n: usize) -> (Vec<T>, usize) where T: Copy + Default + FromPrimitive + Num + PartialOrd {
+    fn linvec<T>(n: usize) -> (Vec<T>, usize)
+    where
+        T: Copy + Default + FromPrimitive + Num + PartialOrd,
+    {
         let space = Vec::linspace(T::zero(), T::from_usize(n).unwrap(), n);
         (space, n)
     }
@@ -71,11 +74,14 @@ mod tests {
             assert_eq!(pos.position(), *exp);
         }
     }
+
     #[test]
     fn test_iter() {
         let shape = Shape::from_iter([2, 2, 2, 2]);
         let (exp, n) = linvec::<f64>(shape.size());
-        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape.clone()).unwrap();
+        let tensor = Tensor::linspace(0f64, n as f64, n)
+            .reshape(shape.clone())
+            .unwrap();
         assert_eq!(&tensor, &exp);
 
         let mut tensor = Tensor::zeros(shape);

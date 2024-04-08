@@ -78,6 +78,21 @@ mod tests {
             assert_eq!(elem, val);
         }
     }
+    #[test]
+    #[ignore = "reason"]
+    fn test_iter_mut_rev() {
+        let shape = Shape::from_iter([2, 2, 2, 2]);
+        let n = shape.size();
+        let exp = Vec::linspace(0f64, n as f64, n);
+        let mut tensor = Tensor::zeros(shape);
+        for (elem, val) in tensor.iter_mut().rev().zip(exp.iter()) {
+            *elem = *val;
+        }
+
+        for (elem, val) in tensor.iter().zip(exp.iter().rev()) {
+            assert_eq!(elem, val);
+        }
+    }
 
     #[test]
     fn test_iter_rev() {

@@ -3,9 +3,17 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::{Scalar, TensorExpr, TensorResult};
-use crate::shape::ShapeError;
+use crate::shape::{ShapeError, Stride};
 use crate::tensor::{from_vec_with_op, TensorBase};
 use num::Zero;
+
+pub(crate) fn coordinates_to_index(coords: impl AsRef<[usize]>, strides: &Stride) -> usize {
+    coords
+        .as_ref()
+        .iter()
+        .zip(strides.iter())
+        .fold(0, |acc, (&i, &s)| acc + i * s)
+}
 
 pub fn matmul<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) -> TensorResult<TensorBase<T>>
 where

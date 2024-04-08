@@ -180,9 +180,7 @@ impl Layout {
 impl Layout {
     pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
         let idx = idx.as_ref();
-        if idx.len() != *self.rank() {
-            panic!("Dimension mismatch");
-        }
+        debug_assert_eq!(idx.len(), *self.rank(), "Dimension mismatch");
         self.index_unchecked(idx)
     }
 

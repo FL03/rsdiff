@@ -4,7 +4,8 @@
 */
 use crate::prelude::{Layout, Shape, Stride};
 
-/// An iterator over the positions of a tensor.
+/// An iterator over the positions of an n-dimensional tensor
+///
 pub struct PositionIter {
     next: Option<usize>,
     position: Vec<usize>,

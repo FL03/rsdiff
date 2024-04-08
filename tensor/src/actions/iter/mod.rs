@@ -5,8 +5,7 @@
 //! # Iter
 //!
 //!
-// pub use self::{axis::*, iterator::*, position::*, utils::*};
-pub use self::{iterator::*, position::*, utils::*};
+pub use self::{indexed::*, iterator::*, position::*, utils::*};
 
 #[allow(dead_code, unused)]
 pub(crate) mod axis;

@@ -31,7 +31,7 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
         ..
     } = expr;
     let method_name = method.clone().to_string();
-    let dr = handle_expr(&receiver, var);
+    
     if let Ok(method) = Methods::from_str(&method_name) {
         let dm = match method {
             Methods::Binary(method) => handle_method_binary(&method, &receiver, &args[0], var),
@@ -39,30 +39,34 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
             // _ => panic!("Unsupported method"),
         };
 
-        return quote! { #dm * #dr };
+        // return quote! { #dm * (#dr + #da) };
+        return dm;
     }
-    let mut grad = quote! { 0.0 };
+    let dr = handle_expr(&receiver, var);
+    let mut da = quote! { 0.0 };
     for arg in args {
-        let da = handle_expr(&arg, var);
-        grad = quote! { #grad + #da };
-    }
-    quote! { #dr + #grad }
+        let dv = handle_expr(&arg, var);
+        da = quote! { #da + #dv };
+    };
+    quote! { #dr + #da }
 }
 
 pub fn handle_method_binary(method: &BinaryOp, lhs: &Expr, rhs: &Expr, var: &Ident) -> TokenStream {
+    // compute the gradient of the left and right hand sides
     let dl = handle_expr(&lhs, var);
     let dr = handle_expr(&rhs, var);
-    println!("(dl, dr): ({}, {}) w.r.t {}", &dl, &dr, &var);
+    // handle various binary operations; returning the gradient
     match method {
         BinaryOp::Pow => {
             quote! {
-               #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.ln() * #lhs.powf(#rhs) * #dr
+               #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.pow(#rhs) * #rhs.ln() * #dr
             }
         }
     }
 }
-pub fn handle_method_unary(method: &UnaryOp, recv: &Expr, _var: &Ident) -> TokenStream {
-    match method {
+pub fn handle_method_unary(method: &UnaryOp, recv: &Expr, var: &Ident) -> TokenStream {
+    let dr = handle_expr(&recv, var);
+    let dm = match method {
         UnaryOp::Abs => quote! { #recv / #recv.abs() },
         UnaryOp::Cos => quote! { -#recv.sin() },
         UnaryOp::Cosh => quote! { #recv.sinh() },
@@ -82,5 +86,6 @@ pub fn handle_method_unary(method: &UnaryOp, recv: &Expr, _var: &Ident) -> Token
         UnaryOp::Sqrt => quote! { (2.0 * #recv.sqrt()).recip() },
         UnaryOp::Tan => quote! { #recv.cos().powi(2).recip() },
         UnaryOp::Tanh => quote! { #recv.cosh().powi(2).recip() },
-    }
+    };
+    quote! { #dm * #dr }
 }

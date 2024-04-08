@@ -124,6 +124,7 @@ fn test_pow() {
     assert_eq!(autodiff!(x: x.pow(y)), y * x.pow(2));
     // assert_eq!(autodiff!(y: x.pow(y)), x.pow(y) * y.ln());
     assert_eq!(autodiff!(x: 2f64.powf(y)), 0f64);
+    assert_eq!(autodiff!(y: 2f64.pow(y)), 2f64.pow(y) * y.ln());
     assert_eq!(autodiff!(x: x.powi(y)), y * x.pow(2));
 }
 

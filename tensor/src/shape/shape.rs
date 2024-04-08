@@ -56,11 +56,20 @@ impl Shape {
             Ok(self.size())
         }
     }
-    pub fn dec(&mut self) {
+    /// Decrement the dimensions of the shape by 1,
+    /// returning a new shape.
+    pub fn dec(&self) -> Self {
+        let mut shape = self.clone();
+        shape.dec_inplace();
+        shape
+    }
+    /// Decrement the dimensions of the shape by 1, inplace.
+    pub fn dec_inplace(&mut self) {
         for dim in self.iter_mut() {
             *dim -= 1;
         }
     }
+    /// Decrement the dimension at the given [Axis] by 1.
     pub fn dec_axis(&mut self, axis: Axis) {
         self[axis] -= 1;
     }
@@ -133,8 +142,8 @@ impl Shape {
     /// or None if there are no more.
     // FIXME: use &Self for index or even &mut?
     #[inline]
-    pub fn next_for(&self, index: Vec<usize>) -> Option<Vec<usize>> {
-        let mut index = index;
+    pub fn next_for<D>(&self, index: D) -> Option<Vec<usize>> where D: AsRef<[usize]> {
+        let mut index = index.as_ref().to_vec();
         let mut done = false;
         for (&dim, ix) in zip(self.as_slice(), index.as_mut_slice()).rev() {
             *ix += 1;
@@ -146,7 +155,7 @@ impl Shape {
             }
         }
         if done {
-            Some(index.to_vec())
+            Some(index)
         } else {
             None
         }

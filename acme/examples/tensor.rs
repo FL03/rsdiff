@@ -34,9 +34,7 @@ pub fn tensor_iter_mut(shape: impl IntoShape) -> BoxResult<Tensor<f64>> {
         *elem = *val;
     }
     assert_eq!(&tensor, &exp);
-    for i in tensor.iter() {
-        println!("{:?}", i);
-    }
+    println!("{:?}", Vec::from_iter(&mut tensor.iter().rev()));
     Ok(tensor)
 }
 
@@ -52,7 +50,7 @@ pub fn tensor_iter_mut_rev(shape: impl IntoShape) -> BoxResult<Tensor<f64>> {
     // assert_eq!(&tensor, &exp);
     let sample = Tensor::linspace(0f64, n as f64, n).reshape(shape)?;
     println!("*** Reversed ***");
-    for i in sample.iter().copied().rev() {
+    for i in sample.clone().iter().copied().rev() {
         println!("{:?}", i);
     }
 

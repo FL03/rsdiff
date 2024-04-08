@@ -6,7 +6,7 @@
 //!
 //!
 // pub use self::{axis::*, iterator::*, position::*, utils::*};
-pub use self::{iterator::*, position::PositionIter, utils::*};
+pub use self::{iterator::*, position::*, utils::*};
 
 #[allow(dead_code, unused)]
 pub(crate) mod axis;
@@ -50,48 +50,52 @@ pub(crate) mod utils {
 
 #[cfg(test)]
 mod tests {
-    use crate::actions::create::Linspace;
-    use crate::prelude::{Shape, Tensor};
+    use crate::create::Linspace;
+    use crate::prelude::{IntoShape, Layout, Shape, Tensor};
+    use num::traits::{FromPrimitive, Num};
 
-    #[test]
-    fn test_iter() {
-        let shape = Shape::from_iter([2, 2, 2, 2]);
-        let n = shape.size();
-        let exp = Vec::linspace(0f64, n as f64, n);
-        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
-        for (elem, val) in tensor.iter().zip(exp.iter()) {
-            assert_eq!(elem, val);
-        }
+    fn linvec<T>(n: usize) -> (Vec<T>, usize) where T: Copy + Default + FromPrimitive + Num + PartialOrd {
+        let space = Vec::linspace(T::zero(), T::from_usize(n).unwrap(), n);
+        (space, n)
     }
 
     #[test]
-    fn test_iter_mut() {
+    fn test_layout_iter() {
+        let shape = (2, 2).into_shape();
+        let layout = Layout::contiguous(shape);
+        let exp = [vec![0usize, 0], vec![0, 1], vec![1, 0], vec![1, 1]];
+        for (pos, exp) in layout.iter().zip(exp.iter()) {
+            assert_eq!(pos.position(), *exp);
+        }
+        for (pos, exp) in layout.iter().rev().zip(exp.iter().rev()) {
+            assert_eq!(pos.position(), *exp);
+        }
+    }
+    #[test]
+    fn test_iter() {
         let shape = Shape::from_iter([2, 2, 2, 2]);
-        let n = shape.size();
-        let exp = Vec::linspace(0f64, n as f64, n);
+        let (exp, n) = linvec::<f64>(shape.size());
+        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape.clone()).unwrap();
+        assert_eq!(&tensor, &exp);
+
         let mut tensor = Tensor::zeros(shape);
         for (elem, val) in tensor.iter_mut().zip(exp.iter()) {
             *elem = *val;
         }
-
-        for (elem, val) in tensor.iter().zip(exp.iter()) {
-            assert_eq!(elem, val);
-        }
+        assert_eq!(&tensor, &exp);
     }
+
     #[test]
-    #[ignore = "reason"]
     fn test_iter_mut_rev() {
         let shape = Shape::from_iter([2, 2, 2, 2]);
         let n = shape.size();
         let exp = Vec::linspace(0f64, n as f64, n);
+        let rev = exp.iter().rev().copied().collect::<Vec<f64>>();
         let mut tensor = Tensor::zeros(shape);
         for (elem, val) in tensor.iter_mut().rev().zip(exp.iter()) {
             *elem = *val;
         }
-
-        for (elem, val) in tensor.iter().zip(exp.iter().rev()) {
-            assert_eq!(elem, val);
-        }
+        assert_eq!(&tensor, &rev);
     }
 
     #[test]

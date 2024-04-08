@@ -191,11 +191,7 @@ impl Layout {
     }
 
     pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
-        idx.as_ref()
-            .iter()
-            .zip(self.strides().iter())
-            .map(|(i, s)| i * s)
-            .sum()
+        crate::coordinates_to_index(idx, self.strides())
     }
 }
 

@@ -2,7 +2,7 @@
     Appellation: grad <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::grad::GradStore;
+use crate::actions::grad::TensorGrad;
 use crate::prelude::{Scalar, TensorExpr, TensorId, TensorResult};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, Store, UnaryOp};
@@ -75,11 +75,11 @@ where
         nodes
     }
 
-    pub fn grad(&self) -> TensorResult<GradStore<T>> {
+    pub fn grad(&self) -> TensorResult<TensorGrad<T>> {
         // get the sorted nodes
         let sorted = self.toposort(true);
         // initialize a new gradient store
-        let mut store = GradStore::new();
+        let mut store = TensorGrad::new();
         // insert the gradient w.r.t. the current node
         store.insert(self.id(), self.ones_like());
 

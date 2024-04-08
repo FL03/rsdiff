@@ -5,7 +5,7 @@
 //! # Gradient
 //!
 //!
-pub use self::store::GradStore;
+pub use self::store::TensorGrad;
 
 pub(crate) mod store;
 

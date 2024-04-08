@@ -141,3 +141,17 @@ where
         tensor::from_vec_with_op(false, op, shape, result)
     }
 }
+
+#[allow(dead_code)]
+macro_rules! multi_for {
+    ($($key:ident in $iter:expr =>)* $expr:expr) => {
+        for $key in $iter {
+            multi_for!($($key in $iter =>)* $expr);
+        }
+    };
+    ($key:ident in $iter:expr => $expr:expr) => {
+        for $key in $iter {
+            $expr
+        }
+    };
+}

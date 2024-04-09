@@ -5,21 +5,25 @@
 //! # Slice
 //!
 //!
-use core::ops::{Range, RangeFrom};
+use super::Ixs;
+use core::ops::{Range, RangeFrom, RangeTo};
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Slice {
-    pub start: isize,
-    pub end: Option<isize>,
-    pub step: isize,
+    pub start: Ixs,
+    pub end: Option<Ixs>,
+    pub step: Ixs,
 }
 
 impl Slice {
-    pub fn new(start: isize, end: Option<isize>, step: isize) -> Self {
+    pub fn new(start: Ixs, end: Option<Ixs>, step: Ixs) -> Self {
         Self { start, end, step }
     }
 }
 
-impl From<Range<isize>> for Slice {
-    fn from(range: Range<isize>) -> Self {
+impl From<Range<Ixs>> for Slice {
+    fn from(range: Range<Ixs>) -> Self {
         Self {
             start: range.start,
             end: Some(range.end),
@@ -28,8 +32,8 @@ impl From<Range<isize>> for Slice {
     }
 }
 
-impl From<RangeFrom<isize>> for Slice {
-    fn from(range: RangeFrom<isize>) -> Self {
+impl From<RangeFrom<Ixs>> for Slice {
+    fn from(range: RangeFrom<Ixs>) -> Self {
         Self {
             start: range.start,
             end: None,
@@ -38,8 +42,20 @@ impl From<RangeFrom<isize>> for Slice {
     }
 }
 
+impl From<RangeTo<Ixs>> for Slice {
+    fn from(range: RangeTo<Ixs>) -> Self {
+        Self {
+            start: 0,
+            end: Some(range.end),
+            step: 1,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(rename_all = "snake_case"))]
 pub enum Slices {
-    Index(isize),
+    Index(Ixs),
     Slice(Slice),
     NewAxis,
 }

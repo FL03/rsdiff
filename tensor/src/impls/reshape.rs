@@ -29,7 +29,7 @@ where
 
         let _diff = *self.shape().rank() - *shape.rank();
 
-        unimplemented!()
+        todo!()
     }
     /// Swap two axes in the tensor.
     pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {

@@ -4,8 +4,14 @@
 */
 extern crate acme;
 
-use acme::prelude::BoxResult;
+use acme::prelude::{nested, BoxResult};
 
 fn main() -> BoxResult {
+    nested!(
+        for i in 0..3,
+        for j in 0..3,
+        for k in 0..3 => {
+        println!("({}, {}, {})", i, j, k)
+    });
     Ok(())
 }

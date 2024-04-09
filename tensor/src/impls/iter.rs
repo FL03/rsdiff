@@ -12,7 +12,7 @@ where
     pub fn product(&self) -> T {
         self.data().iter().copied().product()
     }
-
+    #[doc(hidden)]
     pub fn product_axis(&self, _axis: Axis) -> T {
         unimplemented!("product_axis")
     }
@@ -20,7 +20,7 @@ where
     pub fn sum(&self) -> T {
         self.data().iter().copied().sum()
     }
-
+    #[doc(hidden)]
     pub fn sum_axis(&self, _axis: Axis) -> T {
         unimplemented!("sum_axis")
     }

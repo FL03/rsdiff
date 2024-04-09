@@ -3,13 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![cfg(test)]
-#![allow(unused_variables)]
+#![allow(unused)]
 extern crate acme_macros as macros;
 
 use approx::assert_abs_diff_eq;
 use macros::autodiff;
 
-pub fn sigmoid_prime<T>(x: T) -> T
+fn sigmoid_prime<T>(x: T) -> T
 where
     T: num::Float,
 {
@@ -18,26 +18,30 @@ where
 
 #[test]
 fn test_autodiff() {
-    let (x, y) = (1_f64, 2_f64);
+    let (x, y) = (1f64, 2f64);
     // differentiating a closure item w.r.t. x
     assert_eq!(autodiff!(x: | x: f64, y: f64 | x * y ), y);
     assert_eq!(autodiff!(y: | x: f64, y: f64 | x * y ), x);
     // differentiating a known method call w.r.t. the reciever (x)
-    assert_eq!(autodiff!(x: x.add(y)), 1.0);
+    assert_eq!(autodiff!(x: x.add(y)), 1f64);
     // differentiating an expression w.r.t. x
-    assert_eq!(autodiff!(x: x + y), 1.0);
-    assert_eq!(autodiff!(x: x + x), 2.0);
-    assert_eq!(autodiff!(y: x += y), 1.0);
-}
-
-#[test]
-fn test_item_function() {
-    let (x, y) = (1_f64, 2_f64);
+    assert_eq!(autodiff!(x: x + y), 1f64);
+    assert_eq!(autodiff!(x: x + x), 2f64);
+    assert_eq!(autodiff!(y: x += y), 1f64);
+    // differentiating an item fn w.r.t. y
     assert_eq!(
         autodiff!(x: fn mul<A, B, C>(x: A, y: B) -> C where A: std::ops::Mul<B, Output = C> { x * y }),
         y
     );
-    assert_eq!(autodiff!(y: fn mul(x: f64, y: f64) -> f64 { x * y }), x);
+}
+
+#[test]
+fn test_item_function() {
+    let (x, y) = (1f64, 2f64);
+    assert_eq!(
+        autodiff!(x: fn mul<A, B, C>(x: A, y: B) -> C where A: std::ops::Mul<B, Output = C> { x * y }),
+        y
+    );
 }
 
 #[test]
@@ -49,28 +53,29 @@ fn test_array() {
 
 #[test]
 fn test_add() {
-    let x = [1.0];
-    let y = 2.0;
+    let (x, y) = (1f64, 2f64);
     assert_eq!(autodiff!(x: x + y), 1.0);
     assert_eq!(autodiff!(y: x += y), 1.0);
+    assert_eq!(autodiff!(x: x.add(y)), 1.0);
 }
 
 #[test]
 fn test_div() {
-    let x = 1.0;
-    let y = 2.0;
-    assert_eq!(autodiff!(x: x / y), 1.0 / 2.0);
+    let (x, y) = (1f64, 2f64);
+
+    assert_eq!(autodiff!(x: x / y), 0.5);
+    assert_eq!(autodiff!(x: x.div(y)), 0.5);
     assert_eq!(autodiff!(y: x / y), -1.0 / 4.0);
-    assert_eq!(autodiff!(x: x /= y), 1.0 / 2.0);
+    assert_eq!(autodiff!(x: x /= y), 0.5);
     assert_eq!(autodiff!(y: x /= y), -1.0 / 4.0);
 }
 
 #[test]
 fn test_mul() {
-    let x = 1.0;
-    let y = 2.0;
-    assert_eq!(autodiff!(x: x * y + 10.0), 2.0);
-    assert_eq!(autodiff!(y: x * y), 1.0);
+    let (x, y) = (1f64, 2f64);
+
+    assert_eq!(autodiff!(x: x * y + 10.0), y);
+    assert_eq!(autodiff!(y: x.mul(y)), x);
     assert_eq!(autodiff!(x: x *= y), 2.0);
     assert_eq!(autodiff!(y: x *= y), 1.0);
     assert_eq!(autodiff!(y: x * y + 3.0), 1.0);
@@ -78,19 +83,19 @@ fn test_mul() {
 
 #[test]
 fn test_sub() {
-    let x = 1.0;
-    let y = 2.0;
+    let (x, y) = (1f64, 2f64);
+
     assert_eq!(autodiff!(x: x - y), 1.0);
-    assert_eq!(autodiff!(y: x - y), -1.0);
+    assert_eq!(autodiff!(y: x.sub(y)), -1.0);
     assert_eq!(autodiff!(x: x -= y), 1.0);
     assert_eq!(autodiff!(y: x -= y), -1.0);
 }
 
 #[test]
 fn test_foil() {
-    let (x, y) = (1_f64, 2_f64);
+    let (x, y) = (1f64, 2f64);
 
-    assert_eq!(autodiff!(x: (x + y) * (x + y)), 2_f64 * (x + y));
+    assert_eq!(autodiff!(x: (x + y) * (x + y)), 2f64 * (x + y));
     assert_eq!(
         autodiff!(x: (x + y) * (x + y)),
         autodiff!(y: (x + y) * (x + y))
@@ -122,8 +127,9 @@ fn test_pow() {
     let (x, y) = (2f64, 3f64);
     let y_i: i32 = 3;
     assert_eq!(autodiff!(x: x.pow(y)), y * x.pow(2));
-    // assert_eq!(autodiff!(y: x.pow(y)), x.pow(y) * y.ln());
-    assert_eq!(autodiff!(x: 2f64.powf(y)), 0f64);
+    assert_eq!(autodiff!(y: x.pow(y)), x.pow(y) * y.ln());
+    assert_eq!(autodiff!(x: 2f64.pow(y)), 0f64);
+    assert_eq!(autodiff!(y: 2f64.pow(y)), 2f64.pow(y) * y.ln());
     assert_eq!(autodiff!(x: x.powi(y)), y * x.pow(2));
 }
 

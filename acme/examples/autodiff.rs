@@ -8,19 +8,35 @@ extern crate acme;
 
 use acme::autodiff;
 
+macro_rules! format_exp {
+    (symbolic: {exp: $ex:expr, vars: [$($var:ident),*] }) => {
+        {
+            format!("f({})\t= {}", stringify!($($var),*), stringify!($ex))
+        }
+
+    }
+}
+
 macro_rules! eval {
     ($var:ident: $ex:expr) => {
-        println!("Eval: {:?}", $ex);
-        println!("Gradient: {:?}", autodiff!($var: $ex));
+        {
+            let tmp = autodiff!($var: $ex);
+            let var = stringify!($var);
+            println!("*** Eval ***\nf({})\t= {}\nf({})\t= {:?}\nf'({})\t= {:?}\n", &var, stringify!($ex), $var, $ex, $var, &tmp);
+            tmp
+        }
+
     }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let x = 2_f64;
-
+    let y = 3f64;
+    let exp = format_exp!(symbolic: {exp: x * y, vars: [x, y]});
+    println!("{}", exp);
     // multiply(x, x);
 
-    samples(x);
+    trig_functions(x);
 
     Ok(())
 }
@@ -33,10 +49,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 //     x * y
 // }
 
-fn samples(x: f64) {
-    eval!(x: x.tan());
+fn trig_functions(x: f64) {
+    let _tangent = eval!(x: x.tan());
 
-    eval!(x: x.sin());
-
-    eval!(x: x.cos().sin());
+    let sine = eval!(x: x.sin());
+    assert_eq!(sine, x.cos());
+    let _cos_sin = eval!(x: x.cos().sin());
 }

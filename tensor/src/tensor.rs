@@ -2,11 +2,11 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::iter::Iter;
+use crate::actions::iter::{Iter, IterMut};
 use crate::error::{TensorError, TensorResult};
 use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{TensorId, TensorKind};
-use crate::shape::{IntoShape, Layout, Rank, Shape, Stride};
+use crate::shape::{IntoShape, IntoStride, Layout, Rank, Shape, Stride};
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::{self, Vec};
@@ -78,12 +78,20 @@ impl<T> TensorBase<T> {
     {
         Self::from_vec(Vec::from_iter(iter))
     }
-    pub unsafe fn from_raw_parts(ptr: *mut T, len: usize, cap: usize) -> Self {
+    pub unsafe fn from_raw_parts(
+        ptr: *mut T,
+        shape: impl IntoShape,
+        stride: impl IntoStride,
+    ) -> Self {
+        let shape = shape.into_shape();
+        let stride = stride.into_stride();
+
+        let data = Vec::from_raw_parts(ptr, shape.size(), shape.size());
         Self {
             id: TensorId::new(),
             kind: TensorKind::default(),
-            layout: Layout::contiguous(Shape::from(len)),
-            data: Vec::from_raw_parts(ptr, len, cap),
+            layout: Layout::new(0, shape, stride),
+            data,
             op: BackpropOp::none(),
         }
     }
@@ -223,9 +231,13 @@ impl<T> TensorBase<T> {
     pub const fn is_variable(&self) -> bool {
         self.kind().is_variable()
     }
-    /// Return an iterator over the tensor
+    /// Creates an immutable iterator over the elements in the tensor.
     pub fn iter(&self) -> Iter<'_, T> {
-        Iter::new(self)
+        Iter::new(self.view())
+    }
+    /// Create a mutable iterator over the elements in the tensor.
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+        IterMut::new(self)
     }
     /// Get the kind of the tensor
     pub const fn kind(&self) -> TensorKind {

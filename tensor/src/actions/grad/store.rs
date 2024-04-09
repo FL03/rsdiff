@@ -10,11 +10,11 @@ use core::ops::{Deref, DerefMut, Index, IndexMut};
 use std::collections::btree_map::{BTreeMap, Entry, Keys, Values};
 
 #[derive(Clone, Debug)]
-pub struct GradStore<T> {
+pub struct TensorGrad<T> {
     pub(crate) store: BTreeMap<TensorId, TensorBase<T>>,
 }
 
-impl<T> GradStore<T> {
+impl<T> TensorGrad<T> {
     pub fn new() -> Self {
         Self {
             store: BTreeMap::new(),
@@ -83,31 +83,31 @@ impl<T> GradStore<T> {
     }
 }
 
-impl<T> AsRef<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+impl<T> AsRef<BTreeMap<TensorId, TensorBase<T>>> for TensorGrad<T> {
     fn as_ref(&self) -> &BTreeMap<TensorId, TensorBase<T>> {
         &self.store
     }
 }
 
-impl<T> AsMut<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+impl<T> AsMut<BTreeMap<TensorId, TensorBase<T>>> for TensorGrad<T> {
     fn as_mut(&mut self) -> &mut BTreeMap<TensorId, TensorBase<T>> {
         &mut self.store
     }
 }
 
-impl<T> Borrow<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+impl<T> Borrow<BTreeMap<TensorId, TensorBase<T>>> for TensorGrad<T> {
     fn borrow(&self) -> &BTreeMap<TensorId, TensorBase<T>> {
         &self.store
     }
 }
 
-impl<T> BorrowMut<BTreeMap<TensorId, TensorBase<T>>> for GradStore<T> {
+impl<T> BorrowMut<BTreeMap<TensorId, TensorBase<T>>> for TensorGrad<T> {
     fn borrow_mut(&mut self) -> &mut BTreeMap<TensorId, TensorBase<T>> {
         &mut self.store
     }
 }
 
-impl<T> Deref for GradStore<T> {
+impl<T> Deref for TensorGrad<T> {
     type Target = BTreeMap<TensorId, TensorBase<T>>;
 
     fn deref(&self) -> &Self::Target {
@@ -115,19 +115,19 @@ impl<T> Deref for GradStore<T> {
     }
 }
 
-impl<T> DerefMut for GradStore<T> {
+impl<T> DerefMut for TensorGrad<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.store
     }
 }
 
-impl<T> Extend<(TensorId, TensorBase<T>)> for GradStore<T> {
+impl<T> Extend<(TensorId, TensorBase<T>)> for TensorGrad<T> {
     fn extend<I: IntoIterator<Item = (TensorId, TensorBase<T>)>>(&mut self, iter: I) {
         self.store.extend(iter)
     }
 }
 
-impl<T> FromIterator<(TensorId, TensorBase<T>)> for GradStore<T> {
+impl<T> FromIterator<(TensorId, TensorBase<T>)> for TensorGrad<T> {
     fn from_iter<I: IntoIterator<Item = (TensorId, TensorBase<T>)>>(iter: I) -> Self {
         Self {
             store: BTreeMap::from_iter(iter),
@@ -135,7 +135,7 @@ impl<T> FromIterator<(TensorId, TensorBase<T>)> for GradStore<T> {
     }
 }
 
-impl<T> Index<&TensorId> for GradStore<T> {
+impl<T> Index<&TensorId> for TensorGrad<T> {
     type Output = TensorBase<T>;
 
     fn index(&self, index: &TensorId) -> &Self::Output {
@@ -143,13 +143,13 @@ impl<T> Index<&TensorId> for GradStore<T> {
     }
 }
 
-impl<T> IndexMut<&TensorId> for GradStore<T> {
+impl<T> IndexMut<&TensorId> for TensorGrad<T> {
     fn index_mut(&mut self, index: &TensorId) -> &mut Self::Output {
         self.get_mut(index).expect("Tensor not found")
     }
 }
 
-impl<T> IntoIterator for GradStore<T> {
+impl<T> IntoIterator for TensorGrad<T> {
     type Item = (TensorId, TensorBase<T>);
     type IntoIter = std::collections::btree_map::IntoIter<TensorId, TensorBase<T>>;
 
@@ -158,7 +158,7 @@ impl<T> IntoIterator for GradStore<T> {
     }
 }
 
-impl<T> Store<TensorId, TensorBase<T>> for GradStore<T> {
+impl<T> Store<TensorId, TensorBase<T>> for TensorGrad<T> {
     fn get(&self, key: &TensorId) -> Option<&TensorBase<T>> {
         self.store.get(key)
     }

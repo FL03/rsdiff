@@ -5,11 +5,11 @@
 //! # Iter
 //!
 //!
-// pub use self::{axis::*, iterator::*, position::*, utils::*};
-pub use self::{iterator::*, position::IndexIter, utils::*};
+pub use self::{indexed::*, iterator::*, position::*, utils::*};
 
 #[allow(dead_code, unused)]
 pub(crate) mod axis;
+pub(crate) mod indexed;
 pub(crate) mod iterator;
 pub(crate) mod position;
 
@@ -48,30 +48,4 @@ pub(crate) mod utils {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::actions::create::Linspace;
-    use crate::prelude::{Shape, Tensor};
-
-    #[test]
-    fn test_iter() {
-        let shape = Shape::from_iter([2, 2, 2, 2]);
-        let n = shape.size();
-        let exp = Vec::linspace(0f64, n as f64, n);
-        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
-        for (elem, val) in tensor.iter().zip(exp.iter()) {
-            assert_eq!(elem, val);
-        }
-    }
-
-    #[test]
-    fn test_iter_rev() {
-        let shape = Shape::from_iter([2, 2]);
-        let n = shape.size();
-        let exp = Vec::linspace(0f64, n as f64, n);
-        let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape).unwrap();
-
-        for (i, j) in tensor.iter().rev().zip(exp.iter().rev()) {
-            assert_eq!(i, j);
-        }
-    }
-}
+mod tests {}

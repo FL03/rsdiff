@@ -36,13 +36,6 @@ impl<T> Tensors<T> {
         Self::Tensor(tensor)
     }
 
-    pub fn is_scalar(&self) -> bool {
-        match self {
-            Self::Scalar(_) => true,
-            _ => false,
-        }
-    }
-
     pub fn rank(&self) -> Rank {
         match self {
             Self::Tensor(tensor) => tensor.rank(),

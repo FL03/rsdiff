@@ -12,6 +12,7 @@ use core::ops::{self, Deref};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use std::vec;
+
 /// A shape is a description of the number of elements in each dimension.
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -55,11 +56,20 @@ impl Shape {
             Ok(self.size())
         }
     }
-    pub fn dec(&mut self) {
+    /// Decrement the dimensions of the shape by 1,
+    /// returning a new shape.
+    pub fn dec(&self) -> Self {
+        let mut shape = self.clone();
+        shape.dec_inplace();
+        shape
+    }
+    /// Decrement the dimensions of the shape by 1, inplace.
+    pub fn dec_inplace(&mut self) {
         for dim in self.iter_mut() {
             *dim -= 1;
         }
     }
+    /// Decrement the dimension at the given [Axis] by 1.
     pub fn dec_axis(&mut self, axis: Axis) {
         self[axis] -= 1;
     }
@@ -132,8 +142,11 @@ impl Shape {
     /// or None if there are no more.
     // FIXME: use &Self for index or even &mut?
     #[inline]
-    pub fn next_for(&self, index: Vec<usize>) -> Option<Vec<usize>> {
-        let mut index = index;
+    pub fn next_for<D>(&self, index: D) -> Option<Vec<usize>>
+    where
+        D: AsRef<[usize]>,
+    {
+        let mut index = index.as_ref().to_vec();
         let mut done = false;
         for (&dim, ix) in zip(self.as_slice(), index.as_mut_slice()).rev() {
             *ix += 1;
@@ -145,7 +158,7 @@ impl Shape {
             }
         }
         if done {
-            Some(index.to_vec())
+            Some(index)
         } else {
             None
         }
@@ -217,7 +230,7 @@ impl Shape {
 #[allow(dead_code)]
 #[doc(hidden)]
 impl Shape {
-    pub(crate) fn default_strides(&self) -> Stride {
+    pub fn default_strides(&self) -> Stride {
         // Compute default array strides
         // Shape (a, b, c) => Give strides (b * c, c, 1)
         let mut strides = Stride::zeros(self.rank());
@@ -460,6 +473,12 @@ impl From<Vec<usize>> for Shape {
 
 impl From<&[usize]> for Shape {
     fn from(shape: &[usize]) -> Self {
+        Self(shape.to_vec())
+    }
+}
+
+impl<const N: usize> From<[usize; N]> for Shape {
+    fn from(shape: [usize; N]) -> Self {
         Self(shape.to_vec())
     }
 }

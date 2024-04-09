@@ -2,6 +2,7 @@
     Appellation: layout <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::iter::LayoutIter;
 use crate::shape::dim::stride_offset;
 use crate::shape::{Axis, IntoShape, IntoStride, Rank, Shape, ShapeError, ShapeResult, Stride};
 #[cfg(feature = "serde")]
@@ -17,7 +18,7 @@ pub struct Layout {
 }
 
 impl Layout {
-    pub fn new(offset: usize, shape: impl IntoShape, strides: impl IntoStride) -> Self {
+    pub unsafe fn new(offset: usize, shape: impl IntoShape, strides: impl IntoStride) -> Self {
         Self {
             offset,
             shape: shape.into_shape(),
@@ -66,7 +67,8 @@ impl Layout {
             };
             stride.push(s)
         }
-        Ok(Self::new(self.offset, shape, stride))
+        let layout = unsafe { Layout::new(0, shape, stride) };
+        Ok(layout)
     }
     /// Determine if the current layout is contiguous or not.
     pub fn is_contiguous(&self) -> bool {
@@ -80,6 +82,10 @@ impl Layout {
     /// An n-dimensional object is square if all of its dimensions are equal.
     pub fn is_square(&self) -> bool {
         self.shape().is_square()
+    }
+
+    pub fn iter(&self) -> LayoutIter {
+        LayoutIter::new(self.clone())
     }
     /// Peek the offset of the layout.
     pub fn offset(&self) -> usize {
@@ -180,18 +186,12 @@ impl Layout {
 impl Layout {
     pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
         let idx = idx.as_ref();
-        if idx.len() != *self.rank() {
-            panic!("Dimension mismatch");
-        }
+        debug_assert_eq!(idx.len(), *self.rank(), "Dimension mismatch");
         self.index_unchecked(idx)
     }
 
     pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
-        idx.as_ref()
-            .iter()
-            .zip(self.strides().iter())
-            .map(|(i, s)| i * s)
-            .sum()
+        crate::coordinates_to_index(idx, self.strides())
     }
 }
 

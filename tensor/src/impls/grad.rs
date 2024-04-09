@@ -2,7 +2,7 @@
     Appellation: grad <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::grad::GradStore;
+use crate::actions::grad::TensorGrad;
 use crate::prelude::{Scalar, TensorExpr, TensorId, TensorResult};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, Store, UnaryOp};
@@ -22,7 +22,7 @@ impl<T> TensorBase<T>
 where
     T: Scalar,
 {
-    /// [toposort](TensorBase::toposort) is a utilitarian functions that returns a topologically sorted list of nodes.
+    /// toposort is a function which sorts the nodes of the op graph in topological order.
     fn toposort(&self, reverse: bool) -> Vec<&TensorBase<T>> {
         // Here, the sorted nodes are passed as an owned value rather than as a mutable reference to workaround some lifetime limitations.
         fn walk<'a, T>(
@@ -74,12 +74,12 @@ where
         // return the sorted nodes
         nodes
     }
-
-    pub fn grad(&self) -> TensorResult<GradStore<T>> {
+    /// Compute the gradient of the tensor
+    pub fn grad(&self) -> TensorResult<TensorGrad<T>> {
         // get the sorted nodes
         let sorted = self.toposort(true);
         // initialize a new gradient store
-        let mut store = GradStore::new();
+        let mut store = TensorGrad::new();
         // insert the gradient w.r.t. the current node
         store.insert(self.id(), self.ones_like());
 

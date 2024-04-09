@@ -16,7 +16,7 @@ pub struct Iter<'a, T> {
 }
 
 impl<'a, T> Iter<'a, T> {
-    pub fn new(tensor: TensorBase<&'a T>) -> Self {
+    pub(crate) fn new(tensor: TensorBase<&'a T>) -> Self {
         Self {
             inner: tensor.layout().iter(),
             ptr: unsafe { *tensor.as_ptr() },

@@ -10,7 +10,7 @@ use quote::quote;
 use syn::{ItemFn, Signature};
 
 #[allow(dead_code)]
-pub fn gradient(grad: &GradientAst) -> TokenStream {
+pub fn partial_impl(grad: &GradientAst) -> TokenStream {
     let GradientAst { attrs, item } = grad;
     let _attrs = attrs;
     let item = item;

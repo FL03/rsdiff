@@ -2,7 +2,7 @@
     Appellation: position <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::shape::{Layout, Shape, Stride};
+use crate::shape::Layout;
 
 pub struct Position {
     pub(crate) index: usize,
@@ -10,6 +10,8 @@ pub struct Position {
 }
 
 /// An iterator over the positions of an n-dimensional tensor.
+/// Each step yields a (position)[Position] containing the current position
+/// and corresponding index.
 pub struct LayoutIter {
     layout: Layout,
     next: Option<usize>,
@@ -17,7 +19,7 @@ pub struct LayoutIter {
 }
 
 impl LayoutIter {
-    pub fn new(layout: Layout) -> Self {
+    pub(crate) fn new(layout: Layout) -> Self {
         let next = if layout.size() == 0 {
             None
         } else {
@@ -26,11 +28,6 @@ impl LayoutIter {
         };
         let pos = vec![0; *layout.rank()];
         Self { next, layout, pos }
-    }
-
-    pub unsafe fn from_parts(offset: usize, shape: Shape, strides: Stride) -> Self {
-        let layout = Layout::new(offset, shape, strides);
-        Self::new(layout)
     }
 
     pub(crate) fn index(&self, index: impl AsRef<[usize]>) -> usize {

@@ -23,7 +23,7 @@ where
             data: self.data().clone(),
         }
     }
-
+    #[doc(hidden)]
     pub fn pad(&self, shape: impl IntoShape, _with: T) -> Self {
         let shape = shape.into_shape();
 

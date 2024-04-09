@@ -86,9 +86,9 @@ impl Shape {
         Some(vec![0; *self.rank()])
     }
     pub fn get_final_position(&self) -> Vec<usize> {
-        self.iter().map(|&dim| dim - 1).collect()
+        self.dec().to_vec()
     }
-    /// Inserts a new dimension along the given [Axis].
+    /// Inserts a new dimension along the given [Axis], inplace.
     pub fn insert(&mut self, index: Axis, dim: usize) {
         self.0.insert(*index, dim)
     }
@@ -213,7 +213,6 @@ impl Shape {
         }
         offset
     }
-
     /// Swap the dimensions of the current [Shape] at the given [Axis].
     pub fn swap(&mut self, a: Axis, b: Axis) {
         self.0.swap(a.axis(), b.axis())
@@ -223,6 +222,10 @@ impl Shape {
         let mut shape = self.clone();
         shape.swap(swap, with);
         shape
+    }
+    /// A utilitarian function for converting the shape to a vector.
+    pub fn to_vec(&self) -> Vec<usize> {
+        self.0.clone()
     }
 }
 

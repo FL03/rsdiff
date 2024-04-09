@@ -48,6 +48,4 @@ pub(crate) mod utils {
 }
 
 #[cfg(test)]
-mod tests {
-
-}
+mod tests {}

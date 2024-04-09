@@ -45,7 +45,7 @@ fn test_iter() {
     }
     assert_eq!(&tensor, &exp);
 }
-    #[test]
+#[test]
 fn test_iter_scalar() {
     let exp = 10f64;
     let tensor = Tensor::from_scalar(exp);

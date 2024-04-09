@@ -23,6 +23,7 @@ pub mod types;
 pub mod prelude {
     pub use crate::error::*;
     pub use crate::id::*;
+    pub use crate::nested;
     pub use crate::ops::prelude::*;
     pub use crate::specs::prelude::*;
     pub use crate::types::*;

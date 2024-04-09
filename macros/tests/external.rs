@@ -9,7 +9,6 @@ extern crate acme_macros as macros;
 use defs::*;
 use macros::autodiff;
 
-
 #[test]
 #[ignore = "Externally defined logic is not yet supported in the macro"]
 fn test_closure() {

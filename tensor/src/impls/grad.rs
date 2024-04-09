@@ -22,7 +22,7 @@ impl<T> TensorBase<T>
 where
     T: Scalar,
 {
-    /// [toposort](TensorBase::toposort) is a utilitarian functions that returns a topologically sorted list of nodes.
+    /// toposort is a function which sorts the nodes of the op graph in topological order.
     fn toposort(&self, reverse: bool) -> Vec<&TensorBase<T>> {
         // Here, the sorted nodes are passed as an owned value rather than as a mutable reference to workaround some lifetime limitations.
         fn walk<'a, T>(
@@ -74,7 +74,7 @@ where
         // return the sorted nodes
         nodes
     }
-
+    /// Compute the gradient of the tensor
     pub fn grad(&self) -> TensorResult<TensorGrad<T>> {
         // get the sorted nodes
         let sorted = self.toposort(true);

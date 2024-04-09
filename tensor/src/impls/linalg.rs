@@ -8,7 +8,7 @@
 use crate::linalg::{Inverse, Matmul};
 use crate::prelude::{Scalar, ShapeError, TensorError, TensorExpr, TensorResult};
 use crate::tensor::{self, TensorBase};
-use acme::prelude::UnaryOp;
+use acme::prelude::{nested, UnaryOp};
 use num::traits::{Num, NumAssign};
 
 fn inverse_impl<T>(tensor: &TensorBase<T>) -> TensorResult<TensorBase<T>>
@@ -130,28 +130,10 @@ where
         let shape = self.shape().matmul_shape(&other.shape()).unwrap();
         let mut result = vec![T::zero(); shape.size()];
 
-        for i in 0..self.nrows() {
-            for j in 0..other.ncols() {
-                for k in 0..self.ncols() {
-                    result[oc(i, j)] += self.data[sc(i, k)] * other.data[oc(k, j)];
-                }
-            }
-        }
+        nested!(for i in 0..self.nrows(), for j in 0..other.ncols(), for k in 0..self.ncols() => {
+            result[oc(i, j)] += self.data[sc(i, k)] * other.data[oc(k, j)]
+        });
         let op = TensorExpr::matmul(self.clone(), other.clone());
         tensor::from_vec_with_op(false, op, shape, result)
     }
-}
-
-#[allow(dead_code)]
-macro_rules! multi_for {
-    ($($key:ident in $iter:expr =>)* $expr:expr) => {
-        for $key in $iter {
-            multi_for!($($key in $iter =>)* $expr);
-        }
-    };
-    ($key:ident in $iter:expr => $expr:expr) => {
-        for $key in $iter {
-            $expr
-        }
-    };
 }

@@ -41,7 +41,6 @@ pub fn handle_method(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
         };
     }
     panic!("Unsupported method");
-    
 }
 
 #[allow(dead_code)]

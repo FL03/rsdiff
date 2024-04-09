@@ -28,3 +28,16 @@ impl<A> AxisIter<A> {
         unimplemented!()
     }
 }
+
+impl<A> Iterator for AxisIter<A> {
+    type Item = *mut A;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index == self.end {
+            return None;
+        }
+        let ptr = unsafe { self.ptr.add(self.index as usize) };
+        self.index += self.stride as Ix;
+        Some(ptr)
+    }
+}

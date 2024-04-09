@@ -6,13 +6,58 @@
 
 extern crate acme;
 
-use acme::prelude::{BoxResult, IntoShape, Linspace, Matmul, Tensor};
+use acme::prelude::{Axis, BoxResult, IntoShape, Linspace, Matmul, Tensor};
 
 fn main() -> BoxResult {
     let shape = (3, 3);
 
-    tensor_iter_mut(shape)?;
+    // tensor_iter_mut(shape)?;
+    axis_iter(shape, 0)?;
     Ok(())
+}
+
+pub fn axis_iter(shape: impl IntoShape, axis: usize) -> BoxResult<Tensor<f64>> {
+    let axis = Axis::new(axis);
+    let shape = shape.into_shape();
+    let n = shape.size();
+    let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape.clone())?;
+
+    let mut res = Vec::new();
+    for i in 0..tensor.shape()[axis] {
+        let mut tmp = Tensor::zeros(shape.ncols());
+        for k in 0..shape.ncols() {
+            tmp[[k]] = tensor[[i, k]];
+        }
+        res.push(tmp);
+    }
+    for i in res {
+        println!("{:?}", &i.to_vec());
+    }
+    Ok(tensor)
+}
+
+#[allow(dead_code)]
+pub fn axis_iter_impl(shape: impl IntoShape, axis: usize) -> BoxResult<Tensor<f64>> {
+    let axis = Axis::new(axis);
+    let shape = shape.into_shape();
+    let n = shape.size();
+    let tensor = Tensor::linspace(0f64, n as f64, n).reshape(shape.clone())?;
+
+    let ns = tensor.layout().remove_axis(axis);
+    let mut res = Vec::new();
+    for i in 0..tensor.shape()[axis] {
+        for j in ns.shape().iter().copied() {
+            let mut tmp = Tensor::zeros(j);
+            for k in 0..ns.shape()[j] {
+                tmp[[k]] = tensor[[i, k]];
+            }
+            res.push(tmp);
+        }
+    }
+    for i in res {
+        println!("{:?}", &i.to_vec());
+    }
+    Ok(tensor)
 }
 
 pub fn example_matmul() -> BoxResult<Tensor<f64>> {

@@ -7,7 +7,7 @@ use crate::TensorBase;
 use core::marker::PhantomData;
 use core::ptr;
 
-/// An immutable iterator of the elements of a (tensor)[TensorBase]
+/// An immutable iterator of the elements of a (tensor)[crate::tensor::TensorBase]
 /// Elements are visited in order, matching the layout of the tensor.
 pub struct Iter<'a, T> {
     inner: LayoutIter,

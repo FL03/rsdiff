@@ -477,6 +477,12 @@ impl From<&[usize]> for Shape {
     }
 }
 
+impl<const N: usize> From<[usize; N]> for Shape {
+    fn from(shape: [usize; N]) -> Self {
+        Self(shape.to_vec())
+    }
+}
+
 impl From<(usize,)> for Shape {
     fn from(shape: (usize,)) -> Self {
         Self(vec![shape.0])

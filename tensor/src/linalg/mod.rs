@@ -5,13 +5,13 @@
 //! # Linear Algebra
 //!
 //!
-pub use self::specs::*;
+pub use self::{specs::*, uplo::UPLO};
 
 pub(crate) mod specs;
+pub(crate) mod uplo;
 
 pub mod solve;
 pub mod tri;
-pub mod uplo;
 
 pub(crate) mod prelude {
     pub use super::specs::*;

@@ -2,7 +2,7 @@
     Appellation: unary <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::handle::expr::handle_expr;
+use crate::handle::handle_expr;
 use crate::BoxError;
 use proc_macro2::TokenStream;
 use quote::quote;

@@ -4,6 +4,8 @@
 */
 //! # Autodifferentiation (AD)
 //!
+#[allow(unused_imports)]
+pub use self::{block::handle_block, expr::handle_expr, item::handle_item, stmt::handle_stmt};
 
 pub mod block;
 pub mod expr;

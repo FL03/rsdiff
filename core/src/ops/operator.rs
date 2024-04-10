@@ -36,6 +36,14 @@ impl Args for () {
     }
 }
 
+impl<A> Args for (A,) {
+    type Pattern = (A,);
+
+    fn args(self) -> Self::Pattern {
+        self
+    }
+}
+
 impl<A, B> Args for (A, B) {
     type Pattern = (A, B);
 

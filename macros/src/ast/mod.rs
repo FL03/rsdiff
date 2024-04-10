@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![allow(dead_code)]
-pub mod gradient;
+pub mod grad;
 pub mod partials;
 
 use proc_macro2::Span;

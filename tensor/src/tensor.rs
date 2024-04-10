@@ -377,6 +377,16 @@ impl<T> TensorBase<T> {
             data: self.data().iter().collect(),
         }
     }
+
+    pub fn view_mut<'a>(&'a mut self) -> TensorBase<&'a mut T> {
+        TensorBase {
+            id: self.id(),
+            kind: self.kind(),
+            layout: self.layout().clone(),
+            op: self.op.view_mut(),
+            data: self.data.iter_mut().collect(),
+        }
+    }
 }
 // Inernal Methods
 #[allow(dead_code)]

@@ -8,23 +8,23 @@ pub trait IsDifferentiable {
     fn differentiable(&self) -> bool;
 }
 
-pub trait Gradient<T> {
-    type Gradient;
-
-    fn grad(&self, args: T) -> Self::Gradient;
-}
-
 pub trait Grad {
     type Output;
 
     fn grad(&self) -> Self::Output;
 }
 
-pub trait Parameter {
-    type Key;
-    type Value;
+pub trait Gradient<T> {
+    type Gradient;
 
-    fn key(&self) -> &Self::Key;
+    fn grad(&self, args: T) -> Self::Gradient;
+}
 
-    fn value(&self) -> &Self::Value;
+impl<S> IsDifferentiable for S
+where
+    S: Grad,
+{
+    fn differentiable(&self) -> bool {
+        true
+    }
 }

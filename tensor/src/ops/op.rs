@@ -4,7 +4,7 @@
 */
 use crate::ops::kinds::reshape::*;
 use crate::shape::{Axis, Shape};
-use crate::TensorBase;
+use crate::tensor::TensorBase;
 use acme::prelude::{BinaryOp, UnaryOp};
 use num::Complex;
 
@@ -103,6 +103,26 @@ impl<A, B> TensorExpr<A, B> {
             TensorExpr::Matmul(lhs, rhs) => TensorExpr::matmul(lhs.view(), rhs.view()),
             TensorExpr::Reshape(tensor, shape) => TensorExpr::reshape(tensor.view(), shape.clone()),
             TensorExpr::Transpose(tensor) => TensorExpr::transpose(tensor.view()),
+            _ => unimplemented!(),
+        }
+    }
+    pub fn view_mut<'a>(&'a mut self) -> TensorExpr<&'a mut A, &'a mut B> {
+        match self {
+            TensorExpr::Binary(lhs, rhs, op) => {
+                TensorExpr::binary(lhs.view_mut(), rhs.view_mut(), *op)
+            }
+            TensorExpr::BinaryScalar(lhs, rhs, op) => {
+                TensorExpr::binary_scalar(lhs.view_mut(), rhs, *op)
+            }
+            TensorExpr::Unary(tensor, op) => TensorExpr::unary(tensor.view_mut(), *op),
+            TensorExpr::Broadcast(tensor, shape) => {
+                TensorExpr::broadcast(tensor.view_mut(), shape.clone())
+            }
+            TensorExpr::Matmul(lhs, rhs) => TensorExpr::matmul(lhs.view_mut(), rhs.view_mut()),
+            TensorExpr::Reshape(tensor, shape) => {
+                TensorExpr::reshape(tensor.view_mut(), shape.clone())
+            }
+            TensorExpr::Transpose(tensor) => TensorExpr::transpose(tensor.view_mut()),
             _ => unimplemented!(),
         }
     }

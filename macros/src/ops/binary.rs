@@ -8,7 +8,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
 use syn::parse::{Parse, ParseStream, Result as ParseResult};
-use syn::{Expr, Ident, Token};
+use syn::{BinOp, Expr, Ident, Token};
 
 /// Differentiable binary operations; typically used for defining
 /// valid method calls.
@@ -21,10 +21,23 @@ pub enum BinaryOp {
     Log,
     Mul,
     Pow,
+    Rem,
     Sub,
 }
 
 impl BinaryOp {
+    pub fn from_binary(op: BinOp) -> Result<Self, BoxError> {
+        use BinOp::*;
+        match op {
+            Add(_) | AddAssign(_) => Ok(Self::Add),
+            Div(_) | DivAssign(_) => Ok(Self::Div),
+            Mul(_) | MulAssign(_) => Ok(Self::Mul),
+            Rem(_) | RemAssign(_) => Ok(Self::Rem),
+            Sub(_) | SubAssign(_) => Ok(Self::Sub),
+            _ => Err("Unsupported binary operation".into()),
+        }
+    }
+
     pub fn grad(&self, lhs: &Expr, rhs: &Expr, var: &Ident) -> TokenStream {
         // compute the gradient of the left and right hand sides
         let dl = handle_expr(&lhs, var);
@@ -32,11 +45,11 @@ impl BinaryOp {
         // handle various binary operations; returning the gradient
         match *self {
             BinaryOp::Add => quote! { #dl + #dr },
-            BinaryOp::Div => quote! { (#dl * #rhs - #lhs * #dr) / #rhs.powi(2) },
+            BinaryOp::Div => quote! { (#dl * #rhs - #lhs * #dr) / (#rhs * #rhs) },
             BinaryOp::Mul => quote! { #dl * #rhs + #lhs * #dr },
             BinaryOp::Pow => {
                 quote! {
-                #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.pow(#rhs) * #rhs.ln() * #dr
+                    #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.pow(#rhs) * #rhs.ln() * #dr
                 }
             }
             BinaryOp::Sub => quote! { #dl - #dr },
@@ -44,6 +57,7 @@ impl BinaryOp {
         }
     }
 }
+
 impl core::fmt::Display for BinaryOp {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {
@@ -52,6 +66,7 @@ impl core::fmt::Display for BinaryOp {
             Self::Log => write!(f, "log"),
             Self::Mul => write!(f, "mul"),
             Self::Pow => write!(f, "pow"),
+            Self::Rem => write!(f, "rem"),
             Self::Sub => write!(f, "sub"),
         }
     }
@@ -67,6 +82,7 @@ impl FromStr for BinaryOp {
             "log" => Ok(Self::Log),
             "mul" => Ok(Self::Mul),
             "pow" | "powc" | "powf" | "powi" => Ok(Self::Pow),
+            "rem" => Ok(Self::Rem),
             "sub" => Ok(Self::Sub),
             _ => Err("Method not found".into()),
         }
@@ -92,5 +108,21 @@ impl Parse for BinaryOp {
         }
 
         Err(input.error("Expected a method call"))
+    }
+}
+
+impl TryFrom<BinOp> for BinaryOp {
+    type Error = BoxError;
+
+    fn try_from(op: BinOp) -> Result<Self, Self::Error> {
+        Self::from_binary(op)
+    }
+}
+
+impl TryFrom<Ident> for BinaryOp {
+    type Error = BoxError;
+
+    fn try_from(ident: Ident) -> Result<Self, Self::Error> {
+        Self::from_str(ident.to_string().as_str())
     }
 }

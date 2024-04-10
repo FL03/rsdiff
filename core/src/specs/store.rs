@@ -5,6 +5,31 @@
 use core::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
 
+pub trait Entry<'a> {
+    type Key;
+    type Value;
+
+    fn key(&self) -> &Self::Key;
+
+    fn or_insert(self, default: Self::Value) -> &'a mut Self::Value;
+}
+
+impl<'a, K, V> Entry<'a> for std::collections::hash_map::Entry<'a, K, V>
+where
+    K: Eq + std::hash::Hash,
+{
+    type Key = K;
+    type Value = V;
+
+    fn key(&self) -> &Self::Key {
+        self.key()
+    }
+
+    fn or_insert(self, default: Self::Value) -> &'a mut Self::Value {
+        self.or_insert(default)
+    }
+}
+
 pub trait Get<Q> {
     type Key: Borrow<Q>;
     type Value;

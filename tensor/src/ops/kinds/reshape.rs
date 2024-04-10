@@ -28,8 +28,36 @@ use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString,
 )]
 #[strum_discriminants(name(ReshapeOp))]
 pub enum ReshapeExpr<T> {
-    Broadcast { scope: BoxTensor<T>, shape: Shape },
-    Reshape { scope: BoxTensor<T>, shape: Shape },
-    Swap,
+    Broadcast {
+        recv: BoxTensor<T>,
+        shape: Shape,
+    },
+    Reshape {
+        recv: BoxTensor<T>,
+        shape: Shape,
+    },
+    Swap {
+        recv: BoxTensor<T>,
+        a: usize,
+        b: usize,
+    },
     Transpose,
+}
+
+impl<T> ReshapeExpr<T> {
+    pub fn broadcast(recv: BoxTensor<T>, shape: Shape) -> Self {
+        Self::Broadcast { recv, shape }
+    }
+
+    pub fn reshape(recv: BoxTensor<T>, shape: Shape) -> Self {
+        Self::Reshape { recv, shape }
+    }
+
+    pub fn swap(recv: BoxTensor<T>, a: usize, b: usize) -> Self {
+        Self::Swap { recv, a, b }
+    }
+
+    pub fn transpose() -> Self {
+        Self::Transpose
+    }
 }

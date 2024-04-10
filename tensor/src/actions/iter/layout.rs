@@ -1,16 +1,19 @@
 /*
-    Appellation: position <mod>
+    Appellation: layout <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::shape::Layout;
 
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
+#[repr(C)]
 pub struct Position {
     pub(crate) index: usize,
     pub(crate) position: Vec<usize>,
 }
 
 /// An iterator over the positions of an n-dimensional tensor.
-/// Each step yields a (position)[Position] containing the current position
+/// Each step yields a [position](Position) containing the current position
 /// and corresponding index.
 pub struct LayoutIter {
     layout: Layout,
@@ -97,6 +100,7 @@ impl Iterator for LayoutIter {
 
 mod impl_position {
     use super::Position;
+    use crate::shape::Layout;
 
     impl Position {
         pub fn new(index: usize, position: Vec<usize>) -> Self {
@@ -106,13 +110,45 @@ mod impl_position {
         pub fn first(rank: usize) -> Self {
             Self::new(0, vec![0; rank])
         }
-
+        /// Returns the index of the position.
         pub fn index(&self) -> usize {
             self.index
         }
-
-        pub fn position(&self) -> Vec<usize> {
-            self.position.clone()
+        /// Given a particular layout, returns the next position.
+        pub fn next(&self, layout: &Layout) -> Option<Self> {
+            let mut position = self.position().to_vec();
+            let mut updated = false;
+            let mut next = self.index();
+            for ((i, j), s) in position
+                .iter_mut()
+                .zip(layout.shape().iter())
+                .zip(layout.strides().iter())
+                .rev()
+            {
+                let next_i = *i + 1;
+                if next_i < *j {
+                    *i = next_i;
+                    updated = true;
+                    next += s;
+                    break;
+                } else {
+                    next -= *i * s;
+                    *i = 0;
+                }
+            }
+            if updated {
+                Some(Self::new(next, position))
+            } else {
+                None
+            }
+        }
+        /// Returns a reference to the position.
+        pub fn position(&self) -> &[usize] {
+            &self.position
+        }
+        /// Returns a mutable reference to the position.
+        pub fn position_mut(&mut self) -> &mut [usize] {
+            &mut self.position
         }
     }
 

@@ -4,7 +4,7 @@
 */
 use super::{Axis, Rank, ShapeError, Stride};
 use crate::iter::zip;
-use crate::prelude::{SwapAxes, TensorResult};
+use crate::prelude::{Ixs, SwapAxes, TensorResult};
 #[cfg(not(feature = "std"))]
 use alloc::vec;
 use core::ops::{self, Deref};
@@ -25,6 +25,14 @@ impl Shape {
     /// Creates a new shape of rank 0.
     pub fn scalar() -> Self {
         Self(Vec::new())
+    }
+
+    pub fn stride_offset(index: &[usize], strides: &Stride) -> Ixs {
+        let mut offset = 0;
+        for (&i, &s) in index.iter().zip(strides.as_slice()) {
+            offset += super::dim::stride_offset(i, s);
+        }
+        offset
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
@@ -120,10 +128,11 @@ impl Shape {
     pub fn is_square(&self) -> bool {
         self.iter().all(|&dim| dim == self[0])
     }
+    /// Creates an immutable iterator over the elements of the shape
     pub fn iter(&self) -> core::slice::Iter<usize> {
         self.0.iter()
     }
-
+    /// Creates a mutable iterator over the elements of the shape.
     pub fn iter_mut(&mut self) -> core::slice::IterMut<usize> {
         self.0.iter_mut()
     }
@@ -204,14 +213,6 @@ impl Shape {
     /// The number of elements in the shape.
     pub fn size(&self) -> usize {
         self.0.iter().product()
-    }
-
-    pub fn stride_offset(index: &[usize], strides: &Stride) -> isize {
-        let mut offset = 0;
-        for (&i, &s) in index.iter().zip(strides.as_slice()) {
-            offset += super::dim::stride_offset(i, s);
-        }
-        offset
     }
     /// Swap the dimensions of the current [Shape] at the given [Axis].
     pub fn swap(&mut self, a: Axis, b: Axis) {

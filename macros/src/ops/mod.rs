@@ -29,6 +29,10 @@ impl Methods {
         Methods::Unary(op)
     }
 
+    pub fn from_bin_op(op: syn::BinOp) -> Self {
+        Self::binary(BinaryOp::from_binary(op).expect("Unsupported binary operation"))
+    }
+
     pub fn from_method_call(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
         let ExprMethodCall {
             args,

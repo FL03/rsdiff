@@ -1,9 +1,11 @@
 /*
-    Appellation: grad <module>
+    Appellation: partial <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
-use crate::ast::gradient::GradientAst;
+//! An attribute macro
+//!
+//!
+use crate::ast::grad::GradientAst;
 use crate::handle::block::handle_block;
 use proc_macro2::TokenStream;
 use quote::quote;

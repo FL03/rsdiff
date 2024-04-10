@@ -6,25 +6,28 @@
 ///
 #[macro_export]
 macro_rules! nested {
+    ($(for $i:ident in $iter:expr),* => {$exp:expr} ) => {
+        nested!(@loop $exp, $(for $i in $iter),*);
+    };
+    // This is the base case for the recursion.
+
     (@loop $exp:expr, for $i:ident in $iter:expr) => {
         for $i in $iter {
             $exp
         }
     };
+    // This is the recursive case. It will expand to a nested loop.
     (@loop $exp:expr, for $i:ident in $iter:expr, $($tail:tt)*) => {
         for $i in $iter {
             nested!(@loop $exp, $($tail)*);
         }
     };
-    ($(for $i:ident in $iter:expr),* => {$exp:expr} ) => {
-        nested!(@loop $exp, $(for $i in $iter),*);
-    };
 }
 
-macro_rules! unit_enum_constructor {
+macro_rules! variant_constructor {
     ($(($variant:ident, $method:ident)),*) => {
         $(
-            unit_enum_constructor!($variant, $method);
+            variant_constructor!($variant, $method);
         )*
     };
     ($variant:ident, $method:ident) => {

@@ -2,10 +2,13 @@
     Appellation: unary <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::handle::expr::handle_expr;
 use crate::BoxError;
+use proc_macro2::TokenStream;
+use quote::quote;
 use std::str::FromStr;
 use syn::parse::{Parse, ParseStream, Result as ParseResult};
-use syn::{Ident, Token};
+use syn::{Expr, Ident, Token};
 
 /// Differentiable binary operations; typically used for defining
 /// valid method calls.
@@ -21,6 +24,26 @@ pub enum BinaryOp {
     Sub,
 }
 
+impl BinaryOp {
+    pub fn grad(&self, lhs: &Expr, rhs: &Expr, var: &Ident) -> TokenStream {
+        // compute the gradient of the left and right hand sides
+        let dl = handle_expr(&lhs, var);
+        let dr = handle_expr(&rhs, var);
+        // handle various binary operations; returning the gradient
+        match *self {
+            BinaryOp::Add => quote! { #dl + #dr },
+            BinaryOp::Div => quote! { (#dl * #rhs - #lhs * #dr) / #rhs.powi(2) },
+            BinaryOp::Mul => quote! { #dl * #rhs + #lhs * #dr },
+            BinaryOp::Pow => {
+                quote! {
+                #rhs * #lhs.powf(#rhs - 1.0) * #dl + #lhs.pow(#rhs) * #rhs.ln() * #dr
+                }
+            }
+            BinaryOp::Sub => quote! { #dl - #dr },
+            _ => panic!("Unsupported binary method"),
+        }
+    }
+}
 impl core::fmt::Display for BinaryOp {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {

@@ -4,13 +4,10 @@
 */
 use crate::ops::BoxTensor;
 use crate::shape::Shape;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(Clone, Debug, EnumDiscriminants, Eq, Hash, PartialEq)]
-#[repr(u8)]
-#[strum(serialize_all = "snake_case")]
+#[repr(C)]
 #[strum_discriminants(derive(
     Display,
     EnumCount,
@@ -22,7 +19,13 @@ use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString,
     PartialOrd,
     VariantNames
 ))]
-#[cfg_attr(feature = "serde", strum_discriminants(derive(Deserialize, Serialize)))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "snake_case"),
+    strum(serialize_all = "snake_case"),
+    strum_discriminants(derive(serde::Deserialize, serde::Serialize))
+)]
 #[strum_discriminants(name(ReshapeOp))]
 pub enum ReshapeExpr<T> {
     Broadcast { scope: BoxTensor<T>, shape: Shape },

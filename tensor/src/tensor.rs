@@ -62,6 +62,7 @@ pub(crate) fn from_vec_with_op<T>(
 }
 
 #[derive(Clone, Debug, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) data: Vec<T>,
@@ -210,6 +211,14 @@ impl<T> TensorBase<T> {
     /// Returns the unique identifier of the tensor.
     pub const fn id(&self) -> TensorId {
         self.id
+    }
+
+    pub unsafe fn into_scalar(self) -> T
+    where
+        T: Clone,
+    {
+        debug_assert!(self.is_scalar(), "Tensor is not scalar");
+        self.data.iter().next().unwrap().clone()
     }
     /// Returns true if the tensor is contiguous.
     pub fn is_contiguous(&self) -> bool {

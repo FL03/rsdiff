@@ -11,10 +11,13 @@ extern crate alloc;
 // pub use self::utils::*;
 
 #[macro_use]
+pub(crate) mod macros;
+#[macro_use]
 pub(crate) mod utils;
 
 pub mod error;
 pub mod id;
+#[doc(hidden)]
 pub mod math;
 pub mod ops;
 pub mod specs;

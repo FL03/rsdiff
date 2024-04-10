@@ -74,7 +74,7 @@ impl BinaryOp {
         (Rem, rem, Remainder),
         (Sub, sub, Subtraction)
     );
-    unit_enum_constructor!(
+    variant_constructor!(
         (Pow, pow),
         (Max, max),
         (Min, min),

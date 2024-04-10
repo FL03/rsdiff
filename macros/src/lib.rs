@@ -10,8 +10,9 @@ extern crate proc_macro;
 pub(crate) use primitives::*;
 
 pub(crate) mod ast;
-pub(crate) mod diff;
+pub(crate) mod autodiff;
 pub(crate) mod grad;
+pub(crate) mod handle;
 pub(crate) mod ops;
 
 use ast::partials::PartialAst;
@@ -60,7 +61,7 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
     let expr = parse_macro_input!(input as PartialAst);
 
     // Generate code to compute the gradient
-    let result = diff::generate_autodiff(&expr);
+    let result = autodiff::impl_autodiff(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)

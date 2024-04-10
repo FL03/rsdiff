@@ -2,15 +2,17 @@
     Appellation: expr <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{binary::*, method::*, unary::*};
+pub use self::{binary::*, unary::*};
 
 pub(crate) mod binary;
-pub(crate) mod method;
 pub(crate) mod unary;
 
+use crate::ops::Methods;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Expr, Ident};
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{Expr, ExprCall, Ident};
 
 pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     match expr {
@@ -32,7 +34,7 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
         // Differentiate literals
         Expr::Lit(_) => quote! { 0.0 },
         // Differentiate method calls
-        Expr::MethodCall(inner) => handle_method(inner, variable),
+        Expr::MethodCall(inner) => Methods::from_method_call(inner, variable),
         // Differentiate parenthesized expressions
         Expr::Paren(inner) => handle_expr(&inner.expr, variable),
         // Differentiate variable expressions
@@ -53,4 +55,31 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
         // Differentiate other expressions
         _ => panic!("Unsupported expression!"),
     }
+}
+
+pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
+    let ExprCall { args, func, .. } = expr;
+    let mut grad = quote! { 0.0 };
+    for arg in args {
+        let arg = handle_expr(&arg, var);
+        grad = quote! { #grad + #arg };
+    }
+
+    //
+    let df = handle_expr(&func, var);
+
+    quote! { #df + #grad }
+}
+
+#[allow(dead_code)]
+fn grad_ctx_with_args(ctx: &Box<Expr>, args: &Punctuated<Expr, Comma>, var: &Ident) -> TokenStream {
+    let grad = handle_expr(ctx, var);
+    let da = punctuated_grad(args, var);
+    quote! { #grad + #da }
+}
+
+fn punctuated_grad(args: &Punctuated<Expr, Comma>, var: &Ident) -> TokenStream {
+    args.iter()
+        .map(|arg| handle_expr(arg, var))
+        .fold(quote! { 0.0 }, |acc, arg| quote! { #acc + #arg })
 }

@@ -9,6 +9,7 @@ pub use self::specs::*;
 
 pub(crate) mod specs;
 
+pub mod solve;
 pub mod tri;
 pub mod uplo;
 

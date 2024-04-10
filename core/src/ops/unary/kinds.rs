@@ -59,7 +59,7 @@ impl UnaryOp {
         }
     }
 
-    unit_enum_constructor!(
+    variant_constructor!(
         (Abs, abs),
         (Cos, cos),
         (Cosh, cosh),

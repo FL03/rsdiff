@@ -9,16 +9,10 @@ pub use self::slice::*;
 
 pub(crate) mod slice;
 
-use crate::tensor::TensorBase;
-
+/// A type alias for an unsigned integer used to index into a tensor.
 pub type Ix = usize;
-
+/// A type alias for a signed integer used to index into a tensor.
 pub type Ixs = isize;
-
-pub enum IndexItem<T> {
-    Scalar(T),
-    Tensor(TensorBase<T>),
-}
 
 pub trait TensorIndex {}
 

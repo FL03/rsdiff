@@ -28,7 +28,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
     PartialOrd,
     VariantNames,
 )]
-#[repr(C)]
+#[repr(u8)]
 #[strum(serialize_all = "lowercase")]
 pub enum TensorKind {
     #[default]

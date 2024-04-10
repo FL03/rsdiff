@@ -57,8 +57,8 @@ where
     }
 }
 
-#[ignore = "Currently, support for function calls is not fully implemented"]
 #[test]
+#[ignore = "Custom trait methods are not yet supported"]
 fn test_function_call() {
     let (x, y) = (1_f64, 2_f64);
     // differentiating a function call w.r.t. x
@@ -68,11 +68,9 @@ fn test_function_call() {
     assert_eq!(autodiff!(y: sigmoid::<f64>(y)), sigmoid_prime(y));
 }
 
-#[ignore = "Custom trait methods are not yet supported"]
 #[test]
+#[ignore = "Custom trait methods are not yet supported"]
 fn test_method() {
     let (x, y) = (1_f64, 2_f64);
-    assert_eq!(autodiff!(x: x.mul(y)), 2.0);
-    assert_eq!(autodiff!(x: x.square()), 2.0);
-    assert_eq!(autodiff!(x: x.sigmoid()), sigmoid_prime(x));
+    // assert_eq!(autodiff!(x: x.sigmoid()), sigmoid_prime(x));
 }

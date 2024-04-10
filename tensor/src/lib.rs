@@ -24,6 +24,8 @@ pub(crate) mod utils;
 #[doc(hidden)]
 pub mod backend;
 pub mod error;
+#[doc(hidden)]
+pub mod fmt;
 #[cfg(feature = "io")]
 pub mod io;
 pub mod linalg;

@@ -4,7 +4,7 @@
 */
 
 use crate::ast::gradient::GradientAst;
-use crate::diff::handle::block::handle_block;
+use crate::handle::block::handle_block;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{ItemFn, Signature};

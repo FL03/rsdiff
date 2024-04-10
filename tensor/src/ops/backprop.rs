@@ -9,6 +9,7 @@ use core::borrow::Borrow;
 use core::ops::{Deref, DerefMut};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct BackpropOp<A = f64, B = A>(Option<TensorExpr<A, B>>);
 
 impl<A, B> BackpropOp<A, B> {

@@ -11,6 +11,7 @@ use num::Complex;
 pub type BoxTensor<T = f64> = Box<TensorBase<T>>;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[non_exhaustive]
 pub enum TensorExpr<A, B = A> {
     Binary(BoxTensor<A>, BoxTensor<B>, BinaryOp),

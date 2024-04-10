@@ -10,6 +10,8 @@ pub(crate) mod binary;
 pub(crate) mod unary;
 
 use core::str::FromStr;
+use proc_macro2::TokenStream;
+use syn::{ExprMethodCall, Ident};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[non_exhaustive]
@@ -25,6 +27,25 @@ impl Methods {
 
     pub fn unary(op: UnaryOp) -> Self {
         Methods::Unary(op)
+    }
+
+    pub fn from_method_call(expr: &ExprMethodCall, var: &Ident) -> TokenStream {
+        let ExprMethodCall {
+            args,
+            method,
+            receiver,
+            ..
+        } = expr;
+        let method_name = method.clone().to_string();
+
+        if let Ok(method) = Methods::from_str(&method_name) {
+            return match method {
+                Methods::Binary(method) => method.grad(&receiver, &args[0], var),
+                Methods::Unary(method) => method.grad(&receiver, var),
+                // _ => panic!("Unsupported method"),
+            };
+        }
+        panic!("Unsupported method");
     }
 }
 

@@ -361,6 +361,15 @@ impl<'a, T> TensorBase<&'a T> {
 }
 
 impl<T> TensorBase<T> {
+    pub fn view_from_scalar<'a>(scalar: &'a T) -> TensorBase<&'a T> {
+        TensorBase {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::scalar(),
+            op: BackpropOp::none(),
+            data: vec![scalar],
+        }
+    }
     pub fn to_owned(&self) -> TensorBase<T>
     where
         T: Clone,

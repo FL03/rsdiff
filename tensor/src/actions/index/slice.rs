@@ -6,6 +6,7 @@
 //!
 //!
 use super::Ixs;
+use crate::tensor::TensorBase;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -28,13 +29,13 @@ impl Slice {
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "snake_case")
 )]
-pub enum Slices {
+pub enum SliceType {
     Index(Ixs),
     Slice(Slice),
     NewAxis,
 }
 
-impl Slices {
+impl SliceType {
     /// Create a new axis
     pub fn new_axis() -> Self {
         Self::NewAxis
@@ -49,18 +50,18 @@ impl Slices {
     }
 }
 
-pub struct Slicer {
-    slices: Vec<Slices>,
+pub struct Slices {
+    slices: Vec<SliceType>,
 }
 
-impl Slicer {
-    pub fn new(slices: impl IntoIterator<Item = Slices>) -> Self {
+impl Slices {
+    pub fn new(slices: impl IntoIterator<Item = SliceType>) -> Self {
         Self {
             slices: Vec::from_iter(slices),
         }
     }
 
-    pub fn iter(&self) -> core::slice::Iter<'_, Slices> {
+    pub fn iter(&self) -> core::slice::Iter<'_, SliceType> {
         self.slices.iter()
     }
 }
@@ -112,4 +113,4 @@ macro_rules! impl_from_range {
 }
 
 impl_from_range!(Slice, Slice::new, Ixs, [i32, isize, usize]);
-impl_from_range!(Slices, Slices::slice, Ixs, [i32, isize, usize]);
+impl_from_range!(SliceType, SliceType::slice, Ixs, [i32, isize, usize]);

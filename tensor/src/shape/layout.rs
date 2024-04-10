@@ -35,6 +35,10 @@ impl Layout {
             strides: stride,
         }
     }
+    /// Create a new layout with a scalar stride.
+    pub fn scalar() -> Self {
+        Self::contiguous(())
+    }
     #[doc(hidden)]
     /// Return stride offset for index.
     pub fn stride_offset(index: impl AsRef<[usize]>, strides: &Stride) -> isize {

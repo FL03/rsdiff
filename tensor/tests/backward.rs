@@ -8,7 +8,7 @@ extern crate acme_tensor as acme;
 use acme::prelude::{IntoShape, Scalar, Tensor, TensorKind};
 use core::ops::Neg;
 
-fn shapespace<T>(shape: impl IntoShape) -> Tensor<T> where T: PartialOrd + Scalar {
+fn _shapespace<T>(shape: impl IntoShape) -> Tensor<T> where T: PartialOrd + Scalar {
     let shape = shape.into_shape();
     Tensor::<T>::linspace(T::zero(), T::from(shape.size()).unwrap(), shape.size()).reshape(shape).unwrap()
 }
@@ -126,16 +126,19 @@ fn test_complex_expr() {
 #[test]
 #[ignore = "Fix: test throws an error"]
 fn test_sigmoid() {
+    use acme::prelude::ScalarExt;
     let shape = (2, 2).into_shape();
-    let a = shapespace::<f64>(shape.clone()).variable();
-    let b = shapespace::<f64>(shape);
-
-    assert_eq!(a.kind(), TensorKind::Variable);
-    assert_ne!(a.id(), b.id());
+    let data = (0..shape.size()).map(|x| x as f64).collect::<Vec<_>>();
+    let a = Tensor::<f64>::from_shape_vec(shape.clone(), data.clone()).variable();
+    
 
     let _res = a.sigmoid();
-    let grad = a.sigmoid().grad().unwrap();
-    let exp = b.clone().neg().exp() / (b.clone().neg().exp() + b.ones_like()).powi(2);
+    let grad = _res.grad().unwrap();
+
+
+    assert_eq!(a.kind(), TensorKind::Variable);
+
+    let exp = Tensor::from_shape_iter(shape, data.iter().map(|x| x.sigmoid() * (1f64 - x.sigmoid())));
     println!("{:?}", &grad);
     assert_eq!(
         grad[&a.id()],

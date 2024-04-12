@@ -100,9 +100,9 @@ where
     where
         T: ScalarExt,
     {
-        let shape = self.shape();
-        let store = self.data().iter().copied().map(ScalarExt::sigmoid).collect();
         let op = TensorExpr::sigmoid(self.clone());
+        let shape = self.shape();
+        let store = self.iter().copied().map(ScalarExt::sigmoid).collect();
         from_vec_with_op(false, op, shape, store)
     }
 

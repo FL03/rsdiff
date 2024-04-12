@@ -108,6 +108,7 @@ where
                             *entry!(store, lhs) += &grad * rhs.as_ref();
                             *entry!(store, rhs) += &grad * lhs.as_ref();
                         }
+                        
                         BinaryOp::Sub(_) => {
                             *entry!(store, lhs) += &grad;
                             *entry!(store, rhs) -= &grad;
@@ -166,8 +167,8 @@ where
                         _ => {},
                     },
                     TensorExpr::Sigmoid(val) => {
-
-                        *entry!(store, val) += &grad * val.sigmoid() * (val.ones_like() - val.sigmoid());
+                        let tmp = val.detach();
+                        *entry!(store, val) += &grad * tmp.sigmoid() * (tmp.ones_like() - tmp.sigmoid());
                     }
                     _ => {},
                 }

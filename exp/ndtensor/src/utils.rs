@@ -26,7 +26,7 @@ pub(crate) fn default_strides(shape: &Shape) -> Stride {
 
 pub(crate) fn _fastest_varying_stride_order(strides: &Stride) -> Stride {
     let mut indices = strides.clone();
-    for (i, elt) in indices.as_slice_mut().into_iter().enumerate() {
+    for (i, elt) in indices.as_slice_mut().iter_mut().enumerate() {
         *elt = i;
     }
     let strides = strides.as_slice();

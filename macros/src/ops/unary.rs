@@ -89,12 +89,10 @@ impl FromStr for UnaryOp {
 
 impl Parse for UnaryOp {
     fn parse(input: ParseStream) -> ParseResult<Self> {
-        if input.peek(syn::Token![.]) {
-            if input.peek2(syn::Ident) {
-                let method = input.parse::<syn::Ident>()?;
-                if let Ok(method) = UnaryOp::from_str(method.to_string().as_str()) {
-                    return Ok(method);
-                }
+        if input.peek(syn::Token![.]) && input.peek2(syn::Ident) {
+            let method = input.parse::<syn::Ident>()?;
+            if let Ok(method) = UnaryOp::from_str(method.to_string().as_str()) {
+                return Ok(method);
             }
         }
         Err(input.error("Expected a method call"))

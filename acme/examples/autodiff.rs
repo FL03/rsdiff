@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 // #![cfg(feature = "macros")]
-
+#![allow(unused_variables)]
 extern crate acme;
 
 use acme::autodiff;

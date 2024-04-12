@@ -90,7 +90,7 @@ impl<A, B> TensorExpr<A, B> {
             _ => None,
         }
     }
-    pub fn view<'a>(&'a self) -> TensorExpr<&'a A, &'a B> {
+    pub fn view(&self) -> TensorExpr<&A, &B> {
         match self {
             TensorExpr::Binary(lhs, rhs, op) => TensorExpr::binary(lhs.view(), rhs.view(), *op),
             TensorExpr::BinaryScalar(lhs, rhs, op) => {
@@ -106,7 +106,7 @@ impl<A, B> TensorExpr<A, B> {
             _ => unimplemented!(),
         }
     }
-    pub fn view_mut<'a>(&'a mut self) -> TensorExpr<&'a mut A, &'a mut B> {
+    pub fn view_mut(&mut self) -> TensorExpr<&mut A, &mut B> {
         match self {
             TensorExpr::Binary(lhs, rhs, op) => {
                 TensorExpr::binary(lhs.view_mut(), rhs.view_mut(), *op)

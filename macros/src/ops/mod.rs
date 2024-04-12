@@ -44,8 +44,8 @@ impl Methods {
 
         if let Ok(method) = Methods::from_str(&method_name) {
             return match method {
-                Methods::Binary(method) => method.grad(&receiver, &args[0], var),
-                Methods::Unary(method) => method.grad(&receiver, var),
+                Methods::Binary(method) => method.grad(receiver, &args[0], var),
+                Methods::Unary(method) => method.grad(receiver, var),
                 // _ => panic!("Unsupported method"),
             };
         }

@@ -218,7 +218,7 @@ impl<T> TensorBase<T> {
         T: Clone,
     {
         debug_assert!(self.is_scalar(), "Tensor is not scalar");
-        self.data.iter().next().unwrap().clone()
+        self.data.first().unwrap().clone()
     }
     /// Returns true if the tensor is contiguous.
     pub fn is_contiguous(&self) -> bool {
@@ -361,7 +361,7 @@ impl<'a, T> TensorBase<&'a T> {
 }
 
 impl<T> TensorBase<T> {
-    pub fn view_from_scalar<'a>(scalar: &'a T) -> TensorBase<&'a T> {
+    pub fn view_from_scalar(scalar: &T) -> TensorBase<&T> {
         TensorBase {
             id: TensorId::new(),
             kind: TensorKind::default(),
@@ -377,7 +377,7 @@ impl<T> TensorBase<T> {
         self.clone()
     }
 
-    pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
+    pub fn view(&self) -> TensorBase<&T> {
         TensorBase {
             id: self.id(),
             kind: self.kind(),
@@ -387,7 +387,7 @@ impl<T> TensorBase<T> {
         }
     }
 
-    pub fn view_mut<'a>(&'a mut self) -> TensorBase<&'a mut T> {
+    pub fn view_mut(&mut self) -> TensorBase<&mut T> {
         TensorBase {
             id: self.id(),
             kind: self.kind(),

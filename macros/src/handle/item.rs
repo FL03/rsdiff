@@ -27,5 +27,5 @@ pub fn handle_item_fn(item: &ItemFn, var: &Ident) -> TokenStream {
         }
     }
 
-    handle_block(&block, &var)
+    handle_block(block, var)
 }

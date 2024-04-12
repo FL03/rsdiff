@@ -2,6 +2,7 @@
     Appellation: macros <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![allow(unused_variables)]
 #![feature(fn_traits, tuple_trait, unboxed_closures)]
 #![cfg(all(test, feature = "macros"))]
 

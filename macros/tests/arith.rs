@@ -8,7 +8,6 @@ extern crate acme_macros as acme;
 
 use acme::autodiff;
 
-
 #[test]
 fn test_add() {
     let (x, y) = (1f64, 2f64);
@@ -96,8 +95,3 @@ fn test_pow() {
     assert_eq!(autodiff!(x: 2f64.pow(y)), 0f64);
     assert_eq!(autodiff!(y: 2f64.pow(y)), 2f64.pow(y) * y.ln());
 }
-
-
-
-
-

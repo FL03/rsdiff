@@ -28,7 +28,7 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
             //     elems: Punctuated::from_iter(grad),
             //     bracket_token: inner.bracket_token,
             // };
-            quote! { 
+            quote! {
                 [#(#grad),*]
             }
         }
@@ -72,12 +72,12 @@ pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
     let ExprCall { args, func, .. } = expr;
     let mut grad = quote! { 0.0 };
     for arg in args {
-        let arg = handle_expr(&arg, var);
+        let arg = handle_expr(arg, var);
         grad = quote! { #grad + #arg };
     }
 
     //
-    let df = handle_expr(&func, var);
+    let df = handle_expr(func, var);
 
     quote! { #df + #grad }
 }

@@ -14,6 +14,12 @@ pub struct TensorGrad<T> {
     pub(crate) store: BTreeMap<TensorId, TensorBase<T>>,
 }
 
+impl<T> Default for TensorGrad<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> TensorGrad<T> {
     pub fn new() -> Self {
         Self {

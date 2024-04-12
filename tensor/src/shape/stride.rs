@@ -128,7 +128,7 @@ impl Stride {
 impl Stride {
     pub(crate) fn _fastest_varying_stride_order(&self) -> Self {
         let mut indices = self.clone();
-        for (i, elt) in indices.as_slice_mut().into_iter().enumerate() {
+        for (i, elt) in indices.as_slice_mut().iter_mut().enumerate() {
             *elt = i;
         }
         let strides = self.as_slice();

@@ -185,7 +185,7 @@ pub(crate) mod utils {
         // greatest address accessible by moving along all axes
         let max_offset_bytes = max_offset
             .checked_mul(elem_size)
-            .ok_or_else(|| ShapeError::Overflow)?;
+            .ok_or(ShapeError::Overflow)?;
         // Condition 2b.
         if max_offset_bytes > isize::MAX as usize {
             return Err(ShapeError::Overflow);
@@ -200,7 +200,7 @@ pub(crate) mod utils {
             .iter()
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| ShapeError::Overflow)?;
+            .ok_or(ShapeError::Overflow)?;
         if size_nonzero > ::std::isize::MAX as usize {
             Err(ShapeError::Overflow)
         } else {

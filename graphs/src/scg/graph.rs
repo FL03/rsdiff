@@ -17,6 +17,12 @@ pub struct Scg<T> {
     vals: HashMap<NodeIndex, T>,
 }
 
+impl<T> Default for Scg<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> Scg<T> {
     pub fn new() -> Self {
         Self {
@@ -75,7 +81,7 @@ where
         // find the topological order of the graph
         let nodes: Vec<NodeIndex> = toposort(&self.graph, None)?;
         // compute the gradient w.r.t. the last topological node
-        self.gradient_at(nodes.last().unwrap().clone())
+        self.gradient_at(*nodes.last().unwrap())
     }
 
     pub fn gradient_at(&self, target: NodeIndex) -> Result<HashMap<NodeIndex, T>> {

@@ -51,7 +51,6 @@ fn test_array() {
     let y = [2.0, 2.0];
     assert_eq!(autodiff!(x: x + y), 1f64);
     // assert_eq!(autodiff!(x: x + y), [1.0, 0.0]);
-
 }
 
 #[test]
@@ -89,5 +88,3 @@ fn test_typing() {
     let yi: i32 = y as i32;
     // assert_eq!(autodiff!(x: x.powi(yi)), y * x.pow(2));
 }
-
-

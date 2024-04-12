@@ -49,7 +49,7 @@ where
 
         TensorBase {
             id: TensorId::new(),
-            kind: self.kind.clone(),
+            kind: self.kind,
             layout,
             op: op.into(),
             data: data.clone(),

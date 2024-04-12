@@ -18,6 +18,12 @@ pub struct Dcg<T> {
     store: DynamicGraph<T>,
 }
 
+impl<T> Default for Dcg<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> Dcg<T> {
     pub fn new() -> Self {
         Dcg {
@@ -147,11 +153,9 @@ where
                     }
                     _ => {}
                 },
-                Node::Unary { op, .. } => match op {
-                    _ => {
-                        unimplemented!();
-                    }
-                },
+                Node::Unary { .. } => {
+                    unimplemented!();
+                }
                 Node::Input { param, .. } => {
                     if *param {
                         continue;

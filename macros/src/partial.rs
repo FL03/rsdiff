@@ -16,7 +16,7 @@ pub fn partial_impl(grad: &GradientAst) -> TokenStream {
     let GradientAst { attrs, item } = grad;
     let _attrs = attrs;
     let item = item;
-    handle_item_fn(&item)
+    handle_item_fn(item)
 }
 
 pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
@@ -34,7 +34,7 @@ pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
 
     let grad = vars
         .iter()
-        .map(|var| handle_block(&block, &var))
+        .map(|var| handle_block(block, var))
         .collect::<Vec<_>>();
 
     quote! {
@@ -58,7 +58,7 @@ pub fn item_fn_partial(item: &ItemFn) -> TokenStream {
 
     let grad = vars
         .iter()
-        .map(|var| handle_block(&block, &var))
+        .map(|var| handle_block(block, var))
         .collect::<Vec<_>>();
 
     quote! {

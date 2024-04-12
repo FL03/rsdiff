@@ -41,11 +41,7 @@ impl<'a> IndexIter<'a> {
 
 impl<'a> DoubleEndedIterator for IndexIter<'a> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        let (pos, _idx) = if let Some(item) = self.next() {
-            item
-        } else {
-            return None;
-        };
+        let (pos, _idx) = self.next()?;
         let position = self
             .shape
             .iter()

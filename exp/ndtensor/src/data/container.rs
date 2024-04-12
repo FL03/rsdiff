@@ -166,7 +166,7 @@ where
     ) -> Self {
         let layout = Layout::new(0, dim, strides);
         // debug check for issues that indicates wrong use of this constructor
-        debug_assert!(can_index_slice(&v, &layout.shape(), &layout.strides()).is_ok());
+        debug_assert!(can_index_slice(&v, layout.shape(), layout.strides()).is_ok());
 
         let ptr = {
             let tmp = nonnull_from_vec_data(&mut v);

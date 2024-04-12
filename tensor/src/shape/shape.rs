@@ -55,7 +55,7 @@ impl Shape {
             .iter()
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| ShapeError::Overflow)?;
+            .ok_or(ShapeError::Overflow)?;
         if size_nonzero > core::isize::MAX as usize {
             Err(ShapeError::Overflow)
         } else {

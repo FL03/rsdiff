@@ -34,10 +34,6 @@ impl<T> Edge<T> {
     }
 
     pub fn input(&self) -> Option<Id> {
-        if let Some(id) = self.id() {
-            Some(**id)
-        } else {
-            None
-        }
+        self.id().map(|id| **id)
     }
 }

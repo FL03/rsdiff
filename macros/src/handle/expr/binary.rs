@@ -14,9 +14,9 @@ pub fn handle_binary(expr: &ExprBinary, var: &Ident) -> TokenStream {
     } = expr;
 
     // Compute the partial derivative of the left expression w.r.t. the variable
-    let dl = handle_expr(&left, var);
+    let dl = handle_expr(left, var);
     // Compute the partial derivative of the right expression w.r.t. the variable
-    let dr = handle_expr(&right, var);
+    let dr = handle_expr(right, var);
 
     // Apply the chain rule based on the operator
     match op {

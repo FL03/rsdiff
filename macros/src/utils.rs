@@ -67,7 +67,7 @@ pub fn foil_expr(a: &Expr, b: &ExprParen, var: &Ident) -> TokenStream {
         handle_expr(&new_expr.into(), var)
     } else {
         let da = handle_expr(a, var);
-        let db = handle_expr(&expr, var);
+        let db = handle_expr(expr, var);
         quote! {
             #da * #db
         }

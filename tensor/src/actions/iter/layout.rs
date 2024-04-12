@@ -40,11 +40,7 @@ impl LayoutIter {
 
 impl DoubleEndedIterator for LayoutIter {
     fn next_back(&mut self) -> Option<Self::Item> {
-        let Position { position, .. } = if let Some(item) = self.next() {
-            item
-        } else {
-            return None;
-        };
+        let Position { position, .. } = self.next()?;
         let rev = self
             .layout
             .shape()

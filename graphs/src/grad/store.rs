@@ -12,6 +12,15 @@ pub struct GradientStore<K = NodeIndex, V = Box<dyn Any>> {
     store: BTreeMap<K, V>,
 }
 
+impl<K, V> Default for GradientStore<K, V>
+where
+    K: Ord,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<K, V> GradientStore<K, V>
 where
     K: Ord,

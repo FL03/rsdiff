@@ -40,8 +40,8 @@ impl BinaryOp {
 
     pub fn grad(&self, lhs: &Expr, rhs: &Expr, var: &Ident) -> TokenStream {
         // compute the gradient of the left and right hand sides
-        let dl = handle_expr(&lhs, var);
-        let dr = handle_expr(&rhs, var);
+        let dl = handle_expr(lhs, var);
+        let dr = handle_expr(rhs, var);
         // handle various binary operations; returning the gradient
         match *self {
             BinaryOp::Add => quote! { #dl + #dr },
@@ -98,12 +98,10 @@ impl Parse for BinaryOp {
                     return Ok(method);
                 }
             }
-        } else if input.peek(Token![:]) {
-            if input.peek2(Token![:]) {
-                let method = input.parse::<Ident>()?;
-                if let Ok(method) = Self::from_str(method.to_string().as_str()) {
-                    return Ok(method);
-                }
+        } else if input.peek(Token![:]) && input.peek2(Token![:]) {
+            let method = input.parse::<Ident>()?;
+            if let Ok(method) = Self::from_str(method.to_string().as_str()) {
+                return Ok(method);
             }
         }
 

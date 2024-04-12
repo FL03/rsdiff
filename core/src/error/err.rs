@@ -54,7 +54,7 @@ where
     K: ToString,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.kind.to_string(), self.message)
+        write!(f, "{}: {}", self.kind, self.message)
     }
 }
 

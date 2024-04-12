@@ -55,7 +55,7 @@ mod tests {
 
     #[test]
     fn test_to_vec_mapped() {
-        let v = vec![1, 2, 3, 4, 5];
+        let v = [1, 2, 3, 4, 5];
         let f = |x| x * 2;
         let res = to_vec_mapped(v.iter(), f);
         assert_eq!(res, vec![2, 4, 6, 8, 10]);

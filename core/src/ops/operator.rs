@@ -89,10 +89,7 @@ pub(crate) trait Operand {
     type Args: Args;
     type Output;
 
-    fn eval(
-        &self,
-        args: Self::Args,
-    ) -> Self::Output;
+    fn eval(&self, args: Self::Args) -> Self::Output;
 
     fn kind(&self) -> OperatorKind;
 

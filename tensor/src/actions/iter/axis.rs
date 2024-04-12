@@ -38,7 +38,7 @@ impl<'a, A> Iterator for AxisIter<'a, A> {
         if self.index == self.end {
             return None;
         }
-        let ptr = unsafe { self.ptr.add(self.index as usize) };
+        let ptr = unsafe { self.ptr.add(self.index) };
         self.index += self.stride as Ix;
         unsafe { ptr.as_ref() }
     }

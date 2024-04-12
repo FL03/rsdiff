@@ -5,8 +5,8 @@
 use acme::prelude::TypeError;
 use std::any::TypeId;
 
-pub trait TypeOf {
-    fn of<T>(_value: &T) -> Result<Self, TypeError>
+pub trait FromType {
+    fn from_type<T>(_value: &T) -> Result<Self, TypeError>
     where
         T: 'static,
         Self: Sized;
@@ -32,6 +32,16 @@ impl DType {
     }
 }
 
+impl FromType for DType {
+    fn from_type<T>(val: &T) -> Result<Self, TypeError>
+    where
+        T: 'static,
+        Self: Sized,
+    {
+        DType::of(val)
+    }
+}
+
 pub enum Float {
     F32,
     F64,
@@ -49,6 +59,16 @@ impl Float {
         } else {
             Err(TypeError::InvalidType)
         }
+    }
+}
+
+impl FromType for Float {
+    fn from_type<T>(val: &T) -> Result<Self, TypeError>
+    where
+        T: 'static,
+        Self: Sized,
+    {
+        Float::from_type(val)
     }
 }
 

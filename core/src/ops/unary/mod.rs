@@ -19,5 +19,11 @@ pub trait Unary {
     fn unary(self, expr: UnaryOp) -> Self::Output;
 }
 
+pub trait UnOp {
+    type Output;
+
+    fn apply(&self, x: Self::Output) -> Self::Output;
+}
+
 #[cfg(test)]
 mod tests {}

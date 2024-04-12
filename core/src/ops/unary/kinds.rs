@@ -4,7 +4,6 @@
 */
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
-
 #[derive(
     Clone,
     Copy,
@@ -33,18 +32,12 @@ pub enum UnaryOp {
     Cosh,
     Exp,
     Floor,
-    #[cfg_attr(
-        feature = "serde",
-        serde(alias = "inverse")
-    )]
+    #[cfg_attr(feature = "serde", serde(alias = "inverse"))]
     Inv,
     Ln,
     Neg,
     Not,
-    #[cfg_attr(
-        feature = "serde",
-        serde(alias = "reciprocal")
-    )]
+    #[cfg_attr(feature = "serde", serde(alias = "reciprocal"))]
     Recip,
     Sin,
     Sinh,

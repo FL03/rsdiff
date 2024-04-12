@@ -3,16 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::arithmetic::*;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize,),
-    serde(rename_all = "lowercase", untagged)
-)]
 #[derive(
     Clone,
     Copy,
@@ -29,8 +22,13 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     SmartDefault,
     VariantNames,
 )]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase", untagged),
+    strum(serialize_all = "lowercase")
+)]
 #[repr(u8)]
-#[strum(serialize_all = "lowercase")]
 pub enum BinaryOp {
     // <Kind = String> {
     #[default]

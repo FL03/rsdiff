@@ -6,6 +6,10 @@ use core::ops::Neg;
 use num::traits::{Inv, Num};
 use num::Complex;
 
+pub struct Logistical;
+
+
+
 ///
 pub trait Conjugate {
     type Complex;
@@ -109,6 +113,8 @@ macro_rules! impl_unary_op {
 
 unary_op_trait!(
     (Abs, abs),
+    (Cubed, cbd),
+    (CubeRoot, cbrt),
     (Exp, exp),
     (Ln, ln),
     (Recip, recip),
@@ -122,6 +128,9 @@ unary_op_trait!(
     (Sinh, sinh),
     (Tan, tan),
     (Tanh, tanh)
+);
+unary_op_trait!(
+    (Sigmoid, sigmoid)
 );
 
 impl<T> Abs for Complex<T>

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::actions::grad::TensorGrad;
-use crate::prelude::{Scalar, TensorExpr, TensorId, TensorResult};
+use crate::prelude::{ScalarExt, TensorExpr, TensorId, TensorResult};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, Store, UnaryOp};
 
@@ -20,7 +20,7 @@ macro_rules! entry {
 
 impl<T> TensorBase<T>
 where
-    T: Scalar,
+    T: ScalarExt,
 {
     /// toposort is a function which sorts the nodes of the op graph in topological order.
     fn toposort(&self, reverse: bool) -> Vec<&TensorBase<T>> {
@@ -148,6 +148,7 @@ where
                         UnaryOp::Recip => {
                             *entry!(store, val) -= &grad / val.sqr();
                         }
+                        
                         UnaryOp::Sin => {
                             *entry!(store, val) += &grad * val.cos();
                         }
@@ -162,9 +163,13 @@ where
                             *entry!(store, val) += &grad / val.clone().cos().sqr();
                         }
 
-                        _ => todo!(),
+                        _ => {},
                     },
-                    _ => {}
+                    TensorExpr::Sigmoid(val) => {
+
+                        *entry!(store, val) += &grad * val.sigmoid() * (val.ones_like() - val.sigmoid());
+                    }
+                    _ => {},
                 }
             }
         }

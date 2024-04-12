@@ -19,6 +19,7 @@ where
     {
         Self::fill(self.shape(), T::default())
     }
+    
     /// Create an empty tensor from the given shape
     pub fn empty(shape: impl IntoShape) -> Self
     where
@@ -35,6 +36,9 @@ where
     /// Create a tensor, filled with some value, from the current shape
     pub fn fill_like(&self, value: T) -> Self {
         Self::fill(self.shape(), value)
+    }
+    pub fn like_with(&self, data: Vec<T>) -> Self {
+        from_vec_with_kind(false, self.shape(), data)
     }
 }
 

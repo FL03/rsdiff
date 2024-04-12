@@ -5,8 +5,13 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::{IntoShape, Tensor};
+use acme::prelude::{IntoShape, Scalar, Tensor};
 use core::ops::Neg;
+
+fn shapespace<T>(shape: impl IntoShape) -> Tensor<T> where T: PartialOrd + Scalar {
+    let shape = shape.into_shape();
+    Tensor::<T>::linspace(T::zero(), T::from(shape.size()).unwrap(), shape.size()).reshape(shape).unwrap()
+}
 
 #[test]
 fn test_backward() {
@@ -113,7 +118,6 @@ fn test_complex_expr() {
     let res = (&a + &b) * c.sin() + &b;
 
     let grad = res.grad().unwrap();
-
     assert_eq!(grad[&a.id()], c.sin());
     assert_eq!(grad[&b.id()], c.sin() + 1f64);
     assert_eq!(grad[&c.id()], (&a + &b) * c.cos());
@@ -123,16 +127,17 @@ fn test_complex_expr() {
 #[ignore = "Fix: test throws an error"]
 fn test_sigmoid() {
     let shape = (2, 2).into_shape();
-    let n = shape.size();
-    let a = Tensor::<f64>::linspace(0f64, n as f64, n).reshape(shape.clone()).unwrap().variable();
-    let b = Tensor::<f64>::linspace(0f64, n as f64, n).reshape(shape.clone()).unwrap();
-    let res = ((-&a).exp() + &a.ones_like()).recip();
+    let a = shapespace::<f64>(shape.clone()).variable();
+    let b = shapespace::<f64>(shape);
 
-    let grad = res.grad().unwrap();
-
+    println!("({}({}), {})", a.kind(), a.id(), b.id());
+    let res = a.sigmoid();
+    let grad = a.sigmoid().grad().unwrap();
     let exp = (&b).neg().exp() / ((&b).neg().exp() + &b.ones_like()).powi(2);
-
-
-    assert_eq!(grad[&a.id()].detach(), exp.detach(), "Gradient of sigmoid is incorrect");
+    println!("{:?}", &grad);
+    assert_eq!(
+        grad[&a.id()],
+        exp.detach(),
+        "Gradient of sigmoid is incorrect"
+    );
 }
-

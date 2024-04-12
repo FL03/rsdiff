@@ -2,7 +2,7 @@
     Appellation: arith <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{Scalar, TensorExpr};
+use crate::prelude::{Scalar, ScalarExt, TensorExpr};
 use crate::tensor::*;
 use acme::ops::unary::UnaryOp;
 use core::ops;
@@ -91,8 +91,18 @@ where
         T: Scalar<Real = T>,
     {
         let shape = self.shape();
-        let store = self.data.iter().copied().map(|v| v.abs()).collect();
+        let store = self.data.iter().copied().map(Scalar::abs).collect();
         let op = TensorExpr::unary(self.clone(), UnaryOp::Abs);
+        from_vec_with_op(false, op, shape, store)
+    }
+
+    pub fn sigmoid(&self) -> TensorBase<T>
+    where
+        T: ScalarExt,
+    {
+        let shape = self.shape();
+        let store = self.data().iter().copied().map(ScalarExt::sigmoid).collect();
+        let op = TensorExpr::sigmoid(self.clone());
         from_vec_with_op(false, op, shape, store)
     }
 

@@ -103,6 +103,14 @@ pub trait Scalar:
     }
 }
 
+pub trait ScalarExt: Scalar {
+    fn sigmoid(self) -> Self {
+        (Self::one() + self.neg().exp()).recip()
+    }
+}
+
+impl<S> ScalarExt for S where S: Scalar {}
+
 impl<T> Scalar for Complex<T>
 where
     T: Scalar<Complex = Self, Real = T>,

@@ -171,6 +171,10 @@ impl<T> TensorBase<T> {
             .zip(other.data())
             .for_each(|(a, b)| *a = b.clone());
     }
+
+    pub fn boxed(self) -> Box<Self> {
+        Box::new(self)
+    }
     /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
     where

@@ -4,15 +4,8 @@
 */
 use super::binary::BinaryOp;
 use super::unary::UnaryOp;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, VariantNames};
 
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize,),
-    serde(rename_all = "lowercase", untagged)
-)]
 #[derive(
     Clone,
     Copy,
@@ -27,7 +20,12 @@ use strum::{Display, EnumCount, EnumIs, VariantNames};
     PartialOrd,
     VariantNames,
 )]
-#[strum(serialize_all = "lowercase")]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize,),
+    serde(rename_all = "lowercase", untagged),
+    strum(serialize_all = "lowercase")
+)]
 pub enum Op {
     Binary(BinaryOp),
     Unary(UnaryOp),

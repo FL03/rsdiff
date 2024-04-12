@@ -7,14 +7,13 @@ pub use self::{binary::*, unary::*};
 pub(crate) mod binary;
 pub(crate) mod unary;
 
-use crate::ast::grad::ExprGrad;
 use crate::ops::Methods;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::parse;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{Expr, ExprArray, ExprCall, Ident};
+use syn::{Expr, ExprCall, Ident};
 
 pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     match expr {
@@ -24,13 +23,14 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
                 .elems
                 .iter()
                 .map(|e| parse::<Expr>(handle_expr(e, variable).into()).unwrap());
-            let arr = ExprArray {
-                attrs: inner.attrs.clone(),
-                elems: Punctuated::from_iter(grad),
-                bracket_token: inner.bracket_token,
-            };
-
-            quote! { #arr }
+            // let _arr = ExprArray {
+            //     attrs: inner.attrs.clone(),
+            //     elems: Punctuated::from_iter(grad),
+            //     bracket_token: inner.bracket_token,
+            // };
+            quote! { 
+                [#(#grad),*]
+            }
         }
         // Handle differentiable binary operations
         Expr::Binary(inner) => handle_binary(inner, variable),

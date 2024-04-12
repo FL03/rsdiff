@@ -2,7 +2,7 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::binary::{BinaryOp, BinaryOperator};
+use super::binary::BinaryOp;
 use super::unary::UnaryOp;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -43,8 +43,4 @@ impl From<UnaryOp> for Op {
     fn from(op: UnaryOp) -> Self {
         Self::Unary(op)
     }
-}
-
-pub enum Expr<A, B, C> {
-    Binary(BinaryOperator<(A, B), C>),
 }

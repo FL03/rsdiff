@@ -38,7 +38,7 @@ impl UnaryOp {
             UnaryOp::Abs => quote! { #recv / #recv.abs() },
             UnaryOp::Cos => quote! { -#recv.sin() },
             UnaryOp::Cosh => quote! { #recv.sinh() },
-            UnaryOp::Cubed => quote! { 3.0 * #recv.pow(2) },
+            UnaryOp::Cubed => quote! { 3.0 * #recv.powi(2) },
             UnaryOp::CubeRoot => quote! { #recv.powi(-2) / 3.0 },
             UnaryOp::Exp => {
                 quote! {

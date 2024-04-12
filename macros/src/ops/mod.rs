@@ -28,7 +28,7 @@ impl Methods {
     pub fn unary(op: UnaryOp) -> Self {
         Methods::Unary(op)
     }
-
+    #[allow(dead_code)]
     pub fn from_bin_op(op: syn::BinOp) -> Self {
         Self::binary(BinaryOp::from_binary(op).expect("Unsupported binary operation"))
     }

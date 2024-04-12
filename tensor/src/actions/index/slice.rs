@@ -6,7 +6,6 @@
 //!
 //!
 use super::Ixs;
-use crate::tensor::TensorBase;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -20,6 +19,18 @@ impl Slice {
     pub fn new(start: Ixs, end: Option<Ixs>, step: Ixs) -> Self {
         debug_assert_ne!(step, 0, "step must be non-zero");
         Self { start, end, step }
+    }
+
+    pub fn start(&self) -> Ixs {
+        self.start
+    }
+
+    pub fn end(&self) -> Option<Ixs> {
+        self.end
+    }
+
+    pub fn step(&self) -> Ixs {
+        self.step
     }
 }
 

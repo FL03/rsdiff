@@ -4,9 +4,8 @@
 */
 //! # Mathematics
 //!
-//! This module contains the core mathematical operations and structures used
-//! throughout the library. It is divided into submodules for each mathematical
-//! operation or structure.
+//! This module implements fundamental mathematical concepts and operations.
+//! Each sub-module is dedicated to a specific branch of mathematics.
 pub use self::props::*;
 
 pub(crate) mod props;

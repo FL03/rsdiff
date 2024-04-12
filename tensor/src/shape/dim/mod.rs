@@ -27,11 +27,8 @@ pub trait Dimension {
     #[doc(hidden)]
     /// Return stride offset for index.
     fn stride_offset(index: &Self, strides: &Self) -> isize {
-        let mut offset = 0;
-        for (&i, &s) in izip!(index.as_slice(), strides.as_slice()) {
-            offset += stride_offset(i, s);
-        }
-        offset
+        izip!(index.as_slice(), strides.as_slice())
+            .fold(0, |acc, (&i, &s)| acc + stride_offset(i, s))
     }
 }
 

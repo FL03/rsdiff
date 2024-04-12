@@ -6,7 +6,10 @@
 //!
 //! This module implements fundamental linear algebra concepts and operations.
 //!
-pub mod fields;
+pub use self::fields::*;
+
+pub(crate) mod fields;
+
 pub mod vs;
 
 #[cfg(test)]

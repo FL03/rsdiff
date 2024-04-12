@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use core::iter::Sum;
-use core::ops;
+use core::ops::{Add, Mul};
 
 /// [Affine] describes a type of geometric transformation which preserves
 /// lines and parallelisms.
@@ -18,8 +18,8 @@ pub trait Affine<A, B> {
 
 impl<S, A, B, C> Affine<A, B> for S
 where
-    S: Clone + ops::Mul<A, Output = C>,
-    C: ops::Add<B, Output = C>,
+    S: Clone + Mul<A, Output = C>,
+    C: Add<B, Output = C>,
 {
     type Output = C;
 
@@ -38,6 +38,17 @@ pub trait Inverse {
     fn inv(&self) -> Self::Output;
 }
 
+impl<S, T> Inverse for S
+where
+    S: Clone + num::traits::Inv<Output = T>,
+{
+    type Output = T;
+
+    fn inv(&self) -> Self::Output {
+        self.clone().inv()
+    }
+}
+
 /// Matrix multiplication
 pub trait Matmul<Rhs = Self> {
     type Output;
@@ -45,13 +56,21 @@ pub trait Matmul<Rhs = Self> {
     fn matmul(&self, rhs: &Rhs) -> Self::Output;
 }
 
-impl<T> Matmul for Vec<T>
+impl<A, B, C> Matmul<Vec<B>> for Vec<A>
 where
-    T: Copy + ops::Mul<Output = T> + Sum,
+    A: Clone + Mul<B, Output = C>,
+    B: Clone,
+    C: Sum,
 {
-    type Output = T;
+    type Output = C;
 
-    fn matmul(&self, rhs: &Self) -> Self::Output {
-        self.iter().zip(rhs.iter()).map(|(a, b)| *a * *b).sum()
+    fn matmul(&self, rhs: &Vec<B>) -> Self::Output {
+        self.iter()
+            .cloned()
+            .zip(rhs.iter().cloned())
+            .map(|(a, b)| a * b)
+            .sum()
     }
 }
+
+// impl_matmul!(Vec, Vec, Vec);

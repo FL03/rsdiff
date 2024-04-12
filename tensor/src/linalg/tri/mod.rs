@@ -9,7 +9,10 @@ pub(crate) mod utils {
     use crate::tensor::TensorBase;
     use num::Zero;
 
-    pub fn triangular<T>(a: &TensorBase<T>, uplo: UPLO) -> TensorBase<T> where T: Clone + Zero {
+    pub fn triangular<T>(a: &TensorBase<T>, uplo: UPLO) -> TensorBase<T>
+    where
+        T: Clone + Zero,
+    {
         debug_assert!(a.is_square(), "Tensor must be square.");
         match uplo {
             UPLO::Upper => triu(a),

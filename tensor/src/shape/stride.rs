@@ -2,7 +2,7 @@
    Appellation: stride <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Axis, Rank};
+use super::{dim, Axis, Rank};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut, Index, IndexMut};
 use core::slice::{Iter as SliceIter, IterMut as SliceIterMut};
@@ -101,12 +101,16 @@ impl Stride {
         self.0.get_mut(*axis).map(|v| core::mem::replace(v, value))
     }
     ///
-    pub fn stride_offset(index: &[usize], strides: &Stride) -> isize {
-        let mut offset = 0;
-        for (&i, &s) in index.iter().zip(strides.as_slice()) {
-            offset += super::dim::stride_offset(i, s);
-        }
-        offset
+    pub fn stride_offset<Idx>(&self, index: &Idx) -> isize
+    where
+        Idx: AsRef<[usize]>,
+    {
+        index
+            .as_ref()
+            .iter()
+            .copied()
+            .zip(self.iter().copied())
+            .fold(0, |acc, (i, s)| acc + dim::stride_offset(i, s))
     }
     /// Swaps two elements in the stride, inplace.
     pub fn swap(&mut self, a: usize, b: usize) {

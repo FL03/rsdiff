@@ -4,18 +4,16 @@
 */
 use super::{Axis, Rank, ShapeError, Stride};
 use crate::iter::zip;
-use crate::prelude::{Ixs, SwapAxes, TensorResult};
+use crate::prelude::{Ixs, SwapAxes};
 #[cfg(not(feature = "std"))]
 use alloc::vec;
 use core::ops::{self, Deref};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use std::vec;
 
 /// A shape is a description of the number of elements in each dimension.
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Shape(Vec<usize>);
 
 impl Shape {
@@ -254,9 +252,22 @@ impl Shape {
         strides
     }
 
-    pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
+    pub(crate) fn matmul(&self, other: &Self) -> Result<Self, ShapeError> {
+        if self.rank() == 2 && other.rank() == 2 {
+            return Ok(Self::from((self[0], other[1])));
+        } else if self.rank() == 2 && other.rank() == 1 {
+            return Ok(Self::from(self[0]));
+        } else if self.rank() == 1 && other.rank() == 2 {
+            return Ok(Self::from(other[0]));
+        } else if self.rank() == 1 && other.rank() == 1 {
+            return Ok(Self::scalar());
+        }
+        Err(ShapeError::IncompatibleShapes)
+    }
+
+    pub(crate) fn matmul_shape(&self, other: &Self) -> Result<Self, ShapeError> {
         if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
-            return Err(ShapeError::IncompatibleShapes.into());
+            return Err(ShapeError::IncompatibleShapes);
         }
         Ok(Self::from((self[0], other[1])))
     }

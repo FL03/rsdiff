@@ -197,6 +197,16 @@ impl Layout {
     pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
         crate::coordinates_to_index(idx, self.strides())
     }
+
+    pub(crate) fn _matmul(&self, rhs: &Layout) -> Result<Layout, ShapeError> {
+        let shape = self.shape().matmul(rhs.shape())?;
+        let layout = Layout {
+            offset: self.offset(),
+            shape,
+            strides: self.strides().clone(),
+        };
+        Ok(layout)
+    }
 }
 
 #[cfg(test)]

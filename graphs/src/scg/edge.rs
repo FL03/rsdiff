@@ -4,11 +4,9 @@
 */
 use crate::grad::GradientId;
 use crate::id::Id;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Edge<T> {
     id: Option<GradientId<T>>,
     data: T,

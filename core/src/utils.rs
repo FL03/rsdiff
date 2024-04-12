@@ -10,7 +10,6 @@ macro_rules! nested {
         nested!(@loop $exp, $(for $i in $iter),*);
     };
     // This is the base case for the recursion.
-
     (@loop $exp:expr, for $i:ident in $iter:expr) => {
         for $i in $iter {
             $exp

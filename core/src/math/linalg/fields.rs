@@ -7,7 +7,14 @@
 //!
 
 pub trait Field {
-    type Elem;
+    type Elem: ?Sized;
+
+    fn rank(&self) -> usize;
+}
+
+pub trait Scalar {
+    type Complex: Scalar;
+    type Real: Scalar;
 }
 
 #[cfg(test)]

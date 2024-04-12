@@ -5,7 +5,7 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::{IntoShape, Scalar, Tensor};
+use acme::prelude::{IntoShape, Scalar, Tensor, TensorKind};
 use core::ops::Neg;
 
 fn shapespace<T>(shape: impl IntoShape) -> Tensor<T> where T: PartialOrd + Scalar {
@@ -130,10 +130,12 @@ fn test_sigmoid() {
     let a = shapespace::<f64>(shape.clone()).variable();
     let b = shapespace::<f64>(shape);
 
-    println!("({}({}), {})", a.kind(), a.id(), b.id());
-    let res = a.sigmoid();
+    assert_eq!(a.kind(), TensorKind::Variable);
+    assert_ne!(a.id(), b.id());
+
+    let _res = a.sigmoid();
     let grad = a.sigmoid().grad().unwrap();
-    let exp = (&b).neg().exp() / ((&b).neg().exp() + &b.ones_like()).powi(2);
+    let exp = b.clone().neg().exp() / (b.clone().neg().exp() + b.ones_like()).powi(2);
     println!("{:?}", &grad);
     assert_eq!(
         grad[&a.id()],

@@ -145,6 +145,9 @@ where
                         UnaryOp::Neg => {
                             *entry!(store, val) -= &grad;
                         }
+                        UnaryOp::Recip => {
+                            *entry!(store, val) -= &grad / val.sqr();
+                        }
                         UnaryOp::Sin => {
                             *entry!(store, val) += &grad * val.cos();
                         }

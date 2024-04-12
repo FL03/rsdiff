@@ -100,6 +100,7 @@ where
     impl_unary_op!(Cosh, cosh);
     impl_unary_op!(Exp, exp);
     impl_unary_op!(Ln, ln);
+    impl_unary_op!(Recip, recip);
     impl_unary_op!(Sin, sin);
     impl_unary_op!(Sinh, sinh);
     impl_unary_op!(Square, sqr);

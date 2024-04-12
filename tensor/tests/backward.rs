@@ -5,7 +5,7 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::Tensor;
+use acme::prelude::{IntoShape, Tensor};
 use core::ops::Neg;
 
 #[test]
@@ -118,3 +118,21 @@ fn test_complex_expr() {
     assert_eq!(grad[&b.id()], c.sin() + 1f64);
     assert_eq!(grad[&c.id()], (&a + &b) * c.cos());
 }
+
+#[test]
+// #[ignore = "This test is not yet implemented"]
+fn test_sigmoid() {
+    let shape = (2, 2).into_shape();
+    let n = shape.size();
+    let a = Tensor::<f64>::linspace(0f64, n as f64, n).reshape(shape.clone()).unwrap().variable();
+    let b = Tensor::<f64>::linspace(0f64, n as f64, n).reshape(shape.clone()).unwrap();
+    let res = ((-&a).exp() + 1f64).recip();
+
+    let grad = res.grad().unwrap();
+
+    let exp = (&b).neg().exp() / ((&b).neg().exp() + 1f64).powi(2);
+
+
+    assert_eq!(grad[&a.id()].detach(), exp.detach(), "Gradient of sigmoid is incorrect");
+}
+

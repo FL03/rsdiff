@@ -2,15 +2,9 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize,),
-    serde(rename_all = "lowercase", untagged)
-)]
+
 #[derive(
     Clone,
     Copy,
@@ -26,8 +20,13 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     PartialOrd,
     VariantNames,
 )]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize,),
+    serde(rename_all = "lowercase", untagged),
+    strum(serialize_all = "lowercase")
+)]
 #[repr(u8)]
-#[strum(serialize_all = "lowercase")]
 pub enum UnaryOp {
     Abs,
     Cos,
@@ -36,12 +35,17 @@ pub enum UnaryOp {
     Floor,
     #[cfg_attr(
         feature = "serde",
-        serde(alias = "inverse", alias = "recip", alias = "reciprocal")
+        serde(alias = "inverse")
     )]
     Inv,
     Ln,
     Neg,
     Not,
+    #[cfg_attr(
+        feature = "serde",
+        serde(alias = "reciprocal")
+    )]
+    Recip,
     Sin,
     Sinh,
     #[cfg_attr(feature = "serde", serde(alias = "square_root"))]
@@ -69,6 +73,7 @@ impl UnaryOp {
         (Ln, ln),
         (Neg, neg),
         (Not, not),
+        (Recip, recip),
         (Sin, sin),
         (Sinh, sinh),
         (Sqrt, sqrt),

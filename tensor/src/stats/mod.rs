@@ -88,7 +88,6 @@ macro_rules! impl_stats {
     };
 }
 impl_stats!(Vec<T>, len);
-impl_stats!([T], len);
 pub trait StatisticsExt<T>: Statistics<T> {
     /// Compute the mean along the specified axis.
     fn mean_axis(&self, axis: Axis) -> T;

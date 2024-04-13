@@ -179,7 +179,7 @@ macro_rules! impl_binary_op {
         impl_binary_op!(tensor: $trait, $method, $op);
     };
     (scalar: $trait:ident, $method:ident, $op:tt) => {
-        
+
         impl<T> ops::$trait<T> for TensorBase<T>
         where
             T: Copy + ops::$trait<Output = T>,

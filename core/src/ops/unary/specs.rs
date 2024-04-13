@@ -8,8 +8,6 @@ use num::Complex;
 
 pub struct Logistical;
 
-
-
 ///
 pub trait Conjugate {
     type Complex;
@@ -129,9 +127,7 @@ unary_op_trait!(
     (Tan, tan),
     (Tanh, tanh)
 );
-unary_op_trait!(
-    (Sigmoid, sigmoid)
-);
+unary_op_trait!((Sigmoid, sigmoid));
 
 impl<T> Abs for Complex<T>
 where

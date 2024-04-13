@@ -5,11 +5,10 @@
 use super::EntryId;
 use crate::NodeIndex;
 use core::fmt;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
+#[repr(C)]
 pub struct Id<Idx = NodeIndex> {
     id: EntryId,
     index: Idx,
@@ -23,8 +22,8 @@ impl<Idx> Id<Idx> {
         }
     }
 
-    pub fn id(&self) -> usize {
-        *self.id
+    pub const fn id(&self) -> EntryId {
+        self.id
     }
 
     pub fn index(&self) -> &Idx {

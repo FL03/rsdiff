@@ -8,9 +8,14 @@ extern crate acme_tensor as acme;
 use acme::prelude::{IntoShape, Scalar, Tensor, TensorKind};
 use core::ops::Neg;
 
-fn _shapespace<T>(shape: impl IntoShape) -> Tensor<T> where T: PartialOrd + Scalar {
+fn _shapespace<T>(shape: impl IntoShape) -> Tensor<T>
+where
+    T: PartialOrd + Scalar,
+{
     let shape = shape.into_shape();
-    Tensor::<T>::linspace(T::zero(), T::from(shape.size()).unwrap(), shape.size()).reshape(shape).unwrap()
+    Tensor::<T>::linspace(T::zero(), T::from(shape.size()).unwrap(), shape.size())
+        .reshape(shape)
+        .unwrap()
 }
 
 #[test]
@@ -130,15 +135,16 @@ fn test_sigmoid() {
     let shape = (2, 2).into_shape();
     let data = (0..shape.size()).map(|x| x as f64).collect::<Vec<_>>();
     let a = Tensor::<f64>::from_shape_vec(shape.clone(), data.clone()).variable();
-    
 
     let _res = a.sigmoid();
     let grad = _res.grad().unwrap();
 
-
     assert_eq!(a.kind(), TensorKind::Variable);
 
-    let exp = Tensor::from_shape_iter(shape, data.iter().map(|x| x.sigmoid() * (1f64 - x.sigmoid())));
+    let exp = Tensor::from_shape_iter(
+        shape,
+        data.iter().map(|x| x.sigmoid() * (1f64 - x.sigmoid())),
+    );
     println!("{:?}", &grad);
     assert_eq!(
         grad[&a.id()],

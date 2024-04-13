@@ -4,7 +4,7 @@
 */
 //! # ndtensor
 //!
-//! 
+//!
 #![crate_name = "ndtensor"]
 
 extern crate acme_core as acme;

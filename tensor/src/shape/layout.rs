@@ -188,13 +188,19 @@ impl Layout {
 
 // Internal methods
 impl Layout {
-    pub(crate) fn index<Idx>(&self, idx: Idx) -> usize where Idx: AsRef<[usize]> {
+    pub(crate) fn index<Idx>(&self, idx: Idx) -> usize
+    where
+        Idx: AsRef<[usize]>,
+    {
         let idx = idx.as_ref();
         debug_assert_eq!(idx.len(), *self.rank(), "Dimension mismatch");
         self.index_unchecked(idx)
     }
 
-    pub(crate) fn index_unchecked<Idx>(&self, idx: Idx) -> usize where Idx: AsRef<[usize]> {
+    pub(crate) fn index_unchecked<Idx>(&self, idx: Idx) -> usize
+    where
+        Idx: AsRef<[usize]>,
+    {
         crate::coordinates_to_index::<Idx>(idx, self.strides())
     }
 

@@ -35,10 +35,10 @@ fn test_scg() {
 #[test]
 fn test_backward() {
     let mut dag = Scg::new();
-    let x = dag.variable(1_f64);
-    let y = dag.variable(2_f64);
+    let x = dag.variable(1f64);
+    let y = dag.variable(2f64);
 
-    let c = dag.sub(x, y).unwrap();
+    let c = dag.add(x, y).unwrap();
 
     let d = dag.mul(c, y).unwrap();
 
@@ -54,30 +54,4 @@ fn test_backward() {
 
     assert_eq!(gd[&x], 2.0);
     assert_eq!(gd[&y], -3.0);
-}
-
-#[ignore = "Not yet implemented"]
-#[test]
-fn test_division() {
-    let mut dag = Scg::new();
-    let one = dag.constant(1_f64);
-    let x = dag.variable(1_f64);
-    let y = dag.variable(2_f64);
-
-    let c = dag.add(x, y).unwrap();
-
-    let d = dag.div(one, c).unwrap();
-
-    assert_eq!(*dag.get_value(c).unwrap(), 3.0);
-    assert_eq!(*dag.get_value(d).unwrap(), 1.0 / 3.0);
-
-    let gc = dag.gradient_at(c).unwrap();
-
-    assert_eq!(gc[&x], 1.0);
-    assert_eq!(gc[&y], 1.0);
-
-    let gd = dag.backward().unwrap();
-
-    assert_eq!(gd[&x], -1.0);
-    assert_eq!(gd[&y], -1.0);
 }

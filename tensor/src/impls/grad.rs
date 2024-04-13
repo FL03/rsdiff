@@ -148,7 +148,7 @@ where
                         UnaryOp::Recip => {
                             *entry!(store, val) -= &grad / val.sqr();
                         }
-                        
+
                         UnaryOp::Sin => {
                             *entry!(store, val) += &grad * val.cos();
                         }
@@ -163,13 +163,14 @@ where
                             *entry!(store, val) += &grad / val.clone().cos().sqr();
                         }
 
-                        _ => {},
+                        _ => {}
                     },
                     TensorExpr::Sigmoid(val) => {
                         let tmp = val.detach();
-                        *entry!(store, val) += &grad * tmp.sigmoid() * (tmp.ones_like() - tmp.sigmoid());
+                        *entry!(store, val) +=
+                            &grad * tmp.sigmoid() * (tmp.ones_like() - tmp.sigmoid());
                     }
-                    _ => {},
+                    _ => {}
                 }
             }
         }

@@ -13,7 +13,6 @@ pub(crate) mod operator;
 pub mod binary;
 pub mod unary;
 
-
 pub trait IntoOp {
     fn into_op(self) -> Op;
 }

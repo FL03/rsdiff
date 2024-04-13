@@ -13,13 +13,12 @@
 //!         e^2 = 0
 
 use crate::prelude::{EvaluateOnce, Gradient};
+use core::fmt;
 use core::ops::{self, Neg, Not};
 use num::{Num, One, Zero};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Dual<T> {
     dual: T,
     value: T,
@@ -54,11 +53,11 @@ impl<T> Dual<T> {
     }
 }
 
-impl<T> std::fmt::Display for Dual<T>
+impl<T> fmt::Display for Dual<T>
 where
-    T: std::fmt::Display,
+    T: fmt::Display,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}, {})", self.value, self.dual)
     }
 }

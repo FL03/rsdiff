@@ -45,7 +45,19 @@ pub enum BinaryOp {
     Xor,
     Shl,
     Shr,
-    Custom(),
+    Custom {
+        id: usize,
+    },
+}
+
+pub struct CustomBinOp {
+    pub id: usize,
+}
+
+impl CustomBinOp {
+    pub fn new(id: usize) -> Self {
+        Self { id }
+    }
 }
 
 impl BinaryOp {
@@ -64,13 +76,16 @@ impl BinaryOp {
             _ => false,
         }
     }
+    simple_enum_constructor!(
+        (Add, add, Addition::new),
+        (Div, div, Division::new),
+        (Mul, mul, Multiplication::new),
+        (Rem, rem, Remainder::new),
+        (Sub, sub, Subtraction::new)
+    );
 
     simple_enum_constructor!(
-        (Add, add, Addition),
-        (Div, div, Division),
-        (Mul, mul, Multiplication),
-        (Rem, rem, Remainder),
-        (Sub, sub, Subtraction)
+        st Custom, custom, { id: usize }
     );
     variant_constructor!(
         (Pow, pow),

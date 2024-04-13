@@ -3,53 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{BinOp, BoxedBinOp};
-use crate::ops::{Operator, OpKind};
-use num::traits::NumOps;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use crate::ops::{OpKind, Operator};
+use num::traits::{NumOps, Pow};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
-
-macro_rules! operator {
-    ($kind:ident: $($op:ident),*) => {
-        $(
-            operator!($op, $kind);
-        )*
-    };
-    ($op:ident, $kind:ident) => {
-
-        #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-        pub struct $op;
-
-        impl $op {
-            pub fn new() -> Self {
-                Self
-            }
-
-            pub fn name(&self) -> &str {
-                stringify!($op)
-            }
-        }
-
-        impl core::fmt::Display for $op {
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                write!(f, "{}", self.name())
-            }
-        }
-
-        impl Operator for $op {
-
-            fn kind(&self) -> OpKind {
-                OpKind::$kind
-            }
-
-            fn name(&self) -> &str {
-                self.name()
-            }
-        }
-    };
-
-}
 
 macro_rules! operators {
     ($group:ident: [$(($variant:ident, $op:ident, $method:ident)),*]) => {
@@ -72,9 +28,9 @@ macro_rules! operators {
             feature = "serde",
             derive(serde::Deserialize, serde::Serialize,),
             serde(rename_all = "lowercase", untagged),
-            strum(serialize_all = "lowercase")
         )]
-        #[repr(u8)]
+        #[repr(C)]
+        #[strum(serialize_all = "lowercase")]
         pub enum $group {
             $(
                 $variant($op),
@@ -88,24 +44,13 @@ macro_rules! operators {
                 }
             )*
 
-
             pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
             where
-                A: NumOps<B, C>,
+                A: NumOps<B, C> + Pow<B, Output = C>,
             {
                 self.op().eval(lhs, rhs)
             }
 
-            pub fn op<A, B, C>(self) -> BoxedBinOp<A, B, C>
-            where
-                A: NumOps<B, C>,
-            {
-                match self {
-                    $(
-                        $group::$variant(op) => Box::new(op),
-                    )*
-                }
-            }
 
             pub fn name(&self) -> &str {
                 match self {
@@ -114,6 +59,20 @@ macro_rules! operators {
                     )*
                 }
             }
+
+
+            pub fn op<A, B, C>(self) -> BoxedBinOp<A, B, C>
+            where
+                A: NumOps<B, C> + Pow<B, Output = C>,
+            {
+                match self {
+                    $(
+                        $group::$variant(op) => Box::new(op),
+                    )*
+                }
+            }
+
+
         }
 
         impl Operator for $group {
@@ -135,13 +94,7 @@ macro_rules! impl_binary_op {
         )*
 
     };
-    (alt: $(($op:ident, $bound:ident, $operator:ident)),*) => {
-        $(
-            impl_binary_op!(other: $op, $bound, $operator);
-        )*
-
-    };
-    ($operator:ident$(($op:ident, $bound:ident)),*) => {
+    ($operator:ident -> $(($op:ident, $bound:ident)),*) => {
         $(
             impl_binary_op!(other: $op, $bound, $operator);
         )*
@@ -181,49 +134,62 @@ macro_rules! impl_binary_op {
             }
         }
     };
-    (other: $op:ident, $bound:ident, $call:ident) => {
-        operator!($op, Binary);
+    (other: $operand:ident, $bound:ident, $op:ident) => {
+        operator!($operand, Binary);
 
-        impl<A, B, C> BinOp<A, B> for $op
+        impl_binary_op!(@call $operand, $bound, $op);
+    };
+
+    (@call $operand:ident, $bound:ident, $op:ident) => {
+        impl<A, B, C> BinOp<A, B> for $operand
         where
             A: $bound<B, Output = C>,
         {
             type Output = C;
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                $bound::$call(lhs, rhs)
+                $bound::$op(lhs, rhs)
+            }
+        }
+    };
+    (@sym $operand:ident, $bound:ident, $op:tt) => {
+        impl<A, B, C> BinOp<A, B> for $operand
+        where
+            A: $bound<B, Output = C>,
+        {
+            type Output = C;
+
+            fn eval(&self, lhs: A, rhs: B) -> Self::Output {
+                lhs $op rhs
             }
         }
     };
 }
 
 impl_binary_op!(
-    (Addition, Add, +), 
-    (Division, Div, /), 
-    (Multiplication, Mul, *), 
-    (Remainder, Rem, %), 
+    (Addition, Add, +),
+    (Division, Div, /),
+    (Multiplication, Mul, *),
+    (Remainder, Rem, %),
     (Subtraction, Sub, -)
 );
-
-use num::traits::Pow;
 
 impl_binary_op!(other: Power, Pow, pow);
 
 impl_binary_op!(std:
-    (BitAnd, BitAnd, bitand), 
-    (BitOr, BitOr, bitor), 
-    (BitXor, BitXor, bitxor), 
-    (Shl, Shl, shl), 
+    (BitAnd, BitAnd, bitand),
+    (BitOr, BitOr, bitor),
+    (BitXor, BitXor, bitxor),
+    (Shl, Shl, shl),
     (Shr, Shr, shr)
 );
-
-
 
 operators!(
     Arithmetic: [
         (Add, Addition, add),
         (Div, Division, div),
         (Mul, Multiplication, mul),
+        (Pow, Power, pow),
         (Rem, Remainder, rem),
         (Sub, Subtraction, sub)
     ]

@@ -19,7 +19,7 @@ where
     {
         Self::fill(self.shape(), T::default())
     }
-    
+
     /// Create an empty tensor from the given shape
     pub fn empty(shape: impl IntoShape) -> Self
     where

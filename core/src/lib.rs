@@ -19,6 +19,7 @@ pub mod error;
 pub mod id;
 #[doc(hidden)]
 pub mod math;
+#[macro_use]
 pub mod ops;
 pub mod specs;
 pub mod types;

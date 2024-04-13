@@ -11,19 +11,10 @@ pub(crate) mod kinds;
 pub(crate) mod operator;
 pub(crate) mod specs;
 
-pub trait Unary {
+pub trait Unary<T> {
     type Output;
 
-    fn name(&self) -> &str;
+    fn apply(&self, x: T) -> Self::Output;
 
-    fn unary(self, expr: UnaryOp) -> Self::Output;
+    fn apply_once(self, x: T) -> Self::Output;
 }
-
-pub trait UnOp {
-    type Output;
-
-    fn apply(&self, x: Self::Output) -> Self::Output;
-}
-
-#[cfg(test)]
-mod tests {}

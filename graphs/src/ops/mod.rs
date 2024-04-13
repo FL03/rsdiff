@@ -9,6 +9,19 @@ pub use self::kinds::*;
 
 pub(crate) mod kinds;
 
+pub trait IntoOp {
+    fn into_op(self) -> Operations;
+}
+
+impl<S> IntoOp for S
+where
+    S: Into<Operations>,
+{
+    fn into_op(self) -> Operations {
+        self.into()
+    }
+}
+
 pub trait Operator {
     fn boxed(self) -> Box<dyn Operator>
     where

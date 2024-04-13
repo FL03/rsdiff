@@ -21,7 +21,7 @@ impl<Idx> Edge<Idx> {
     }
 
     pub fn get_id(&self) -> usize {
-        self.source.id()
+        *self.source.id()
     }
 
     pub fn get_index(&self) -> &Idx {

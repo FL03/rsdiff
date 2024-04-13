@@ -10,24 +10,38 @@ pub trait Operator {
     fn name(&self) -> &str;
 }
 
-#[allow(dead_code)]
-pub(crate) struct Expr {
-    kind: OpKind,
-    name: String,
-}
-
-pub trait Args {
+pub trait Params {
     type Pattern;
 
-    fn args(self) -> Self::Pattern;
+    fn into_pattern(self) -> Self::Pattern;
 }
 
 macro_rules! args_impl {
+    (nary) => {
+        impl Params for () {
+            type Pattern = ();
+
+            fn into_pattern(self) -> Self::Pattern {
+                ()
+            }
+        }
+    };
+    ($($n:tt),*) => {
+        impl_args!(@loop $($n),*);
+    };
+    (b $(($($n:tt),*)),*) => {
+        $(
+            impl_args!(@loop $($n),*);
+        )*
+    };
+    (@loop $(($($n:ident),*)),*) => {
+        impl_args!(@loop $(($($n),*)),*);
+    };
     (@loop $($n:ident),*) => {
-        impl<$($n),*> Args for ($($n),*) {
+        impl<$($n),*> Params for ($($n),*) {
             type Pattern = ($($n),*);
 
-            fn args(self) -> Self::Pattern {
+            fn into_pattern(self) -> Self::Pattern {
                 self
             }
         }
@@ -35,6 +49,7 @@ macro_rules! args_impl {
 }
 
 macro_rules! impl_args {
+
     ($($n:ident),*) => {
         impl_args!(@loop $($n),*);
     };
@@ -44,10 +59,10 @@ macro_rules! impl_args {
         )*
     };
     (@loop $($n:ident),*) => {
-        impl<$($n),*> Args for ($($n),*) {
+        impl<$($n),*> Params for ($($n),*) {
             type Pattern = ($($n),*);
 
-            fn args(self) -> Self::Pattern {
+            fn into_pattern(self) -> Self::Pattern {
                 self
             }
         }
@@ -56,16 +71,10 @@ macro_rules! impl_args {
         $($n),*
     };
 }
-impl_args!(A, B);
+args_impl!(nary);
+// args_impl!(A);
+args_impl!(A, B);
 impl_args!(A, B, C);
-
-// impl Args for () {
-//     type Pattern = ();
-
-//     fn args(self) -> Self::Pattern {
-//         ()
-//     }
-// }
 
 // impl<A> Args for (A,) {
 //     type Pattern = (A,);
@@ -83,27 +92,62 @@ impl_args!(A, B, C);
 //     }
 // }
 
-pub trait Evaluator<Args> {
+pub struct Adder;
+
+impl Operator for Adder {
+    fn kind(&self) -> OpKind {
+        OpKind::Binary
+    }
+
+    fn name(&self) -> &str {
+        "adder"
+    }
+}
+
+impl<P, A, B, C> Evaluator<P> for Adder
+where
+    A: core::ops::Add<B, Output = C>,
+    P: super::binary::BinArgs<Lhs = A, Rhs = B>,
+{
+    type Output = C;
+
+    fn eval(&self, args: P) -> Self::Output {
+        let args = args.into_pattern();
+        args.0 + args.1
+    }
+}
+
+impl<P, A, B, C> Differentiable<P> for Adder
+where
+    A: core::ops::Add<B, Output = C>,
+    P: super::binary::BinArgs<Lhs = A, Rhs = B>,
+{
+    type Grad = C;
+
+    fn grad(&self, args: P) -> Self::Grad {
+        let args = args.into_pattern();
+        args.0 + args.1
+    }
+}
+
+pub trait Evaluator<Args>
+where
+    Self: Operator,
+    Args: Params,
+{
     type Output;
 
     fn eval(&self, args: Args) -> Self::Output;
 }
 
-pub trait Operand {
-    type Args: Args;
-    type Output;
+pub trait Differentiable<Args>
+where
+    Self: Evaluator<Args>,
+    Args: Params,
+{
+    type Grad;
 
-    fn eval(&self, args: Self::Args) -> Self::Output;
-
-    fn kind(&self) -> OpKind;
-
-    fn name(&self) -> &str;
-}
-
-pub trait Differentiable: Operand {
-    type Jacobian;
-
-    fn grad(&self, args: Self::Args) -> Self::Jacobian;
+    fn grad(&self, args: Args) -> Self::Grad;
 }
 
 #[cfg(test)]
@@ -113,10 +157,10 @@ mod tests {
     #[test]
     fn test_args() {
         let args = (0f64, 0f32);
-        let pattern = args.args();
+        let pattern = args.into_pattern();
         assert_eq!(pattern, args);
         let args = (0f64, 0f32, 0usize);
-        let pattern = args.args();
+        let pattern = args.into_pattern();
         assert_eq!(pattern, args);
     }
 }

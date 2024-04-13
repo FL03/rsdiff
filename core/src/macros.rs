@@ -36,3 +36,45 @@ macro_rules! impl_binary {
         }
     };
 }
+
+macro_rules! operator {
+    ($kind:ident: $($op:ident),*) => {
+        $(
+            operator!($op, $kind);
+        )*
+    };
+    ($op:ident, $kind:ident) => {
+
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
+        pub struct $op;
+
+        impl $op {
+            pub fn new() -> Self {
+                Self
+            }
+
+            pub fn name(&self) -> &str {
+                stringify!($op)
+            }
+        }
+
+        impl core::fmt::Display for $op {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                write!(f, "{}", self.name())
+            }
+        }
+
+        impl $crate::ops::Operator for $op {
+
+            fn kind(&self) -> $crate::ops::OpKind {
+                OpKind::$kind
+            }
+
+            fn name(&self) -> &str {
+                self.name()
+            }
+        }
+    };
+
+}

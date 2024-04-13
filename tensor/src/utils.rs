@@ -6,7 +6,10 @@ use crate::prelude::{Scalar, TensorExpr, TensorResult};
 use crate::shape::{ShapeError, Stride};
 use crate::tensor::{from_vec_with_op, TensorBase};
 
-pub(crate) fn coordinates_to_index<Idx>(coords: Idx, strides: &Stride) -> usize where Idx: AsRef<[usize]> {
+pub(crate) fn coordinates_to_index<Idx>(coords: Idx, strides: &Stride) -> usize
+where
+    Idx: AsRef<[usize]>,
+{
     coords
         .as_ref()
         .iter()

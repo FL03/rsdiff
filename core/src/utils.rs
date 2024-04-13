@@ -24,16 +24,41 @@ macro_rules! nested {
 }
 
 macro_rules! variant_constructor {
-    ($(($variant:ident, $method:ident)),*) => {
+    ($(($($rest:tt),*)),*) => {
         $(
-            variant_constructor!($variant, $method);
+            variant_constructor!(@loop $($rest),*);
         )*
     };
-    ($variant:ident, $method:ident) => {
+    ($(($variant:ident, $method:ident $($rest:tt),*)),*) => {
+        $(
+            variant_constructor!(@loop $variant, $method $($rest),*);
+        )*
+    };
+
+
+    (@loop $variant:ident, $method:ident, $call:expr) => {
+        pub fn $method() -> Self {
+            Self::$variant($call())
+        }
+    };
+    (@loop $variant:ident, $method:ident) => {
         pub fn $method() -> Self {
             Self::$variant
         }
     };
+    (@loop $variant:ident, $method:ident, $new:expr => {$($field:ident: $ty:ty),*}) => {
+        pub fn $method($($field:$ty),*) -> Self {
+            Self::$variant($new($($field),*))
+        }
+    };
+    (@loop $variant:ident, $method:ident => {$($field:ident: $ty:ty),*}) => {
+        pub fn $method($($field:$ty),*) -> Self {
+            Self::$variant {
+                $($field),*
+            }
+        }
+    };
+
 }
 
 macro_rules! simple_enum_constructor {
@@ -42,9 +67,26 @@ macro_rules! simple_enum_constructor {
             simple_enum_constructor!($variant, $method, $new);
         )*
     };
+    ($variant:ident, $method:ident) => {
+        pub fn $method() -> Self {
+            Self::$variant
+        }
+    };
     ($variant:ident, $method:ident, $new:expr) => {
         pub fn $method() -> Self {
-            Self::$variant($new)
+            Self::$variant($new())
+        }
+    };
+    (st $variant:ident, $method:ident, {$($field:ident: $ty:ty),*}) => {
+        pub fn $method($($field:$ty),*) -> Self {
+            Self::$variant {
+                $($field),*
+            }
+        }
+    };
+    (ext $variant:ident, $method:ident, $new:expr, {$($field:ident: $ty:ty),*}) => {
+        pub fn $method($($field:$ty),*) -> Self {
+            Self::$variant($new($($field),*))
         }
     };
 }

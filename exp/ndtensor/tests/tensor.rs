@@ -14,5 +14,4 @@ fn test_tensor() {
     let tensor = Tensor::new(array![[0f64, 1f64], [2f64, 3f64]]);
 
     assert!(tensor.op().is_none());
-
 }

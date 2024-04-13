@@ -2,8 +2,7 @@
    Appellation: operator <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Unary, UnaryOp};
-// use std::marker::PhantomData;
+use super::UnaryOp;
 
 pub struct UnaryOperator<A> {
     pub args: A,
@@ -18,12 +17,5 @@ impl<A> UnaryOperator<A> {
             differentiable: op.differentiable(),
             op,
         }
-    }
-
-    pub fn eval(self) -> A::Output
-    where
-        A: Unary,
-    {
-        self.args.unary(self.op)
     }
 }

@@ -24,7 +24,7 @@ use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString,
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize,),
-    serde(rename_all = "lowercase", untagged),
+    serde(rename_all = "lowercase", untagged)
 )]
 #[strum(serialize_all = "lowercase")]
 #[strum_discriminants(

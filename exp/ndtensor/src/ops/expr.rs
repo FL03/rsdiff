@@ -8,7 +8,10 @@ use ndarray::RawData;
 
 pub type BoxTensor<S> = Box<Tensor<S>>;
 
-pub enum TensorExpr<S> where S: RawData {
+pub enum TensorExpr<S>
+where
+    S: RawData,
+{
     Binary {
         lhs: BoxTensor<S>,
         rhs: BoxTensor<S>,
@@ -17,5 +20,5 @@ pub enum TensorExpr<S> where S: RawData {
     Unary {
         recv: BoxTensor<S>,
         op: UnaryOp,
-    }
+    },
 }

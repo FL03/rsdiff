@@ -1,0 +1,19 @@
+/*
+    Appellation: utils <module>
+    Contrib: FL03 <jo3mccain@icloud.com>
+*/
+use ndarray::{Dimension, IntoDimension};
+use std::hash::{DefaultHasher, Hash, Hasher};
+
+/// Hashes a dimension using the [DefaultHasher].
+pub fn hash_dim<D>(dim: impl IntoDimension<Dim = D>) -> u64
+where
+    D: Dimension,
+{
+    let dim = dim.into_dimension();
+    let mut s = DefaultHasher::new();
+    for i in dim.slice() {
+        i.hash(&mut s);
+    }
+    s.finish()
+}

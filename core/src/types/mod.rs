@@ -5,9 +5,10 @@
 //! # Types
 //!
 //!
-pub use self::{constants::*, dual::*, variables::*};
+pub use self::{constants::*, dtype::*, dual::*, variables::*};
 
 pub(crate) mod constants;
+pub(crate) mod dtype;
 pub(crate) mod dual;
 pub(crate) mod variables;
 

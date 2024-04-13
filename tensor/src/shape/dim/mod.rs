@@ -9,6 +9,8 @@ pub use self::{dimension::Dim, utils::*};
 
 pub(crate) mod dimension;
 
+use super::Rank;
+
 pub trait IntoDimension {
     type Dim: Dimension;
 
@@ -19,8 +21,8 @@ pub trait Dimension {
     type Pattern;
 
     fn as_slice(&self) -> &[usize];
-    /// Return the rank of the dimension; i.e. the number of axes.
-    fn rank(&self) -> usize;
+    /// Return the [rank](super::Rank) of the dimension; i.e. the number of axes.
+    fn rank(&self) -> Rank;
     /// Return the size of the dimension; i.e. the number of elements.
     fn size(&self) -> usize;
 

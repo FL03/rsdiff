@@ -12,5 +12,7 @@ pub(crate) mod props;
 
 pub mod linalg;
 
+pub trait Group {}
+
 #[cfg(test)]
 mod tests {}

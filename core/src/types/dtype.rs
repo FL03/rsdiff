@@ -2,7 +2,7 @@
     Appellation: dtype <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use acme::prelude::TypeError;
+use crate::prelude::TypeError;
 use std::any::TypeId;
 
 pub trait FromType {
@@ -13,32 +13,46 @@ pub trait FromType {
 }
 
 pub enum DType {
+    Num(Number),
+    Str(Strings),
+}
+pub enum Strings {
+    Bytes,
+    Char,
+    Str,
+    String,
+}
+pub enum Number {
+    Complex(R, R),
+    Real(R),
+}
+pub enum R {
     Float(Float),
     Integer(Integer),
 }
 
-impl DType {
+impl R {
     pub fn of<T>(val: &T) -> Result<Self, TypeError>
     where
         T: 'static,
     {
         if let Ok(float) = Float::from_type(val) {
-            Ok(DType::Float(float))
+            Ok(R::Float(float))
         } else if let Ok(integer) = Integer::from_type(val) {
-            Ok(DType::Integer(integer))
+            Ok(R::Integer(integer))
         } else {
             Err(TypeError::InvalidType)
         }
     }
 }
 
-impl FromType for DType {
+impl FromType for R {
     fn from_type<T>(val: &T) -> Result<Self, TypeError>
     where
         T: 'static,
         Self: Sized,
     {
-        DType::of(val)
+        R::of(val)
     }
 }
 

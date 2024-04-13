@@ -5,10 +5,10 @@
 //! # Elements
 //!
 //!
-use acme::prelude::DType;
+use acme::prelude::R;
 
 pub trait Element {
     type Elem;
 
-    fn dtype(&self) -> DType;
+    fn dtype(&self) -> R;
 }

@@ -6,4 +6,10 @@ use crate::math::linalg::fields::Field;
 
 pub trait VectorSpace<T> {
     type Field: Field<Elem = T>;
+
+    fn field(&self) -> &Self::Field;
+
+    fn rank(&self) -> usize {
+        self.field().rank()
+    }
 }

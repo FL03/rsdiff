@@ -5,7 +5,8 @@
 #![cfg(test)]
 extern crate acme_tensor as acme;
 
-use acme::prelude::{IntoShape, Scalar, Tensor, TensorKind};
+use acme::prelude::{IntoShape, Tensor, TensorKind};
+use acme_core::prelude::Scalar;
 use core::ops::Neg;
 
 fn _shapespace<T>(shape: impl IntoShape) -> Tensor<T>

@@ -13,9 +13,13 @@ version = "0.1.0"
 
 [features]
 default = [
+    "approx",
     "std",
 ]
 
+approx = [
+    "ndarray/approx"
+]
 std = []
 
 serde = [

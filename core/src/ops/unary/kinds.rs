@@ -2,6 +2,7 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::ops::{OpKind, Operator};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 #[derive(
@@ -74,4 +75,31 @@ impl UnaryOp {
         (Tan, tan),
         (Tanh, tanh)
     );
+}
+
+impl Operator for UnaryOp {
+    fn name(&self) -> &str {
+        match self {
+            UnaryOp::Abs => "abs",
+            UnaryOp::Cos => "cos",
+            UnaryOp::Cosh => "cosh",
+            UnaryOp::Exp => "exp",
+            UnaryOp::Floor => "floor",
+            UnaryOp::Inv => "inv",
+            UnaryOp::Ln => "ln",
+            UnaryOp::Neg => "neg",
+            UnaryOp::Not => "not",
+            UnaryOp::Recip => "recip",
+            UnaryOp::Sin => "sin",
+            UnaryOp::Sinh => "sinh",
+            UnaryOp::Sqrt => "sqrt",
+            UnaryOp::Square => "square",
+            UnaryOp::Tan => "tan",
+            UnaryOp::Tanh => "tanh",
+        }
+    }
+
+    fn kind(&self) -> OpKind {
+        OpKind::Unary
+    }
 }

@@ -10,6 +10,15 @@ pub trait Operator {
     fn name(&self) -> &str;
 }
 
+impl Operator for Box<dyn Operator> {
+    fn kind(&self) -> OpKind {
+        self.as_ref().kind()
+    }
+
+    fn name(&self) -> &str {
+        self.as_ref().name()
+    }
+}
 pub trait Params {
     type Pattern;
 

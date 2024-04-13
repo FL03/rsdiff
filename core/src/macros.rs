@@ -5,11 +5,20 @@
 #![allow(unused_macros)]
 
 macro_rules! impl_binary {
-    ($lhs:ty, $rhs:ty, $res:ty, $trait:path, $method:ident, $e:expr) => {
-        impl_binary!(@base $lhs, $rhs, $res, $trait, $method, $e);
+    (custom $($args:tt),*) => {
+        impl_binary!(@loop $(args),*);
     };
-    (generic $lhs:ty, $rhs:ty, $res:ty, $trait:path, $method:ident, $e:expr) => {
-        impl<T> $trait<T> for $lhs {
+    ($lhs:ty, $rhs:ty, $res:ty: [$(( $op:ident, $method:ident, $e:expr)),*]) => {
+        $(
+            impl_binary!(@loop $lhs, $rhs, $res, $op, $method, $e);
+        )*
+    };
+    ($lhs:ty, $rhs:ty, $res:ty, $op:ident, $method:ident, $e:expr) => {
+        impl_binary!(@loop $lhs, $rhs, $res, $op, $method, $e);
+    };
+
+    (@loop $lhs:ty, $rhs:ty, $res:ty, $trait:path, $method:ident, $e:expr, where T: $($tr:tt)+*) => {
+        impl<T> $trait<T> for $lhs where T: $($tr)* {
             type Output = $res;
 
             fn $method(self, rhs: $rhs) -> Self::Output {
@@ -17,8 +26,8 @@ macro_rules! impl_binary {
             }
         }
     };
-    (@base $lhs:ty, $rhs:ty, $res:ty, $trait:path, $method:ident, $e:expr) => {
-        impl $trait<$rhs> for $lhs {
+    (@loop $lhs:ty, $rhs:ty, $res:ty, $op:ident, $method:ident, $e:expr) => {
+        impl $op<$rhs> for $lhs {
             type Output = $res;
 
             fn $method(self, rhs: $rhs) -> Self::Output {
@@ -32,6 +41,35 @@ macro_rules! impl_binary {
 
             fn $method(self, rhs: $rhs) -> Self::Output {
                 $e(self, rhs)
+            }
+        }
+    };
+}
+
+pub(crate) struct U(usize);
+
+use core::ops::*;
+impl_binary!(
+    U, U, U: [
+        (Add, add, | lhs: U, rhs: U | U(lhs.0 + rhs.0)),
+        (Div, div, | lhs: U, rhs: U | U(lhs.0 / rhs.0)),
+        (Mul, mul, | lhs: U, rhs: U | U(lhs.0 * rhs.0)),
+        (Sub, sub, | lhs: U, rhs: U | U(lhs.0 - rhs.0))
+    ]
+);
+
+macro_rules! impl_evaluator {
+    (
+        $op:ident,
+        args:{$($args:ident: $ty:ty),*},
+        output:$output:ty,
+        call:$call:expr
+    ) => {
+        impl<$($args)*> Evaluator<$($args)*> for $op {
+            type Output = $output
+
+            fn eval(&self, ) -> Self::Output {
+                $call($($args),*)
             }
         }
     };

@@ -7,13 +7,23 @@
 extern crate ndtensor;
 
 use ndarray::array;
-use ndtensor::prelude::{hash_dim, Tensor};
+use ndtensor::prelude::{hash_dim, TensorBase};
 
 #[test]
 fn test_tensor() {
-    let tensor = Tensor::ndtensor(array![[0f64, 1f64], [2f64, 3f64]]);
+    let tensor = TensorBase::ndtensor(array![[0f64, 1f64], [2f64, 3f64]]);
 
     assert!(tensor.op().is_none());
+}
+
+#[test]
+fn test_tensor_ops() {
+    let tensor = TensorBase::ndtensor(array![[0f64, 1f64], [2f64, 3f64]]);
+    let res = tensor.cos();
+    tensor
+        .data()
+        .mapv(|i| i.cos())
+        .abs_diff_eq(&res.data(), 1e-8);
 }
 
 #[test]

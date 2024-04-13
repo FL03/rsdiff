@@ -78,4 +78,5 @@ pub mod prelude {
     pub use crate::utils::*;
     #[doc(inline)]
     pub use crate::Tensor;
+    pub(crate) use acme::prelude::Scalar;
 }

@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::arithmetic::*;
+use crate::ops::{OpKind, Operator};
 use smart_default::SmartDefault;
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -14,6 +15,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     EnumCount,
     EnumIs,
     EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,
@@ -97,4 +99,29 @@ impl BinaryOp {
         (Shl, shl),
         (Shr, shr)
     );
+}
+
+impl Operator for BinaryOp {
+    fn name(&self) -> &str {
+        match self {
+            Self::Add(_) => "add",
+            Self::Div(_) => "div",
+            Self::Mul(_) => "mul",
+            Self::Sub(_) => "sub",
+            Self::Pow => "pow",
+            Self::Rem(_) => "rem",
+            Self::Max => "max",
+            Self::Min => "min",
+            Self::And => "and",
+            Self::Or => "or",
+            Self::Xor => "xor",
+            Self::Shl => "shl",
+            Self::Shr => "shr",
+            Self::Custom { .. } => "custom",
+        }
+    }
+
+    fn kind(&self) -> OpKind {
+        OpKind::Binary
+    }
 }

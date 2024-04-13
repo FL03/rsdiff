@@ -2,8 +2,8 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinOp, BoxedBinOp};
-use crate::ops::{OpKind, Operator};
+use super::BinOp;
+use crate::ops::{Evaluator, OpKind, Operator};
 use num::traits::{NumOps, Pow};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
@@ -47,8 +47,11 @@ macro_rules! operators {
             pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
             where
                 A: NumOps<B, C> + Pow<B, Output = C>,
+                Box<dyn Operator>: Evaluator<(A, B), Output = C>,
+
+
             {
-                self.op().eval(lhs, rhs)
+                self.op().eval((lhs, rhs))
             }
 
 
@@ -61,10 +64,7 @@ macro_rules! operators {
             }
 
 
-            pub fn op<A, B, C>(self) -> BoxedBinOp<A, B, C>
-            where
-                A: NumOps<B, C> + Pow<B, Output = C>,
-            {
+            pub fn op(self) -> Box<dyn Operator> {
                 match self {
                     $(
                         $group::$variant(op) => Box::new(op),

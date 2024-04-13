@@ -335,6 +335,10 @@ impl<T> TensorBase<T> {
         unsafe { self.with_layout_unchecked(layout) }
     }
     /// Set the layout of the tensor without checking for compatibility
+    /// 
+    /// # Safety
+    /// 
+    /// This function is unsafe because it does not check if the layout is compatible with the tensor.
     pub unsafe fn with_layout_unchecked(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
@@ -345,7 +349,7 @@ impl<T> TensorBase<T> {
         self
     }
 
-    pub unsafe fn with_shape_unchecked(mut self, shape: impl IntoShape) -> Self {
+    pub fn with_shape_c(mut self, shape: impl IntoShape) -> Self {
         self.layout = self.layout.with_shape_c(shape);
         self
     }

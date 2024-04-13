@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{BinOp, BoxedBinOp};
-use crate::ops::{Operator, OperatorKind};
+use crate::ops::{Operator, OpKind};
 use num::traits::NumOps;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -39,8 +39,8 @@ macro_rules! operator {
 
         impl Operator for $op {
 
-            fn kind(&self) -> OperatorKind {
-                OperatorKind::$kind
+            fn kind(&self) -> OpKind {
+                OpKind::$kind
             }
 
             fn name(&self) -> &str {
@@ -117,8 +117,8 @@ macro_rules! operators {
         }
 
         impl Operator for $group {
-            fn kind(&self) -> OperatorKind {
-                OperatorKind::Binary
+            fn kind(&self) -> OpKind {
+                OpKind::Binary
             }
 
             fn name(&self) -> &str {

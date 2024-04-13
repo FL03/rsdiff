@@ -1,32 +1,46 @@
 [package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
-description = "acme-ndtensor"
-edition = "2021"
+authors.workspace = true
+categories.workspace = true
+description = "ndtensor is an n-dimensional tensor library for Rust."
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
 name = "ndtensor"
+repository.workspace = true
+readme.workspace = true
 version = "0.1.0"
 
 [features]
 default = [
-    "std"
+    "std",
 ]
 
-std = [
-    "acme/std",
-]
+std = []
+
 
 [lib]
-bench = false
+bench = true
 crate-type = ["cdylib", "rlib"]
-doctest = false
+doctest = true
 test = true
 
 [build-dependencies]
 
 [dependencies]
+ndarray = "0.15"
 num = "0.4"
-rawpointer = "0.2.1"
 
-[dependencies.acme]
-path = "../../acme"
+[dependencies.acme-core]
+path = "../../core"
+version = "0.3.1"
 
 [dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

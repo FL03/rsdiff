@@ -1,27 +1,22 @@
-extern crate acme;
-#[cfg(not(feature = "std"))]
-extern crate alloc;
+/*
+    Appellation: ndtensor <library>
+    Contrib: FL03 <jo3mccain@icloud.com>
+*/
+//! # ndtensor
+//!
+//! 
+#![crate_name = "ndtensor"]
 
-#[allow(unused_imports)]
-pub use self::utils::*;
+extern crate acme_core as acme;
 
-#[allow(unused_macros)]
-#[macro_use]
-pub(crate) mod macros;
-#[macro_use]
-pub(crate) mod seal;
-#[macro_use]
-pub(crate) mod utils;
+pub use self::tensor::*;
 
-pub mod data;
-pub mod dim;
-pub mod index;
-#[macro_use]
-pub mod iter;
+pub(crate) mod tensor;
+
+pub mod ops;
+
+pub type NdContainer<S> = ndarray::ArrayBase<S, ndarray::IxDyn>;
 
 pub mod prelude {
-    #[doc(inline)]
-    pub use crate::data::prelude::*;
-    #[doc(inline)]
-    pub use crate::iter::*;
+    pub use crate::tensor::Tensor;
 }

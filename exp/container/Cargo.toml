@@ -1,0 +1,32 @@
+[package]
+authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
+description = "acme-container"
+edition = "2021"
+name = "acme-container"
+version = "0.1.0"
+
+[features]
+default = [
+    "std"
+]
+
+std = [
+    "acme/std",
+]
+
+[lib]
+bench = false
+crate-type = ["cdylib", "rlib"]
+doctest = false
+test = true
+
+[build-dependencies]
+
+[dependencies]
+num = "0.4"
+rawpointer = "0.2.1"
+
+[dependencies.acme]
+path = "../../acme"
+
+[dev-dependencies]

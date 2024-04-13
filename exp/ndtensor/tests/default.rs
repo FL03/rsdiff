@@ -4,15 +4,16 @@
 */
 #![cfg(test)]
 
-fn addition<A, B, C>(a: A, b: B) -> C
+pub fn multiply<A, B, C>(x: A, y: B) -> C
 where
-    A: std::ops::Add<B, Output = C>,
+    A: std::ops::Mul<B, Output = C>,
 {
-    a + b
+    x * y
 }
 
 #[test]
 fn compiles() {
-    let result = addition(2, 2);
-    assert_eq!(result, 4);
+    assert!(multiply(2, 3) > 0);
+    assert_eq!(multiply(2, 3), 6);
+    assert_ne!(multiply(2, 3), 7);
 }

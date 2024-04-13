@@ -4,7 +4,7 @@
 */
 use super::binary::BinaryOp;
 use super::unary::UnaryOp;
-use strum::{Display, EnumCount, EnumIs, VariantNames};
+use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -12,6 +12,7 @@ use strum::{Display, EnumCount, EnumIs, VariantNames};
     Debug,
     Display,
     EnumCount,
+    EnumDiscriminants,
     EnumIs,
     Eq,
     Hash,
@@ -24,7 +25,21 @@ use strum::{Display, EnumCount, EnumIs, VariantNames};
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize,),
     serde(rename_all = "lowercase", untagged),
-    strum(serialize_all = "lowercase")
+)]
+#[strum(serialize_all = "lowercase")]
+#[strum_discriminants(
+    derive(
+        Display,
+        EnumCount,
+        EnumIs,
+        EnumIter,
+        EnumString,
+        Hash,
+        Ord,
+        PartialOrd,
+        VariantNames
+    ),
+    name(OpKind)
 )]
 pub enum Op {
     Binary(BinaryOp),

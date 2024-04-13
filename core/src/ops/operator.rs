@@ -2,23 +2,17 @@
     Appellation: operator <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
-pub enum OperatorKind {
-    Binary,
-    Unary,
-    Ternary,
-    Nary,
-}
+use super::kinds::OpKind;
 
 pub trait Operator {
-    fn kind(&self) -> OperatorKind;
+    fn kind(&self) -> OpKind;
 
     fn name(&self) -> &str;
 }
 
 #[allow(dead_code)]
 pub(crate) struct Expr {
-    kind: OperatorKind,
+    kind: OpKind,
     name: String,
 }
 
@@ -26,6 +20,18 @@ pub trait Args {
     type Pattern;
 
     fn args(self) -> Self::Pattern;
+}
+
+macro_rules! args_impl {
+    (@loop $($n:ident),*) => {
+        impl<$($n),*> Args for ($($n),*) {
+            type Pattern = ($($n),*);
+
+            fn args(self) -> Self::Pattern {
+                self
+            }
+        }
+    };
 }
 
 macro_rules! impl_args {
@@ -50,7 +56,6 @@ macro_rules! impl_args {
         $($n),*
     };
 }
-
 impl_args!(A, B);
 impl_args!(A, B, C);
 
@@ -84,16 +89,21 @@ pub trait Evaluator<Args> {
     fn eval(&self, args: Args) -> Self::Output;
 }
 
-#[allow(dead_code)]
-pub(crate) trait Operand {
+pub trait Operand {
     type Args: Args;
     type Output;
 
     fn eval(&self, args: Self::Args) -> Self::Output;
 
-    fn kind(&self) -> OperatorKind;
+    fn kind(&self) -> OpKind;
 
     fn name(&self) -> &str;
+}
+
+pub trait Differentiable: Operand {
+    type Jacobian;
+
+    fn grad(&self, args: Self::Args) -> Self::Jacobian;
 }
 
 #[cfg(test)]

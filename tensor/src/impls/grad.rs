@@ -108,7 +108,6 @@ where
                             *entry!(store, lhs) += &grad * rhs.as_ref();
                             *entry!(store, rhs) += &grad * lhs.as_ref();
                         }
-                        
                         BinaryOp::Sub(_) => {
                             *entry!(store, lhs) += &grad;
                             *entry!(store, rhs) -= &grad;

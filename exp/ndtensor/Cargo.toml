@@ -52,6 +52,7 @@ strum.workspace = true
 path = "../../core"
 version = "0.3.1"
 
+
 [dev-dependencies]
 
 [package.metadata.docs.rs]

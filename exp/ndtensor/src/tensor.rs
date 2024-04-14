@@ -4,10 +4,15 @@
 */
 use crate::prelude::{TensorExpr, TensorId, TensorOp, TensorResult};
 use crate::Context;
+#[cfg(not(feature = "std"))]
+use alloc::vec;
 use core::borrow::{Borrow, BorrowMut};
 use core::fmt;
 use ndarray::iter::{Iter, IterMut};
 use ndarray::*;
+#[cfg(feature = "std")]
+use std::vec;
+
 
 pub(crate) fn new<S, D>(
     data: ArrayBase<S, D>,
@@ -18,13 +23,7 @@ where
     D: Dimension,
     S: RawData,
 {
-    let ctx = Context::new(kind);
-    TensorBase {
-        id: TensorId::new(),
-        ctx,
-        data,
-        op: TensorOp::new(op),
-    }
+    TensorBase::new(data, op, kind)
 }
 
 pub struct TensorBase<S, D = IxDyn>
@@ -44,7 +43,7 @@ where
     S: RawData<Elem = A>,
 {
     pub(crate) fn new(data: ArrayBase<S, D>, op: Option<TensorExpr<S>>, kind: bool) -> Self {
-        let ctx = Context::new(kind);
+        let ctx = Context::new(kind, data.ndim());
         TensorBase {
             id: TensorId::new(),
             ctx,

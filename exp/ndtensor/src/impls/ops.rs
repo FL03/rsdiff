@@ -21,7 +21,7 @@ macro_rules! unop {
                 recv: Box::new(self.clone().into_dyn().into_owned()),
                 op: UnaryOp::$op,
             };
-            new(data, Some(op))
+            new!(data, Some(op))
         }
     };
 }

@@ -9,17 +9,32 @@
 
 extern crate acme_core as acme;
 
-pub use self::{errors::*, specs::*, tensor::*, utils::*};
+pub use self::{context::Context, errors::*, specs::*, tensor::*, types::*, utils::*};
 
+pub(crate) mod context;
 pub(crate) mod errors;
+#[macro_use]
+pub(crate) mod macros;
 pub(crate) mod specs;
 pub(crate) mod tensor;
 pub(crate) mod utils;
 
 pub mod ops;
 
+#[allow(unused_imports)]
+pub(crate) mod nd {
+    pub(crate) use ndarray::*;
+}
+
 pub(crate) mod impls {
+    pub(crate) mod create;
+    pub(crate) mod grad;
     pub(crate) mod ops;
+}
+
+pub(crate) mod types {
+    pub use self::kinds::*;
+    pub(crate) mod kinds;
 }
 
 use ndarray::{CowRepr, IxDyn, OwnedArcRepr, OwnedRepr, ViewRepr};

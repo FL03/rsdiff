@@ -1,5 +1,3 @@
-use ndarray::{DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
-
 /*
     Appellation: ops <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
@@ -7,6 +5,11 @@ use ndarray::{DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 pub use self::expr::*;
 
 pub(crate) mod expr;
+
+use ndarray::*;
+
+pub type TOp<A, B> = TensorOp<OwnedArcRepr<A>, OwnedArcRepr<B>>;
+
 pub struct TensorOp<S1, S2 = S1>(pub(crate) Option<TensorExpr<S1, S2>>)
 where
     S1: RawData,
@@ -58,6 +61,14 @@ where
     pub fn is_some(&self) -> bool {
         self.0.is_some()
     }
+
+    pub fn view(&self) -> TensorOp<ViewRepr<&'_ A>, ViewRepr<&'_ B>>
+    where
+        S1: Data,
+        S2: Data,
+    {
+        TensorOp(self.0.as_ref().map(|expr| expr.view()))
+    }
 }
 
 impl<S1, S2> Clone for TensorOp<S1, S2>
@@ -67,6 +78,16 @@ where
 {
     fn clone(&self) -> Self {
         TensorOp(self.0.clone())
+    }
+}
+
+impl<S1, S2> Default for TensorOp<S1, S2>
+where
+    S1: RawData,
+    S2: RawData,
+{
+    fn default() -> Self {
+        TensorOp(None)
     }
 }
 

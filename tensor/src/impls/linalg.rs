@@ -130,7 +130,7 @@ where
         let shape = self.shape().matmul_shape(other.shape()).unwrap();
         let mut result = vec![T::zero(); shape.size()];
 
-        nested!(for i in 0..self.nrows(), for j in 0..other.ncols(), for k in 0..self.ncols() => {
+        nested!(i in 0..self.nrows() => j in 0..other.ncols() => k in 0..self.ncols() => {
             result[oc(i, j)] += self.data[sc(i, k)] * other.data[oc(k, j)]
         });
         let op = TensorExpr::matmul(self.clone(), other.clone());

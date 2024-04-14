@@ -97,46 +97,44 @@ macro_rules! impl_binary_op {
     //     impl_binary_op!(@loop $($args),*);
 
     // };
-    ($op:ident, $($bound:ident)::*, $operator:tt) => {
-        impl_binary_op!(@loop $op, $bound, $operator);
+    ($op:ident, $($p:ident)::*, $operator:tt) => {
+        impl_binary_op!(@loop $op, $($p)::*, $operator);
     };
-    (other: $operand:ident, $($bound:ident)::*, $op:ident) => {
-        impl_binary_op!(@loop $operand, $($bound)::*, $op);
+    (other: $operand:ident, $($p:ident)::*, $op:ident) => {
+        impl_binary_op!(@loop $operand, $($p)::*, $op);
     };
     (std $(($op:ident, $bound:ident, $operator:tt)),*) => {
         $(
             impl_binary_op!(@loop $op, core::ops::$bound, $operator);
         )*
     };
-    (@loop $(($op:ident, $($bound:ident)::*, $operator:tt)),*) => {
+    (@loop $(($op:ident, $($p:ident)::*, $operator:tt)),*) => {
         $(
-            impl_binary_op!($op, $bound, $operator);
+            impl_binary_op!($op, $($p)::*, $operator);
         )*
 
     };
 
-
-
-    (@loop $operand:ident, $($bound:ident)::*, $op:ident) => {
+    (@loop $operand:ident, $($p:ident)::*, $op:ident) => {
         operator!($operand, Binary, $op);
 
         impl<A, B, C> BinOp<A, B> for $operand
         where
-            A: $($bound)::*<B, Output = C>,
+            A: $($p)::*<B, Output = C>,
         {
             type Output = C;
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                $($bound)::*::$op(lhs, rhs)
+                $($p)::*::$op(lhs, rhs)
             }
         }
     };
-    (@loop $operand:ident, $($bound:ident)::*, $op:tt) => {
+    (@loop $operand:ident, $($p:ident)::*, $op:tt) => {
         operator!($operand, Binary);
 
         impl<A, B, C> BinOp<A, B> for $operand
         where
-            A: $($bound)::*<B, Output = C>,
+            A: $($p)::*<B, Output = C>,
         {
             type Output = C;
 

@@ -6,17 +6,23 @@
 ///
 #[macro_export]
 macro_rules! nested {
-    ($(for $i:ident in $iter:expr),* => {$exp:expr} ) => {
-        nested!(@loop $exp, $(for $i in $iter),*);
+    ($($i:ident in $iter:expr)=>* => {$exp:expr} ) => {
+        nested!(@loop $exp, $($i in $iter),*);
     };
     // This is the base case for the recursion.
-    (@loop $exp:expr, for $i:ident in $iter:expr) => {
+    (@loop $exp:expr, $i:ident in $iter:expr) => {
         for $i in $iter {
             $exp
         }
     };
+    // This is the base case for the recursion.
+    (@loop $exp:expr, $i:ident in $iter:expr) => {
+        for $i in $iter.into_iter() {
+            $exp
+        }
+    };
     // This is the recursive case. It will expand to a nested loop.
-    (@loop $exp:expr, for $i:ident in $iter:expr, $($tail:tt)*) => {
+    (@loop $exp:expr, $i:ident in $iter:expr, $($tail:tt)*) => {
         for $i in $iter {
             nested!(@loop $exp, $($tail)*);
         }

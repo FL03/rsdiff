@@ -2,9 +2,10 @@
     Appellation: expr <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::nd::*;
 use crate::TensorBase;
+
 use acme::ops::{BinaryOp, UnaryOp};
-use ndarray::{DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 
 pub type BoxTensor<S> = Box<TensorBase<S>>;
 
@@ -71,6 +72,38 @@ where
             TensorExpr::Unary { recv, op } => TensorExpr::Unary {
                 recv: recv.into_shared().boxed(),
                 op,
+            },
+        }
+    }
+
+    // pub fn reborrow<'b>(&'b self) -> TensorExpr<ViewRepr<&'b A>, ViewRepr<&'b B>> {
+    //     match self {
+    //         TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+    //             lhs: lhs.reborrow().boxed(),
+    //             rhs: rhs.reborrow().boxed(),
+    //             op: *op,
+    //         },
+    //         TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+    //             recv: recv.reborrow().boxed(),
+    //             op: *op,
+    //         },
+    //     }
+    // }
+
+    pub fn view(&self) -> TensorExpr<ViewRepr<&'_ A>, ViewRepr<&'_ B>>
+    where
+        S1: Data,
+        S2: Data,
+    {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.view().boxed(),
+                rhs: rhs.view().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.view().boxed(),
+                op: *op,
             },
         }
     }

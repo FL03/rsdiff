@@ -109,6 +109,25 @@ where
     }
 }
 
+use ndarray::RawViewRepr;
+
+impl<A, B> TensorExpr<RawViewRepr<*const A>, RawViewRepr<*const B>> {
+    pub unsafe fn cast<C>(self) -> TensorExpr<RawViewRepr<*const C>, RawViewRepr<*const C>> where {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.cast().boxed(),
+                rhs: rhs.cast().boxed(),
+                op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.cast().boxed(),
+                op,
+            },
+        }
+    
+    }
+}
+
 impl<S1, S2> Clone for TensorExpr<S1, S2>
 where
     S1: RawDataClone,

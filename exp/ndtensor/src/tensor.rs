@@ -228,6 +228,17 @@ where
     }
 }
 
+impl<A, D> TensorBase<RawViewRepr<*const A>, D> where D: Dimension {
+    pub unsafe fn cast<B>(self) -> crate::RawTensorView<B, D> where {
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.cast::<B>(),
+            op: self.op.cast(),
+        }
+    }
+}
+
 impl<A, S> TensorBase<S, ndarray::Ix0>
 where
     S: RawData<Elem = A>,

@@ -11,7 +11,7 @@ use ndarray::*;
 pub type TOp<A, B> = TensorOp<OwnedArcRepr<A>, OwnedArcRepr<B>>;
 
 pub trait NdTensorOp {
-    
+
     fn is_none(&self) -> bool;
     fn is_some(&self) -> bool;
 }
@@ -77,6 +77,13 @@ where
     }
 }
 
+
+impl<A, B> TensorOp<RawViewRepr<*const A>, RawViewRepr<*const B>> {
+    pub unsafe fn cast<C>(self) -> TensorOp<RawViewRepr<*const C>, RawViewRepr<*const C>> where {
+        TensorOp(self.0.map(|expr| expr.cast()))
+    
+    }
+}
 impl<S1, S2> Clone for TensorOp<S1, S2>
 where
     S1: RawDataClone,

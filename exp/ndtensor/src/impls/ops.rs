@@ -6,7 +6,7 @@ use crate::prelude::{Dimension, TensorExpr};
 use crate::tensor::{new, TensorBase};
 use acme::prelude::{BinaryOp, Scalar, UnaryOp};
 use ndarray::DimMax;
-use ndarray::{Data, DataMut, DataOwned, RawDataClone};
+use ndarray::{Data, DataMut, DataOwned, OwnedRepr, RawDataClone};
 
 macro_rules! unop {
     ($(($method:ident, $op:ident)),*) => {
@@ -93,7 +93,7 @@ macro_rules! stdop {
             S2: DataOwned<Elem = B>,
 
         {
-            type Output = TensorBase<S1, <D1 as DimMax<D2>>::Output>;
+            type Output = TensorBase<OwnedRepr<A>, <D1 as DimMax<D2>>::Output>;
 
             #[allow(unused_variables)]
             fn $call(self, rhs: TensorBase<S2, D2>) -> Self::Output {
@@ -103,7 +103,7 @@ macro_rules! stdop {
                     Box::new(rhs.into_dyn().into_owned()),
                     BinaryOp::$call(),
                 );
-                // new(data, Some(op))
+                // new!(data, Some(op.cast::<A>()))
                 unimplemented!()
             }
         }

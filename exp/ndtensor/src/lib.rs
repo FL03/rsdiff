@@ -43,6 +43,10 @@ pub type ArcTensor<S, D = IxDyn> = TensorBase<OwnedArcRepr<S>, D>;
 
 pub type CowTensor<'a, S, D = IxDyn> = TensorBase<CowRepr<'a, S>, D>;
 
+pub type RawTensorView<S, D = IxDyn> = TensorBase<ndarray::RawViewRepr<*const S>, D>;
+
+
+
 pub type Tensor<S, D = IxDyn> = TensorBase<OwnedRepr<S>, D>;
 
 pub type TensorView<'a, S, D = IxDyn> = TensorBase<ViewRepr<&'a S>, D>;

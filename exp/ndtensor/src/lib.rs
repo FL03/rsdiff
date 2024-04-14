@@ -48,7 +48,6 @@ pub mod prelude {
         ArcTensor, CowTensor, NdContainer, Tensor, TensorId, TensorView, TensorViewMut,
     };
 
-    pub(crate) use acme::prelude::Scalar;
     #[allow(unused_imports)]
     pub(crate) use ndarray::{
         array, s, ArrayBase, ArrayD, Data, DataOwned, Dimension, IxDyn, RawData, ShapeError,

@@ -6,12 +6,12 @@ use crate::prelude::{TensorExpr, TensorId, TensorOp, TensorResult};
 use core::fmt;
 use ndarray::iter::{Iter, IterMut};
 use ndarray::{ArrayBase, Dimension, IxDyn};
-use ndarray::{Data, DataOwned, DataShared, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
+use ndarray::{Data, DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 
-pub(crate) fn new<S1, D>(data: ArrayBase<S1, D>, op: Option<TensorExpr<S1>>) -> TensorBase<S1, D>
+pub(crate) fn new<S, D>(data: ArrayBase<S, D>, op: Option<TensorExpr<S>>) -> TensorBase<S, D>
 where
     D: Dimension,
-    S1: RawData,
+    S: RawData,
 {
     TensorBase {
         id: TensorId::new(),

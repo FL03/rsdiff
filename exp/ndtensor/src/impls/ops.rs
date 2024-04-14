@@ -52,12 +52,12 @@ where
     D: Dimension,
     S: Data<Elem = A> + DataOwned + RawDataClone,
 {
-    pub fn abs(self) -> crate::Tensor<<A as Scalar>::Real, D>
+    pub fn abs(&self) -> crate::Tensor<<A as Scalar>::Real, D>
     where
         A: Scalar<Real = A>,
     {
         let data = self.data().mapv(|x| x.abs());
-        let op = TensorExpr::unary(Box::new(self.into_dyn()), UnaryOp::Abs).into_owned();
+        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Abs).into_owned();
         TensorBase::from_arr(data).with_op(op)
     }
     unop!(

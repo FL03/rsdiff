@@ -4,7 +4,7 @@
 */
 use crate::TensorBase;
 use acme::ops::{BinaryOp, UnaryOp};
-use ndarray::{DataOwned, Dimension, IxDyn, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
+use ndarray::{DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 
 pub type BoxTensor<S> = Box<TensorBase<S>>;
 

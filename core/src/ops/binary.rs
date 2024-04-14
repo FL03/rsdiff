@@ -35,6 +35,3 @@ impl<A, B, C> BinOp<A, B> for Box<dyn BinOp<A, B, Output = C>> {
         self.as_ref().eval(lhs, rhs)
     }
 }
-
-#[cfg(test)]
-mod tests {}

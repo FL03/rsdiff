@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::BinOp;
-use crate::ops::{Evaluator, OpKind, Operator};
+use crate::ops::{Evaluator, OpKind, Operator, Params};
 use num::traits::{NumOps, Pow};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
@@ -44,17 +44,6 @@ macro_rules! operators {
                 }
             )*
 
-            pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
-            where
-                A: NumOps<B, C> + Pow<B, Output = C>,
-                Box<dyn Operator>: Evaluator<(A, B), Output = C>,
-
-
-            {
-                self.op().eval((lhs, rhs))
-            }
-
-
             pub fn name(&self) -> &str {
                 match self {
                     $(
@@ -71,8 +60,6 @@ macro_rules! operators {
                     )*
                 }
             }
-
-
         }
 
         impl Operator for $group {
@@ -84,78 +71,72 @@ macro_rules! operators {
                 self.name()
             }
         }
+
+        impl<P, A, B, C> Evaluator<P> for $group
+        where
+            A: NumOps<B, C> + Pow<B, Output = C>,
+            P: Params<Pattern = (A, B)>,
+        {
+            type Output = C;
+
+            fn eval(&self, args: P) -> Self::Output
+
+            {
+                match self {
+                    $(
+                        $group::$variant(op) => Evaluator::eval(op, args),
+                    )*
+                }
+            }
+        }
     };
 }
 
 macro_rules! impl_binary_op {
-    ($(($op:ident, $bound:ident, $operator:tt)),*) => {
+    // ($($args:tt),*) => {
+    //     impl_binary_op!(@loop $($args),*);
+
+    // };
+    ($op:ident, $($bound:ident)::*, $operator:tt) => {
+        impl_binary_op!(@loop $op, $bound, $operator);
+    };
+    (other: $operand:ident, $($bound:ident)::*, $op:ident) => {
+        impl_binary_op!(@loop $operand, $($bound)::*, $op);
+    };
+    (std $(($op:ident, $bound:ident, $operator:tt)),*) => {
+        $(
+            impl_binary_op!(@loop $op, core::ops::$bound, $operator);
+        )*
+    };
+    (@loop $(($op:ident, $($bound:ident)::*, $operator:tt)),*) => {
         $(
             impl_binary_op!($op, $bound, $operator);
         )*
 
     };
-    ($operator:ident -> $(($op:ident, $bound:ident)),*) => {
-        $(
-            impl_binary_op!(other: $op, $bound, $operator);
-        )*
 
-    };
-    (std: $(($op:ident, $bound:ident, $operator:ident)),*) => {
-        $(
-            impl_binary_op!(@core $op, $bound, $operator);
-        )*
 
-    };
-    ($op:ident, $bound:ident, $operator:tt) => {
-        operator!($op, Binary);
 
-        impl<A, B, C> BinOp<A, B> for $op
+    (@loop $operand:ident, $($bound:ident)::*, $op:ident) => {
+        operator!($operand, Binary, $op);
+
+        impl<A, B, C> BinOp<A, B> for $operand
         where
-            A: core::ops::$bound<B, Output = C>,
+            A: $($bound)::*<B, Output = C>,
         {
             type Output = C;
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                lhs $operator rhs
+                $($bound)::*::$op(lhs, rhs)
             }
         }
     };
-    (@core $op:ident, $bound:ident, $call:ident) => {
-        operator!($op, Binary);
-
-        impl<A, B, C> BinOp<A, B> for $op
-        where
-            A: core::ops::$bound<B, Output = C>,
-        {
-            type Output = C;
-
-            fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                core::ops::$bound::$call(lhs, rhs)
-            }
-        }
-    };
-    (other: $operand:ident, $bound:ident, $op:ident) => {
+    (@loop $operand:ident, $($bound:ident)::*, $op:tt) => {
         operator!($operand, Binary);
 
-        impl_binary_op!(@call $operand, $bound, $op);
-    };
-
-    (@call $operand:ident, $bound:ident, $op:ident) => {
         impl<A, B, C> BinOp<A, B> for $operand
         where
-            A: $bound<B, Output = C>,
-        {
-            type Output = C;
-
-            fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                $bound::$op(lhs, rhs)
-            }
-        }
-    };
-    (@sym $operand:ident, $bound:ident, $op:tt) => {
-        impl<A, B, C> BinOp<A, B> for $operand
-        where
-            A: $bound<B, Output = C>,
+            A: $($bound)::*<B, Output = C>,
         {
             type Output = C;
 
@@ -166,7 +147,58 @@ macro_rules! impl_binary_op {
     };
 }
 
-impl_binary_op!(
+macro_rules! impl_evaluator {
+    (sym $(($operand:ident, $($p:ident)::*, $op:tt)),*) => {
+        $(
+            impl_evaluator!(@loop $operand, $($p)::*, $op);
+        )*
+    };
+    (call $(($operand:ident, $($p:ident)::*, $call:ident)),*) => {
+        $(
+            impl_evaluator!(@loop $operand, $($p)::*, $call);
+        )*
+    };
+    (@loop $operand:ident, $($p:ident)::*,  $call:ident) => {
+        impl<P, A, B, C> Evaluator<P> for $operand
+        where
+            A: $($p)::*<B, Output = C>,
+            P: $crate::ops::Params<Pattern = (A, B)>
+        {
+            type Output = C;
+
+            fn eval(&self, args: P) -> Self::Output {
+                let (lhs, rhs) = args.into_pattern();
+                $($p)::*::$call(lhs, rhs)
+            }
+        }
+    };
+    (@loop $operand:ident, $($p:ident)::*, $op:tt) => {
+        impl<P, A, B, C> Evaluator<P> for $operand
+        where
+            A: $($p)::*<B, Output = C>,
+            P: $crate::ops::Params<Pattern = (A, B)>
+        {
+            type Output = C;
+
+            fn eval(&self, args: P) -> Self::Output {
+                let (lhs, rhs) = args.into_pattern();
+                lhs $op rhs
+            }
+        }
+    };
+}
+
+impl_evaluator!(sym
+    (Addition, core::ops::Add, +),
+    (Division, core::ops::Div, /),
+    (Multiplication, core::ops::Mul, *),
+    (Remainder, core::ops::Rem, %),
+    (Subtraction, core::ops::Sub, -)
+);
+
+impl_evaluator!(call(Power, num::traits::Pow, pow));
+
+impl_binary_op!(std
     (Addition, Add, +),
     (Division, Div, /),
     (Multiplication, Mul, *),
@@ -176,8 +208,8 @@ impl_binary_op!(
 
 impl_binary_op!(other: Power, Pow, pow);
 
-impl_binary_op!(std:
-    (BitAnd, BitAnd, bitand),
+impl_binary_op!(
+    std(BitAnd, BitAnd, bitand),
     (BitOr, BitOr, bitor),
     (BitXor, BitXor, bitxor),
     (Shl, Shl, shl),

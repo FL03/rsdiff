@@ -46,7 +46,7 @@ macro_rules! impl_binary {
     };
 }
 
-pub(crate) struct U(usize);
+struct U(usize);
 
 use core::ops::*;
 impl_binary!(
@@ -82,6 +82,9 @@ macro_rules! operator {
         )*
     };
     ($op:ident, $kind:ident) => {
+        operator!($op, $kind, $op);
+    };
+    ($op:ident, $kind:ident, $name:ident) => {
 
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
@@ -93,7 +96,7 @@ macro_rules! operator {
             }
 
             pub fn name(&self) -> &str {
-                stringify!($op)
+                stringify!($name)
             }
         }
 

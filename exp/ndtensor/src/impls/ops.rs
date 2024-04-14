@@ -26,6 +26,7 @@ macro_rules! unop {
     };
 }
 
+#[allow(unused_macros)]
 macro_rules! binop {
     ($(($method:ident, $op:ident)),*) => {
         $(
@@ -57,7 +58,8 @@ where
         A: Scalar<Real = A>,
     {
         let data = self.data().mapv(|x| x.abs());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Abs).into_owned();
+        let op =
+            TensorExpr::<S, S>::unary(Box::new(self.clone().into_dyn()), UnaryOp::Abs).into_owned();
         TensorBase::from_arr(data).with_op(op)
     }
     unop!(
@@ -88,18 +90,19 @@ macro_rules! stdop {
             D1: Dimension + DimMax<D2>,
             D2: Dimension,
             S1: DataOwned<Elem = A> + DataMut,
-            S2: Data<Elem = B>,
+            S2: DataOwned<Elem = B>,
 
         {
             type Output = TensorBase<S1, <D1 as DimMax<D2>>::Output>;
 
+            #[allow(unused_variables)]
             fn $call(self, rhs: TensorBase<S2, D2>) -> Self::Output {
                 let data = core::ops::$bound::$call(self.data(), rhs.data());
-                // let op = TensorExpr::binary(
-                //     Box::new(self.into_dyn().into_owned()),
-                //     Box::new(rhs.into_dyn().into_owned()),
-                //     BinaryOp::$call(),
-                // );
+                let op = TensorExpr::binary(
+                    Box::new(self.into_dyn().into_owned()),
+                    Box::new(rhs.into_dyn().into_owned()),
+                    BinaryOp::$call(),
+                );
                 // new(data, Some(op))
                 unimplemented!()
             }

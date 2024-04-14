@@ -8,37 +8,41 @@ use ndarray::{DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 
 pub type BoxTensor<S> = Box<TensorBase<S>>;
 
-pub enum TensorExpr<S>
+pub enum TensorExpr<S1, S2 = S1>
 where
-    S: RawData,
+    S1: RawData,
+    S2: RawData,
 {
     Binary {
-        lhs: BoxTensor<S>,
-        rhs: BoxTensor<S>,
+        lhs: BoxTensor<S1>,
+        rhs: BoxTensor<S2>,
         op: BinaryOp,
     },
     Unary {
-        recv: BoxTensor<S>,
+        recv: BoxTensor<S1>,
         op: UnaryOp,
     },
 }
 
-impl<A, S> TensorExpr<S>
+impl<A, B, S1, S2> TensorExpr<S1, S2>
 where
-    S: RawData<Elem = A>,
+    S1: RawData<Elem = A>,
+    S2: RawData<Elem = B>,
 {
-    pub fn binary(lhs: BoxTensor<S>, rhs: BoxTensor<S>, op: BinaryOp) -> Self {
+    pub fn binary(lhs: BoxTensor<S1>, rhs: BoxTensor<S2>, op: BinaryOp) -> Self {
         TensorExpr::Binary { lhs, rhs, op }
     }
 
-    pub fn unary(recv: BoxTensor<S>, op: UnaryOp) -> Self {
+    pub fn unary(recv: BoxTensor<S1>, op: UnaryOp) -> Self {
         TensorExpr::Unary { recv, op }
     }
 
-    pub fn into_owned(self) -> TensorExpr<OwnedRepr<A>>
+    pub fn into_owned(self) -> TensorExpr<OwnedRepr<A>, OwnedRepr<B>>
     where
         A: Clone,
-        S: DataOwned,
+        B: Clone,
+        S1: DataOwned,
+        S2: DataOwned,
     {
         match self {
             TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
@@ -53,9 +57,10 @@ where
         }
     }
 
-    pub fn into_shared(self) -> TensorExpr<OwnedArcRepr<A>>
+    pub fn into_shared(self) -> TensorExpr<OwnedArcRepr<A>, OwnedArcRepr<B>>
     where
-        S: DataOwned,
+        S1: DataOwned,
+        S2: DataOwned,
     {
         match self {
             TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
@@ -71,9 +76,10 @@ where
     }
 }
 
-impl<S> Clone for TensorExpr<S>
+impl<S1, S2> Clone for TensorExpr<S1, S2>
 where
-    S: RawDataClone,
+    S1: RawDataClone,
+    S2: RawDataClone,
 {
     fn clone(&self) -> Self {
         match self {

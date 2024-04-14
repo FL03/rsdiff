@@ -26,7 +26,7 @@ pub trait Params {
 }
 
 macro_rules! args_impl {
-    (nary) => {
+    () => {
         impl Params for () {
             type Pattern = ();
 
@@ -34,37 +34,38 @@ macro_rules! args_impl {
                 ()
             }
         }
+
+        impl Params for [(); 0] {
+            type Pattern = ();
+
+            fn into_pattern(self) -> Self::Pattern {
+                ()
+            }
+        }
+    };
+    ($n:ident) => {
+        impl<$n> Params for ($n,) {
+            type Pattern = ($n,);
+
+            fn into_pattern(self) -> Self::Pattern {
+                self
+            }
+        }
+
+        impl<$n> Params for [$n; 1] where $n: Copy {
+            type Pattern = ($n,);
+
+            fn into_pattern(self) -> Self::Pattern {
+                (self[0],)
+            }
+        }
     };
     ($($n:tt),*) => {
-        impl_args!(@loop $($n),*);
-    };
-    (b $(($($n:tt),*)),*) => {
-        $(
-            impl_args!(@loop $($n),*);
-        )*
+        args_impl!(@loop $($n),*);
     };
     (@loop $(($($n:ident),*)),*) => {
-        impl_args!(@loop $(($($n),*)),*);
-    };
-    (@loop $($n:ident),*) => {
-        impl<$($n),*> Params for ($($n),*) {
-            type Pattern = ($($n),*);
-
-            fn into_pattern(self) -> Self::Pattern {
-                self
-            }
-        }
-    };
-}
-
-macro_rules! impl_args {
-
-    ($($n:ident),*) => {
-        impl_args!(@loop $($n),*);
-    };
-    (alt: $(($($n:ident),*)),*) => {
         $(
-            impl_args!(@loop $($n),*);
+            args_impl!(@loop $($n),*);
         )*
     };
     (@loop $($n:ident),*) => {
@@ -76,30 +77,11 @@ macro_rules! impl_args {
             }
         }
     };
-    (@loop $($n:ident),*) => {
-        $($n),*
-    };
 }
-args_impl!(nary);
-// args_impl!(A);
-args_impl!(A, B);
-impl_args!(A, B, C);
 
-// impl<A> Args for (A,) {
-//     type Pattern = (A,);
-
-//     fn args(self) -> Self::Pattern {
-//         self
-//     }
-// }
-
-// impl<A, B> Args for (A, B) {
-//     type Pattern = (A, B);
-
-//     fn args(self) -> Self::Pattern {
-//         self
-//     }
-// }
+args_impl!();
+args_impl!(A);
+args_impl!((A, B), (A, B, C), (A, B, C, D));
 
 pub struct Adder;
 
@@ -110,6 +92,17 @@ impl Operator for Adder {
 
     fn name(&self) -> &str {
         "adder"
+    }
+}
+
+impl<A, B, C> super::binary::BinOp<A, B> for Adder
+where
+    A: core::ops::Add<B, Output = C>,
+{
+    type Output = C;
+
+    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
+        lhs + rhs
     }
 }
 
@@ -149,6 +142,14 @@ where
     fn eval(&self, args: Args) -> Self::Output;
 }
 
+// impl<Args, C> Evaluator<Args> for Box<dyn Evaluator<Args, Output = C> + Operator> where Args: Params {
+//     type Output = C;
+
+//     fn eval(&self, args: Args) -> Self::Output {
+//         self.as_ref().eval(args)
+//     }
+// }
+
 pub trait Differentiable<Args>
 where
     Self: Evaluator<Args>,
@@ -165,6 +166,12 @@ mod tests {
 
     #[test]
     fn test_args() {
+        let args = ();
+        let pattern = args.into_pattern();
+        assert_eq!(pattern, args);
+        let args = (10f64,);
+        let pattern = args.into_pattern();
+        assert_eq!(pattern, args);
         let args = (0f64, 0f32);
         let pattern = args.into_pattern();
         assert_eq!(pattern, args);

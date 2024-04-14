@@ -27,10 +27,11 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
-    serde(rename_all = "lowercase", untagged),
-    strum(serialize_all = "lowercase")
+    serde(rename_all = "lowercase", untagged)
 )]
-#[repr(u8)]
+#[non_exhaustive]
+#[repr(C)]
+#[strum(serialize_all = "lowercase")]
 pub enum BinaryOp {
     // <Kind = String> {
     #[default]
@@ -38,7 +39,7 @@ pub enum BinaryOp {
     Div(Division),
     Mul(Multiplication),
     Sub(Subtraction),
-    Pow,
+    Pow(Power),
     Rem(Remainder),
     Max,
     Min,
@@ -52,11 +53,11 @@ pub enum BinaryOp {
     },
 }
 
-pub struct CustomBinOp {
+pub struct CustomOp {
     pub id: usize,
 }
 
-impl CustomBinOp {
+impl CustomOp {
     pub fn new(id: usize) -> Self {
         Self { id }
     }
@@ -65,9 +66,7 @@ impl CustomBinOp {
 impl BinaryOp {
     pub fn differentiable(&self) -> bool {
         match self {
-            BinaryOp::Add(_) | BinaryOp::Div(_) | Self::Mul(_) | Self::Sub(_) | BinaryOp::Pow => {
-                true
-            }
+            Self::Add(_) | Self::Div(_) | Self::Mul(_) | Self::Sub(_) | Self::Pow(_) => true,
             _ => false,
         }
     }
@@ -82,6 +81,7 @@ impl BinaryOp {
         (Add, add, Addition::new),
         (Div, div, Division::new),
         (Mul, mul, Multiplication::new),
+        (Pow, pow, Power::new),
         (Rem, rem, Remainder::new),
         (Sub, sub, Subtraction::new)
     );
@@ -90,7 +90,6 @@ impl BinaryOp {
         st Custom, custom, { id: usize }
     );
     variant_constructor!(
-        (Pow, pow),
         (Max, max),
         (Min, min),
         (And, bitand),
@@ -108,7 +107,7 @@ impl Operator for BinaryOp {
             Self::Div(_) => "div",
             Self::Mul(_) => "mul",
             Self::Sub(_) => "sub",
-            Self::Pow => "pow",
+            Self::Pow(_) => "pow",
             Self::Rem(_) => "rem",
             Self::Max => "max",
             Self::Min => "min",

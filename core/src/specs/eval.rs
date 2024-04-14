@@ -18,27 +18,29 @@ pub trait Evaluate: EvaluateMut {
 }
 
 macro_rules! impl_evaluate {
-    ($($ty:ty),*) => {
+
+    ($($s:ty),*) => {
         $(
-            impl_evaluate!(@primitive $ty);
+            impl_evaluate!(@loop $s);
         )*
     };
-    (@primitive $ty:ty) => {
-        impl EvaluateOnce for $ty {
-            type Output = $ty;
+
+    (@loop $s:ty) => {
+        impl EvaluateOnce for $s {
+            type Output = $s;
 
             fn eval_once(self) -> Self::Output {
                 self
             }
         }
 
-        impl EvaluateMut for $ty {
+        impl EvaluateMut for $s {
             fn eval_mut(&mut self) -> Self::Output {
                 *self
             }
         }
 
-        impl Evaluate for $ty {
+        impl Evaluate for $s {
             fn eval(&self) -> Self::Output {
                 *self
             }

@@ -124,7 +124,7 @@ where
                         BinaryOp::Mul(_) => {
                             *entry!(store, lhs) += &grad * *rhs;
                         }
-                        BinaryOp::Pow => {
+                        BinaryOp::Pow(_) => {
                             *entry!(store, lhs) += &grad * *rhs * lhs.pow(*rhs - T::one());
                         }
                         BinaryOp::Sub(_) => {

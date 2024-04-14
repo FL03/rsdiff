@@ -68,10 +68,24 @@ impl Node {
         Node::Placeholder(Placeholder::new(name))
     }
 
+    pub fn id(&self) -> EntryId {
+        match self {
+            Node::Operation(op) => op.id(),
+            Node::Placeholder(ph) => ph.id(),
+        }
+    }
+
     pub fn inputs(&self) -> Option<&[NodeIndex]> {
         match self {
             Node::Operation(op) => Some(op.inputs()),
             _ => None,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Node::Operation(op) => op.name(),
+            Node::Placeholder(ph) => ph.name(),
         }
     }
 

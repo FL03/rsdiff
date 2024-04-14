@@ -7,16 +7,17 @@ use ndarray::{DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 pub use self::expr::*;
 
 pub(crate) mod expr;
-
-pub struct TensorOp<S>(pub(crate) Option<TensorExpr<S>>)
+pub struct TensorOp<S1, S2 = S1>(pub(crate) Option<TensorExpr<S1, S2>>)
 where
-    S: RawData;
+    S1: RawData,
+    S2: RawData;
 
-impl<A, S> TensorOp<S>
+impl<A, B, S1, S2> TensorOp<S1, S2>
 where
-    S: RawData<Elem = A>,
+    S1: RawData<Elem = A>,
+    S2: RawData<Elem = B>,
 {
-    pub fn new(expr: Option<TensorExpr<S>>) -> Self {
+    pub fn new(expr: Option<TensorExpr<S1, S2>>) -> Self {
         TensorOp(expr)
     }
 
@@ -24,25 +25,28 @@ where
         TensorOp(None)
     }
 
-    pub fn as_ref(&self) -> Option<&TensorExpr<S>> {
+    pub fn as_ref(&self) -> Option<&TensorExpr<S1, S2>> {
         self.0.as_ref()
     }
 
-    pub fn as_mut(&mut self) -> Option<&mut TensorExpr<S>> {
+    pub fn as_mut(&mut self) -> Option<&mut TensorExpr<S1, S2>> {
         self.0.as_mut()
     }
 
-    pub fn into_owned(self) -> TensorOp<OwnedRepr<A>>
+    pub fn into_owned(self) -> TensorOp<OwnedRepr<A>, OwnedRepr<B>>
     where
         A: Clone,
-        S: DataOwned,
+        B: Clone,
+        S1: DataOwned,
+        S2: DataOwned,
     {
         TensorOp(self.0.map(|expr| expr.into_owned()))
     }
 
-    pub fn into_shared(self) -> TensorOp<OwnedArcRepr<A>>
+    pub fn into_shared(self) -> TensorOp<OwnedArcRepr<A>, OwnedArcRepr<B>>
     where
-        S: DataOwned,
+        S1: DataOwned,
+        S2: DataOwned,
     {
         TensorOp(self.0.map(|expr| expr.into_shared()))
     }
@@ -56,38 +60,42 @@ where
     }
 }
 
-impl<S> Clone for TensorOp<S>
+impl<S1, S2> Clone for TensorOp<S1, S2>
 where
-    S: RawDataClone,
+    S1: RawDataClone,
+    S2: RawDataClone,
 {
     fn clone(&self) -> Self {
         TensorOp(self.0.clone())
     }
 }
 
-impl<S> From<TensorOp<S>> for Option<TensorExpr<S>>
+impl<S1, S2> From<TensorOp<S1, S2>> for Option<TensorExpr<S1, S2>>
 where
-    S: RawData,
+    S1: RawData,
+    S2: RawData,
 {
-    fn from(op: TensorOp<S>) -> Self {
+    fn from(op: TensorOp<S1, S2>) -> Self {
         op.0
     }
 }
 
-impl<S> From<Option<TensorExpr<S>>> for TensorOp<S>
+impl<S1, S2> From<Option<TensorExpr<S1, S2>>> for TensorOp<S1, S2>
 where
-    S: RawData,
+    S1: RawData,
+    S2: RawData,
 {
-    fn from(expr: Option<TensorExpr<S>>) -> Self {
+    fn from(expr: Option<TensorExpr<S1, S2>>) -> Self {
         TensorOp(expr)
     }
 }
 
-impl<S> From<TensorExpr<S>> for TensorOp<S>
+impl<S1, S2> From<TensorExpr<S1, S2>> for TensorOp<S1, S2>
 where
-    S: RawData,
+    S1: RawData,
+    S2: RawData,
 {
-    fn from(expr: TensorExpr<S>) -> Self {
+    fn from(expr: TensorExpr<S1, S2>) -> Self {
         TensorOp(Some(expr))
     }
 }

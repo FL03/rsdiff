@@ -2,14 +2,14 @@
     Appellation: error <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
+
+pub type GraphResult<T = ()> = std::result::Result<T, GraphError>;
 
 #[derive(Clone, Debug, Display, EnumCount, EnumIs, VariantNames)]
 #[cfg_attr(
     feature = "serde",
-    derive(Deserialize, Serialize),
+    derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "snake_case", untagged)
 )]
 #[repr(usize)]
@@ -39,7 +39,7 @@ impl From<String> for GraphError {
 
 impl<Idx> From<petgraph::algo::Cycle<Idx>> for GraphError
 where
-    Idx: Copy + std::fmt::Debug,
+    Idx: Copy + core::fmt::Debug,
 {
     fn from(error: petgraph::algo::Cycle<Idx>) -> Self {
         GraphError::Cycle(CycleError::Cycle {
@@ -57,7 +57,7 @@ impl From<petgraph::algo::NegativeCycle> for GraphError {
 #[derive(Clone, Debug, Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames)]
 #[cfg_attr(
     feature = "serde",
-    derive(Deserialize, Serialize),
+    derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "snake_case", untagged)
 )]
 #[repr(usize)]

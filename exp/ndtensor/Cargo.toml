@@ -1,14 +1,14 @@
 [package]
-authors.workspace = true
-categories.workspace = true
+authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
+categories = ["data-structures", "math", "science"]
 description = "ndtensor is an n-dimensional tensor library for Rust."
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
+edition = "2021"
+homepage = "https://github.com/FL03/ndtensor/wiki"
+keywords = ["tensor"]
+license = "Apache-2.0"
 name = "ndtensor"
-repository.workspace = true
-readme.workspace = true
+repository = "https://github.com/FL03/ndtensor"
+readme = "README.md"
 version = "0.1.0"
 
 [features]
@@ -20,6 +20,7 @@ default = [
 approx = [
     "ndarray/approx"
 ]
+
 std = []
 
 serde = [

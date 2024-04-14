@@ -101,7 +101,7 @@ impl<T> TensorBase<T> {
     {
         let shape = self.shape();
         let store = self.data().iter().copied().map(|a| a.pow(exp)).collect();
-        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::Pow);
+        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::pow());
         from_vec_with_op(false, op, shape, store)
     }
 
@@ -111,7 +111,7 @@ impl<T> TensorBase<T> {
     {
         let shape = self.shape();
         let store = self.data().iter().copied().map(|a| a.powf(exp)).collect();
-        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::Pow);
+        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::pow());
         from_vec_with_op(false, op, shape, store)
     }
 
@@ -121,7 +121,7 @@ impl<T> TensorBase<T> {
     {
         let shape = self.shape();
         let store = self.data().iter().copied().map(|a| a.powi(exp)).collect();
-        let op = TensorExpr::binary_scalar(self.clone(), T::from(exp).unwrap(), BinaryOp::Pow);
+        let op = TensorExpr::binary_scalar(self.clone(), T::from(exp).unwrap(), BinaryOp::pow());
         from_vec_with_op(false, op, shape, store)
     }
 }
@@ -151,7 +151,7 @@ where
     fn pow(self, exp: T) -> Self::Output {
         let shape = self.shape().clone();
         let store = self.data().iter().map(|a| a.pow(exp)).collect();
-        let op = TensorExpr::binary_scalar(self, exp, BinaryOp::Pow);
+        let op = TensorExpr::binary_scalar(self, exp, BinaryOp::pow());
         from_vec_with_op(false, op, shape, store)
     }
 }
@@ -165,7 +165,7 @@ where
     fn pow(self, exp: T) -> Self::Output {
         let shape = self.shape().clone();
         let store = self.data().iter().map(|a| a.pow(exp)).collect();
-        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::Pow);
+        let op = TensorExpr::binary_scalar(self.clone(), exp, BinaryOp::pow());
         from_vec_with_op(false, op, shape, store)
     }
 }

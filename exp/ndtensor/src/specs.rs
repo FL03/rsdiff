@@ -10,10 +10,11 @@ where
     D: Dimension,
     S: RawData,
 {
-    fn container(&self) -> ArrayBase<S, D>;
-    fn shape(&self) -> Vec<usize>;
+    fn data(&self) -> ArrayBase<S, D>;
+
+    fn dim(&self) -> D;
 
     fn rank(&self) -> usize {
-        self.shape().len()
+        D::NDIM.unwrap_or(self.dim().slice().len())
     }
 }

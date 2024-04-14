@@ -2,7 +2,7 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinaryOp, Evaluator, Operator, Params, UnaryOp};
+use super::{BinaryOp, Operator, Params, UnaryOp};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
@@ -23,7 +23,8 @@ use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString,
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize,),
-    serde(rename_all = "lowercase", untagged)
+    serde(rename_all = "lowercase", untagged),
+    strum_discriminants(derive(serde::Deserialize, serde::Serialize))
 )]
 #[strum(serialize_all = "lowercase")]
 #[strum_discriminants(

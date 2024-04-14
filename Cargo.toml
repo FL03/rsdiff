@@ -33,6 +33,7 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
+paste = "1"
 strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
 

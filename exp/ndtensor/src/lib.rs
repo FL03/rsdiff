@@ -18,6 +18,10 @@ pub(crate) mod utils;
 
 pub mod ops;
 
+pub(crate) mod impls {
+    pub(crate) mod ops;
+}
+
 use ndarray::{CowRepr, IxDyn, OwnedArcRepr, OwnedRepr, ViewRepr};
 
 pub type ArcTensor<S, D = IxDyn> = TensorBase<OwnedArcRepr<S>, D>;
@@ -36,6 +40,7 @@ pub type NdContainer<S> = ndarray::ArrayBase<S, ndarray::IxDyn>;
 
 pub mod prelude {
     pub use crate::errors::{TensorError, TensorResult};
+    pub use crate::ops::{TensorExpr, TensorOp};
     pub use crate::specs::NdTensor;
     pub use crate::tensor::TensorBase;
     pub use crate::utils::*;

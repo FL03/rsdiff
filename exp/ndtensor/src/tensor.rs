@@ -2,22 +2,21 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
-use crate::ops::TensorExpr;
-use crate::prelude::{Scalar, TensorId, TensorResult};
-use acme::prelude::UnaryOp;
+use crate::prelude::{TensorExpr, TensorId, TensorOp, TensorResult};
 use core::fmt;
-use ndarray::{ArrayBase, Data, DataOwned, Dimension, IxDyn, RawData};
+use ndarray::iter::{Iter, IterMut};
+use ndarray::{ArrayBase, Dimension, IxDyn};
+use ndarray::{Data, DataOwned, DataShared, OwnedArcRepr, OwnedRepr, RawData, RawDataClone};
 
-pub(crate) fn new<S, D>(data: ArrayBase<S, D>, op: Option<TensorExpr<S>>) -> TensorBase<S, D>
+pub(crate) fn new<S1, D>(data: ArrayBase<S1, D>, op: Option<TensorExpr<S1>>) -> TensorBase<S1, D>
 where
     D: Dimension,
-    S: RawData,
+    S1: RawData,
 {
     TensorBase {
         id: TensorId::new(),
         data,
-        op,
+        op: TensorOp::new(op),
     }
 }
 
@@ -35,9 +34,9 @@ where
     D: Dimension,
     S: RawData,
 {
-    id: TensorId,
-    data: ArrayBase<S, D>,
-    op: Option<TensorExpr<S>>,
+    pub(crate) id: TensorId,
+    pub(crate) data: ArrayBase<S, D>,
+    pub(crate) op: TensorOp<S>,
 }
 
 impl<A, S, D> TensorBase<S, D>
@@ -65,7 +64,11 @@ where
         Ok(tensor)
     }
 
-    pub fn data(&self) -> &ArrayBase<S, D> {
+    pub fn boxed(self) -> Box<TensorBase<S, D>> {
+        Box::new(self)
+    }
+
+    pub const fn data(&self) -> &ArrayBase<S, D> {
         &self.data
     }
 
@@ -74,20 +77,58 @@ where
         self.id
     }
 
-    pub fn into_dyn(self) -> TensorBase<S, IxDyn> {
-        new(self.data.into_dyn(), self.op)
+    pub fn into_dimensionality<D2>(self) -> TensorResult<TensorBase<S, D2>>
+    where
+        D2: Dimension,
+    {
+        let data = self.data.into_dimensionality::<D2>()?;
+        Ok(TensorBase {
+            id: self.id,
+            data,
+            op: self.op,
+        })
     }
 
-    pub fn iter(&self) -> ndarray::iter::Iter<'_, A, D>
+    pub fn into_dyn(self) -> TensorBase<S, IxDyn> {
+        new(self.data.into_dyn(), self.op.0)
+    }
+
+    pub fn into_owned(self) -> TensorBase<OwnedRepr<A>, D>
+    where
+        A: Clone,
+        S: DataOwned,
+    {
+        new(self.data.into_owned(), self.op.into_owned().0)
+    }
+
+    pub fn into_shared(self) -> TensorBase<OwnedArcRepr<A>, D>
+    where
+        S: DataOwned,
+    {
+        new(self.data.into_shared(), self.op.into_shared().0)
+    }
+
+    pub fn iter(&self) -> Iter<'_, A, D>
     where
         S: Data,
     {
         self.data.iter()
     }
 
+    pub fn iter_mut(&mut self) -> IterMut<'_, A, D>
+    where
+        S: ndarray::DataMut,
+    {
+        self.data.iter_mut()
+    }
     /// Gets an immutable reference to the operations of the tensor.
     pub fn op(&self) -> Option<&TensorExpr<S>> {
         self.op.as_ref()
+    }
+
+    pub fn with_op(mut self, op: impl Into<TensorOp<S>>) -> Self {
+        self.op = op.into();
+        self
     }
 }
 
@@ -101,84 +142,12 @@ where
     {
         new(data.into_dyn(), None)
     }
-
-    pub fn to_dimensionality<D2>(self) -> TensorResult<TensorBase<S, D2>>
-    where
-        D2: Dimension,
-    {
-        let data = self.data.into_dimensionality::<D2>()?;
-        Ok(TensorBase {
-            id: self.id,
-            data,
-            op: self.op,
-        })
-    }
-}
-
-impl<A, D> TensorBase<ndarray::OwnedRepr<A>, D>
-where
-    D: Dimension,
-    A: Scalar,
-{
-    pub fn cos(&self) -> Self {
-        let data = self.data.mapv(|x| x.cos());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Cos);
-        new(data, Some(op))
-    }
-
-    pub fn cosh(&self) -> Self {
-        let data = self.data.mapv(|x| x.cosh());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Cosh);
-        new(data, Some(op))
-    }
-
-    pub fn exp(&self) -> Self {
-        let data = self.data.mapv(|x| x.exp());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Exp);
-        new(data, Some(op))
-    }
-
-    pub fn ln(&self) -> Self {
-        let data = self.data.mapv(|x| x.ln());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Ln);
-        new(data, Some(op))
-    }
-
-    pub fn sin(&self) -> Self {
-        let data = self.data.mapv(|x| x.sin());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Sin);
-        new(data, Some(op))
-    }
-
-    pub fn sqr(&self) -> Self {
-        let data = self.data.mapv(|x| x.sqr());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Square);
-        new(data, Some(op))
-    }
-
-    pub fn sqrt(&self) -> Self {
-        let data = self.data.mapv(|x| x.sqrt());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Sqrt);
-        new(data, Some(op))
-    }
-
-    pub fn tan(&self) -> Self {
-        let data = self.data.mapv(|x| x.tan());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Tan);
-        new(data, Some(op))
-    }
-
-    pub fn tanh(&self) -> Self {
-        let data = self.data.mapv(|x| x.tanh());
-        let op = TensorExpr::unary(Box::new(self.clone().into_dyn()), UnaryOp::Tanh);
-        new(data, Some(op))
-    }
 }
 
 impl<S, D> Clone for TensorBase<S, D>
 where
     D: Dimension,
-    S: ndarray::RawDataClone,
+    S: RawDataClone,
 {
     fn clone(&self) -> Self {
         let data = self.data.clone();
@@ -199,5 +168,16 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self.data)
+    }
+}
+
+impl<S, D> fmt::Display for TensorBase<S, D>
+where
+    D: Dimension,
+    S: Data,
+    S::Elem: fmt::Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.data)
     }
 }

@@ -11,7 +11,6 @@ use ndarray::*;
 pub type TOp<A, B> = TensorOp<OwnedArcRepr<A>, OwnedArcRepr<B>>;
 
 pub trait NdTensorOp {
-
     fn is_none(&self) -> bool;
     fn is_some(&self) -> bool;
 }
@@ -68,6 +67,38 @@ where
         self.0.is_some()
     }
 
+    pub fn raw_view(&self) -> TensorOp<RawViewRepr<*const A>, RawViewRepr<*const B>> {
+        TensorOp(self.0.as_ref().map(|expr| expr.raw_view()))
+    }
+
+    pub fn raw_view_mut(&mut self) -> TensorOp<RawViewRepr<*mut A>, RawViewRepr<*mut B>>
+    where
+        S1: RawDataMut,
+        S2: RawDataMut,
+    {
+        TensorOp(self.0.as_mut().map(|expr| expr.raw_view_mut()))
+    }
+
+    pub fn to_owned(&self) -> TensorOp<OwnedRepr<A>, OwnedRepr<B>>
+    where
+        A: Clone,
+        B: Clone,
+        S1: Data,
+        S2: Data,
+    {
+        TensorOp(self.0.as_ref().map(|expr| expr.to_owned()))
+    }
+
+    pub fn to_shared(&self) -> TensorOp<OwnedArcRepr<A>, OwnedArcRepr<B>>
+    where
+        A: Clone,
+        B: Clone,
+        S1: Data,
+        S2: Data,
+    {
+        TensorOp(self.0.as_ref().map(|expr| expr.to_shared()))
+    }
+
     pub fn view(&self) -> TensorOp<ViewRepr<&'_ A>, ViewRepr<&'_ B>>
     where
         S1: Data,
@@ -75,13 +106,23 @@ where
     {
         TensorOp(self.0.as_ref().map(|expr| expr.view()))
     }
-}
 
+    pub fn view_mut(&mut self) -> TensorOp<ViewRepr<&'_ mut A>, ViewRepr<&'_ mut B>>
+    where
+        S1: DataMut,
+        S2: DataMut,
+    {
+        TensorOp(self.0.as_mut().map(|expr| expr.view_mut()))
+    }
+}
 
 impl<A, B> TensorOp<RawViewRepr<*const A>, RawViewRepr<*const B>> {
     pub unsafe fn cast<C>(self) -> TensorOp<RawViewRepr<*const C>, RawViewRepr<*const C>> where {
         TensorOp(self.0.map(|expr| expr.cast()))
-    
+    }
+
+    pub unsafe fn deref_into_view<'a>(self) -> TensorOp<ViewRepr<&'a A>, ViewRepr<&'a B>> where {
+        TensorOp(self.0.map(|expr| expr.deref_into_view()))
     }
 }
 impl<S1, S2> Clone for TensorOp<S1, S2>

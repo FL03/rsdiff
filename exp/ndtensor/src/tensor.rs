@@ -13,7 +13,6 @@ use ndarray::*;
 #[cfg(feature = "std")]
 use std::vec;
 
-
 pub(crate) fn new<S, D>(
     data: ArrayBase<S, D>,
     op: Option<TensorExpr<S>>,
@@ -87,7 +86,12 @@ where
     }
 
     pub fn into_dyn(self) -> TensorBase<S, IxDyn> {
-        new!(self.data.into_dyn(), self.op.0)
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.into_dyn(),
+            op: self.op,
+        }
     }
 
     pub fn into_owned(self) -> TensorBase<OwnedRepr<A>, D>
@@ -95,7 +99,12 @@ where
         A: Clone,
         S: DataOwned,
     {
-        new!(self.data.into_owned(), self.op.into_owned().0)
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.into_owned(),
+            op: self.op.into_owned(),
+        }
     }
 
     pub fn into_shape<D2>(self, shape: D2) -> Result<TensorBase<S, D2::Dim>, ShapeError>
@@ -115,7 +124,12 @@ where
     where
         S: DataOwned,
     {
-        new!(self.data.into_shared(), self.op.into_shared().0)
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.into_shared(),
+            op: self.op.into_shared(),
+        }
     }
 
     pub fn is_variable(&self) -> bool {
@@ -148,6 +162,27 @@ where
         self.data().raw_dim()
     }
 
+    pub fn raw_view(&self) -> TensorBase<RawViewRepr<*const A>, D> {
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.raw_view(),
+            op: self.op.raw_view(),
+        }
+    }
+
+    pub fn raw_view_mut(&mut self) -> TensorBase<RawViewRepr<*mut A>, D>
+    where
+        S: RawDataMut,
+    {
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.raw_view_mut(),
+            op: self.op.raw_view_mut(),
+        }
+    }
+
     pub fn shape(&self) -> &[usize] {
         self.data().shape()
     }
@@ -159,16 +194,27 @@ where
     pub fn to_owned(&self) -> crate::Tensor<A, D>
     where
         A: Clone,
-        S: DataOwned + RawDataClone,
+        S: Data,
     {
-        self.clone().into_owned()
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.to_owned(),
+            op: self.op.to_owned(),
+        }
     }
 
     pub fn to_shared(&self) -> crate::ArcTensor<A, D>
     where
-        S: DataOwned + RawDataClone,
+        A: Clone,
+        S: Data,
     {
-        self.clone().into_shared()
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.to_shared(),
+            op: self.op.to_shared(),
+        }
     }
 
     pub fn view(&self) -> crate::TensorView<'_, A, D>
@@ -180,6 +226,18 @@ where
             ctx: self.ctx,
             data: self.data.view(),
             op: self.op.view(),
+        }
+    }
+
+    pub fn view_mut(&mut self) -> crate::TensorViewMut<'_, A, D>
+    where
+        S: DataMut,
+    {
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.view_mut(),
+            op: self.op.view_mut(),
         }
     }
 
@@ -228,7 +286,10 @@ where
     }
 }
 
-impl<A, D> TensorBase<RawViewRepr<*const A>, D> where D: Dimension {
+impl<A, D> TensorBase<RawViewRepr<*const A>, D>
+where
+    D: Dimension,
+{
     pub unsafe fn cast<B>(self) -> crate::RawTensorView<B, D> where {
         TensorBase {
             id: self.id,
@@ -237,32 +298,18 @@ impl<A, D> TensorBase<RawViewRepr<*const A>, D> where D: Dimension {
             op: self.op.cast(),
         }
     }
-}
 
-impl<A, S> TensorBase<S, ndarray::Ix0>
-where
-    S: RawData<Elem = A>,
-{
-    pub fn from_scalar(scalar: A) -> Self
-    where
-        A: Clone,
-        S: DataOwned,
-    {
-        new!(ArrayBase::from_elem((), scalar))
+    pub unsafe fn deref_into_view<'a>(self) -> crate::TensorView<'a, A, D> {
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data.deref_into_view(),
+            op: self.op.deref_into_view(),
+        }
     }
 }
 
-impl<A, S> TensorBase<S>
-where
-    S: RawData<Elem = A>,
-{
-    pub fn ndtensor<D>(data: ArrayBase<S, D>) -> Self
-    where
-        D: Dimension,
-    {
-        new!(data.into_dyn(), None)
-    }
-}
+
 
 impl<S, D> Borrow<ArrayBase<S, D>> for TensorBase<S, D>
 where

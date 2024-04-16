@@ -29,6 +29,15 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 #[repr(u8)]
 pub enum UnaryOp {
     Abs,
+    Acos,
+    Acosh,
+    Asin,
+    Asinh,
+    Atan,
+    Atanh,
+    #[cfg_attr(feature = "serde", serde(alias = "cube_root"))]
+    Cbrt,
+    Ceil,
     Cos,
     Cosh,
     Exp,
@@ -44,6 +53,7 @@ pub enum UnaryOp {
     Sinh,
     #[cfg_attr(feature = "serde", serde(alias = "square_root"))]
     Sqrt,
+    #[cfg_attr(feature = "serde", serde(alias = "sqr"))]
     Square,
     Tan,
     Tanh,
@@ -59,6 +69,14 @@ impl UnaryOp {
 
     variant_constructor!(
         (Abs, abs),
+        (Acos, acos),
+        (Acosh, acosh),
+        (Asin, asin),
+        (Asinh, asinh),
+        (Atan, atan),
+        (Atanh, atanh),
+        (Cbrt, cbrt),
+        (Ceil, ceil),
         (Cos, cos),
         (Cosh, cosh),
         (Exp, exp),
@@ -81,6 +99,14 @@ impl Operator for UnaryOp {
     fn name(&self) -> &str {
         match self {
             UnaryOp::Abs => "abs",
+            UnaryOp::Acos => "acos",
+            UnaryOp::Acosh => "acosh",
+            UnaryOp::Asin => "asin",
+            UnaryOp::Asinh => "asinh",
+            UnaryOp::Atan => "atan",
+            UnaryOp::Atanh => "atanh",
+            UnaryOp::Cbrt => "cbrt",
+            UnaryOp::Ceil => "ceil",
             UnaryOp::Cos => "cos",
             UnaryOp::Cosh => "cosh",
             UnaryOp::Exp => "exp",

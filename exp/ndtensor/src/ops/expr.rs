@@ -76,19 +76,77 @@ where
         }
     }
 
-    // pub fn reborrow<'b>(&'b self) -> TensorExpr<ViewRepr<&'b A>, ViewRepr<&'b B>> {
-    //     match self {
-    //         TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-    //             lhs: lhs.reborrow().boxed(),
-    //             rhs: rhs.reborrow().boxed(),
-    //             op: *op,
-    //         },
-    //         TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-    //             recv: recv.reborrow().boxed(),
-    //             op: *op,
-    //         },
-    //     }
-    // }
+    pub fn raw_view(&self) -> TensorExpr<RawViewRepr<*const A>, RawViewRepr<*const B>> {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.raw_view().boxed(),
+                rhs: rhs.raw_view().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.raw_view().boxed(),
+                op: *op,
+            },
+        }
+    }
+
+    pub fn raw_view_mut(&mut self) -> TensorExpr<RawViewRepr<*mut A>, RawViewRepr<*mut B>>
+    where
+        S1: RawDataMut,
+        S2: RawDataMut,
+    {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.raw_view_mut().boxed(),
+                rhs: rhs.raw_view_mut().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.raw_view_mut().boxed(),
+                op: *op,
+            },
+        }
+    }
+
+    pub fn to_owned(&self) -> TensorExpr<OwnedRepr<A>, OwnedRepr<B>>
+    where
+        A: Clone,
+        B: Clone,
+        S1: Data,
+        S2: Data,
+    {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.as_ref().to_owned().boxed(),
+                rhs: rhs.as_ref().to_owned().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.as_ref().to_owned().boxed(),
+                op: *op,
+            },
+        }
+    }
+
+    pub fn to_shared(&self) -> TensorExpr<OwnedArcRepr<A>, OwnedArcRepr<B>>
+    where
+        A: Clone,
+        B: Clone,
+        S1: Data,
+        S2: Data,
+    {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.to_shared().boxed(),
+                rhs: rhs.to_shared().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.to_shared().boxed(),
+                op: *op,
+            },
+        }
+    }
 
     pub fn view(&self) -> TensorExpr<ViewRepr<&'_ A>, ViewRepr<&'_ B>>
     where
@@ -103,6 +161,24 @@ where
             },
             TensorExpr::Unary { recv, op } => TensorExpr::Unary {
                 recv: recv.view().boxed(),
+                op: *op,
+            },
+        }
+    }
+
+    pub fn view_mut(&mut self) -> TensorExpr<ViewRepr<&'_ mut A>, ViewRepr<&'_ mut B>>
+    where
+        S1: DataMut,
+        S2: DataMut,
+    {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.view_mut().boxed(),
+                rhs: rhs.view_mut().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.view_mut().boxed(),
                 op: *op,
             },
         }
@@ -124,7 +200,20 @@ impl<A, B> TensorExpr<RawViewRepr<*const A>, RawViewRepr<*const B>> {
                 op,
             },
         }
-    
+    }
+
+    pub unsafe fn deref_into_view<'a>(self) -> TensorExpr<ViewRepr<&'a A>, ViewRepr<&'a B>> where {
+        match self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.deref_into_view().boxed(),
+                rhs: rhs.deref_into_view().boxed(),
+                op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.deref_into_view().boxed(),
+                op,
+            },
+        }
     }
 }
 

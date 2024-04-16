@@ -5,7 +5,7 @@
 use core::iter::{Product, Sum};
 use core::ops::Neg;
 use num::complex::Complex;
-use num::traits::{Float, FromPrimitive, Inv, NumAssign, NumCast, NumOps, Pow};
+use num::traits::{Float, FromPrimitive, Inv, NumAssign, NumCast, NumOps, Pow, ToPrimitive};
 
 pub trait Scalar:
     Copy
@@ -19,6 +19,7 @@ pub trait Scalar:
     + Pow<Self, Output = Self>
     + Product
     + Sum
+    + ToPrimitive
     + 'static
 {
     type Complex: Scalar<Complex = Self::Complex, Real = Self::Real>
@@ -29,6 +30,8 @@ pub trait Scalar:
     fn from_real(re: Self::Real) -> Self;
 
     fn abs(self) -> Self::Real;
+
+    fn acos(self) -> Self;
 
     fn add_complex(&self, other: Self::Complex) -> Self::Complex {
         self.as_complex() + other
@@ -114,6 +117,10 @@ where
         Complex::norm(self)
     }
 
+    fn acos(self) -> Self {
+        Complex::acos(self)
+    }
+
     fn as_complex(&self) -> Self::Complex {
         *self
     }
@@ -195,6 +202,10 @@ macro_rules! impl_scalar {
 
             fn abs(self) -> Self::Real {
                 <$re>::abs(self)
+            }
+
+            fn acos(self) -> Self {
+                <$re>::acos(self)
             }
 
             fn as_complex(&self) -> Self::Complex {

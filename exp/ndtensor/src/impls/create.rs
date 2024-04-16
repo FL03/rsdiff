@@ -54,6 +54,31 @@ macro_rules! map_method {
     };
 }
 
+impl<A, S> TensorBase<S, ndarray::Ix0>
+where
+    S: RawData<Elem = A>,
+{
+    pub fn from_scalar(scalar: A) -> Self
+    where
+        A: Clone,
+        S: DataOwned,
+    {
+        new!(ArrayBase::from_elem((), scalar))
+    }
+}
+
+impl<A, S> TensorBase<S>
+where
+    S: RawData<Elem = A>,
+{
+    pub fn ndtensor<D>(data: ArrayBase<S, D>) -> TensorBase<S, ndarray::IxDyn>
+    where
+        D: Dimension,
+    {
+        new!(data.into_dyn(), None)
+    }
+}
+
 impl<A, S, D> TensorBase<S, D>
 where
     D: Dimension,
@@ -114,7 +139,7 @@ where
     {
         let dim = shape.into_dimension();
         let n = dim.ndim();
-        Self::linspace(A::zero(), A::from(n).unwrap(), n - 1).into_shape(dim)
+        TensorBase::<S, ndarray::Ix1>::linspace(A::zero(), A::from(n).unwrap() - A::one(), n).into_shape(dim)
     }
 
     pub fn ones<Sh>(shape: Sh) -> Self

@@ -45,8 +45,6 @@ pub type CowTensor<'a, S, D = IxDyn> = TensorBase<CowRepr<'a, S>, D>;
 
 pub type RawTensorView<S, D = IxDyn> = TensorBase<ndarray::RawViewRepr<*const S>, D>;
 
-
-
 pub type Tensor<S, D = IxDyn> = TensorBase<OwnedRepr<S>, D>;
 
 pub type TensorView<'a, S, D = IxDyn> = TensorBase<ViewRepr<&'a S>, D>;
@@ -60,7 +58,7 @@ pub type NdContainer<S> = ndarray::ArrayBase<S, ndarray::IxDyn>;
 pub mod prelude {
     pub use crate::errors::{TensorError, TensorResult};
     pub use crate::ops::{TensorExpr, TensorOp};
-    pub use crate::specs::NdTensor;
+    pub use crate::specs::*;
     pub use crate::tensor::TensorBase;
     pub use crate::utils::*;
     pub use crate::{

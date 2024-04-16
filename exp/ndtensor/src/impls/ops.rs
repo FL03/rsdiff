@@ -7,41 +7,41 @@ use crate::tensor::{new, TensorBase};
 use acme::prelude::{BinaryOp, Scalar, UnaryOp};
 use ndarray::DimMax;
 use ndarray::{Data, DataMut, DataOwned, OwnedRepr, RawDataClone};
+use num::complex::ComplexFloat;
 
 macro_rules! unop {
-    ($(($method:ident, $op:ident)),*) => {
+    ($($method:ident),*) => {
         $(
-            unop!($method, $op);
+            unop!(@loop $method);
         )*
     };
-    ($method:ident, $op:ident) => {
+    (@loop $method:ident) => {
         pub fn $method(&self) -> crate::Tensor<A, D> {
             let data = self.data().mapv(|x| x.$method());
             let op = TensorExpr::Unary {
                 recv: Box::new(self.clone().into_dyn().into_owned()),
-                op: UnaryOp::$op,
+                op: UnaryOp::$method(),
             };
             new!(data, Some(op))
         }
     };
 }
 
-#[allow(unused_macros)]
 macro_rules! binop {
-    ($(($method:ident, $op:ident)),*) => {
+    ($(($method:ident, $op:tt)),*) => {
         $(
-            stdop!($method, $op);
+            binop!(@loop $method, $op);
         )*
     };
-    ($method:ident, $op:ident) => {
-        pub fn $method(&self, other: &Self) -> Self {
-            let data = self.data() + other.data();
+    (@loop $method:ident, $op:tt) => {
+        pub fn $method(&self, other: &Self) -> crate::Tensor<A, D> {
+            let data = self.data() $op other.data();
             let op = TensorExpr::binary(
-                Box::new(self.clone().into_dyn()),
-                Box::new(other.clone().into_dyn()),
-                BinaryOp::$op,
+                self.clone().into_dyn().boxed(),
+                other.clone().into_dyn().boxed(),
+                BinaryOp::$method(),
             );
-            new(data, Some(op))
+            new!(data, Some(op.into_owned()))
         }
     };
 
@@ -49,31 +49,26 @@ macro_rules! binop {
 
 impl<A, S, D> TensorBase<S, D>
 where
-    A: Scalar,
+    A: ComplexFloat,
     D: Dimension,
     S: Data<Elem = A> + DataOwned + RawDataClone,
 {
-    pub fn abs(&self) -> crate::Tensor<<A as Scalar>::Real, D>
+    pub fn abs(&self) -> crate::Tensor<<A as ComplexFloat>::Real, D>
     where
-        A: Scalar<Real = A>,
+        A: ComplexFloat<Real = A>,
     {
         let data = self.data().mapv(|x| x.abs());
-        let op =
-            TensorExpr::<S, S>::unary(Box::new(self.clone().into_dyn()), UnaryOp::Abs).into_owned();
-        TensorBase::from_arr(data).with_op(op)
+        let op = TensorExpr::<S, S>::unary(self.clone().into_dyn().boxed(), UnaryOp::Abs);
+        TensorBase::from_arr(data).with_op(op.into_owned())
     }
-    unop!(
-        (cos, Cos),
-        (cosh, Cosh),
-        (exp, Exp),
-        (ln, Ln),
-        (sin, Sin),
-        (sinh, Sinh),
-        (sqr, Square),
-        (sqrt, Sqrt),
-        (tan, Tan),
-        (tanh, Tanh)
+    binop!(
+        (add, +),
+        (div, /),
+        (mul, *),
+        (rem, %),
+        (sub, -)
     );
+    unop!(acos, acosh, asin, asinh, atan, cos, cosh, exp, ln, neg, sin, sinh, sqrt, tan, tanh);
 }
 
 macro_rules! stdop {
@@ -95,16 +90,15 @@ macro_rules! stdop {
         {
             type Output = TensorBase<OwnedRepr<A>, <D1 as DimMax<D2>>::Output>;
 
-            #[allow(unused_variables)]
             fn $call(self, rhs: TensorBase<S2, D2>) -> Self::Output {
                 let data = core::ops::$bound::$call(self.data(), rhs.data());
-                let op = TensorExpr::binary(
-                    Box::new(self.into_dyn().into_owned()),
-                    Box::new(rhs.into_dyn().into_owned()),
+                let lhs = self.into_dyn().into_owned();
+                let op = unsafe { TensorExpr::binary(
+                    Box::new(lhs),
+                    Box::new(rhs.into_dyn().raw_view().cast::<A>().deref_into_view()),
                     BinaryOp::$call(),
-                );
-                // new!(data, Some(op.cast::<A>()))
-                unimplemented!()
+                )};
+                new!(data, Some(op.to_owned()))
             }
         }
     };
@@ -112,6 +106,10 @@ macro_rules! stdop {
 }
 
 stdop!(
-    (Add, add, +)
+    (Add, add, +),
+    (Div, div, /),
+    (Mul, mul, *),
+    (Rem, rem, %),
+    (Sub, sub, -)
 
 );

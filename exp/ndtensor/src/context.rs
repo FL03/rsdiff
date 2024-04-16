@@ -15,7 +15,10 @@ pub struct Context {
 
 impl Context {
     pub fn new(kind: bool, rank: usize) -> Self {
-        Self { kind: TensorKind::new(kind), rank  }
+        Self {
+            kind: TensorKind::new(kind),
+            rank,
+        }
     }
 
     pub fn variable(mut self) -> Self {
@@ -23,11 +26,18 @@ impl Context {
         self
     }
 
-    pub fn from_shape<D>(shape: impl IntoDimension<Dim = D>) -> Self where D: Dimension {
+    pub fn from_shape<D>(shape: impl IntoDimension<Dim = D>) -> Self
+    where
+        D: Dimension,
+    {
         Self::new(false, shape.into_dimension().ndim())
     }
-    
-    pub fn from_arr<S, D>( arr: ArrayBase<S, D>) -> Self where D: Dimension, S: RawData {
+
+    pub fn from_arr<S, D>(arr: ArrayBase<S, D>) -> Self
+    where
+        D: Dimension,
+        S: RawData,
+    {
         Self::new(false, arr.ndim())
     }
 

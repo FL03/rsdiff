@@ -5,7 +5,7 @@
 use crate::prelude::TensorError;
 use crate::TensorBase;
 use ndarray::*;
-use num::{One, Zero};
+use num::{Num, One, Zero};
 
 macro_rules! map_method {
     // ($method:ident) => {
@@ -143,6 +143,23 @@ where
             .into_shape(dim)
     }
 
+    pub fn default<Sh>(shape: Sh) -> Self
+    where
+        A: Clone + Default,
+        S: DataOwned,
+        Sh: ShapeBuilder<Dim = D>,
+    {
+        new!(ArrayBase::default(shape))
+    }
+
+    pub fn default_like(&self) -> Self
+    where
+        A: Clone + Default,
+        S: DataOwned,
+    {
+        Self::default(self.dim())
+    }
+
     pub fn ones<Sh>(shape: Sh) -> Self
     where
         A: Clone + One,
@@ -175,5 +192,38 @@ where
         S: DataOwned,
     {
         Self::zeros(self.dim())
+    }
+}
+
+impl<A> One for crate::Tensor<A, Ix0>
+where
+    A: Clone + One + core::ops::Mul<Output = A>,
+{
+    fn one() -> Self {
+        Self::from_scalar(A::one())
+    }
+}
+
+impl<A> Zero for crate::Tensor<A, Ix0>
+where
+    A: Clone + Zero,
+{
+    fn zero() -> Self {
+        Self::from_scalar(A::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        self.data.iter().all(|x| x.is_zero())
+    }
+}
+
+impl<A> Num for crate::Tensor<A, Ix0>
+where
+    A: Clone + Num,
+{
+    type FromStrRadixErr = A::FromStrRadixErr;
+
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        A::from_str_radix(str, radix).map(Self::from_scalar)
     }
 }

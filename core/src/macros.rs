@@ -5,8 +5,12 @@
 #![allow(unused_macros)]
 
 macro_rules! impl_binary {
-    (custom $($args:tt),*) => {
-        impl_binary!(@loop $(args),*);
+    (impl $($path:ident)::*, $lhs:ident => $body:block) => {
+        impl<T> $($path)::*<T> for $lhs where T: $($tr)* {
+            type Output = $res;
+
+            fn $method(self, rhs: $rhs) -> Self::Output $body
+        }
     };
     ($lhs:ty, $rhs:ty, $res:ty: [$(( $op:ident, $method:ident, $e:expr)),*]) => {
         $(

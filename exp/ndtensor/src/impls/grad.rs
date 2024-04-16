@@ -2,9 +2,9 @@
     Appellation: grad <impls>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::nd::{Data, Dimension};
 use crate::ops::TensorExpr;
 use crate::{ScalarExt, Tensor, TensorBase, TensorId, TensorView};
+use ndarray::Data;
 use std::collections::HashMap;
 
 pub(crate) type Visited<K = TensorId> = HashMap<K, bool>;

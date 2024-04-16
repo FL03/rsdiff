@@ -47,7 +47,7 @@ macro_rules! operators {
             pub fn name(&self) -> &str {
                 match self {
                     $(
-                        $group::$variant(op) => op.name(),
+                        $group::$variant(_) => stringify!($method),
                     )*
                 }
             }
@@ -228,5 +228,18 @@ operators!(
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {
         op
+    }
+
+    pub fn is_commutative(&self) -> bool {
+        match self {
+            Arithmetic::Add(_) | Arithmetic::Mul(_) => true,
+            _ => false,
+        }
+    }
+}
+
+impl Default for Arithmetic {
+    fn default() -> Self {
+        Arithmetic::add()
     }
 }

@@ -29,6 +29,24 @@ macro_rules! nested {
     };
 }
 
+macro_rules! nested_constructor {
+    ($variant:ident<$inner:ident>, $method:ident, [$($call:ident),*]) => {
+        nested_constructor!(@loop $variant<$inner>, $method, [$($call),*]);
+    };
+    (@loop $variant:ident<$inner:ident>, $method:ident, [$($call:ident),*]) => {
+        pub fn $method(inner:$inner) -> Self {
+            Self::$variant(inner)
+        }
+
+        $(
+            pub fn $call() -> Self {
+                Self::$method($inner::$call())
+            }
+        )*
+        
+    };
+}
+
 macro_rules! variant_constructor {
     ($(($($rest:tt),*)),*) => {
         $(

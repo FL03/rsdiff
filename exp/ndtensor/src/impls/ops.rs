@@ -5,8 +5,8 @@
 use crate::prelude::{Dimension, TensorExpr};
 use crate::TensorBase;
 use acme::prelude::{BinaryOp, UnaryOp};
-use ndarray::DimMax;
 use ndarray::{Data, DataMut, DataOwned, OwnedRepr, RawDataClone};
+use ndarray::{DimMax, Ix0};
 use num::complex::ComplexFloat;
 
 macro_rules! unop {
@@ -78,6 +78,8 @@ macro_rules! stdop {
         )*
     };
     ($bound:ident, $call:ident, $op:tt) => {
+
+
         impl<A, B, S1, S2, D1, D2> core::ops::$bound<TensorBase<S2, D2>> for TensorBase<S1, D1>
         where
             A: Clone + core::ops::$bound<B, Output = A>,

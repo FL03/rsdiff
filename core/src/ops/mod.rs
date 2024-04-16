@@ -42,7 +42,7 @@ mod tests {
     #[test]
     fn test_arith() {
         let op = Arithmetic::add();
-        assert_eq!(op.name(), "Addition");
+        assert_eq!(op.name(), "add");
         let res = op.eval((1f64, 2f64));
         assert_eq!(res, 3f64);
     }

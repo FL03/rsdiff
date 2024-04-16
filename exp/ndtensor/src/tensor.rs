@@ -367,3 +367,25 @@ where
         write!(f, "{}", self.data)
     }
 }
+
+impl<A, S, D> PartialEq for TensorBase<S, D>
+where
+    D: Dimension,
+    S: Data<Elem = A>,
+    A: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.data == other.data
+    }
+}
+
+impl<A, S, D> PartialEq<ArrayBase<S, D>> for TensorBase<S, D>
+where
+    D: Dimension,
+    S: Data<Elem = A>,
+    A: PartialEq,
+{
+    fn eq(&self, other: &ArrayBase<S, D>) -> bool {
+        self.data == other
+    }
+}

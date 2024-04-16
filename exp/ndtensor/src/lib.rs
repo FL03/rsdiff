@@ -33,7 +33,9 @@ pub(crate) mod impls {
 }
 
 pub(crate) mod types {
-    pub use self::kinds::*;
+    pub use self::{gradient::TensorGrad, kinds::*};
+
+    pub(crate) mod gradient;
     pub(crate) mod kinds;
 }
 

@@ -41,6 +41,7 @@ test = true
 [build-dependencies]
 
 [dependencies]
+itertools = "0.12"
 ndarray = "0.15"
 num = "0.4"
 paste = "1"

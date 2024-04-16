@@ -95,6 +95,8 @@ impl Operator for Adder {
     }
 }
 
+
+
 impl<A, B, C> super::binary::BinOp<A, B> for Adder
 where
     A: core::ops::Add<B, Output = C>,
@@ -109,7 +111,7 @@ where
 impl<P, A, B, C> Evaluator<P> for Adder
 where
     A: core::ops::Add<B, Output = C>,
-    P: super::binary::BinArgs<Lhs = A, Rhs = B>,
+    P: Params<Pattern = (A, B)>,
 {
     type Output = C;
 
@@ -122,7 +124,7 @@ where
 impl<P, A, B, C> Differentiable<P> for Adder
 where
     A: core::ops::Add<B, Output = C>,
-    P: super::binary::BinArgs<Lhs = A, Rhs = B>,
+    P: Params<Pattern = (A, B)>,
 {
     type Grad = C;
 

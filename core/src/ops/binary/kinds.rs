@@ -35,12 +35,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 pub enum BinaryOp {
     // <Kind = String> {
     #[default]
-    Add(Addition),
-    Div(Division),
-    Mul(Multiplication),
-    Sub(Subtraction),
-    Pow(Power),
-    Rem(Remainder),
+    Arithmetic(Arithmetic),
     Max,
     Min,
     And,
@@ -66,24 +61,20 @@ impl CustomOp {
 impl BinaryOp {
     pub fn differentiable(&self) -> bool {
         match self {
-            Self::Add(_) | Self::Div(_) | Self::Mul(_) | Self::Sub(_) | Self::Pow(_) => true,
+            Self::Arithmetic(_) => true,
             _ => false,
         }
     }
 
     pub fn is_commutative(&self) -> bool {
         match self {
-            BinaryOp::Add(_) | Self::Mul(_) | BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
+            Self::Arithmetic(arith) => arith.is_commutative(),
+            BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
             _ => false,
         }
     }
-    simple_enum_constructor!(
-        (Add, add, Addition::new),
-        (Div, div, Division::new),
-        (Mul, mul, Multiplication::new),
-        (Pow, pow, Power::new),
-        (Rem, rem, Remainder::new),
-        (Sub, sub, Subtraction::new)
+    nested_constructor!(
+        Arithmetic<Arithmetic>, arithmetic, [add, div, mul, pow, rem, sub]
     );
 
     simple_enum_constructor!(
@@ -103,12 +94,7 @@ impl BinaryOp {
 impl Operator for BinaryOp {
     fn name(&self) -> &str {
         match self {
-            Self::Add(_) => "add",
-            Self::Div(_) => "div",
-            Self::Mul(_) => "mul",
-            Self::Sub(_) => "sub",
-            Self::Pow(_) => "pow",
-            Self::Rem(_) => "rem",
+            Self::Arithmetic(inner) => inner.name(),
             Self::Max => "max",
             Self::Min => "min",
             Self::And => "and",

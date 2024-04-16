@@ -95,8 +95,6 @@ impl Operator for Adder {
     }
 }
 
-
-
 impl<A, B, C> super::binary::BinOp<A, B> for Adder
 where
     A: core::ops::Add<B, Output = C>,

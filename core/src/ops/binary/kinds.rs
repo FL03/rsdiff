@@ -74,7 +74,9 @@ impl BinaryOp {
         }
     }
     nested_constructor!(
-        Arithmetic<Arithmetic>, arithmetic, [add, div, mul, pow, rem, sub]
+        Arithmetic<Arithmetic>,
+        arithmetic,
+        [add, div, mul, pow, rem, sub]
     );
 
     simple_enum_constructor!(

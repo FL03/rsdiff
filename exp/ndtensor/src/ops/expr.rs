@@ -2,10 +2,13 @@
     Appellation: expr <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::nd::*;
+
 use crate::TensorBase;
 
 use acme::ops::{BinaryOp, UnaryOp};
+use ndarray::{
+    Data, DataMut, DataOwned, OwnedArcRepr, OwnedRepr, RawData, RawDataClone, RawDataMut, ViewRepr,
+};
 
 pub type BoxTensor<S> = Box<TensorBase<S>>;
 

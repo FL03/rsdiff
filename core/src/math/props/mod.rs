@@ -14,7 +14,6 @@ pub trait Commutative {
     const IS_COMMUTATIVE: bool;
 }
 
-
 #[cfg(test)]
 mod tests {
 

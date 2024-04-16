@@ -84,6 +84,60 @@ where
 
     fn op(&self) -> Op;
 }
+pub enum Exprs<Id = usize> {
+    Binary {
+        lhs: Box<Exprs<Id>>,
+        rhs: Box<Exprs<Id>>,
+        op: BinaryOp,
+    },
+    Unary {
+        arg: Box<Exprs<Id>>,
+        op: UnaryOp,
+    },
+    Constant(Box<dyn core::any::Any>),
+    Variable {
+        id: Id,
+        value: Box<dyn core::any::Any>,
+    },
+}
+
+impl<Id> Exprs<Id> {
+    pub fn binary(lhs: Exprs<Id>, rhs: Exprs<Id>, op: BinaryOp) -> Self {
+        Self::Binary {
+            lhs: Box::new(lhs),
+            rhs: Box::new(rhs),
+            op,
+        }
+    }
+
+    pub fn unary(arg: Exprs<Id>, op: UnaryOp) -> Self {
+        Self::Unary {
+            arg: Box::new(arg),
+            op,
+        }
+    }
+
+    pub fn variable<T: 'static>(id: Id, value: T) -> Self {
+        Self::Variable {
+            id,
+            value: Box::new(value),
+        }
+    }
+
+    pub fn lhs(&self) -> Option<&Exprs<Id>> {
+        match self {
+            Self::Binary { lhs, .. } => Some(lhs),
+            _ => None,
+        }
+    }
+
+    pub fn lhs_mut(&mut self) -> Option<&mut Exprs<Id>> {
+        match self {
+            Self::Binary { lhs, .. } => Some(lhs),
+            _ => None,
+        }
+    }
+}
 pub struct Expr<Args>
 where
     Args: Params,

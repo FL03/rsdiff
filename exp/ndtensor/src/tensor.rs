@@ -346,25 +346,51 @@ where
     }
 }
 
-impl<S, D> fmt::Debug for TensorBase<S, D>
+// impl<S, D> Copy for TensorBase<S, D>
+// where
+//     D: Copy + Dimension,
+//     S: Copy + RawDataClone,
+// {
+//     fn copy(&self) -> Self {
+//         TensorBase {
+//             id: self.id,
+//             ctx: self.ctx,
+//             data: self.data,
+//             op: self.op,
+//         }
+//     }
+// }
+
+impl<A, S, D> fmt::Binary for TensorBase<S, D>
 where
+    A: fmt::Binary,
     D: Dimension,
-    S: Data,
-    S::Elem: fmt::Debug,
+    S: Data<Elem = A>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.data)
+        write!(f, "{:b}", self.data())
     }
 }
 
-impl<S, D> fmt::Display for TensorBase<S, D>
+impl<A, S, D> fmt::Debug for TensorBase<S, D>
 where
+    A: fmt::Debug,
     D: Dimension,
-    S: Data,
-    S::Elem: fmt::Display,
+    S: Data<Elem = A>,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.data)
+        write!(f, "{:?}", self.data())
+    }
+}
+
+impl<A, S, D> fmt::Display for TensorBase<S, D>
+where
+    A: fmt::Display,
+    D: Dimension,
+    S: Data<Elem = A>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.data())
     }
 }
 

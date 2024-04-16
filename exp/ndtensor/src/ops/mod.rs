@@ -135,6 +135,13 @@ where
     }
 }
 
+// impl<S1, S2> Copy for TensorOp<S1, S2>
+// where
+//     S1: RawDataClone,
+//     S2: RawDataClone,
+// {
+// }
+
 impl<S1, S2> Default for TensorOp<S1, S2>
 where
     S1: RawData,

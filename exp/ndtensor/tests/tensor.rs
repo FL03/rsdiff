@@ -6,6 +6,7 @@
 
 extern crate ndtensor;
 
+use approx::AbsDiffEq;
 use ndarray::array;
 use ndtensor::prelude::{hash_dim, TensorBase};
 

@@ -5,7 +5,7 @@
 use crate::actions::grad::TensorGrad;
 use crate::prelude::{ScalarExt, TensorExpr, TensorId, TensorResult};
 use crate::TensorBase;
-use acme::prelude::{BinaryOp, Store, UnaryOp};
+use acme::prelude::{Arithmetic, BinaryOp, Store, UnaryOp};
 
 pub(crate) type Visited<K = TensorId> = std::collections::HashMap<K, bool>;
 
@@ -95,41 +95,46 @@ where
             if let Some(op) = &*node.op {
                 match op {
                     TensorExpr::Binary(lhs, rhs, kind) => match kind {
-                        BinaryOp::Add(_) => {
-                            *entry!(store, lhs) += &grad;
-                            *entry!(store, rhs) += &grad;
-                        }
-                        BinaryOp::Div(_) => {
-                            *entry!(store, lhs) += &grad / rhs.as_ref();
-                            *entry!(store, rhs) -=
-                                &grad * lhs.as_ref() / (rhs.as_ref() * rhs.as_ref());
-                        }
-                        BinaryOp::Mul(_) => {
-                            *entry!(store, lhs) += &grad * rhs.as_ref();
-                            *entry!(store, rhs) += &grad * lhs.as_ref();
-                        }
-                        BinaryOp::Sub(_) => {
-                            *entry!(store, lhs) += &grad;
-                            *entry!(store, rhs) -= &grad;
-                        }
+                        BinaryOp::Arithmetic(inner) => match inner {
+                            Arithmetic::Add(_) => {
+                                *entry!(store, lhs) += &grad;
+                                *entry!(store, rhs) += &grad;
+                            }
+                            Arithmetic::Div(_) => {
+                                *entry!(store, lhs) += &grad / rhs.as_ref();
+                                *entry!(store, rhs) += &grad * lhs.as_ref() / rhs.sqr();
+                            }
+                            Arithmetic::Mul(_) => {
+                                *entry!(store, lhs) += &grad * rhs.as_ref();
+                                *entry!(store, rhs) += &grad * lhs.as_ref();
+                            }
+                            Arithmetic::Sub(_) => {
+                                *entry!(store, lhs) += &grad;
+                                *entry!(store, rhs) -= &grad;
+                            }
+                            _ => todo!(),
+                        },
                         _ => todo!(),
                     },
                     TensorExpr::BinaryScalar(lhs, rhs, kind) => match kind {
-                        BinaryOp::Add(_) => {
-                            *entry!(store, lhs) += &grad;
-                        }
-                        BinaryOp::Div(_) => {
-                            *entry!(store, lhs) += &grad / *rhs;
-                        }
-                        BinaryOp::Mul(_) => {
-                            *entry!(store, lhs) += &grad * *rhs;
-                        }
-                        BinaryOp::Pow(_) => {
-                            *entry!(store, lhs) += &grad * *rhs * lhs.pow(*rhs - T::one());
-                        }
-                        BinaryOp::Sub(_) => {
-                            *entry!(store, lhs) += &grad;
-                        }
+                        BinaryOp::Arithmetic(inner) => match inner {
+                            Arithmetic::Add(_) => {
+                                *entry!(store, lhs) += &grad;
+                            }
+                            Arithmetic::Div(_) => {
+                                *entry!(store, lhs) += &grad / *rhs;
+                            }
+                            Arithmetic::Mul(_) => {
+                                *entry!(store, lhs) += &grad * *rhs;
+                            }
+                            Arithmetic::Pow(_) => {
+                                *entry!(store, lhs) += &grad * *rhs * lhs.pow(*rhs - T::one());
+                            }
+                            Arithmetic::Sub(_) => {
+                                *entry!(store, lhs) += &grad;
+                            }
+                            _ => todo!(),
+                        },
                         _ => todo!(),
                     },
                     TensorExpr::Unary(val, kind) => match kind {

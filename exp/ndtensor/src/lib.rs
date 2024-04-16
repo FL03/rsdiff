@@ -21,12 +21,9 @@ pub(crate) mod utils;
 
 pub mod ops;
 
-#[allow(unused_imports)]
-pub(crate) mod nd {
-    pub(crate) use ndarray::*;
-}
-
 pub(crate) mod impls {
+    #[cfg(feature = "approx")]
+    pub(crate) mod approx;
     pub(crate) mod create;
     pub(crate) mod grad;
     pub(crate) mod ops;

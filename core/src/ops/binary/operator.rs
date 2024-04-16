@@ -9,6 +9,13 @@ pub trait BinArgs: Params<Pattern = (Self::Lhs, Self::Rhs)> {
     type Lhs;
     type Rhs;
 
+    fn apply(self, op: BinaryOp) -> BinaryOperator<Self>
+    where
+        Self: Sized,
+    {
+        BinaryOperator::new(self, op)
+    }
+
     fn lhs(&self) -> &Self::Lhs;
 
     fn rhs(&self) -> &Self::Rhs;
@@ -48,8 +55,8 @@ where
         self.args.rhs()
     }
 
-    pub fn into_args(self) -> impl BinArgs {
-        self.args
+    pub fn args(&self) -> &Args {
+        &self.args
     }
 }
 

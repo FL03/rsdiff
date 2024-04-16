@@ -43,7 +43,7 @@ macro_rules! nested_constructor {
                 Self::$method($inner::$call())
             }
         )*
-        
+
     };
 }
 

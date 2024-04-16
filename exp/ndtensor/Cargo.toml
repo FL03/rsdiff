@@ -18,10 +18,14 @@ default = [
 ]
 
 approx = [
-    "ndarray/approx"
+    "dep:approx",
+    "ndarray/approx-0_5",
 ]
 
-std = []
+std = [
+    "acme-core/std",
+    "ndarray/std"
+]
 
 serde = [
     "dep:serde",
@@ -29,7 +33,9 @@ serde = [
 ]
 
 serde-ext = [
-    "dep:serde_json"
+    "dep:serde_json",
+    "ndarray/serde-1",
+    "acme-core/serde",
 ]
 
 [lib]
@@ -38,9 +44,15 @@ crate-type = ["cdylib", "rlib"]
 doctest = true
 test = true
 
+[[test]]
+name = "tensor"
+required-features = ["approx", "std"]
+
+
 [build-dependencies]
 
 [dependencies]
+approx = { optional = true, version = "0.5" }
 itertools = "0.12"
 ndarray = "0.15"
 num = "0.4"
@@ -51,6 +63,8 @@ smart-default = "0.7"
 strum = { features = ["derive"], version = "0.26"}
 
 [dependencies.acme-core]
+# default-features = false
+# features = ["core", "macros"]
 path = "../../core"
 version = "0.3.1"
 

@@ -13,7 +13,9 @@ use ndtensor::prelude::Tensor;
 fn test_addition() {
     let shape = (3, 3);
 
-    let a = Tensor::<f64, Ix2>::linspace(0f64, 8f64, 9).into_shape(shape).unwrap();
+    let a = Tensor::<f64, Ix2>::linspace(0f64, 8f64, 9)
+        .into_shape(shape)
+        .unwrap();
     let b = Tensor::<f64, Ix2>::ones(shape);
 
     let res = a + b;

@@ -39,11 +39,11 @@ pub(crate) mod types {
 
 use ndarray::{CowRepr, IxDyn, OwnedArcRepr, OwnedRepr, ViewRepr};
 
-pub type ArcTensor<S, D = IxDyn> = TensorBase<OwnedArcRepr<S>, D>;
+pub type ArcTensor<A, D = IxDyn> = TensorBase<OwnedArcRepr<A>, D>;
 
-pub type CowTensor<'a, S, D = IxDyn> = TensorBase<CowRepr<'a, S>, D>;
+pub type CowTensor<'a, A, D = IxDyn> = TensorBase<CowRepr<'a, A>, D>;
 
-pub type RawTensorView<S, D = IxDyn> = TensorBase<ndarray::RawViewRepr<*const S>, D>;
+pub type RawTensorView<A, D = IxDyn> = TensorBase<ndarray::RawViewRepr<*const A>, D>;
 
 pub type Tensor<S, D = IxDyn> = TensorBase<OwnedRepr<S>, D>;
 

@@ -286,7 +286,7 @@ where
     }
 }
 
-impl<A, D> TensorBase<RawViewRepr<*const A>, D>
+impl<A, D> crate::RawTensorView<A, D>
 where
     D: Dimension,
 {
@@ -308,8 +308,6 @@ where
         }
     }
 }
-
-
 
 impl<S, D> Borrow<ArrayBase<S, D>> for TensorBase<S, D>
 where

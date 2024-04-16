@@ -139,7 +139,8 @@ where
     {
         let dim = shape.into_dimension();
         let n = dim.ndim();
-        TensorBase::<S, ndarray::Ix1>::linspace(A::zero(), A::from(n).unwrap() - A::one(), n).into_shape(dim)
+        TensorBase::<S, ndarray::Ix1>::linspace(A::zero(), A::from(n).unwrap() - A::one(), n)
+            .into_shape(dim)
     }
 
     pub fn ones<Sh>(shape: Sh) -> Self

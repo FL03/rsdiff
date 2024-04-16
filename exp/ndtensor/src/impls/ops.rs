@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::{Dimension, TensorExpr};
-use crate::tensor::{new, TensorBase};
-use acme::prelude::{BinaryOp, Scalar, UnaryOp};
+use crate::TensorBase;
+use acme::prelude::{BinaryOp, UnaryOp};
 use ndarray::DimMax;
 use ndarray::{Data, DataMut, DataOwned, OwnedRepr, RawDataClone};
 use num::complex::ComplexFloat;
@@ -93,6 +93,30 @@ macro_rules! stdop {
             fn $call(self, rhs: TensorBase<S2, D2>) -> Self::Output {
                 let data = core::ops::$bound::$call(self.data(), rhs.data());
                 let lhs = self.into_dyn().into_owned();
+                let op = unsafe { TensorExpr::binary(
+                    Box::new(lhs),
+                    Box::new(rhs.into_dyn().raw_view().cast::<A>().deref_into_view()),
+                    BinaryOp::$call(),
+                )};
+                new!(data, Some(op.to_owned()))
+            }
+        }
+
+        impl<'a, A, B, S1, S2, D1, D2> core::ops::$bound<TensorBase<S2, D2>> for &'a TensorBase<S1, D1>
+        where
+            A: Clone + core::ops::$bound<B, Output = A>,
+            B: Clone,
+            D1: Dimension + DimMax<D2>,
+            D2: Dimension,
+            S1: DataOwned<Elem = A> + DataMut + RawDataClone,
+            S2: DataOwned<Elem = B>,
+
+        {
+            type Output = TensorBase<OwnedRepr<A>, <D1 as DimMax<D2>>::Output>;
+
+            fn $call(self, rhs: TensorBase<S2, D2>) -> Self::Output {
+                let data = core::ops::$bound::$call(self.data(), rhs.data());
+                let lhs = self.clone().into_dyn().into_owned();
                 let op = unsafe { TensorExpr::binary(
                     Box::new(lhs),
                     Box::new(rhs.into_dyn().raw_view().cast::<A>().deref_into_view()),

@@ -2,11 +2,10 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{TensorExpr, TensorId, TensorOp, TensorResult};
+use crate::prelude::{TensorError, TensorExpr, TensorId, TensorOp};
 use crate::Context;
 use core::borrow::{Borrow, BorrowMut};
 use core::fmt;
-use ndarray::iter::{Iter, IterMut};
 use ndarray::*;
 
 pub(crate) fn new<S, D>(
@@ -76,7 +75,7 @@ where
         self.id
     }
 
-    pub fn into_dimensionality<D2>(self) -> TensorResult<TensorBase<S, D2>>
+    pub fn into_dimensionality<D2>(self) -> Result<TensorBase<S, D2>, TensorError>
     where
         D2: Dimension,
     {
@@ -98,7 +97,19 @@ where
         }
     }
 
-    pub fn into_owned(self) -> TensorBase<OwnedRepr<A>, D>
+    pub fn to_dyn(&self) -> TensorBase<S, IxDyn>
+    where
+        S: RawDataClone,
+    {
+        TensorBase {
+            id: self.id,
+            ctx: self.ctx,
+            data: self.data().clone().into_dyn(),
+            op: self.op.clone(),
+        }
+    }
+
+    pub fn into_owned(self) -> crate::Tensor<A, D>
     where
         A: Clone,
         S: DataOwned,
@@ -111,7 +122,7 @@ where
         }
     }
 
-    pub fn into_shared(self) -> TensorBase<OwnedArcRepr<A>, D>
+    pub fn into_shared(self) -> crate::ArcTensor<A, D>
     where
         S: DataOwned,
     {
@@ -127,14 +138,14 @@ where
         self.ctx().is_variable()
     }
 
-    pub fn iter(&self) -> Iter<'_, A, D>
+    pub fn iter(&self) -> iter::Iter<'_, A, D>
     where
         S: Data,
     {
         self.data().iter()
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<'_, A, D>
+    pub fn iter_mut(&mut self) -> iter::IterMut<'_, A, D>
     where
         S: ndarray::DataMut,
     {
@@ -153,7 +164,7 @@ where
         self.data().raw_dim()
     }
 
-    pub fn raw_view(&self) -> TensorBase<RawViewRepr<*const A>, D> {
+    pub fn raw_view(&self) -> crate::RawTensorView<A, D> {
         TensorBase {
             id: self.id,
             ctx: self.ctx,
@@ -162,7 +173,7 @@ where
         }
     }
 
-    pub fn raw_view_mut(&mut self) -> TensorBase<RawViewRepr<*mut A>, D>
+    pub fn raw_view_mut(&mut self) -> crate::RawTensorViewMut<A, D>
     where
         S: RawDataMut,
     {
@@ -352,38 +363,33 @@ where
 //     }
 // }
 
-impl<A, S, D> fmt::Binary for TensorBase<S, D>
-where
-    A: fmt::Binary,
-    D: Dimension,
-    S: Data<Elem = A>,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:b}", self.data())
-    }
+macro_rules! impl_fmt {
+    ($(($trait:ident, $($fmt:tt)*)),*) => {
+        impl_fmt!(@impl $(($trait, $($fmt)*)),*);
+    };
+    ($trait:ident, $($fmt:tt)*) => {
+        impl_fmt!(@impl $trait, $($fmt)*);
+    };
+    (@impl $(($trait:ident, $($fmt:tt)*)),*) => {
+        $(
+            impl_fmt!(@impl $trait, $($fmt)*);
+        )*
+    };
+    (@impl $trait:ident, $($fmt:tt)*) => {
+        impl<A, S, D> core::fmt::$trait for TensorBase<S, D>
+        where
+            A: core::fmt::$trait,
+            D: Dimension,
+            S: Data<Elem = A>,
+        {
+            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+                write!(f, $($fmt)*, self.data())
+            }
+        }
+    };
 }
 
-impl<A, S, D> fmt::Debug for TensorBase<S, D>
-where
-    A: fmt::Debug,
-    D: Dimension,
-    S: Data<Elem = A>,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.data())
-    }
-}
-
-impl<A, S, D> fmt::Display for TensorBase<S, D>
-where
-    A: fmt::Display,
-    D: Dimension,
-    S: Data<Elem = A>,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.data())
-    }
-}
+impl_fmt!((Binary, "{:b}"), (Debug, "{:?}"), (Display, "{}"));
 
 impl<A, S, D> PartialEq for TensorBase<S, D>
 where

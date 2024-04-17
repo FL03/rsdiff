@@ -63,4 +63,8 @@ impl Context {
     pub fn set_kind(&mut self, kind: TensorKind) {
         self.kind = kind;
     }
+
+    pub fn set_rank(&mut self, rank: usize) {
+        self.rank = rank;
+    }
 }

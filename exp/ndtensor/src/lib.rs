@@ -45,6 +45,8 @@ pub type CowTensor<'a, A, D = IxDyn> = TensorBase<CowRepr<'a, A>, D>;
 
 pub type RawTensorView<A, D = IxDyn> = TensorBase<ndarray::RawViewRepr<*const A>, D>;
 
+pub type RawTensorViewMut<A, D = IxDyn> = TensorBase<ndarray::RawViewRepr<*mut A>, D>;
+
 pub type Tensor<S, D = IxDyn> = TensorBase<OwnedRepr<S>, D>;
 
 pub type TensorView<'a, S, D = IxDyn> = TensorBase<ViewRepr<&'a S>, D>;

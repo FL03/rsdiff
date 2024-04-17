@@ -29,12 +29,6 @@ impl From<&str> for TensorError {
     }
 }
 
-impl From<String> for TensorError {
-    fn from(error: String) -> Self {
-        TensorError::Unknown(error)
-    }
-}
-
 macro_rules! into_tensor_error {
     ($($n:tt),*) => {
         into_tensor_error!(@loop $($n),*);
@@ -45,21 +39,21 @@ macro_rules! into_tensor_error {
     (@loop $(($kind:ident, $err:ident, $call:ident)),*) => {
         into_tensor_error!(@loop $($kind, $err, $call)*);
     };
-
-    (@loop $kind:ident, $error:ident, $call:ident) => {
-        impl From<$error> for TensorError {
-            fn from(error: $error) -> Self {
-                TensorError::$kind(error.$call())
+    (@loop $kind:ident, $err:ident) => {
+        impl From<$err> for TensorError {
+            fn from(err: $err) -> Self {
+                TensorError::$kind(err)
             }
         }
     };
-    (@loop $kind:ident, $error:ident) => {
-        impl From<$error> for TensorError {
-            fn from(error: $error) -> Self {
-                TensorError::$kind(error)
+    (@loop $kind:ident, $err:ident, $call:ident) => {
+        impl From<$err> for TensorError {
+            fn from(err: $err) -> Self {
+                TensorError::$kind(err.$call())
             }
         }
     };
 }
 
-into_tensor_error!((Shape, ShapeError, to_string));
+into_tensor_error!(Unknown, String);
+into_tensor_error!(Shape, ShapeError, to_string);

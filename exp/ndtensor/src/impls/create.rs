@@ -138,7 +138,10 @@ where
         S: DataOwned,
     {
         let dim = shape.into_dimension();
-        let n = dim.ndim();
+        let n = {
+            let tmp = dim.as_array_view();
+            tmp.product()
+        };
         TensorBase::<S, ndarray::Ix1>::linspace(A::zero(), A::from(n).unwrap() - A::one(), n)
             .into_shape(dim)
     }

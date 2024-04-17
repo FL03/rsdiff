@@ -26,6 +26,7 @@ pub enum Number {
     Complex(R, R),
     Real(R),
 }
+
 pub enum R {
     Float(Float),
     Integer(Integer),
@@ -175,23 +176,30 @@ pub enum NumBits {
 }
 
 macro_rules! impl_from_bits {
-    ($v:ident, $t:ty) => {
+    ($(($v:ident: [$($t:ty),*])),*) => {
+        $(
+            impl_from_bits!(@loop $v: [$($t),*]);
+        )*
+    };
+    (@loop $v:ident: [$($t:ty),*]) => {
+        $(
+            impl_from_bits!(@loop $v: $t);
+        )*
+    };
+    (@loop $v:ident: $t:ty) => {
         impl From<$t> for NumBits {
             fn from(_: $t) -> Self {
                 NumBits::$v
             }
         }
     };
-    ($v:ident: [$($t:ty),*]) => {
-        $(
-            impl_from_bits!($v, $t);
-        )*
-    };
 }
 
-impl_from_bits!(B8: [u8, i8]);
-impl_from_bits!(B16: [u16, i16]);
-impl_from_bits!(B32: [u32, i32]);
-impl_from_bits!(B64: [u64, i64]);
-impl_from_bits!(B128: [u128, i128]);
-impl_from_bits!(BSize: [usize, isize]);
+impl_from_bits!(
+    (B8: [u8, i8]),
+    (B16: [u16, i16]),
+    (B32: [u32, i32]),
+    (B64: [u64, i64]),
+    (B128: [u128, i128]),
+    (BSize: [usize, isize])
+);

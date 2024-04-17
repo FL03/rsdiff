@@ -10,9 +10,17 @@ use ndarray::*;
 
 pub type TOp<A, B> = TensorOp<OwnedArcRepr<A>, OwnedArcRepr<B>>;
 
-pub trait NdTensorOp {
+pub trait NdTensorOp<S1, S2>
+where
+    S1: RawData,
+    S2: RawData,
+{
     fn is_none(&self) -> bool;
     fn is_some(&self) -> bool;
+
+    fn as_ref(&self) -> Option<&TensorExpr<S1, S2>>;
+
+    fn as_mut(&mut self) -> Option<&mut TensorExpr<S1, S2>>;
 }
 
 pub struct TensorOp<S1, S2 = S1>(pub(crate) Option<TensorExpr<S1, S2>>)

@@ -9,13 +9,11 @@ pub(crate) mod propagation;
 pub(crate) mod standard;
 pub(crate) mod types;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, VariantNames};
 
 pub trait ErrorType {
-    type Kind: std::fmt::Display;
+    type Kind: core::fmt::Display;
 
     fn kind(&self) -> &Self::Kind;
 
@@ -28,6 +26,7 @@ pub trait ErrorType {
     Debug,
     Display,
     EnumCount,
+    EnumDiscriminants,
     EnumIs,
     EnumIter,
     Eq,
@@ -40,7 +39,7 @@ pub trait ErrorType {
 )]
 #[cfg_attr(
     feature = "serde",
-    derive(Deserialize, Serialize,),
+    derive(serde::Deserialize, serde::Serialize,),
     serde(rename_all = "snake_case")
 )]
 #[strum(serialize_all = "snake_case")]
@@ -49,3 +48,6 @@ pub enum ErrorKind<E = String> {
     External(ExternalError<E>),
     Sync(SyncError),
 }
+
+#[cfg(feature = "std")]
+impl<E> std::error::Error for ErrorKind<E> where E: core::fmt::Debug {}

@@ -9,6 +9,9 @@
 pub trait Field {
     type Elem: ?Sized;
 
+    /// The length of the field.
+    fn len(&self) -> usize;
+    /// The rank of the field; i.e the number of dimensions.
     fn rank(&self) -> usize;
 }
 

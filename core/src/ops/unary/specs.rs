@@ -120,6 +120,12 @@ unary_op_trait!(
     (Square, sqr)
 );
 unary_op_trait!(
+    (Acos, acos),
+    (Acosh, acosh),
+    (Asin, asin),
+    (Asinh, asinh),
+    (Atan, atan),
+    (Atanh, atanh),
     (Cos, cos),
     (Cosh, cosh),
     (Sin, sin),

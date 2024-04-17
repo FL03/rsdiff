@@ -5,14 +5,10 @@
 //! # Operations
 //!
 //!
-pub use self::{
-    binary::BinaryOp,
-    expr::*,
-    kinds::*,
-    operator::*,
-    ternary::{TernaryExpr, TernaryOp},
-    unary::UnaryOp,
-};
+pub use self::binary::{Arithmetic, BinaryOp};
+pub use self::ternary::{TernaryExpr, TernaryOp};
+pub use self::unary::UnaryOp;
+pub use self::{expr::*, kinds::*, operator::*};
 
 pub(crate) mod expr;
 pub(crate) mod kinds;
@@ -39,7 +35,8 @@ pub(crate) mod prelude {
     pub use super::IntoOp;
 
     pub use super::binary::*;
-    pub use super::kinds::Op;
+    pub use super::kinds::{Op, OpKind};
+    pub use super::ternary::*;
     pub use super::unary::*;
 }
 

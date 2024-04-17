@@ -17,6 +17,17 @@ pub(crate) mod kinds {
 
 pub trait Identifier {}
 
+macro_rules! impl_identifier {
+    (@loop $($t:ty),*) => {
+        $(
+            impl_identifier!(@loop $t);
+        )*
+    };
+    (@loop $t:ty) => {
+        impl Identifier for $t {}
+    };
+}
+
 pub trait Identifiable {
     type Id: Identifier;
 

@@ -57,6 +57,14 @@ macro_rules! fwd_view_body {
     };
 }
 
+pub enum ReshapeExpr<S>
+where
+    S: RawData,
+{
+    Reshape(BoxTensor<S>, Vec<usize>),
+    Transpose(BoxTensor<S>),
+}
+
 pub enum TensorExpr<S1, S2 = S1>
 where
     S1: RawData,

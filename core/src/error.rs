@@ -2,13 +2,16 @@
     Appellation: error <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::kinds::{ErrorKind, ExternalError, SyncError};
-use core::fmt::{self, Debug, Display};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+pub use self::kinds::*;
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+pub(crate) mod kinds;
+
+pub type Result<T = ()> = core::result::Result<T, Error>;
+
+use core::fmt::{self, Debug, Display};
+
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Error<K = String> {
     kind: ErrorKind<K>,
     message: String,

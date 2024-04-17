@@ -72,6 +72,12 @@ impl Operator for TernaryOp {
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase")
+)]
+#[repr(C)]
 pub struct Affine;
 
 impl Operator for Affine {

@@ -7,6 +7,7 @@ use crate::Tensor;
 use acme::prelude::Scalar;
 use ndarray::{Ix0, RawData};
 use num::complex::ComplexFloat;
+
 pub trait NdTensor<S, D = IxDyn>
 where
     D: Dimension,

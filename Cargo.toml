@@ -28,7 +28,6 @@ members = [
     "macros",
     "tensor",
     "exp/container",
-    "exp/ndtensor",
 ]
 resolver = "2"
 

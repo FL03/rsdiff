@@ -62,7 +62,7 @@ fn test_division() {
     let shape = (2, 2);
 
     let a = Tensor::<f64>::ones(shape).variable();
-    let b = Tensor::<f64>::fill(shape, 2_f64).variable();
+    let b = Tensor::<f64>::fill(shape, 2.0).variable();
     let c = &a / &b;
 
     let grad = c.grad().unwrap();

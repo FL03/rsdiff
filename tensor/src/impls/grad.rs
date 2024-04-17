@@ -102,7 +102,7 @@ where
                             }
                             Arithmetic::Div(_) => {
                                 *entry!(store, lhs) += &grad / rhs.as_ref();
-                                *entry!(store, rhs) += &grad * lhs.as_ref() / rhs.sqr();
+                                *entry!(store, rhs) -= &grad * lhs.as_ref() / rhs.sqr();
                             }
                             Arithmetic::Mul(_) => {
                                 *entry!(store, lhs) += &grad * rhs.as_ref();

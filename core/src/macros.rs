@@ -4,8 +4,30 @@
 */
 #![allow(unused_macros)]
 
+///
+#[macro_export]
+macro_rules! nested {
+    ($($i:ident in $iter:expr)=>* => $body:block ) => {
+        nested!(@loop $body, $($i in $iter),*);
+    };
+    // The primary base case for iterators
+    (@loop $body:block, $i:ident in $iter:expr) => {
+        for $i in $iter $body
+    };
+    // An alternative base case
+    (@loop $body:block, $i:ident in $iter:expr) => {
+        for $i in $iter.into_iter() $body
+    };
+    // This is the recursive case. It will expand to a nested loop.
+    (@loop $body:block, $i:ident in $iter:expr, $($tail:tt)*) => {
+        for $i in $iter {
+            nested!(@loop $body, $($tail)*);
+        }
+    };
+}
+
 macro_rules! impl_binary {
-    (impl $($path:ident)::*, $lhs:ident => $body:block) => {
+    (impl $($path:ident)::*, for $lhs:ident => $body:block) => {
         impl<T> $($path)::*<T> for $lhs where T: $($tr)* {
             type Output = $res;
 
@@ -39,15 +61,6 @@ macro_rules! impl_binary {
             }
         }
     };
-    (@lifetime $lhs:ty, $rhs:ty, $res:ty, $trait:path, $method:ident, $e:expr) => {
-        impl<'a> $trait<$rhs> for $lhs {
-            type Output = $res;
-
-            fn $method(self, rhs: $rhs) -> Self::Output {
-                $e(self, rhs)
-            }
-        }
-    };
 }
 
 struct U(usize);
@@ -62,14 +75,12 @@ impl_binary!(
     ]
 );
 
-macro_rules! impl_evaluator {
-    (
-        $op:ident,
-        args:{$($args:ident: $ty:ty),*},
-        output:$output:ty,
-        call:$call:expr
-    ) => {
-        impl<$($args)*> Evaluator<$($args)*> for $op {
+macro_rules! evaluator {
+    ($op:ident($($args:ident: $ty:ty),*) -> $output:ty $body:block) => {
+        impl<P, $($args)*> Evaluator<P> for $op
+        where
+            P: $crate::ops::Params<Pattern = ($($arg),*)>,
+        {
             type Output = $output
 
             fn eval(&self, ) -> Self::Output {

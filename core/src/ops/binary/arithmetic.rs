@@ -7,7 +7,10 @@ use crate::ops::{Evaluator, OpKind, Operator, Params};
 use num::traits::{NumOps, Pow};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
-macro_rules! operators {
+macro_rules! impl_arith {
+    ($parent:ident: {$($var:ident($inner:ident): $new:ident),*}) => {
+        impl_arith!($parent: [$($var, $inner, $new),*]);
+    };
     ($group:ident: [$(($variant:ident, $op:ident, $method:ident)),*]) => {
         #[derive(
             Clone,
@@ -213,7 +216,7 @@ impl_binary_op!(
     (Shr, Shr, shr)
 );
 
-operators!(
+impl_arith!(
     Arithmetic: [
         (Add, Addition, add),
         (Div, Division, div),

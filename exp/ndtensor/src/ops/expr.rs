@@ -12,6 +12,51 @@ use ndarray::{
 
 pub type BoxTensor<S> = Box<TensorBase<S>>;
 
+macro_rules! fwd_view_body {
+    ($self:ident, $method:ident) => {
+        match $self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.$method().boxed(),
+                rhs: rhs.$method().boxed(),
+                op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.$method().boxed(),
+                op,
+            },
+            TensorExpr::Transpose(recv) => TensorExpr::Transpose(recv.$method().boxed()),
+        }
+    };
+    (&$self:ident, $method:ident) => {
+        match $self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.as_ref().$method().boxed(),
+                rhs: rhs.as_ref().$method().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.as_ref().$method().boxed(),
+                op: *op,
+            },
+            TensorExpr::Transpose(recv) => TensorExpr::Transpose(recv.as_ref().$method().boxed()),
+        }
+    };
+    (&mut $self:ident, $method:ident) => {
+        match $self {
+            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
+                lhs: lhs.as_mut().$method().boxed(),
+                rhs: rhs.as_mut().$method().boxed(),
+                op: *op,
+            },
+            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
+                recv: recv.as_mut().$method().boxed(),
+                op: *op,
+            },
+            TensorExpr::Transpose(recv) => TensorExpr::Transpose(recv.as_mut().$method().boxed()),
+        }
+    };
+}
+
 pub enum TensorExpr<S1, S2 = S1>
 where
     S1: RawData,
@@ -26,6 +71,7 @@ where
         recv: BoxTensor<S1>,
         op: UnaryOp,
     },
+    Transpose(BoxTensor<S1>),
 }
 
 impl<A, B, S1, S2> TensorExpr<S1, S2>
@@ -35,6 +81,10 @@ where
 {
     pub fn binary(lhs: BoxTensor<S1>, rhs: BoxTensor<S2>, op: BinaryOp) -> Self {
         TensorExpr::Binary { lhs, rhs, op }
+    }
+
+    pub fn transpose(recv: BoxTensor<S1>) -> Self {
+        TensorExpr::Transpose(recv)
     }
 
     pub fn unary(recv: BoxTensor<S1>, op: UnaryOp) -> Self {
@@ -48,17 +98,7 @@ where
         S1: DataOwned,
         S2: DataOwned,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.into_owned().boxed(),
-                rhs: rhs.into_owned().boxed(),
-                op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.into_owned().boxed(),
-                op,
-            },
-        }
+        fwd_view_body!(self, into_owned)
     }
 
     pub fn into_shared(self) -> TensorExpr<OwnedArcRepr<A>, OwnedArcRepr<B>>
@@ -66,31 +106,11 @@ where
         S1: DataOwned,
         S2: DataOwned,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.into_shared().boxed(),
-                rhs: rhs.into_shared().boxed(),
-                op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.into_shared().boxed(),
-                op,
-            },
-        }
+        fwd_view_body!(self, into_shared)
     }
 
     pub fn raw_view(&self) -> TensorExpr<RawViewRepr<*const A>, RawViewRepr<*const B>> {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.raw_view().boxed(),
-                rhs: rhs.raw_view().boxed(),
-                op: *op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.raw_view().boxed(),
-                op: *op,
-            },
-        }
+        fwd_view_body!(&self, raw_view)
     }
 
     pub fn raw_view_mut(&mut self) -> TensorExpr<RawViewRepr<*mut A>, RawViewRepr<*mut B>>
@@ -98,17 +118,7 @@ where
         S1: RawDataMut,
         S2: RawDataMut,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.raw_view_mut().boxed(),
-                rhs: rhs.raw_view_mut().boxed(),
-                op: *op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.raw_view_mut().boxed(),
-                op: *op,
-            },
-        }
+        fwd_view_body!(&mut self, raw_view_mut)
     }
 
     pub fn to_owned(&self) -> TensorExpr<OwnedRepr<A>, OwnedRepr<B>>
@@ -118,17 +128,7 @@ where
         S1: Data,
         S2: Data,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.as_ref().to_owned().boxed(),
-                rhs: rhs.as_ref().to_owned().boxed(),
-                op: *op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.as_ref().to_owned().boxed(),
-                op: *op,
-            },
-        }
+        fwd_view_body!(&self, to_owned)
     }
 
     pub fn to_shared(&self) -> TensorExpr<OwnedArcRepr<A>, OwnedArcRepr<B>>
@@ -138,17 +138,7 @@ where
         S1: Data,
         S2: Data,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.to_shared().boxed(),
-                rhs: rhs.to_shared().boxed(),
-                op: *op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.to_shared().boxed(),
-                op: *op,
-            },
-        }
+        fwd_view_body!(&self, to_shared)
     }
 
     pub fn view(&self) -> TensorExpr<ViewRepr<&'_ A>, ViewRepr<&'_ B>>
@@ -156,17 +146,7 @@ where
         S1: Data,
         S2: Data,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.view().boxed(),
-                rhs: rhs.view().boxed(),
-                op: *op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.view().boxed(),
-                op: *op,
-            },
-        }
+        fwd_view_body!(&self, view)
     }
 
     pub fn view_mut(&mut self) -> TensorExpr<ViewRepr<&'_ mut A>, ViewRepr<&'_ mut B>>
@@ -174,17 +154,7 @@ where
         S1: DataMut,
         S2: DataMut,
     {
-        match self {
-            TensorExpr::Binary { lhs, rhs, op } => TensorExpr::Binary {
-                lhs: lhs.view_mut().boxed(),
-                rhs: rhs.view_mut().boxed(),
-                op: *op,
-            },
-            TensorExpr::Unary { recv, op } => TensorExpr::Unary {
-                recv: recv.view_mut().boxed(),
-                op: *op,
-            },
-        }
+        fwd_view_body!(&mut self, view_mut)
     }
 }
 
@@ -202,6 +172,7 @@ impl<A, B> TensorExpr<RawViewRepr<*const A>, RawViewRepr<*const B>> {
                 recv: recv.cast().boxed(),
                 op,
             },
+            TensorExpr::Transpose(recv) => TensorExpr::Transpose(recv.cast().boxed()),
         }
     }
 
@@ -216,6 +187,7 @@ impl<A, B> TensorExpr<RawViewRepr<*const A>, RawViewRepr<*const B>> {
                 recv: recv.deref_into_view().boxed(),
                 op,
             },
+            TensorExpr::Transpose(recv) => TensorExpr::Transpose(recv.deref_into_view().boxed()),
         }
     }
 }
@@ -236,6 +208,7 @@ where
                 recv: recv.clone(),
                 op: *op,
             },
+            TensorExpr::Transpose(recv) => TensorExpr::Transpose(recv.clone()),
         }
     }
 }

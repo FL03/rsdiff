@@ -43,9 +43,6 @@ pub enum BinaryOp {
     Xor,
     Shl,
     Shr,
-    Custom {
-        id: usize,
-    },
 }
 
 pub struct CustomOp {
@@ -79,9 +76,9 @@ impl BinaryOp {
         [add, div, mul, pow, rem, sub]
     );
 
-    simple_enum_constructor!(
-        st Custom, custom, { id: usize }
-    );
+    // simple_enum_constructor!(
+    //     st Custom, custom, { id: usize }
+    // );
     variant_constructor!(
         (Max, max),
         (Min, min),
@@ -104,7 +101,6 @@ impl Operator for BinaryOp {
             Self::Xor => "xor",
             Self::Shl => "shl",
             Self::Shr => "shr",
-            Self::Custom { .. } => "custom",
         }
     }
 

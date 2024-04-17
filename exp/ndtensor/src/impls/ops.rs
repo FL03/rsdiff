@@ -71,14 +71,14 @@ where
     unop!(acos, acosh, asin, asinh, atan, cos, cosh, exp, ln, neg, sin, sinh, sqrt, tan, tanh);
 }
 
-macro_rules! stdop {
+macro_rules! impl_binary_op {
     ($(($bound:ident, $call:ident, $op:tt)),*) => {
         $(
-            stdop!($bound, $call, $op);
+            impl_binary_op!($bound, $call, $op);
         )*
     };
     ($bound:ident, $call:ident, $op:tt) => {
-
+        // impl_binary_op!(alt: $bound, $call, $op);
 
         impl<A, B, S1, S2, D1, D2> core::ops::$bound<TensorBase<S2, D2>> for TensorBase<S1, D1>
         where
@@ -128,10 +128,34 @@ macro_rules! stdop {
             }
         }
     };
+    (alt: $bound:ident, $call:ident, $op:tt) => {
 
+
+        impl<A, B, C, S, D> core::ops::$bound<B> for TensorBase<S, D>
+        where
+            A: Clone + core::ops::$bound<B, Output = C>,
+            D: Dimension + DimMax<D2>,
+            S: DataOwned<Elem = A> + DataMut,
+            ArrayBase<S, D>: core::ops::$bound<B, Output = C>,
+
+        {
+            type Output = C;
+
+            fn $call(self, rhs: B) -> Self::Output {
+                let data = core::ops::$bound::$call(self.data(), rhs.data());
+                let lhs = self.into_dyn().into_owned();
+                let op = unsafe { TensorExpr::binary(
+                    Box::new(lhs),
+                    Box::new(rhs.into_dyn().raw_view().cast::<A>().deref_into_view()),
+                    BinaryOp::$call(),
+                )};
+                new!(data, Some(op.to_owned()))
+            }
+        }
+    };
 }
 
-stdop!(
+impl_binary_op!(
     (Add, add, +),
     (Div, div, /),
     (Mul, mul, *),

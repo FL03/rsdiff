@@ -27,6 +27,7 @@ pub(crate) mod impls {
     pub(crate) mod create;
     pub(crate) mod grad;
     pub(crate) mod ops;
+    pub(crate) mod reshape;
 }
 
 pub(crate) mod types {

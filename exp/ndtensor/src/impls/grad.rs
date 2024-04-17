@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::ops::TensorExpr;
-use crate::{ScalarExt, Tensor, TensorBase, TensorId, TensorView};
+use crate::{ScalarExt, Tensor, TensorId, TensorView};
 use ndarray::Data;
 use std::collections::HashMap;
 
@@ -24,7 +24,7 @@ where
     S: Data<Elem = A>,
 {
     /// toposort is a function which sorts the nodes of the op graph in topological order.
-    fn toposort(&self, reverse: bool) -> Vec<crate::TensorView<'_, S>> {
+    fn toposort(&self, reverse: bool) -> Vec<TensorView<'_, S>> {
         unimplemented!()
     }
 }

@@ -4,14 +4,10 @@
 */
 use crate::prelude::{TensorExpr, TensorId, TensorOp, TensorResult};
 use crate::Context;
-#[cfg(not(feature = "std"))]
-use alloc::vec;
 use core::borrow::{Borrow, BorrowMut};
 use core::fmt;
 use ndarray::iter::{Iter, IterMut};
 use ndarray::*;
-#[cfg(feature = "std")]
-use std::vec;
 
 pub(crate) fn new<S, D>(
     data: ArrayBase<S, D>,
@@ -54,13 +50,21 @@ where
     pub fn boxed(self) -> Box<TensorBase<S, D>> {
         Box::new(self)
     }
-
-    pub fn context(&self) -> &Context {
+    /// Get an immutable reference to the [context](Context) of the tensor.
+    pub fn ctx(&self) -> &Context {
         &self.ctx
+    }
+    /// Get a mutable reference to the [context](Context) of the tensor.
+    pub fn ctx_mut(&mut self) -> &mut Context {
+        &mut self.ctx
     }
 
     pub const fn data(&self) -> &ArrayBase<S, D> {
         &self.data
+    }
+
+    pub fn data_mut(&mut self) -> &mut ArrayBase<S, D> {
+        &mut self.data
     }
 
     pub fn dim(&self) -> D::Pattern {
@@ -107,19 +111,6 @@ where
         }
     }
 
-    pub fn into_shape<D2>(self, shape: D2) -> Result<TensorBase<S, D2::Dim>, ShapeError>
-    where
-        D2: IntoDimension,
-    {
-        let data = self.data.into_shape(shape)?;
-        Ok(TensorBase {
-            id: self.id,
-            ctx: self.ctx,
-            data,
-            op: self.op,
-        })
-    }
-
     pub fn into_shared(self) -> TensorBase<OwnedArcRepr<A>, D>
     where
         S: DataOwned,
@@ -133,7 +124,7 @@ where
     }
 
     pub fn is_variable(&self) -> bool {
-        self.context().is_variable()
+        self.ctx().is_variable()
     }
 
     pub fn iter(&self) -> Iter<'_, A, D>
@@ -413,5 +404,29 @@ where
 {
     fn eq(&self, other: &ArrayBase<S, D>) -> bool {
         self.data == other
+    }
+}
+
+impl<S, D, I> core::ops::Index<I> for TensorBase<S, D>
+where
+    D: Dimension,
+    I: NdIndex<D>,
+    S: Data,
+{
+    type Output = <S as RawData>::Elem;
+
+    fn index(&self, index: I) -> &Self::Output {
+        &self.data[index]
+    }
+}
+
+impl<S, D, I> core::ops::IndexMut<I> for TensorBase<S, D>
+where
+    D: Dimension,
+    I: NdIndex<D>,
+    S: DataMut,
+{
+    fn index_mut(&mut self, index: I) -> &mut Self::Output {
+        &mut self.data[index]
     }
 }

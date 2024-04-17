@@ -53,64 +53,41 @@ macro_rules! variant_constructor {
             variant_constructor!(@loop $($rest),*);
         )*
     };
-    ($(($variant:ident, $method:ident $($rest:tt),*)),*) => {
+    ($(($variant:ident $($rest:tt),*, $method:ident)),*) => {
         $(
-            variant_constructor!(@loop $variant, $method $($rest),*);
+            variant_constructor!(@loop $variant $($rest),*, $method);
         )*
-    };
-
-
-    (@loop $variant:ident, $method:ident, $call:expr) => {
-        pub fn $method() -> Self {
-            Self::$variant($call())
-        }
     };
     (@loop $variant:ident, $method:ident) => {
         pub fn $method() -> Self {
             Self::$variant
         }
     };
-    (@loop $variant:ident, $method:ident, $new:expr => {$($field:ident: $ty:ty),*}) => {
-        pub fn $method($($field:$ty),*) -> Self {
-            Self::$variant($new($($field),*))
+
+    (@loop $variant:ident($call:expr), $method:ident) => {
+        pub fn $method() -> Self {
+            Self::$variant($call())
         }
     };
-    (@loop $variant:ident, $method:ident => {$($field:ident: $ty:ty),*}) => {
-        pub fn $method($($field:$ty),*) -> Self {
-            Self::$variant {
-                $($field),*
-            }
-        }
-    };
+
 
 }
 
 macro_rules! simple_enum_constructor {
-    ($(($variant:ident, $method:ident, $new:expr)),*) => {
+    ($($n:tt)*) => {
+        simple_enum_constructor!(@loop $($n)*);
+    };
+    (@loop $(($variant:ident {$($field:ident: $ty:ty),*}, $method:ident)),*) => {
         $(
-            simple_enum_constructor!($variant, $method, $new);
+            simple_enum_constructor!(@loop $variant {$($field: $ty),*}, $method);
         )*
     };
-    ($variant:ident, $method:ident) => {
-        pub fn $method() -> Self {
-            Self::$variant
-        }
-    };
-    ($variant:ident, $method:ident, $new:expr) => {
-        pub fn $method() -> Self {
-            Self::$variant($new())
-        }
-    };
-    (st $variant:ident, $method:ident, {$($field:ident: $ty:ty),*}) => {
+
+    (@loop $variant:ident {$($field:ident: $ty:ty),*}, $method:ident) => {
         pub fn $method($($field:$ty),*) -> Self {
             Self::$variant {
                 $($field),*
             }
-        }
-    };
-    (ext $variant:ident, $method:ident, $new:expr, {$($field:ident: $ty:ty),*}) => {
-        pub fn $method($($field:$ty),*) -> Self {
-            Self::$variant($new($($field),*))
         }
     };
 }

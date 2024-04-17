@@ -2,7 +2,8 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinaryOp, Operator, TernaryOp, UnaryOp};
+use crate::ops::ternary::Ternary;
+use crate::ops::{OpKind, Operator};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
@@ -39,54 +40,58 @@ use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString,
         PartialOrd,
         VariantNames
     ),
-    name(OpKind)
+    name(TernaryOp),
+    strum(serialize_all = "lowercase")
 )]
-pub enum Op {
-    Binary(BinaryOp),
-    Ternary(TernaryOp),
-    Unary(UnaryOp),
+pub enum TernaryExpr {
+    Affine(Affine),
 }
 
-impl Op {
-    pub fn binary(op: BinaryOp) -> Self {
-        Self::Binary(op)
+impl Operator for TernaryExpr {
+    fn kind(&self) -> OpKind {
+        OpKind::Ternary
     }
 
-    pub fn ternary(op: TernaryOp) -> Self {
-        Self::Ternary(op)
-    }
-
-    pub fn unary(op: UnaryOp) -> Self {
-        Self::Unary(op)
-    }
-}
-
-impl Operator for Op {
     fn name(&self) -> &str {
         match self {
-            Self::Binary(op) => op.name(),
-            Self::Ternary(op) => op.name(),
-            Self::Unary(op) => op.name(),
+            TernaryExpr::Affine(op) => op.name(),
         }
     }
+}
 
+impl Operator for TernaryOp {
     fn kind(&self) -> OpKind {
+        OpKind::Ternary
+    }
+
+    fn name(&self) -> &str {
         match self {
-            Self::Binary(op) => op.kind(),
-            Self::Ternary(op) => op.kind(),
-            Self::Unary(op) => op.kind(),
+            Self::Affine => "affine",
         }
     }
 }
 
-impl From<BinaryOp> for Op {
-    fn from(op: BinaryOp) -> Self {
-        Self::Binary(op)
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Affine;
+
+impl Operator for Affine {
+    fn kind(&self) -> OpKind {
+        OpKind::Ternary
+    }
+
+    fn name(&self) -> &str {
+        "affine"
     }
 }
 
-impl From<UnaryOp> for Op {
-    fn from(op: UnaryOp) -> Self {
-        Self::Unary(op)
+impl<A, B, C> Ternary<A, B, C> for Affine
+where
+    A: core::ops::Mul<B, Output = C>,
+    C: core::ops::Add<Output = C>,
+{
+    type Output = C;
+
+    fn apply(&self, a: A, b: B, c: C) -> Self::Output {
+        a * b + c
     }
 }

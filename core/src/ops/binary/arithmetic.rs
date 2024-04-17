@@ -186,15 +186,14 @@ macro_rules! impl_evaluator {
     };
 }
 
-impl_evaluator!(sym
-    (Addition, core::ops::Add, +),
-    (Division, core::ops::Div, /),
-    (Multiplication, core::ops::Mul, *),
-    (Remainder, core::ops::Rem, %),
-    (Subtraction, core::ops::Sub, -)
+impl_evaluator!(
+    call(Addition, core::ops::Add, add),
+    (Division, core::ops::Div, div),
+    (Multiplication, core::ops::Mul, mul),
+    (Remainder, core::ops::Rem, rem),
+    (Subtraction, core::ops::Sub, sub),
+    (Power, num::traits::Pow, pow)
 );
-
-impl_evaluator!(call(Power, num::traits::Pow, pow));
 
 impl_binary_op!(std
     (Addition, Add, +),

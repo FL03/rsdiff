@@ -7,15 +7,17 @@ use crate::TensorBase;
 use acme::prelude::Store;
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut, Index, IndexMut};
-use std::collections::btree_map::{BTreeMap, Entry, Keys, Values};
+use std::collections::btree_map::{self, BTreeMap, Entry, Keys, Values};
 
 use ndarray::{DataOwned, RawData};
+
+pub(crate) type GradientMap<T> = BTreeMap<TensorId, T>;
 
 pub struct TensorGrad<S>
 where
     S: RawData,
 {
-    pub(crate) store: BTreeMap<TensorId, TensorBase<S>>,
+    pub(crate) store: GradientMap<TensorBase<S>>,
 }
 
 impl<S> Default for TensorGrad<S>
@@ -36,29 +38,25 @@ where
             store: BTreeMap::new(),
         }
     }
-
+    /// clears the gradient
     pub fn clear(&mut self) {
         self.store.clear()
     }
-
+    /// Returns an entry in the map for the given key.
     pub fn entry(&mut self, key: TensorId) -> Entry<'_, TensorId, TensorBase<S>> {
         self.store.entry(key)
+    }
+
+    pub fn get(&self, item: &TensorBase<S>) -> Option<&TensorBase<S>> {
+        self.store.get(&item.id())
     }
 
     pub fn get_mut(&mut self, key: &TensorId) -> Option<&mut TensorBase<S>> {
         self.store.get_mut(key)
     }
 
-    pub fn get_tensor(&self, item: &TensorBase<S>) -> Option<&TensorBase<S>> {
-        self.store.get(&item.id())
-    }
-
-    pub fn insert(&mut self, key: TensorId, tensor: TensorBase<S>) -> Option<TensorBase<S>> {
-        self.store.insert(key, tensor)
-    }
-
-    pub fn insert_tensor(&mut self, tensor: TensorBase<S>) -> Option<TensorBase<S>> {
-        self.insert(tensor.id(), tensor)
+    pub fn insert(&mut self, tensor: TensorBase<S>) -> Option<TensorBase<S>> {
+        self.store.insert(tensor.id(), tensor)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -100,21 +98,15 @@ where
         self.entry(tensor.id()).or_insert(tensor.zeros_like())
     }
 
-    pub fn remove(&mut self, key: &TensorId) -> Option<TensorBase<S>> {
-        self.store.remove(key)
-    }
-
-    pub fn remove_tensor(&mut self, tensor: &TensorBase<S>) -> Option<TensorBase<S>> {
-        self.remove(&tensor.id())
+    pub fn remove(&mut self, tensor: &TensorBase<S>) -> Option<TensorBase<S>> {
+        self.store.remove(&tensor.id())
     }
 
     pub fn values(&self) -> Values<'_, TensorId, TensorBase<S>> {
         self.store.values()
     }
 
-    pub fn values_mut(
-        &mut self,
-    ) -> std::collections::btree_map::ValuesMut<TensorId, TensorBase<S>> {
+    pub fn values_mut(&mut self) -> btree_map::ValuesMut<TensorId, TensorBase<S>> {
         self.store.values_mut()
     }
 }

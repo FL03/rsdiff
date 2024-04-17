@@ -18,6 +18,13 @@ fn test_tensor() {
 }
 
 #[test]
+fn test_index() {
+    let tensor = TensorBase::ndtensor(array![[0f64, 1f64], [2f64, 3f64]]);
+
+    assert_eq!(tensor[[0, 0]], 0f64);
+}
+
+#[test]
 fn test_tensor_ops() {
     let tensor = TensorBase::ndtensor(array![[0f64, 1f64], [2f64, 3f64]]);
     let res = tensor.cos();

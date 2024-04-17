@@ -5,12 +5,21 @@
 //! # Operations
 //!
 //!
-pub use self::{binary::BinaryOp, kinds::*, operator::*, unary::UnaryOp};
+pub use self::{
+    binary::BinaryOp,
+    expr::*,
+    kinds::*,
+    operator::*,
+    ternary::{TernaryExpr, TernaryOp},
+    unary::UnaryOp,
+};
 
+pub(crate) mod expr;
 pub(crate) mod kinds;
 pub(crate) mod operator;
 
 pub mod binary;
+pub mod ternary;
 pub mod unary;
 
 pub trait IntoOp {

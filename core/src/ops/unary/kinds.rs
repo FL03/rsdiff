@@ -22,11 +22,11 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 )]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Deserialize, serde::Serialize,),
-    serde(rename_all = "lowercase", untagged),
-    strum(serialize_all = "lowercase")
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase", untagged)
 )]
 #[repr(u8)]
+#[strum(serialize_all = "lowercase")]
 pub enum UnaryOp {
     Abs,
     Acos,
@@ -53,7 +53,7 @@ pub enum UnaryOp {
     Sinh,
     #[cfg_attr(feature = "serde", serde(alias = "square_root"))]
     Sqrt,
-    #[cfg_attr(feature = "serde", serde(alias = "sqr"))]
+    #[cfg_attr(feature = "serde", serde(alias = "square"))]
     Square,
     Tan,
     Tanh,
@@ -89,7 +89,7 @@ impl UnaryOp {
         (Sin, sin),
         (Sinh, sinh),
         (Sqrt, sqrt),
-        (Square, square),
+        (Square, sqr),
         (Tan, tan),
         (Tanh, tanh)
     );
@@ -119,7 +119,7 @@ impl Operator for UnaryOp {
             UnaryOp::Sin => "sin",
             UnaryOp::Sinh => "sinh",
             UnaryOp::Sqrt => "sqrt",
-            UnaryOp::Square => "square",
+            UnaryOp::Square => "sqr",
             UnaryOp::Tan => "tan",
             UnaryOp::Tanh => "tanh",
         }

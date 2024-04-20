@@ -26,6 +26,23 @@ macro_rules! nested {
     };
 }
 
+macro_rules! impl_fmt {
+    ($target:ident, $name:ident($($args:tt)*)) => {
+        impl core::fmt::$name for $target {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                write!(f, $($args)*)
+            }
+        }
+    };
+    ($target:ident<$($t:ident),*>, $name:ident($($args:tt)*)) => {
+        impl<$($t),*> core::fmt::$name for $target<$($t),*> {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                write!(f, $($args)*)
+            }
+        }
+    };
+}
+
 macro_rules! impl_binary {
     (impl $($path:ident)::*, for $lhs:ident => $body:block) => {
         impl<T> $($path)::*<T> for $lhs where T: $($tr)* {

@@ -2,7 +2,8 @@
     Appellation: gradient <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
+use crate::id::Identifiable;
+use crate::specs::StoreExt;
 pub trait Jacobian {
     type Item;
 
@@ -16,9 +17,11 @@ pub trait Partial<T> {
 }
 
 pub trait Grad {
-    type Output;
+    type Args: Identifiable;
+    type Gradient: StoreExt<Self::Args>;
 
-    fn grad(&self) -> Self::Output;
+    fn grad(&self) -> Self::Gradient;
+    fn grad_at(&self, wrt: <Self::Args as Identifiable>::Id) -> Self::Args;
 }
 
 pub trait Gradient<T> {

@@ -47,6 +47,7 @@ macro_rules! variant_constructor {
 
 }
 
+#[allow(unused_macros)]
 macro_rules! simple_enum_constructor {
     ($($n:tt)*) => {
         simple_enum_constructor!(@loop $($n)*);

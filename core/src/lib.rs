@@ -4,6 +4,10 @@
 */
 //! # Core
 //!
+//! The core module provides the fundamental building blocks for the Acme library.
+//! One of the primary focuses of the library is to provide a set of primitives and utilities
+//! for interpreting various operations. The core module is the foundation for the rest of the
+//! library, and it is designed to be as lightweight as possible.
 //!
 #[cfg(not(feature = "std"))]
 extern crate alloc;

@@ -2,8 +2,11 @@
     Appellation: stores <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#[cfg(not(feature = "std"))]
+use alloc::collections::{btree_map, BTreeMap};
 use core::borrow::Borrow;
-use std::collections::{BTreeMap, HashMap};
+#[cfg(feature = "std")]
+use std::collections::{btree_map, hash_map, BTreeMap, HashMap};
 
 pub trait Entry<'a> {
     type Key;
@@ -12,22 +15,6 @@ pub trait Entry<'a> {
     fn key(&self) -> &Self::Key;
 
     fn or_insert(self, default: Self::Value) -> &'a mut Self::Value;
-}
-
-impl<'a, K, V> Entry<'a> for std::collections::hash_map::Entry<'a, K, V>
-where
-    K: Eq + std::hash::Hash,
-{
-    type Key = K;
-    type Value = V;
-
-    fn key(&self) -> &Self::Key {
-        self.key()
-    }
-
-    fn or_insert(self, default: Self::Value) -> &'a mut Self::Value {
-        self.or_insert(default)
-    }
 }
 
 pub trait Get<Q> {
@@ -64,6 +51,49 @@ pub trait Store<K, V> {
     fn remove(&mut self, key: &K) -> Option<V>;
 }
 
+pub trait StoreExt<T>
+where
+    T: crate::id::Identifiable,
+{
+    type Store: Store<T::Id, T>;
+
+    fn store(&self) -> &Self::Store;
+
+    fn store_mut(&mut self) -> &mut Self::Store;
+
+    fn get(&self, item: T) -> Option<&T> {
+        Store::get(self.store(), item.id())
+    }
+
+    fn get_mut(&mut self, item: T) -> Option<&mut T> {
+        Store::get_mut(self.store_mut(), item.id())
+    }
+
+    fn insert(&mut self, item: T) -> Option<T> {
+        Store::insert(self.store_mut(), *item.id(), item)
+    }
+
+    fn remove(&mut self, item: T) -> Option<T> {
+        Store::remove(self.store_mut(), item.id())
+    }
+}
+
+impl<S, T> StoreExt<T> for S
+where
+    S: Store<T::Id, T>,
+    T: crate::id::Identifiable,
+{
+    type Store = S;
+
+    fn store(&self) -> &Self::Store {
+        self
+    }
+
+    fn store_mut(&mut self) -> &mut Self::Store {
+        self
+    }
+}
+
 pub trait Cache<K, V> {
     fn get_or_insert_with<F>(&mut self, key: K, f: F) -> &mut V
     where
@@ -72,6 +102,33 @@ pub trait Cache<K, V> {
 
 pub trait OrInsert<K, V> {
     fn or_insert(&mut self, key: K, value: V) -> &mut V;
+}
+
+macro_rules! entry {
+    ($($prefix:ident)::* -> $call:ident($($arg:tt),*)) => {
+        $($prefix)::*::Entry::$call($($arg),*)
+    };
+
+}
+
+macro_rules! impl_entry {
+    ($($prefix:ident)::* where $($preds:tt)* ) => {
+
+        impl<'a, K, V> Entry<'a> for $($prefix)::*::Entry<'a, K, V> where $($preds)* {
+            type Key = K;
+            type Value = V;
+
+            fn key(&self) -> &Self::Key {
+                entry!($($prefix)::* -> key(self))
+            }
+
+            fn or_insert(self, default: Self::Value) -> &'a mut Self::Value {
+                entry!($($prefix)::* -> or_insert(self, default))
+            }
+        }
+
+    };
+
 }
 
 macro_rules! impl_store {
@@ -98,5 +155,9 @@ macro_rules! impl_store {
     };
 }
 
+impl_entry!(btree_map where K: Ord);
+#[cfg(feature = "std")]
+impl_entry!(hash_map where K: Eq + core::hash::Hash);
 impl_store!(BTreeMap<K, V>, where K: Ord);
-impl_store!(HashMap<K, V>, where K: Eq + std::hash::Hash);
+#[cfg(feature = "std")]
+impl_store!(HashMap<K, V>, where K: Eq + core::hash::Hash);

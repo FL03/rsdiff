@@ -14,7 +14,7 @@ pub mod solve;
 pub mod tri;
 
 pub(crate) mod prelude {
-    pub use super::specs::*;
+    pub use super::specs::{Inverse, Matmul};
     pub use super::uplo::UPLO;
 }
 

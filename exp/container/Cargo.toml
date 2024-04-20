@@ -18,7 +18,7 @@ std = [
 bench = false
 crate-type = ["cdylib", "rlib"]
 doctest = false
-test = true
+test = false
 
 [build-dependencies]
 

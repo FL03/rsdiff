@@ -82,7 +82,7 @@ mod impl_args {
             (self.lhs, self.rhs)
         }
 
-        pub fn reverse(self) -> BinaryArgs<B, A> {
+        pub fn flip(self) -> BinaryArgs<B, A> {
             BinaryArgs::new(self.rhs, self.lhs)
         }
 

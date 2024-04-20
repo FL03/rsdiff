@@ -95,7 +95,7 @@ where
             if let Some(op) = &*node.op {
                 match op {
                     TensorExpr::Binary(lhs, rhs, kind) => match kind {
-                        BinaryOp::Arithmetic(inner) => match inner {
+                        BinaryOp::Arith(inner) => match inner {
                             Arithmetic::Add(_) => {
                                 *entry!(store, lhs) += &grad;
                                 *entry!(store, rhs) += &grad;
@@ -117,7 +117,7 @@ where
                         _ => todo!(),
                     },
                     TensorExpr::BinaryScalar(lhs, rhs, kind) => match kind {
-                        BinaryOp::Arithmetic(inner) => match inner {
+                        BinaryOp::Arith(inner) => match inner {
                             Arithmetic::Add(_) => {
                                 *entry!(store, lhs) += &grad;
                             }

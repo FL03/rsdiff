@@ -149,12 +149,7 @@ macro_rules! impl_binary_op {
 }
 
 macro_rules! impl_evaluator {
-    (sym $(($operand:ident, $($p:ident)::*, $op:tt)),*) => {
-        $(
-            impl_evaluator!(@loop $operand, $($p)::*, $op);
-        )*
-    };
-    (call $(($operand:ident, $($p:ident)::*, $call:ident)),*) => {
+    ($(($operand:ident, $($p:ident)::*, $call:ident)),*) => {
         $(
             impl_evaluator!(@loop $operand, $($p)::*, $call);
         )*
@@ -173,24 +168,10 @@ macro_rules! impl_evaluator {
             }
         }
     };
-    (@loop $operand:ident, $($p:ident)::*, $op:tt) => {
-        impl<P, A, B, C> Evaluator<P> for $operand
-        where
-            A: $($p)::*<B, Output = C>,
-            P: $crate::ops::Params<Pattern = (A, B)>
-        {
-            type Output = C;
-
-            fn eval(&self, args: P) -> Self::Output {
-                let (lhs, rhs) = args.into_pattern();
-                lhs $op rhs
-            }
-        }
-    };
 }
 
 impl_evaluator!(
-    call(Addition, core::ops::Add, add),
+    (Addition, core::ops::Add, add),
     (Division, core::ops::Div, div),
     (Multiplication, core::ops::Mul, mul),
     (Remainder, core::ops::Rem, rem),

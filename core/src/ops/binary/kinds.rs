@@ -35,7 +35,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 pub enum BinaryOp {
     // <Kind = String> {
     #[default]
-    Arithmetic(Arithmetic),
+    Arith(Arithmetic),
     Max,
     Min,
     And,
@@ -58,20 +58,20 @@ impl CustomOp {
 impl BinaryOp {
     pub fn differentiable(&self) -> bool {
         match self {
-            Self::Arithmetic(_) => true,
+            Self::Arith(_) => true,
             _ => false,
         }
     }
 
     pub fn is_commutative(&self) -> bool {
         match self {
-            Self::Arithmetic(arith) => arith.is_commutative(),
+            Self::Arith(arith) => arith.is_commutative(),
             BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
             _ => false,
         }
     }
     nested_constructor!(
-        Arithmetic<Arithmetic>,
+        Arith<Arithmetic>,
         arithmetic,
         [add, div, mul, pow, rem, sub]
     );
@@ -93,7 +93,7 @@ impl BinaryOp {
 impl Operator for BinaryOp {
     fn name(&self) -> &str {
         match self {
-            Self::Arithmetic(inner) => inner.name(),
+            Self::Arith(inner) => inner.name(),
             Self::Max => "max",
             Self::Min => "min",
             Self::And => "and",

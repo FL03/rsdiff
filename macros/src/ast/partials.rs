@@ -2,6 +2,7 @@
     Appellation: partials <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
 use syn::{Attribute, Block, Expr, Ident, ItemFn, Signature, Token, Type};
@@ -58,6 +59,7 @@ impl Parse for PartialFnCall {
 }
 
 pub enum PartialFn {
+    Custom(TokenStream),
     Expr(Expr),
     Item(ItemFn),
 }
@@ -69,7 +71,7 @@ impl Parse for PartialFn {
         } else if let Ok(expr) = input.parse() {
             Ok(Self::Expr(expr))
         } else {
-            Err(input.error("Expected a function call or method call"))
+            Ok(PartialFn::Custom(input.parse()?))
         }
     }
 }

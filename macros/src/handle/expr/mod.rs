@@ -39,7 +39,9 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
         // Handle differentiable closures
         Expr::Closure(inner) => handle_expr(&inner.body, variable),
         // Differentiate constants
-        Expr::Const(_) => quote! { T::default() },
+        Expr::Const(_) => {
+            quote! { T::default() }
+        }
         // Differentiate groups
         Expr::Group(inner) => handle_expr(&inner.expr, variable),
         // Differentiate literals
@@ -68,8 +70,16 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     }
 }
 
+pub fn check_lexical(attrs: &Vec<syn::Attribute>) -> bool {
+    attrs.iter().any(|attr| match &attr.meta {
+        syn::Meta::Path(inner) => inner.is_ident("lexical"),
+        _ => false,
+    })
+}
+
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
     let ExprCall { args, func, .. } = expr;
+
     let mut grad = quote! { 0.0 };
     for arg in args {
         let arg = handle_expr(arg, var);

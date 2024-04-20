@@ -10,11 +10,13 @@ extern crate proc_macro;
 pub(crate) use self::{primitives::*, utils::*};
 
 pub(crate) mod ast;
-pub(crate) mod autodiff;
 pub(crate) mod handle;
 pub(crate) mod ops;
-pub(crate) mod partial;
 pub(crate) mod utils;
+
+pub(crate) mod autodiff;
+pub(crate) mod operator;
+pub(crate) mod partial;
 
 use ast::partials::PartialAst;
 use proc_macro::TokenStream;
@@ -68,6 +70,15 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
     TokenStream::from(result)
 }
 
+#[doc(hidden)]
+#[proc_macro_attribute]
+pub fn operator(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(item as syn::Item);
+    let result = operator::impl_operator(ast);
+    TokenStream::from(result)
+}
+
+#[doc(hidden)]
 #[proc_macro_attribute]
 pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(item as syn::ItemFn);

@@ -81,6 +81,11 @@ required-features = ["macros"]
 name = "graph"
 required-features = ["graph"]
 
+[[example]]
+name = "macros"
+required-features = ["macros"]
+
+
 [[test]]
 name = "macros"
 required-features = ["macros"]

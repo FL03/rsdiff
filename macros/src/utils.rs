@@ -49,6 +49,13 @@ macro_rules! binary_expr {
     };
 }
 
+pub fn check_lexical(attrs: &Vec<syn::Attribute>) -> bool {
+    attrs.iter().any(|attr| match &attr.meta {
+        syn::Meta::Path(inner) => inner.is_ident("lexical"),
+        _ => false,
+    })
+}
+
 pub fn foil_expr(a: &Expr, b: &ExprParen, var: &Ident) -> TokenStream {
     let ExprParen {
         attrs,

@@ -70,12 +70,7 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     }
 }
 
-pub fn check_lexical(attrs: &Vec<syn::Attribute>) -> bool {
-    attrs.iter().any(|attr| match &attr.meta {
-        syn::Meta::Path(inner) => inner.is_ident("lexical"),
-        _ => false,
-    })
-}
+
 
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
     let ExprCall { args, func, .. } = expr;

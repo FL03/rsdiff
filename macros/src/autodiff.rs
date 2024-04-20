@@ -9,22 +9,13 @@ use proc_macro2::TokenStream;
 pub fn impl_autodiff(partial: &PartialAst) -> TokenStream {
     let PartialAst { expr, var, .. } = partial;
 
-    // match expr {
-    //     PartialFn::Expr(inner) => expr::handle_expr(inner, var),
-    //     PartialFn::Item(inner) => item::handle_item(&inner.clone().into(), var),
-    // }
     match expr {
         PartialFn::Expr(inner) => {
-            println!("******* EXPR ********");
             expr::handle_expr(inner, var)
         }
         PartialFn::Item(inner) => {
-            println!("******* ITEM_FN ********");
             item::handle_item(&inner.clone().into(), var)
         }
-        PartialFn::Custom(_inner) => {
-            println!("******* CUSTOM ********");
-            panic!("Custom functions not yet supported")
-        }
+        PartialFn::Custom(_inner) => panic!("Custom functions not yet supported"),
     }
 }

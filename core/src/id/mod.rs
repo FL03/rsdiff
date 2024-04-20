@@ -18,7 +18,7 @@ pub(crate) mod kinds {
 pub trait Identifier {}
 
 macro_rules! impl_identifier {
-    (@loop $($t:ty),*) => {
+    ($($t:ty),*) => {
         $(
             impl_identifier!(@loop $t);
         )*
@@ -26,6 +26,10 @@ macro_rules! impl_identifier {
     (@loop $t:ty) => {
         impl Identifier for $t {}
     };
+}
+
+impl_identifier! {
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize
 }
 
 pub trait Identifiable {

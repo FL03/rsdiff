@@ -33,6 +33,16 @@ pub trait Scalar:
 
     fn acos(self) -> Self;
 
+    fn acosh(self) -> Self;
+
+    fn asin(self) -> Self;
+
+    fn asinh(self) -> Self;
+
+    fn atan(self) -> Self;
+
+    fn atanh(self) -> Self;
+
     fn add_complex(&self, other: Self::Complex) -> Self::Complex {
         self.as_complex() + other
     }
@@ -121,6 +131,26 @@ where
         Complex::acos(self)
     }
 
+    fn acosh(self) -> Self {
+        Complex::acosh(self)
+    }
+
+    fn asin(self) -> Self {
+        Complex::asin(self)
+    }
+
+    fn asinh(self) -> Self {
+        Complex::asinh(self)
+    }
+
+    fn atan(self) -> Self {
+        Complex::atan(self)
+    }
+
+    fn atanh(self) -> Self {
+        Complex::atanh(self)
+    }
+
     fn as_complex(&self) -> Self::Complex {
         *self
     }
@@ -191,7 +221,15 @@ where
 }
 
 macro_rules! impl_scalar {
+    ($($re:ty),*) => {
+        $(
+            impl_scalar!(@loop $re);
+        )*
+    };
     ($re:ty) => {
+        impl_scalar!(@loop $re);
+    };
+    (@loop $re:ty) => {
         impl Scalar for $re {
             type Complex = Complex<$re>;
             type Real = $re;
@@ -206,6 +244,26 @@ macro_rules! impl_scalar {
 
             fn acos(self) -> Self {
                 <$re>::acos(self)
+            }
+
+            fn acosh(self) -> Self {
+                <$re>::acosh(self)
+            }
+
+            fn asin(self) -> Self {
+                <$re>::asin(self)
+            }
+
+            fn asinh(self) -> Self {
+                <$re>::asinh(self)
+            }
+
+            fn atan(self) -> Self {
+                <$re>::atan(self)
+            }
+
+            fn atanh(self) -> Self {
+                <$re>::atanh(self)
             }
 
             fn as_complex(&self) -> Self::Complex {
@@ -275,5 +333,4 @@ macro_rules! impl_scalar {
     };
 }
 
-impl_scalar!(f32);
-impl_scalar!(f64);
+impl_scalar!(f32, f64);

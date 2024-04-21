@@ -59,7 +59,7 @@ pub enum CompareExpr {
 )]
 #[cfg_attr(
     feature = "serde",
-    derive(Deserialize, Serialize,),
+    derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase", untagged)
 )]
 #[repr(u8)]
@@ -167,7 +167,7 @@ impl From<Division> for BinaryExpr {
 )]
 #[cfg_attr(
     feature = "serde",
-    derive(Deserialize, Serialize,),
+    derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase", untagged)
 )]
 #[repr(u8)]
@@ -209,7 +209,7 @@ pub enum UnaryExpr {
 )]
 #[cfg_attr(
     feature = "serde",
-    derive(Deserialize, Serialize,),
+    derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase", untagged)
 )]
 #[repr(u8)]

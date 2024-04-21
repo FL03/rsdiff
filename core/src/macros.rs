@@ -44,7 +44,7 @@ macro_rules! impl_fmt {
 }
 
 macro_rules! impl_binary {
-    (impl $($path:ident)::*, for $lhs:ident => $body:block) => {
+    (impl $($path:ident)::* for $lhs:ident => $body:block) => {
         impl<T> $($path)::*<T> for $lhs where T: $($tr)* {
             type Output = $res;
 
@@ -108,15 +108,29 @@ macro_rules! evaluator {
 }
 
 macro_rules! operator {
-    ($kind:ident: $($op:ident),*) => {
+    ($(($op:ident<$kind:ident>, $name:ident)),*) => {
         $(
-            operator!($op, $kind);
+            operator!(@impl $op<$kind>, $name);
         )*
     };
-    ($op:ident, $kind:ident) => {
-        operator!($op, $kind, $op);
+    ($($op:ident<$kind:ident>),*) => {
+        $(
+            operator!(@impl $op<$kind>, $op);
+        )*
     };
-    ($op:ident, $kind:ident, $name:ident) => {
+    ($kind:ident: $($op:ident),*) => {
+        operator!($(op<$kind>),*);
+    };
+    ($kind:ident: $(($op:ident, $name:ident)),*) => {
+        operator!($(($op<$kind>, $name)),*);
+    };
+    ($op:ident<$kind:ident>) => {
+        operator!(@impl $op<$kind>, $op);
+    };
+    ($op:ident<$kind:ident>, $name:ident) => {
+        operator!(@impl $op<$kind>, $name);
+    };
+    (@impl $op:ident<$kind:ident>, $name:ident) => {
 
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]

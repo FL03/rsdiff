@@ -61,6 +61,10 @@ pub trait Scalar:
 
     fn as_complex(&self) -> Self::Complex;
 
+    fn cubed(&self) -> Self {
+        self.powi(3)
+    }
+
     fn conj(&self) -> Self::Complex;
 
     fn im(&self) -> Self::Real {

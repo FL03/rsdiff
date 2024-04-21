@@ -12,7 +12,10 @@ pub struct IndexId<Idx = usize> {
 }
 
 impl<Idx> IndexId<Idx> {
-    pub fn new(index: Idx) -> Self {
+    pub fn new(id: AtomicId, index: Idx) -> Self {
+        Self { id, index }
+    }
+    pub fn from_index(index: Idx) -> Self {
         Self {
             id: AtomicId::new(),
             index,
@@ -33,10 +36,6 @@ where
     Idx: core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        if f.alternate() {
-            write!(f, "{}.{}", self.index(), self.id)
-        } else {
-            write!(f, "{}", self.index())
-        }
+        write!(f, "{}({})", self.id(), self.index())
     }
 }

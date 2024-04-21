@@ -2,7 +2,7 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::BinOp;
+use super::{BinOp, BinaryAssignOp};
 use crate::ops::{Evaluator, OpKind, Operator, Params};
 use num::traits::{NumOps, Pow};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
@@ -100,11 +100,13 @@ macro_rules! impl_binary_op {
     //     impl_binary_op!(@loop $($args),*);
 
     // };
-    ($op:ident, $($p:ident)::*, $operator:tt) => {
-        impl_binary_op!(@loop $op, $($p)::*, $operator);
+    ($(($operand:ident, $($p:ident)::*.$op:ident)),*) => {
+        $(
+            impl_binary_op!(@loop $operand, $($p)::*.$op);
+        )*
     };
-    (other: $operand:ident, $($p:ident)::*, $op:ident) => {
-        impl_binary_op!(@loop $operand, $($p)::*, $op);
+    ($operand:ident, $($p:ident)::*.$op:ident) => {
+        impl_binary_op!(@loop $operand, $($p)::*.$op);
     };
     (std $(($op:ident, $bound:ident, $operator:tt)),*) => {
         $(
@@ -118,8 +120,9 @@ macro_rules! impl_binary_op {
 
     };
 
-    (@loop $operand:ident, $($p:ident)::*, $op:ident) => {
-        operator!($operand, Binary, $op);
+    (@loop $operand:ident, $($p:ident)::*.$op:ident) => {
+        operator!($operand<Binary>, $op);
+        impl_evaluator!($operand, $($p)::*.$op);
 
         impl<A, B, C> BinOp<A, B> for $operand
         where
@@ -148,13 +151,49 @@ macro_rules! impl_binary_op {
     };
 }
 
+macro_rules! assign_op {
+    ($(($operand:ident, $($p:ident)::*, $op:tt)),*) => {
+        $(assign_op!(@loop $operand, $($p)::*, $op);)*
+    };
+    ($operand:ident, $($p:ident)::*, $op:tt) => {
+        assign_op!(@impl $operand, $($p)::*, $op);
+    };
+    (@impl $operand:ident, $($p:ident)::*, $op:tt) => {
+        operator!($operand<Binary>);
+
+        impl<A, B> BinOp<A, B> for $operand
+        where
+            A: Copy + $($p)::*<B>,
+        {
+            type Output = A;
+
+            fn eval(&self, mut lhs: A, rhs: B) -> Self::Output {
+                lhs $op rhs;
+                lhs
+            }
+        }
+
+        impl<A, B> BinaryAssignOp<A, B> for $operand
+        where
+            A: $($p)::*<B>,
+        {
+            fn eval(&self, mut lhs: A, rhs: B) {
+                lhs $op rhs;
+            }
+        }
+    };
+}
+
 macro_rules! impl_evaluator {
-    ($(($operand:ident, $($p:ident)::*, $call:ident)),*) => {
+    ($(($operand:ident, $($p:ident)::*.$call:ident)),*) => {
         $(
-            impl_evaluator!(@loop $operand, $($p)::*, $call);
+            impl_evaluator!(@loop $operand, $($p)::*.$call);
         )*
     };
-    (@loop $operand:ident, $($p:ident)::*,  $call:ident) => {
+    ($operand:ident, $($p:ident)::*.$call:ident) => {
+        impl_evaluator!(@loop $operand, $($p)::*.$call);
+    };
+    (@loop $operand:ident, $($p:ident)::*.$call:ident) => {
         impl<P, A, B, C> Evaluator<P> for $operand
         where
             A: $($p)::*<B, Output = C>,
@@ -170,32 +209,26 @@ macro_rules! impl_evaluator {
     };
 }
 
-impl_evaluator!(
-    (Addition, core::ops::Add, add),
-    (Division, core::ops::Div, div),
-    (Multiplication, core::ops::Mul, mul),
-    (Remainder, core::ops::Rem, rem),
-    (Subtraction, core::ops::Sub, sub),
-    (Power, num::traits::Pow, pow)
-);
-
-impl_binary_op!(std
-    (Addition, Add, +),
-    (Division, Div, /),
-    (Multiplication, Mul, *),
-    (Remainder, Rem, %),
-    (Subtraction, Sub, -)
-);
-
-impl_binary_op!(other: Power, Pow, pow);
 
 impl_binary_op!(
-    std(BitAnd, BitAnd, bitand),
-    (BitOr, BitOr, bitor),
-    (BitXor, BitXor, bitxor),
-    (Shl, Shl, shl),
-    (Shr, Shr, shr)
+    (Addition, core::ops::Add.add),
+    (Division, core::ops::Div.div),
+    (Multiplication, core::ops::Mul.mul),
+    (Remainder, core::ops::Rem.rem),
+    (Subtraction, core::ops::Sub.sub),
+    (Power, num::traits::Pow.pow)
 );
+
+assign_op!(AddAssign, core::ops::AddAssign, +=);
+
+
+// impl_binary_op!(
+//     (BitAnd, BitAnd.
+//     (BitOr, BitOr, |),
+//     (BitXor, BitXor, &|),
+//     (Shl, Shl, <<),
+//     (Shr, Shr, >>)
+// );
 
 impl_arith!(
     Arithmetic: [

@@ -43,6 +43,7 @@ pub enum BinaryOp {
     Xor,
     Shl,
     Shr,
+    // Custom()
 }
 
 pub struct CustomOp {

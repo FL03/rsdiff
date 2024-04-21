@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{BinaryOp, UnaryOp};
+use crate::id::IndexId;
 use crate::prelude::AnyBox;
 use strum::EnumIs;
 
@@ -11,7 +12,7 @@ pub enum Expr<K = usize, V = AnyBox> {
     Binary(BinaryExpr<K, V>),
     Unary(UnaryExpr<K, V>),
     Constant(V),
-    Variable { id: K, value: V },
+    Variable { id: IndexId<K>, value: V },
 }
 
 impl<K, V> Expr<K, V> {
@@ -27,8 +28,11 @@ impl<K, V> Expr<K, V> {
         Self::Unary(UnaryExpr::new(arg, op))
     }
 
-    pub fn variable(id: K, value: V) -> Self {
-        Self::Variable { id, value }
+    pub fn variable(idx: K, value: V) -> Self {
+        Self::Variable {
+            id: IndexId::from_index(idx),
+            value,
+        }
     }
 }
 

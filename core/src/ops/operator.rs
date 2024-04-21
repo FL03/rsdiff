@@ -4,12 +4,46 @@
 */
 use super::kinds::OpKind;
 
+pub trait OperandType {
+    private!();
+}
+
 pub trait Operator {
     fn kind(&self) -> OpKind;
 
     fn name(&self) -> &str;
 }
 
+
+pub trait Params {
+    type Pattern;
+
+    fn into_pattern(self) -> Self::Pattern;
+}
+
+pub trait Evaluator<Args>
+where
+    Self: Operator,
+    Args: Params,
+{
+    type Output;
+
+    fn eval(&self, args: Args) -> Self::Output;
+}
+
+pub trait Differentiable<Args>
+where
+    Self: Evaluator<Args>,
+    Args: Params,
+{
+    type Grad;
+
+    fn grad(&self, args: Args) -> Self::Grad;
+}
+
+/*
+    **************** implementations ****************
+*/
 impl Operator for Box<dyn Operator> {
     fn kind(&self) -> OpKind {
         self.as_ref().kind()
@@ -18,11 +52,6 @@ impl Operator for Box<dyn Operator> {
     fn name(&self) -> &str {
         self.as_ref().name()
     }
-}
-pub trait Params {
-    type Pattern;
-
-    fn into_pattern(self) -> Self::Pattern;
 }
 
 macro_rules! args_impl {
@@ -81,102 +110,25 @@ macro_rules! args_impl {
 
 args_impl!();
 args_impl!(A);
-args_impl!((A, B), (A, B, C), (A, B, C, D));
+args_impl!((A, B), (A, B, C), (A, B, C, D), (A, B, C, D, E));
 
-pub struct Adder;
+macro_rules! impl_operand_ty {
+    ($($kind:ident),*) => {
+        $(
+            impl_operand_ty!(@impl $kind);
+        )*
+    };
+    (@impl $kind:ident) => {
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+        pub struct $kind;
 
-impl Operator for Adder {
-    fn kind(&self) -> OpKind {
-        OpKind::Binary
-    }
-
-    fn name(&self) -> &str {
-        "adder"
-    }
+        impl OperandType for $kind {
+            seal!();
+        }
+    };
 }
 
-impl<A, B, C> super::binary::BinOp<A, B> for Adder
-where
-    A: core::ops::Add<B, Output = C>,
-{
-    type Output = C;
 
-    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-        lhs + rhs
-    }
-}
 
-impl<P, A, B, C> Evaluator<P> for Adder
-where
-    A: core::ops::Add<B, Output = C>,
-    P: Params<Pattern = (A, B)>,
-{
-    type Output = C;
-
-    fn eval(&self, args: P) -> Self::Output {
-        let args = args.into_pattern();
-        args.0 + args.1
-    }
-}
-
-impl<P, A, B, C> Differentiable<P> for Adder
-where
-    A: core::ops::Add<B, Output = C>,
-    P: Params<Pattern = (A, B)>,
-{
-    type Grad = C;
-
-    fn grad(&self, args: P) -> Self::Grad {
-        let args = args.into_pattern();
-        args.0 + args.1
-    }
-}
-
-pub trait Evaluator<Args>
-where
-    Self: Operator,
-    Args: Params,
-{
-    type Output;
-
-    fn eval(&self, args: Args) -> Self::Output;
-}
-
-// impl<Args, C> Evaluator<Args> for Box<dyn Evaluator<Args, Output = C> + Operator> where Args: Params {
-//     type Output = C;
-
-//     fn eval(&self, args: Args) -> Self::Output {
-//         self.as_ref().eval(args)
-//     }
-// }
-
-pub trait Differentiable<Args>
-where
-    Self: Evaluator<Args>,
-    Args: Params,
-{
-    type Grad;
-
-    fn grad(&self, args: Args) -> Self::Grad;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_args() {
-        let args = ();
-        let pattern = args.into_pattern();
-        assert_eq!(pattern, args);
-        let args = (10f64,);
-        let pattern = args.into_pattern();
-        assert_eq!(pattern, args);
-        let args = (0f64, 0f32);
-        let pattern = args.into_pattern();
-        assert_eq!(pattern, args);
-        let args = (0f64, 0f32, 0usize);
-        let pattern = args.into_pattern();
-        assert_eq!(pattern, args);
-    }
-}
+impl_operand_ty!(Binary, Nary, Ternary, Unary);

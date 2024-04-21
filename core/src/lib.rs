@@ -17,6 +17,8 @@ extern crate alloc;
 #[macro_use]
 pub(crate) mod macros;
 #[macro_use]
+pub(crate) mod seal;
+#[macro_use]
 pub(crate) mod utils;
 
 pub mod error;

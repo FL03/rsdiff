@@ -15,10 +15,10 @@ std = [
 ]
 
 [lib]
-bench = false
+bench = true
 crate-type = ["cdylib", "rlib"]
-doctest = false
-test = false
+doctest = true
+test = true
 
 [build-dependencies]
 

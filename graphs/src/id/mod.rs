@@ -10,10 +10,13 @@ pub use self::{entry::*, id::*};
 pub(crate) mod entry;
 pub(crate) mod id;
 
-pub trait Identifier {}
+use acme::prelude::Identifier;
 
-pub trait Index {
-    fn next(&self) -> Self;
+pub trait GraphIdx {
+    type Idx: Identifier;
+    fn new(index: Self::Idx) -> Self;
+    fn id(&self) -> EntryId;
+    fn index(&self) -> &Self::Idx;
 }
 
 #[cfg(test)]

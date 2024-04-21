@@ -22,6 +22,9 @@ pub mod scg;
 
 pub use petgraph::graph::{EdgeIndex, GraphIndex, NodeIndex};
 
+pub type Gid = acme::id::IndexId<crate::NodeIndex>;
+
+
 pub mod prelude {
     #[doc(inline)]
     pub use crate::dcg::Dcg;

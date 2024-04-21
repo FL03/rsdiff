@@ -18,7 +18,10 @@ pub mod binary;
 pub mod ternary;
 pub mod unary;
 
-pub trait IntoOp<F> where F: Operator {
+pub trait IntoOp<F>
+where
+    F: Operator,
+{
     fn into_op(self) -> F;
 }
 
@@ -27,7 +30,6 @@ where
     F: Operator,
     S: Into<F>,
 {
-
     fn into_op(self) -> F {
         self.into()
     }
@@ -47,8 +49,6 @@ mod tests {
     use super::binary::Arithmetic;
     use super::{Evaluator, Params};
 
-
-
     #[test]
     fn test_args() {
         let args = ();
@@ -64,7 +64,6 @@ mod tests {
         let pattern = args.into_pattern();
         assert_eq!(pattern, args);
     }
-
 
     #[test]
     fn test_arith() {

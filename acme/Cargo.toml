@@ -22,7 +22,8 @@ full = [
     "derive",
     "graph",
     "serde",
-    "tensor"
+    "tensor",
+    "trace",
 ]
 
 core = []
@@ -57,6 +58,11 @@ std = [
 
 tensor = [
     "dep:acme-tensor"
+]
+
+trace = [
+    "acme-core/trace",
+    "acme-graphs/trace",
 ]
 
 

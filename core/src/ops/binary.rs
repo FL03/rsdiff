@@ -41,7 +41,6 @@ impl<A, B, C> BinOp<A, B> for Box<dyn BinOp<A, B, Output = C>> {
 }
 
 impl<A, B> BinaryAssignOp<A, B> for Box<dyn BinaryAssignOp<A, B>> {
-
     fn eval(&self, lhs: A, rhs: B) {
         self.as_ref().eval(lhs, rhs)
     }

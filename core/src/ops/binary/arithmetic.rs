@@ -209,7 +209,6 @@ macro_rules! impl_evaluator {
     };
 }
 
-
 impl_binary_op!(
     (Addition, core::ops::Add.add),
     (Division, core::ops::Div.div),
@@ -220,7 +219,6 @@ impl_binary_op!(
 );
 
 assign_op!(AddAssign, core::ops::AddAssign, +=);
-
 
 // impl_binary_op!(
 //     (BitAnd, BitAnd.

@@ -26,7 +26,6 @@ pub fn handle_item_fn(item: &ItemFn, var: &Ident) -> TokenStream {
             }
         }
     }
-    println!("\n\n****\nITEM_FN\n****");
 
     handle_block(block, var)
 }

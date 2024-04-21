@@ -25,6 +25,10 @@ serde-ext = [
 
 std = []
 
+trace = [
+    "dep:tracing",
+]
+
 [lib]
 bench = false
 crate-type = ["cdylib", "rlib"]
@@ -39,6 +43,7 @@ serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
 smart-default.workspace = true
 strum.workspace = true
+tracing = { optional = true, version = "0.1" }
 
 [dev-dependencies]
 lazy_static = "1"

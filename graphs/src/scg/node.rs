@@ -6,14 +6,14 @@
 //!
 //! A computational graph relies on weighted nodes to represent constants, operations, and variables.
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
-use crate::id::EntryId;
-use crate::ops::{IntoOp, Operations};
 use crate::NodeIndex;
+use acme::id::AtomicId;
+use acme::ops::{Op, Operator};
 use smart_default::SmartDefault;
-use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
+use strum::{Display, EnumCount, EnumIs, VariantNames};
 
 pub trait ScgNode {
-    fn id(&self) -> EntryId;
+    fn id(&self) -> AtomicId;
     fn name(&self) -> &str;
 }
 
@@ -21,7 +21,7 @@ macro_rules! impl_scg_node {
     ($($ty:ty),*) => {
         $(
             impl ScgNode for $ty {
-                fn id(&self) -> EntryId {
+                fn id(&self) -> AtomicId {
                     self.id
                 }
 
@@ -42,8 +42,6 @@ impl_scg_node!(Placeholder, Operation);
     Display,
     EnumCount,
     EnumIs,
-    EnumIter,
-    EnumString,
     Eq,
     Hash,
     Ord,
@@ -60,7 +58,7 @@ pub enum Node {
 }
 
 impl Node {
-    pub fn operation(inputs: impl IntoIterator<Item = NodeIndex>, op: impl IntoOp) -> Self {
+    pub fn operation(inputs: impl IntoIterator<Item = NodeIndex>, op: impl Into<Op>) -> Self {
         Node::Operation(Operation::new(inputs, op))
     }
 
@@ -68,7 +66,7 @@ impl Node {
         Node::Placeholder(Placeholder::new(name))
     }
 
-    pub fn id(&self) -> EntryId {
+    pub fn id(&self) -> AtomicId {
         match self {
             Node::Operation(op) => op.id(),
             Node::Placeholder(ph) => ph.id(),
@@ -89,7 +87,7 @@ impl Node {
         }
     }
 
-    pub fn op(&self) -> Option<&Operations> {
+    pub fn op(&self) -> Option<&Op> {
         match self {
             Node::Operation(op) => Some(op.operation()),
             _ => None,
@@ -100,14 +98,14 @@ impl Node {
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Placeholder {
-    id: EntryId,
+    id: AtomicId,
     name: String,
 }
 
 impl Placeholder {
     pub fn new(name: impl ToString) -> Self {
         Self {
-            id: EntryId::new(),
+            id: AtomicId::new(),
             name: name.to_string(),
         }
     }
@@ -117,7 +115,7 @@ impl Placeholder {
         self
     }
 
-    pub const fn id(&self) -> EntryId {
+    pub const fn id(&self) -> AtomicId {
         self.id
     }
 
@@ -126,22 +124,22 @@ impl Placeholder {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Operation {
-    id: EntryId,
+    id: AtomicId,
     inputs: Vec<NodeIndex>,
     name: String,
-    op: Operations,
+    op: Op,
 }
 
 impl Operation {
-    pub fn new(inputs: impl IntoIterator<Item = NodeIndex>, op: impl IntoOp) -> Self {
-        let op = op.into_op();
+    pub fn new(inputs: impl IntoIterator<Item = NodeIndex>, op: impl Into<Op>) -> Self {
+        let op = op.into();
         Self {
-            id: EntryId::new(),
+            id: AtomicId::new(),
             inputs: Vec::from_iter(inputs),
-            name: op.to_string(),
+            name: op.name().to_string(),
             op,
         }
     }
@@ -172,7 +170,7 @@ impl Operation {
         &self.name
     }
 
-    pub fn operation(&self) -> &Operations {
+    pub fn operation(&self) -> &Op {
         &self.op
     }
 }

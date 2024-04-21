@@ -14,7 +14,6 @@ pub trait Operator {
     fn name(&self) -> &str;
 }
 
-
 pub trait Params {
     type Pattern;
 
@@ -42,7 +41,7 @@ where
 }
 
 /*
-    **************** implementations ****************
+ **************** implementations ****************
 */
 impl Operator for Box<dyn Operator> {
     fn kind(&self) -> OpKind {
@@ -128,7 +127,5 @@ macro_rules! impl_operand_ty {
         }
     };
 }
-
-
 
 impl_operand_ty!(Binary, Nary, Ternary, Unary);

@@ -3,9 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{Edge, Node, Operation};
-use crate::ops::{BinaryExpr, IntoOp, Operations};
 use crate::prelude::GraphResult as Result;
-use acme::ops::binary::BinOp;
+use acme::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
 use num::traits::{NumAssign, NumOps, Signed};
 use petgraph::algo::toposort;
 use petgraph::prelude::{DiGraph, NodeIndex};
@@ -54,7 +53,7 @@ impl<T> Scg<T> {
     pub fn operation(
         &mut self,
         inputs: impl IntoIterator<Item = NodeIndex>,
-        operation: impl IntoOp,
+        operation: impl Into<Op>,
         result: Option<T>,
     ) -> Result<NodeIndex>
     where
@@ -106,32 +105,39 @@ where
                     // calculate the gradient of each input w.r.t. the current node
                     let dt = if let Some(op) = node.op() {
                         match op {
-                            Operations::Binary(op) => match op {
-                                BinaryExpr::Add(_) => grad,
-                                BinaryExpr::Div(_) => {
-                                    let out = self.vals[&i];
-                                    let val = self.vals[input];
-                                    if j % 2 == 0 {
-                                        grad / val
-                                    } else {
-                                        -grad * out / (val * val)
+                            Op::Binary(base) => match base {
+                                BinaryOp::Arith(inner) => match inner {
+                                    Arithmetic::Add(_) => grad,
+                                    Arithmetic::Div(_) => {
+                                        let out = self.vals[&i];
+                                        let val = self.vals[input];
+                                        if j % 2 == 0 {
+                                            grad / val
+                                        } else {
+                                            -grad * out / (val * val)
+                                        }
                                     }
-                                }
-                                BinaryExpr::Mul(_) => {
-                                    let out = self.vals[&i];
-                                    let val = self.vals[input];
-                                    grad * out / val
-                                }
-                                BinaryExpr::Sub(_) => {
-                                    if j % 2 == 0 {
-                                        grad
-                                    } else {
-                                        grad.neg()
+                                    Arithmetic::Mul(_) => {
+                                        let out = self.vals[&i];
+                                        let val = self.vals[input];
+                                        grad * out / val
                                     }
-                                }
-                                _ => T::default(),
+                                    Arithmetic::Sub(_) => {
+                                        if j % 2 == 0 {
+                                            grad
+                                        } else {
+                                            grad.neg()
+                                        }
+                                    }
+                                    _ => todo!(),
+                                },
+                                _ => todo!(),
                             },
-                            _ => T::default(),
+                            Op::Unary(base) => match base {
+                                UnaryOp::Neg => -grad,
+                                _ => todo!(),
+                            },
+                            _ => todo!(),
                         }
                     } else {
                         T::default()
@@ -154,8 +160,8 @@ where
     pub fn add(&mut self, a: NodeIndex, b: NodeIndex) -> Result<NodeIndex> {
         let x = self.vals[&a];
         let y = self.vals[&b];
-        let op = BinaryExpr::add();
-        let res = op.eval(x, y);
+        let op = BinaryOp::add();
+        let res = x + y;
 
         let c = self.operation([a, b], op, Some(res))?;
         Ok(c)
@@ -165,7 +171,7 @@ where
         let x = self.vals[&a];
         let y = self.vals[&b];
         let res = x * y;
-        let c = self.operation([a, b], BinaryExpr::mul(), Some(res))?;
+        let c = self.operation([a, b], BinaryOp::mul(), Some(res))?;
 
         Ok(c)
     }

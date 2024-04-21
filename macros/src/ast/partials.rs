@@ -5,19 +5,40 @@
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::{Attribute, Block, Expr, Ident, ItemFn, Signature, Token, Type};
+use syn::{Attribute, Block, Expr, Ident, Item, Signature, Token, Type};
 
+// #77 Try to integrate with the #[operator] macro by collecting the String created by invoking <call>_lexical()
+pub enum Scope {
+    Expr(Expr),
+    Item(Item),
+    Custom(Expr, TokenStream),
+}
+
+impl Parse for Scope {
+    fn parse(input: ParseStream) -> Result<Self> {
+        if let Ok(item) = input.parse() {
+            Ok(Self::Item(item))
+        } else if let Ok(expr) = input.parse() {
+            Ok(Self::Expr(expr))
+        } else {
+            Err(input.error("expected item or expression"))
+        }
+    }
+}
 pub struct Partial {
-    pub expr: Expr,
+    pub attrs: Vec<Attribute>,
+    pub expr: Scope,
     pub var: Ident,
 }
 
 impl Parse for Partial {
     fn parse(input: ParseStream) -> Result<Self> {
+        let attrs = input.call(Attribute::parse_outer)?;
         let variable = input.parse()?;
         input.parse::<Token![:]>()?;
         let expr = input.parse()?;
         Ok(Partial {
+            attrs,
             expr,
             var: variable,
         })
@@ -55,38 +76,5 @@ impl Parse for PartialFnCall {
             body: Box::new(body),
             sig,
         })
-    }
-}
-
-pub enum PartialFn {
-    Custom(TokenStream),
-    Expr(Expr),
-    Item(ItemFn),
-}
-
-impl Parse for PartialFn {
-    fn parse(input: ParseStream) -> Result<Self> {
-        if let Ok(item) = input.parse() {
-            Ok(Self::Item(item))
-        } else if let Ok(expr) = input.parse() {
-            Ok(Self::Expr(expr))
-        } else {
-            Ok(PartialFn::Custom(input.parse()?))
-        }
-    }
-}
-
-pub struct PartialAst {
-    pub expr: PartialFn,
-    pub split: Token![:],
-    pub var: Ident,
-}
-
-impl Parse for PartialAst {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let var = input.parse()?;
-        let split = input.parse::<Token![:]>()?;
-        let expr = input.parse()?;
-        Ok(Self { expr, split, var })
     }
 }

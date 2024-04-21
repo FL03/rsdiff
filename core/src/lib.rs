@@ -30,6 +30,7 @@ pub mod ops;
 pub mod specs;
 pub mod types;
 
+#[doc(hidden)]
 pub mod prelude {
     pub use crate::error::*;
     pub use crate::id::*;

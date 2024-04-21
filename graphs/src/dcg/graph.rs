@@ -34,7 +34,7 @@ macro_rules! push {
     ($ctx:expr, $(($key:expr, $val:expr)),*) => {
         $(push!(@impl $ctx, $key, $val);)*
     };
-    
+
     ($ctx:expr, $key:expr, $val:expr) => {
         push!(@impl $ctx, $key, $val)
     };
@@ -66,17 +66,6 @@ macro_rules! unop {
     };
 }
 
-pub trait GraphData {
-    type Value: ?Sized;
-}
-
-impl<S> GraphData for S
-where
-    S: Scalar<Real = S>,
-{
-    type Value = S;
-}
-
 pub struct Dcg<T> {
     store: DynamicGraph<T>,
 }
@@ -94,12 +83,7 @@ impl<T> Dcg<T> {
         }
     }
 
-    pub fn binary(
-        &mut self,
-        lhs: NodeIndex,
-        rhs: NodeIndex,
-        op: impl Into<BinaryOp>,
-    ) -> NodeIndex {
+    pub fn binary(&mut self, lhs: NodeIndex, rhs: NodeIndex, op: impl Into<BinaryOp>) -> NodeIndex {
         let c = self.store.add_node(Node::binary(lhs, rhs, op));
         self.store.add_edge(lhs, c, Edge::new(lhs));
         self.store.add_edge(rhs, c, Edge::new(rhs));
@@ -152,7 +136,10 @@ impl<T> Dcg<T> {
 
     binop!(add, div, mul, pow, rem, sub);
 
-    unop!(abs, acos, acosh, asin, asinh, atan, atanh, ceil, cos, cosh, exp, floor, inv, ln, neg, recip, sin, sinh, sqr, sqrt, tan, tanh);
+    unop!(
+        abs, acos, acosh, asin, asinh, atan, atanh, ceil, cos, cosh, exp, floor, inv, ln, neg,
+        recip, sin, sinh, sqr, sqrt, tan, tanh
+    );
 }
 
 impl<T> Dcg<T>
@@ -183,7 +170,7 @@ where
                             *entry!(store[*rhs]) += grad;
 
                             push!(stack, (*lhs, grad), (*rhs, grad));
-                        },
+                        }
                         Arithmetic::Div(_) => {
                             let lhs_grad = grad / self[*rhs].value();
                             let rhs_grad = grad * self[*lhs].value() / self[*rhs].value().powi(2);
@@ -191,32 +178,35 @@ where
                             *entry!(store[*rhs]) += rhs_grad;
 
                             push!(stack, (*lhs, lhs_grad), (*rhs, rhs_grad));
-                        },
+                        }
                         Arithmetic::Mul(_) => {
                             let lhs_grad = grad * self[*rhs].value();
                             let rhs_grad = grad * self[*lhs].value();
                             *entry!(store[*lhs]) += lhs_grad;
                             *entry!(store[*rhs]) += rhs_grad;
                             push!(stack, (*lhs, lhs_grad), (*rhs, rhs_grad));
-                            
-                        },
+                        }
                         Arithmetic::Pow(_) => {
-                            let lhs_grad = grad * self[*rhs].value() * self[*lhs].value().powf(self[*rhs].value() - T::one());
-                            let rhs_grad = grad * self[*lhs].value().powf(self[*rhs].value()) * (self[*lhs].value().ln());
+                            let lhs_grad = grad
+                                * self[*rhs].value()
+                                * self[*lhs].value().powf(self[*rhs].value() - T::one());
+                            let rhs_grad = grad
+                                * self[*lhs].value().powf(self[*rhs].value())
+                                * (self[*lhs].value().ln());
                             *entry!(store[*lhs]) += lhs_grad;
                             *entry!(store[*rhs]) += rhs_grad;
-                            
+
                             push!(stack, (*lhs, lhs_grad), (*rhs, rhs_grad));
-                        },
+                        }
                         Arithmetic::Sub(_) => {
                             *entry!(store[*lhs]) += grad;
                             *entry!(store[*rhs]) -= grad;
 
                             push!(stack, (*lhs, grad), (*rhs, -grad));
-                        },
+                        }
                         _ => todo!(),
                     },
-                    _ => todo!()
+                    _ => todo!(),
                 },
                 Node::Unary { .. } => {
                     unimplemented!();

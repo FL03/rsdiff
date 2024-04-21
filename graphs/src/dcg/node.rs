@@ -6,7 +6,6 @@ use crate::NodeIndex;
 use acme::id::AtomicId;
 use acme::ops::{BinaryOp, Op, UnaryOp};
 
-
 #[derive(Clone, Debug)]
 pub enum Node<T> {
     Binary {
@@ -53,7 +52,11 @@ impl<T> Node<T> {
     }
 
     pub fn input(param: bool, value: T) -> Self {
-        Node::Input { id: AtomicId::new(), param, value }
+        Node::Input {
+            id: AtomicId::new(),
+            param,
+            value,
+        }
     }
 
     pub fn value(&self) -> T

@@ -2,15 +2,12 @@
     Appellation: id <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::id::Id;
-use core::fmt;
+use crate::Id;
 use core::marker::PhantomData;
 use core::ops::Deref;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct GradientId<T> {
     pub(crate) inner: Id,
     ptr: PhantomData<T>,
@@ -29,8 +26,8 @@ impl<T> GradientId<T> {
     }
 }
 
-impl<T> fmt::Display for GradientId<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl<T> core::fmt::Display for GradientId<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         write!(f, "{:?}", self.inner)
     }
 }

@@ -2,46 +2,116 @@
    Appellation: binary <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{arithmetic::*, kinds::*, operator::*, specs::*};
+pub use self::{args::*, arithmetic::*, operator::*, specs::*};
 
+pub(crate) mod args;
 pub(crate) mod arithmetic;
-pub(crate) mod kinds;
 pub(crate) mod operator;
 pub(crate) mod specs;
 
-pub type BoxedBinOp<A, B = A, C = A> = Box<dyn BinOp<A, B, Output = C>>;
+use crate::ops::{OpKind, Operator};
+use smart_default::SmartDefault;
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
-pub trait BinOp<A, B = A> {
-    type Output;
-
-    fn eval(&self, lhs: A, rhs: B) -> Self::Output;
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Display,
+    EnumCount,
+    EnumIs,
+    EnumIter,
+    EnumString,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SmartDefault,
+    VariantNames,
+)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase", untagged)
+)]
+#[non_exhaustive]
+#[repr(C)]
+#[strum(serialize_all = "lowercase")]
+pub enum BinaryOp {
+    // <Kind = String> {
+    #[default]
+    Arith(Arithmetic),
+    Max,
+    Min,
+    And,
+    Or,
+    Xor,
+    Shl,
+    Shr,
+    // Custom()
 }
 
-pub trait BinaryAssignOp<A, B = A> {
-    fn eval(&self, lhs: A, rhs: B);
+pub struct CustomOp {
+    pub id: usize,
 }
 
-impl<S, A, B, C> BinOp<A, B> for S
-where
-    S: Fn(A, B) -> C,
-{
-    type Output = C;
-
-    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-        self(lhs, rhs)
+impl CustomOp {
+    pub fn new(id: usize) -> Self {
+        Self { id }
     }
 }
 
-impl<A, B, C> BinOp<A, B> for Box<dyn BinOp<A, B, Output = C>> {
-    type Output = C;
-
-    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-        self.as_ref().eval(lhs, rhs)
+impl BinaryOp {
+    pub fn differentiable(&self) -> bool {
+        match self {
+            Self::Arith(_) => true,
+            _ => false,
+        }
     }
+
+    pub fn is_commutative(&self) -> bool {
+        match self {
+            Self::Arith(arith) => arith.is_commutative(),
+            BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
+            _ => false,
+        }
+    }
+    nested_constructor!(
+        Arith<Arithmetic>,
+        arithmetic,
+        [add, div, mul, pow, rem, sub]
+    );
+
+    // simple_enum_constructor!(
+    //     st Custom, custom, { id: usize }
+    // );
+    variant_constructor!(
+        (Max, max),
+        (Min, min),
+        (And, bitand),
+        (Or, bitor),
+        (Xor, bitxor),
+        (Shl, shl),
+        (Shr, shr)
+    );
 }
 
-impl<A, B> BinaryAssignOp<A, B> for Box<dyn BinaryAssignOp<A, B>> {
-    fn eval(&self, lhs: A, rhs: B) {
-        self.as_ref().eval(lhs, rhs)
+impl Operator for BinaryOp {
+    fn name(&self) -> &str {
+        match self {
+            Self::Arith(inner) => inner.name(),
+            Self::Max => "max",
+            Self::Min => "min",
+            Self::And => "and",
+            Self::Or => "or",
+            Self::Xor => "xor",
+            Self::Shl => "shl",
+            Self::Shr => "shr",
+        }
+    }
+
+    fn kind(&self) -> OpKind {
+        OpKind::Binary
     }
 }

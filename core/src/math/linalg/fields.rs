@@ -2,10 +2,10 @@
     Appellation: fields <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # Fields
-//!
-//!
 
+/// A field is a set of elements with two binary operations, addition and multiplication, that satisfy the following axioms:
+/// - Associativity of addition and multiplication
+/// - Commutativity of addition and multiplication
 pub trait Field {
     type Elem: ?Sized;
 

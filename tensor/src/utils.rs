@@ -5,9 +5,11 @@
 use crate::prelude::{Scalar, TensorExpr, TensorResult};
 use crate::shape::{ShapeError, Stride};
 use crate::tensor::{from_vec_with_op, TensorBase};
-use num::Zero;
 
-pub(crate) fn coordinates_to_index(coords: impl AsRef<[usize]>, strides: &Stride) -> usize {
+pub(crate) fn coordinates_to_index<Idx>(coords: Idx, strides: &Stride) -> usize
+where
+    Idx: AsRef<[usize]>,
+{
     coords
         .as_ref()
         .iter()
@@ -39,33 +41,6 @@ where
     let op = TensorExpr::matmul(lhs.clone(), rhs.clone());
     let tensor = from_vec_with_op(false, op, shape, result);
     Ok(tensor)
-}
-
-/// Returns the lower triangular portion of a matrix.
-pub fn tril<T>(a: &TensorBase<T>) -> TensorBase<T>
-where
-    T: Clone + Zero,
-{
-    let mut out = a.clone();
-    for i in 0..a.shape()[0] {
-        for j in i + 1..a.shape()[1] {
-            out[[i, j]] = T::zero();
-        }
-    }
-    out
-}
-/// Returns the upper triangular portion of a matrix.
-pub fn triu<T>(a: &TensorBase<T>) -> TensorBase<T>
-where
-    T: Clone + Zero,
-{
-    let mut out = a.clone();
-    for i in 0..a.shape()[0] {
-        for j in 0..i {
-            out[[i, j]] = T::zero();
-        }
-    }
-    out
 }
 
 macro_rules! i {

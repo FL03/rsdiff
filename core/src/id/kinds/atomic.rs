@@ -73,8 +73,8 @@ impl DerefMut for AtomicId {
 
 impl Identifier for AtomicId {}
 
-impl std::fmt::Display for AtomicId {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl core::fmt::Display for AtomicId {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         write!(f, "{}", self.0)
     }
 }

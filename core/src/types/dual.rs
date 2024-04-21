@@ -13,13 +13,12 @@
 //!         e^2 = 0
 
 use crate::prelude::{EvaluateOnce, Gradient};
+use core::fmt;
 use core::ops::{self, Neg, Not};
 use num::{Num, One, Zero};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Dual<T> {
     dual: T,
     value: T,
@@ -54,11 +53,11 @@ impl<T> Dual<T> {
     }
 }
 
-impl<T> std::fmt::Display for Dual<T>
+impl<T> fmt::Display for Dual<T>
 where
-    T: std::fmt::Display,
+    T: fmt::Display,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}, {})", self.value, self.dual)
     }
 }
@@ -175,7 +174,7 @@ where
 
 impl<T> One for Dual<T>
 where
-    T: Copy + One + PartialEq + ops::Add<Output = T>,
+    T: One + PartialEq,
 {
     fn one() -> Self {
         Dual::new(T::one(), T::one())
@@ -204,67 +203,17 @@ macro_rules! impl_binary_op {
         $(impl_binary_op!($op, $method, $e);)*
     };
     ($trait:ident, $method:ident, $e:tt) => {
-        impl<T> ops::$trait<Dual<T>> for Dual<T>
-        where
-            T: Copy + ops::$trait<T, Output = T>,
-        {
-            type Output = Dual<T>;
-
-            fn $method(self, rhs: Self) -> Self::Output {
-                let real = self.value $e rhs.value;
-                let dual = self.dual $e rhs.dual;
-                Dual::new(real, dual)
-            }
-        }
-
-        impl<'a, T> ops::$trait<&'a Dual<T>> for Dual<T>
-        where
-            T: Copy + ops::$trait<T, Output = T>,
-        {
-            type Output = Dual<T>;
-
-            fn $method(self, rhs: &'a Dual<T>) -> Self::Output {
-                let real = self.value $e rhs.value;
-                let dual = self.dual $e rhs.dual;
-                Dual::new(real, dual)
-            }
-        }
-
-        impl<'a, T> ops::$trait<Dual<T>> for &'a Dual<T>
-        where
-            T: Copy + ops::$trait<T, Output = T>,
-        {
-            type Output = Dual<T>;
-
-            fn $method(self, rhs: Dual<T>) -> Self::Output {
-                let real = self.value $e rhs.value;
-                let dual = self.dual $e rhs.dual;
-                Dual::new(real, dual)
-            }
-        }
-
-        impl<'a, T> ops::$trait<&'a Dual<T>> for &'a Dual<T>
-        where
-            T: Copy + ops::$trait<T, Output = T>,
-        {
-            type Output = Dual<T>;
-
-            fn $method(self, rhs: &'a Dual<T>) -> Self::Output {
-                let real = self.value $e rhs.value;
-                let dual = self.dual $e rhs.dual;
-                Dual::new(real, dual)
-            }
-        }
-
         impl<T> ops::$trait<T> for Dual<T>
         where
-            T: Copy + ops::$trait<Output = T>,
+            T: ops::$trait<Output = T>,
         {
             type Output = Dual<T>;
 
             fn $method(self, rhs: T) -> Self::Output {
-                let real = self.value $e rhs;
-                Dual::new(real, self.dual)
+                Dual {
+                    dual: self.dual,
+                    value: self.value $e rhs,
+                }
             }
         }
 
@@ -275,10 +224,70 @@ macro_rules! impl_binary_op {
             type Output = Dual<T>;
 
             fn $method(self, rhs: T) -> Self::Output {
-                let real = self.value $e rhs;
-                Dual::new(real, self.dual)
+                Dual {
+                    dual: self.dual,
+                    value: self.value $e rhs,
+                }
             }
         }
+
+        impl<T> ops::$trait<Dual<T>> for Dual<T>
+        where
+            T: ops::$trait<T, Output = T>,
+        {
+            type Output = Dual<T>;
+
+            fn $method(self, rhs: Self) -> Self::Output {
+                Dual {
+                    dual: self.dual $e rhs.dual,
+                    value: self.value $e rhs.value,
+                }
+            }
+        }
+
+        impl<'a, T> ops::$trait<&'a Dual<T>> for Dual<T>
+        where
+            T: Copy + ops::$trait<T, Output = T>,
+        {
+            type Output = Dual<T>;
+
+            fn $method(self, rhs: &'a Dual<T>) -> Self::Output {
+                Dual {
+                    dual: self.dual $e rhs.dual,
+                    value: self.value $e rhs.value,
+                }
+            }
+        }
+
+        impl<'a, T> ops::$trait<Dual<T>> for &'a Dual<T>
+        where
+            T: Copy + ops::$trait<T, Output = T>,
+        {
+            type Output = Dual<T>;
+
+            fn $method(self, rhs: Dual<T>) -> Self::Output {
+                Dual {
+                    dual: self.dual $e rhs.dual,
+                    value: self.value $e rhs.value,
+                }
+            }
+        }
+
+        impl<'a, T> ops::$trait<&'a Dual<T>> for &'a Dual<T>
+        where
+            T: Copy + ops::$trait<T, Output = T>,
+        {
+            type Output = Dual<T>;
+
+            fn $method(self, rhs: &'a Dual<T>) -> Self::Output {
+                Dual {
+                    dual: self.dual $e rhs.dual,
+                    value: self.value $e rhs.value,
+                }
+            }
+        }
+
+
     };
 }
 
@@ -287,9 +296,9 @@ macro_rules! impl_assign_op {
         $(impl_assign_op!($op, $method, $e);)*
     };
     ($trait:ident, $method:ident, $e:tt) => {
-        impl<T> ops::$trait<Dual<T>> for Dual<T>
+        impl<T> core::ops::$trait<Dual<T>> for Dual<T>
         where
-            T: Copy + ops::$trait<T>,
+            T: core::ops::$trait<T>,
         {
             fn $method(&mut self, rhs: Self) {
                 self.value $e rhs.value;
@@ -297,19 +306,20 @@ macro_rules! impl_assign_op {
             }
         }
 
-        impl<'a, T> ops::$trait<&'a Dual<T>> for Dual<T>
+        impl<'a, T> core::ops::$trait<&'a Dual<T>> for Dual<T>
         where
-            T: Copy + ops::$trait<T>,
+            T: Clone + core::ops::$trait<T>,
         {
             fn $method(&mut self, rhs: &'a Dual<T>) {
-                self.value $e rhs.value;
-                self.dual $e rhs.dual;
+                let Dual { dual, value } = rhs.clone();
+                self.value $e value;
+                self.dual $e dual;
             }
         }
 
-        impl<T> ops::$trait<T> for Dual<T>
+        impl<T> core::ops::$trait<T> for Dual<T>
         where
-            T: Copy + ops::$trait,
+            T: core::ops::$trait,
         {
             fn $method(&mut self, rhs: T) {
                 self.value $e rhs;

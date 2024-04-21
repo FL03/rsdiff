@@ -7,14 +7,18 @@
 //!
 extern crate proc_macro;
 
-pub(crate) use primitives::*;
+pub(crate) use self::{primitives::*, utils::*};
 
 pub(crate) mod ast;
-pub(crate) mod diff;
-pub(crate) mod grad;
+pub(crate) mod handle;
 pub(crate) mod ops;
+pub(crate) mod utils;
 
-use ast::partials::PartialAst;
+pub(crate) mod autodiff;
+pub(crate) mod operator;
+pub(crate) mod partial;
+
+use ast::ad::AutodiffAst;
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 
@@ -57,19 +61,28 @@ use syn::parse_macro_input;
 #[proc_macro]
 pub fn autodiff(input: TokenStream) -> TokenStream {
     // Parse the input expression into a syntax tree
-    let expr = parse_macro_input!(input as PartialAst);
+    let expr = parse_macro_input!(input as AutodiffAst);
 
     // Generate code to compute the gradient
-    let result = diff::generate_autodiff(&expr);
+    let result = autodiff::impl_autodiff(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)
 }
 
+#[doc(hidden)]
+#[proc_macro_attribute]
+pub fn operator(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(item as syn::Item);
+    let result = operator::impl_operator(ast);
+    TokenStream::from(result)
+}
+
+#[doc(hidden)]
 #[proc_macro_attribute]
 pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(item as syn::ItemFn);
-    let result = grad::handle_item_fn(&ast);
+    let result = partial::handle_item_fn(&ast);
     TokenStream::from(result)
 }
 

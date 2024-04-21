@@ -62,6 +62,7 @@ pub(crate) fn from_vec_with_op<T>(
 }
 
 #[derive(Clone, Debug, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) data: Vec<T>,
@@ -170,6 +171,10 @@ impl<T> TensorBase<T> {
             .zip(other.data())
             .for_each(|(a, b)| *a = b.clone());
     }
+
+    pub fn boxed(self) -> Box<Self> {
+        Box::new(self)
+    }
     /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
     where
@@ -210,6 +215,14 @@ impl<T> TensorBase<T> {
     /// Returns the unique identifier of the tensor.
     pub const fn id(&self) -> TensorId {
         self.id
+    }
+
+    pub unsafe fn into_scalar(self) -> T
+    where
+        T: Clone,
+    {
+        debug_assert!(self.is_scalar(), "Tensor is not scalar");
+        self.data.first().unwrap().clone()
     }
     /// Returns true if the tensor is contiguous.
     pub fn is_contiguous(&self) -> bool {
@@ -322,6 +335,10 @@ impl<T> TensorBase<T> {
         unsafe { self.with_layout_unchecked(layout) }
     }
     /// Set the layout of the tensor without checking for compatibility
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it does not check if the layout is compatible with the tensor.
     pub unsafe fn with_layout_unchecked(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
@@ -332,7 +349,7 @@ impl<T> TensorBase<T> {
         self
     }
 
-    pub unsafe fn with_shape_unchecked(mut self, shape: impl IntoShape) -> Self {
+    pub fn with_shape_c(mut self, shape: impl IntoShape) -> Self {
         self.layout = self.layout.with_shape_c(shape);
         self
     }
@@ -352,6 +369,15 @@ impl<'a, T> TensorBase<&'a T> {
 }
 
 impl<T> TensorBase<T> {
+    pub fn view_from_scalar(scalar: &T) -> TensorBase<&T> {
+        TensorBase {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::scalar(),
+            op: BackpropOp::none(),
+            data: vec![scalar],
+        }
+    }
     pub fn to_owned(&self) -> TensorBase<T>
     where
         T: Clone,
@@ -359,13 +385,23 @@ impl<T> TensorBase<T> {
         self.clone()
     }
 
-    pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
+    pub fn view(&self) -> TensorBase<&T> {
         TensorBase {
             id: self.id(),
             kind: self.kind(),
             layout: self.layout().clone(),
             op: self.op().view(),
             data: self.data().iter().collect(),
+        }
+    }
+
+    pub fn view_mut(&mut self) -> TensorBase<&mut T> {
+        TensorBase {
+            id: self.id(),
+            kind: self.kind(),
+            layout: self.layout().clone(),
+            op: self.op.view_mut(),
+            data: self.data.iter_mut().collect(),
         }
     }
 }

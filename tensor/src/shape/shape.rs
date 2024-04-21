@@ -4,18 +4,16 @@
 */
 use super::{Axis, Rank, ShapeError, Stride};
 use crate::iter::zip;
-use crate::prelude::{SwapAxes, TensorResult};
+use crate::prelude::{Ixs, SwapAxes};
 #[cfg(not(feature = "std"))]
 use alloc::vec;
 use core::ops::{self, Deref};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use std::vec;
 
 /// A shape is a description of the number of elements in each dimension.
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Shape(Vec<usize>);
 
 impl Shape {
@@ -25,6 +23,14 @@ impl Shape {
     /// Creates a new shape of rank 0.
     pub fn scalar() -> Self {
         Self(Vec::new())
+    }
+
+    pub fn stride_offset(index: &[usize], strides: &Stride) -> Ixs {
+        let mut offset = 0;
+        for (&i, &s) in index.iter().zip(strides.as_slice()) {
+            offset += super::dim::stride_offset(i, s);
+        }
+        offset
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
@@ -49,7 +55,7 @@ impl Shape {
             .iter()
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| ShapeError::Overflow)?;
+            .ok_or(ShapeError::Overflow)?;
         if size_nonzero > core::isize::MAX as usize {
             Err(ShapeError::Overflow)
         } else {
@@ -86,9 +92,9 @@ impl Shape {
         Some(vec![0; *self.rank()])
     }
     pub fn get_final_position(&self) -> Vec<usize> {
-        self.iter().map(|&dim| dim - 1).collect()
+        self.dec().to_vec()
     }
-    /// Inserts a new dimension along the given [Axis].
+    /// Inserts a new dimension along the given [Axis], inplace.
     pub fn insert(&mut self, index: Axis, dim: usize) {
         self.0.insert(*index, dim)
     }
@@ -120,10 +126,11 @@ impl Shape {
     pub fn is_square(&self) -> bool {
         self.iter().all(|&dim| dim == self[0])
     }
+    /// Creates an immutable iterator over the elements of the shape
     pub fn iter(&self) -> core::slice::Iter<usize> {
         self.0.iter()
     }
-
+    /// Creates a mutable iterator over the elements of the shape.
     pub fn iter_mut(&mut self) -> core::slice::IterMut<usize> {
         self.0.iter_mut()
     }
@@ -205,15 +212,6 @@ impl Shape {
     pub fn size(&self) -> usize {
         self.0.iter().product()
     }
-
-    pub fn stride_offset(index: &[usize], strides: &Stride) -> isize {
-        let mut offset = 0;
-        for (&i, &s) in index.iter().zip(strides.as_slice()) {
-            offset += super::dim::stride_offset(i, s);
-        }
-        offset
-    }
-
     /// Swap the dimensions of the current [Shape] at the given [Axis].
     pub fn swap(&mut self, a: Axis, b: Axis) {
         self.0.swap(a.axis(), b.axis())
@@ -223,6 +221,10 @@ impl Shape {
         let mut shape = self.clone();
         shape.swap(swap, with);
         shape
+    }
+    /// A utilitarian function for converting the shape to a vector.
+    pub fn to_vec(&self) -> Vec<usize> {
+        self.0.clone()
     }
 }
 
@@ -250,9 +252,22 @@ impl Shape {
         strides
     }
 
-    pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
+    pub(crate) fn matmul(&self, other: &Self) -> Result<Self, ShapeError> {
+        if self.rank() == 2 && other.rank() == 2 {
+            return Ok(Self::from((self[0], other[1])));
+        } else if self.rank() == 2 && other.rank() == 1 {
+            return Ok(Self::from(self[0]));
+        } else if self.rank() == 1 && other.rank() == 2 {
+            return Ok(Self::from(other[0]));
+        } else if self.rank() == 1 && other.rank() == 1 {
+            return Ok(Self::scalar());
+        }
+        Err(ShapeError::IncompatibleShapes)
+    }
+
+    pub(crate) fn matmul_shape(&self, other: &Self) -> Result<Self, ShapeError> {
         if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
-            return Err(ShapeError::IncompatibleShapes.into());
+            return Err(ShapeError::IncompatibleShapes);
         }
         Ok(Self::from((self[0], other[1])))
     }

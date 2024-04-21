@@ -3,16 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::arithmetic::*;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use crate::ops::{OpKind, Operator};
 use smart_default::SmartDefault;
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
-#[cfg_attr(
-    feature = "serde",
-    derive(Deserialize, Serialize,),
-    serde(rename_all = "lowercase", untagged)
-)]
 #[derive(
     Clone,
     Copy,
@@ -21,6 +15,7 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     EnumCount,
     EnumIs,
     EnumIter,
+    EnumString,
     Eq,
     Hash,
     Ord,
@@ -29,17 +24,18 @@ use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
     SmartDefault,
     VariantNames,
 )]
-#[repr(u8)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase", untagged)
+)]
+#[non_exhaustive]
+#[repr(C)]
 #[strum(serialize_all = "lowercase")]
 pub enum BinaryOp {
     // <Kind = String> {
     #[default]
-    Add(Addition),
-    Div(Division),
-    Mul(Multiplication),
-    Sub(Subtraction),
-    Pow,
-    Rem(Remainder),
+    Arith(Arithmetic),
     Max,
     Min,
     And,
@@ -47,35 +43,44 @@ pub enum BinaryOp {
     Xor,
     Shl,
     Shr,
-    Custom(),
+    // Custom()
+}
+
+pub struct CustomOp {
+    pub id: usize,
+}
+
+impl CustomOp {
+    pub fn new(id: usize) -> Self {
+        Self { id }
+    }
 }
 
 impl BinaryOp {
     pub fn differentiable(&self) -> bool {
         match self {
-            BinaryOp::Add(_) | BinaryOp::Div(_) | Self::Mul(_) | Self::Sub(_) | BinaryOp::Pow => {
-                true
-            }
+            Self::Arith(_) => true,
             _ => false,
         }
     }
 
     pub fn is_commutative(&self) -> bool {
         match self {
-            BinaryOp::Add(_) | Self::Mul(_) | BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
+            Self::Arith(arith) => arith.is_commutative(),
+            BinaryOp::And | BinaryOp::Or | BinaryOp::Xor => true,
             _ => false,
         }
     }
-
-    simple_enum_constructor!(
-        (Add, add, Addition),
-        (Div, div, Division),
-        (Mul, mul, Multiplication),
-        (Rem, rem, Remainder),
-        (Sub, sub, Subtraction)
+    nested_constructor!(
+        Arith<Arithmetic>,
+        arithmetic,
+        [add, div, mul, pow, rem, sub]
     );
-    unit_enum_constructor!(
-        (Pow, pow),
+
+    // simple_enum_constructor!(
+    //     st Custom, custom, { id: usize }
+    // );
+    variant_constructor!(
         (Max, max),
         (Min, min),
         (And, bitand),
@@ -84,4 +89,23 @@ impl BinaryOp {
         (Shl, shl),
         (Shr, shr)
     );
+}
+
+impl Operator for BinaryOp {
+    fn name(&self) -> &str {
+        match self {
+            Self::Arith(inner) => inner.name(),
+            Self::Max => "max",
+            Self::Min => "min",
+            Self::And => "and",
+            Self::Or => "or",
+            Self::Xor => "xor",
+            Self::Shl => "shl",
+            Self::Shr => "shr",
+        }
+    }
+
+    fn kind(&self) -> OpKind {
+        OpKind::Binary
+    }
 }

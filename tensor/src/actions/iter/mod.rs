@@ -5,13 +5,13 @@
 //! # Iter
 //!
 //!
-pub use self::{indexed::*, iterator::*, position::*, utils::*};
+pub use self::{indexed::*, iterator::*, layout::*, utils::*};
 
 #[allow(dead_code, unused)]
 pub(crate) mod axis;
 pub(crate) mod indexed;
 pub(crate) mod iterator;
-pub(crate) mod position;
+pub(crate) mod layout;
 
 pub(crate) mod utils {
     use core::ptr;
@@ -48,4 +48,28 @@ pub(crate) mod utils {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    use crate::shape::Layout;
+
+    #[test]
+    fn test_to_vec_mapped() {
+        let v = [1, 2, 3, 4, 5];
+        let f = |x| x * 2;
+        let res = to_vec_mapped(v.iter(), f);
+        assert_eq!(res, vec![2, 4, 6, 8, 10]);
+    }
+
+    #[test]
+    fn test_position() {
+        let shape = (2, 2);
+        let layout = Layout::contiguous(shape);
+        let position = Position::new(1, vec![0, 1]);
+        assert_eq!(position.index(), 1);
+        assert_eq!(
+            position.next(&layout).unwrap(),
+            Position::new(2, vec![1, 0])
+        );
+    }
+}

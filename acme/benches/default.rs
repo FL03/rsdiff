@@ -20,7 +20,7 @@ fn recursive_fibonacci(b: &mut Bencher) {
 
 #[bench]
 fn iterative_fibonacci(b: &mut Bencher) {
-    b.iter(|| fib::Fibonacci::seq().take(BENCH_SIZE))
+    b.iter(|| fib::Fibonacci::seq().take(BENCH_SIZE).collect::<Vec<_>>())
 }
 
 pub mod fib {

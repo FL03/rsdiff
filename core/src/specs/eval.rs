@@ -17,10 +17,56 @@ pub trait Evaluate: EvaluateMut {
     fn eval(&self) -> Self::Output;
 }
 
-impl EvaluateOnce for f64 {
-    type Output = f64;
+macro_rules! impl_evaluate {
 
-    fn eval_once(self) -> Self::Output {
-        self
-    }
+    ($($s:ty),*) => {
+        $(
+            impl_evaluate!(@loop $s);
+        )*
+    };
+
+    (@loop $s:ty) => {
+        impl EvaluateOnce for $s {
+            type Output = $s;
+
+            fn eval_once(self) -> Self::Output {
+                self
+            }
+        }
+
+        impl EvaluateMut for $s {
+            fn eval_mut(&mut self) -> Self::Output {
+                *self
+            }
+        }
+
+        impl Evaluate for $s {
+            fn eval(&self) -> Self::Output {
+                *self
+            }
+        }
+    };
+    ($ty:ty, $e:expr) => {
+        impl EvaluateOnce for $ty {
+            type Output = $ty;
+
+            fn eval_once(self) -> Self::Output {
+                $e(self)
+            }
+        }
+
+        impl EvaluateMut for $ty {
+            fn eval_mut(&mut self) -> Self::Output {
+                $e(*self)
+            }
+        }
+
+        impl Evaluate for $ty {
+            fn eval(&self) -> Self::Output {
+                $e(*self)
+            }
+        }
+    };
 }
+
+impl_evaluate!(f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);

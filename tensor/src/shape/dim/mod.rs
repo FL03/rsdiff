@@ -9,6 +9,8 @@ pub use self::{dimension::Dim, utils::*};
 
 pub(crate) mod dimension;
 
+use super::Rank;
+
 pub trait IntoDimension {
     type Dim: Dimension;
 
@@ -19,19 +21,16 @@ pub trait Dimension {
     type Pattern;
 
     fn as_slice(&self) -> &[usize];
-    /// Return the rank of the dimension; i.e. the number of axes.
-    fn rank(&self) -> usize;
+    /// Return the [rank](super::Rank) of the dimension; i.e. the number of axes.
+    fn rank(&self) -> Rank;
     /// Return the size of the dimension; i.e. the number of elements.
     fn size(&self) -> usize;
 
     #[doc(hidden)]
     /// Return stride offset for index.
     fn stride_offset(index: &Self, strides: &Self) -> isize {
-        let mut offset = 0;
-        for (&i, &s) in izip!(index.as_slice(), strides.as_slice()) {
-            offset += stride_offset(i, s);
-        }
-        offset
+        izip!(index.as_slice(), strides.as_slice())
+            .fold(0, |acc, (&i, &s)| acc + stride_offset(i, s))
     }
 }
 
@@ -83,7 +82,7 @@ pub(crate) mod utils {
             .iter()
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| ShapeError::Overflow)?;
+            .ok_or(ShapeError::Overflow)?;
         if size_nonzero > ::std::isize::MAX as usize {
             Err(ShapeError::Overflow)
         } else {
@@ -152,7 +151,7 @@ pub(crate) mod utils {
         // greatest address accessible by moving along all axes
         let max_offset_bytes = max_offset
             .checked_mul(elem_size)
-            .ok_or_else(|| ShapeError::Overflow)?;
+            .ok_or(ShapeError::Overflow)?;
         // Condition 2b.
         if max_offset_bytes > isize::MAX as usize {
             return Err(ShapeError::Overflow);

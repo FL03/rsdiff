@@ -53,7 +53,7 @@ where
     type Kind = ExternalError<E>;
 
     fn kind(&self) -> &Self::Kind {
-        &self
+        self
     }
 
     fn name(&self) -> String {

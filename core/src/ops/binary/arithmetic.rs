@@ -2,56 +2,15 @@
     Appellation: arithmetic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinOp, BoxedBinOp};
-use crate::ops::{Operator, OperatorKind};
-use num::traits::NumOps;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use super::{BinOp, BinaryAssignOp};
+use crate::ops::{Evaluator, OpKind, Operator, Params};
+use num::traits::{NumOps, Pow};
 use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
-macro_rules! operator {
-    ($kind:ident: $($op:ident),*) => {
-        $(
-            operator!($op, $kind);
-        )*
+macro_rules! impl_arith {
+    ($parent:ident: {$($var:ident($inner:ident): $new:ident),*}) => {
+        impl_arith!($parent: [$($var, $inner, $new),*]);
     };
-    ($op:ident, $kind:ident) => {
-
-        #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        #[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-        pub struct $op;
-
-        impl $op {
-            pub fn new() -> Self {
-                Self
-            }
-
-            pub fn name(&self) -> &str {
-                stringify!($op)
-            }
-        }
-
-        impl core::fmt::Display for $op {
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                write!(f, "{}", self.name())
-            }
-        }
-
-        impl Operator for $op {
-
-            fn kind(&self) -> OperatorKind {
-                OperatorKind::$kind
-            }
-
-            fn name(&self) -> &str {
-                self.name()
-            }
-        }
-    };
-
-}
-
-macro_rules! operators {
     ($group:ident: [$(($variant:ident, $op:ident, $method:ident)),*]) => {
         #[derive(
             Clone,
@@ -70,10 +29,10 @@ macro_rules! operators {
         )]
         #[cfg_attr(
             feature = "serde",
-            derive(Deserialize, Serialize,),
-            serde(rename_all = "lowercase", untagged)
+            derive(serde::Deserialize, serde::Serialize,),
+            serde(rename_all = "lowercase", untagged),
         )]
-        #[repr(u8)]
+        #[repr(C)]
         #[strum(serialize_all = "lowercase")]
         pub enum $group {
             $(
@@ -88,94 +47,193 @@ macro_rules! operators {
                 }
             )*
 
-
-            pub fn eval<A, B, C>(&self, lhs: A, rhs: B) -> C
-            where
-                A: NumOps<B, C>,
-            {
-                self.op().eval(lhs, rhs)
+            pub fn name(&self) -> &str {
+                match self {
+                    $(
+                        $group::$variant(_) => stringify!($method),
+                    )*
+                }
             }
 
-            pub fn op<A, B, C>(self) -> BoxedBinOp<A, B, C>
-            where
-                A: NumOps<B, C>,
-            {
+
+            pub fn op(self) -> Box<dyn Operator> {
                 match self {
                     $(
                         $group::$variant(op) => Box::new(op),
                     )*
                 }
             }
-
-            pub fn name(&self) -> &str {
-                match self {
-                    $(
-                        $group::$variant(op) => op.name(),
-                    )*
-                }
-            }
         }
 
         impl Operator for $group {
-            fn kind(&self) -> OperatorKind {
-                OperatorKind::Binary
+            fn kind(&self) -> OpKind {
+                OpKind::Binary
             }
 
             fn name(&self) -> &str {
                 self.name()
             }
         }
+
+        impl<P, A, B, C> Evaluator<P> for $group
+        where
+            A: NumOps<B, C> + Pow<B, Output = C>,
+            P: Params<Pattern = (A, B)>,
+        {
+            type Output = C;
+
+            fn eval(&self, args: P) -> Self::Output
+
+            {
+                match self {
+                    $(
+                        $group::$variant(op) => Evaluator::eval(op, args),
+                    )*
+                }
+            }
+        }
     };
 }
 
 macro_rules! impl_binary_op {
-    ($(($op:ident, $bound:ident, $operator:tt)),*) => {
+    // ($($args:tt),*) => {
+    //     impl_binary_op!(@loop $($args),*);
+
+    // };
+    ($(($operand:ident, $($p:ident)::*.$op:ident)),*) => {
         $(
-            impl_binary_op!($op, $bound, $operator);
+            impl_binary_op!(@loop $operand, $($p)::*.$op);
+        )*
+    };
+    ($operand:ident, $($p:ident)::*.$op:ident) => {
+        impl_binary_op!(@loop $operand, $($p)::*.$op);
+    };
+    (std $(($op:ident, $bound:ident, $operator:tt)),*) => {
+        $(
+            impl_binary_op!(@loop $op, core::ops::$bound, $operator);
+        )*
+    };
+    (@loop $(($op:ident, $($p:ident)::*, $operator:tt)),*) => {
+        $(
+            impl_binary_op!($op, $($p)::*, $operator);
         )*
 
     };
-    ($op:ident, $bound:ident, $operator:tt) => {
-        operator!($op, Binary);
 
-        impl<A, B, C> BinOp<A, B> for $op
+    (@loop $operand:ident, $($p:ident)::*.$op:ident) => {
+        operator!($operand<Binary>, $op);
+        impl_evaluator!($operand, $($p)::*.$op);
+
+        impl<A, B, C> BinOp<A, B> for $operand
         where
-            A: core::ops::$bound<B, Output = C>,
+            A: $($p)::*<B, Output = C>,
         {
             type Output = C;
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                lhs $operator rhs
+                $($p)::*::$op(lhs, rhs)
             }
         }
     };
-    (other: $op:ident, $bound:ident, $call:ident) => {
-        operator!($op, Binary);
+    (@loop $operand:ident, $($p:ident)::*, $op:tt) => {
+        operator!($operand, Binary);
 
-        impl<A, B, C> BinOp<A, B> for $op
+        impl<A, B, C> BinOp<A, B> for $operand
         where
-            A: $bound<B, Output = C>,
+            A: $($p)::*<B, Output = C>,
         {
             type Output = C;
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-                $bound::$call(lhs, rhs)
+                lhs $op rhs
             }
         }
     };
 }
 
-impl_binary_op!((Addition, Add, +), (Division, Div, /), (Multiplication, Mul, *), (Remainder, Rem, %), (Subtraction, Sub, -));
+macro_rules! assign_op {
+    ($(($operand:ident, $($p:ident)::*, $op:tt)),*) => {
+        $(assign_op!(@loop $operand, $($p)::*, $op);)*
+    };
+    ($operand:ident, $($p:ident)::*, $op:tt) => {
+        assign_op!(@impl $operand, $($p)::*, $op);
+    };
+    (@impl $operand:ident, $($p:ident)::*, $op:tt) => {
+        operator!($operand<Binary>);
 
-use num::traits::Pow;
+        impl<A, B> BinOp<A, B> for $operand
+        where
+            A: Copy + $($p)::*<B>,
+        {
+            type Output = A;
 
-impl_binary_op!(other: Power, Pow, pow);
+            fn eval(&self, mut lhs: A, rhs: B) -> Self::Output {
+                lhs $op rhs;
+                lhs
+            }
+        }
 
-operators!(
+        impl<A, B> BinaryAssignOp<A, B> for $operand
+        where
+            A: $($p)::*<B>,
+        {
+            fn eval(&self, mut lhs: A, rhs: B) {
+                lhs $op rhs;
+            }
+        }
+    };
+}
+
+macro_rules! impl_evaluator {
+    ($(($operand:ident, $($p:ident)::*.$call:ident)),*) => {
+        $(
+            impl_evaluator!(@loop $operand, $($p)::*.$call);
+        )*
+    };
+    ($operand:ident, $($p:ident)::*.$call:ident) => {
+        impl_evaluator!(@loop $operand, $($p)::*.$call);
+    };
+    (@loop $operand:ident, $($p:ident)::*.$call:ident) => {
+        impl<P, A, B, C> Evaluator<P> for $operand
+        where
+            A: $($p)::*<B, Output = C>,
+            P: $crate::ops::Params<Pattern = (A, B)>
+        {
+            type Output = C;
+
+            fn eval(&self, args: P) -> Self::Output {
+                let (lhs, rhs) = args.into_pattern();
+                $($p)::*::$call(lhs, rhs)
+            }
+        }
+    };
+}
+
+impl_binary_op!(
+    (Addition, core::ops::Add.add),
+    (Division, core::ops::Div.div),
+    (Multiplication, core::ops::Mul.mul),
+    (Remainder, core::ops::Rem.rem),
+    (Subtraction, core::ops::Sub.sub),
+    (Power, num::traits::Pow.pow)
+);
+
+assign_op!(AddAssign, core::ops::AddAssign, +=);
+
+// impl_binary_op!(
+//     (BitAnd, BitAnd.
+//     (BitOr, BitOr, |),
+//     (BitXor, BitXor, &|),
+//     (Shl, Shl, <<),
+//     (Shr, Shr, >>)
+// );
+
+impl_arith!(
     Arithmetic: [
         (Add, Addition, add),
         (Div, Division, div),
         (Mul, Multiplication, mul),
+        (Pow, Power, pow),
         (Rem, Remainder, rem),
         (Sub, Subtraction, sub)
     ]
@@ -184,5 +242,18 @@ operators!(
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {
         op
+    }
+
+    pub fn is_commutative(&self) -> bool {
+        match self {
+            Arithmetic::Add(_) | Arithmetic::Mul(_) => true,
+            _ => false,
+        }
+    }
+}
+
+impl Default for Arithmetic {
+    fn default() -> Self {
+        Arithmetic::add()
     }
 }

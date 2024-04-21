@@ -3,15 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-pub use self::{arith::*, eval::*, gradient::*, prop::*, store::*};
+pub use self::{eval::*, gradient::*, prop::*, scalar::Scalar, store::*};
 
-pub(crate) mod arith;
 pub(crate) mod eval;
 pub(crate) mod gradient;
 pub(crate) mod prop;
+pub(crate) mod scalar;
 pub(crate) mod store;
-
-pub mod func;
 
 pub trait AsSlice<T> {
     fn as_slice(&self) -> &[T];
@@ -40,13 +38,25 @@ where
 }
 
 pub(crate) mod prelude {
-    pub use super::arith::*;
     pub use super::eval::*;
-    pub use super::func::*;
     pub use super::gradient::*;
     pub use super::prop::*;
+    pub use super::scalar::*;
     pub use super::store::*;
+    pub use super::{AsSlice, AsSliceMut};
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::scalar::Scalar;
+    use num::Complex;
+
+    #[test]
+    fn test_scalar() {
+        let a = 3f64;
+        let b = Complex::new(4f64, 0f64);
+
+        assert_eq!(Scalar::sqr(a), 9f64);
+        assert_eq!(Scalar::sqrt(b), 2f64.into());
+    }
+}

@@ -29,11 +29,7 @@ impl<'a, T> Iterator for IndexedIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         let pos = self.inner.next()?;
         self.scope = self.tensor.get_by_index(pos.index());
-        if let Some(scope) = self.scope {
-            Some((scope, pos))
-        } else {
-            None
-        }
+        self.scope.map(|scope| (scope, pos))
     }
 }
 
@@ -41,11 +37,7 @@ impl<'a, T> DoubleEndedIterator for IndexedIter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         let pos = self.inner.next_back()?;
         self.scope = self.tensor.get_by_index(pos.index());
-        if let Some(scope) = self.scope {
-            Some((scope, pos))
-        } else {
-            None
-        }
+        self.scope.map(|scope| (scope, pos))
     }
 }
 

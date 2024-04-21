@@ -3,46 +3,66 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-///
-#[macro_export]
-macro_rules! nested {
-    (@loop $exp:expr, for $i:ident in $iter:expr) => {
-        for $i in $iter {
-            $exp
-        }
+macro_rules! nested_constructor {
+    ($variant:ident<$inner:ident>, $method:ident, [$($call:ident),*]) => {
+        nested_constructor!(@loop $variant<$inner>, $method, [$($call),*]);
     };
-    (@loop $exp:expr, for $i:ident in $iter:expr, $($tail:tt)*) => {
-        for $i in $iter {
-            nested!(@loop $exp, $($tail)*);
+    (@loop $variant:ident<$inner:ident>, $method:ident, [$($call:ident),*]) => {
+        pub fn $method(inner:$inner) -> Self {
+            Self::$variant(inner)
         }
-    };
-    ($(for $i:ident in $iter:expr),* => {$exp:expr} ) => {
-        nested!(@loop $exp, $(for $i in $iter),*);
+
+        $(
+            pub fn $call() -> Self {
+                Self::$method($inner::$call())
+            }
+        )*
+
     };
 }
 
-macro_rules! unit_enum_constructor {
-    ($(($variant:ident, $method:ident)),*) => {
+macro_rules! variant_constructor {
+    ($(($($rest:tt),*)),*) => {
         $(
-            unit_enum_constructor!($variant, $method);
+            variant_constructor!(@loop $($rest),*);
         )*
     };
-    ($variant:ident, $method:ident) => {
+    ($(($variant:ident $($rest:tt),*, $method:ident)),*) => {
+        $(
+            variant_constructor!(@loop $variant $($rest),*, $method);
+        )*
+    };
+    (@loop $variant:ident, $method:ident) => {
         pub fn $method() -> Self {
             Self::$variant
         }
     };
+
+    (@loop $variant:ident($call:expr), $method:ident) => {
+        pub fn $method() -> Self {
+            Self::$variant($call())
+        }
+    };
+
+
 }
 
+#[allow(unused_macros)]
 macro_rules! simple_enum_constructor {
-    ($(($variant:ident, $method:ident, $new:expr)),*) => {
+    ($($n:tt)*) => {
+        simple_enum_constructor!(@loop $($n)*);
+    };
+    (@loop $(($variant:ident {$($field:ident: $ty:ty),*}, $method:ident)),*) => {
         $(
-            simple_enum_constructor!($variant, $method, $new);
+            simple_enum_constructor!(@loop $variant {$($field: $ty),*}, $method);
         )*
     };
-    ($variant:ident, $method:ident, $new:expr) => {
-        pub fn $method() -> Self {
-            Self::$variant($new)
+
+    (@loop $variant:ident {$($field:ident: $ty:ty),*}, $method:ident) => {
+        pub fn $method($($field:$ty),*) -> Self {
+            Self::$variant {
+                $($field),*
+            }
         }
     };
 }

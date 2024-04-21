@@ -8,9 +8,7 @@ use acme::prelude::{nested, BoxResult};
 
 fn main() -> BoxResult {
     nested!(
-        for i in 0..3,
-        for j in 0..3,
-        for k in 0..3 => {
+        i in 0..3 => j in 0..3 => k in 0..3 => {
         println!("({}, {}, {})", i, j, k)
     });
     Ok(())

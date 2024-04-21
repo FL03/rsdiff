@@ -51,8 +51,10 @@
 /**/venv/
 
 # Rust
-/**/debug/
-/**/target/
+**/debug/
+**/target/
+
+rustc-ice-**.txt
 
 # Svelte
 /**/.DS_STORE/

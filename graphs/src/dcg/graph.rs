@@ -5,17 +5,75 @@
 use super::edge::Edge;
 use super::node::Node;
 use super::DynamicGraph;
-use crate::ops::*;
 use crate::prelude::GraphResult as Result;
 use crate::NodeIndex;
 
-use core::ops::{Index, Neg};
-use num::traits::NumAssign;
+use acme::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
+use acme::prelude::Scalar;
+use core::ops::Index;
 use petgraph::algo::toposort;
 use std::collections::HashMap;
 
+macro_rules! entry {
+    ($ctx:ident[$key:expr]) => {
+        entry!(@base $ctx[$key]).or_default()
+    };
+    ($ctx:ident[$key:expr], $val:expr) => {
+        entry!(@base $ctx[$key].or_insert($val))
+    };
+    (@base $ctx:ident[$key:expr].$call:ident($val:expr)) => {
+        entry!($ctx[$key]).$call:ident($val)
+    };
+    (@base $ctx:ident[$key:expr]) => {
+        $ctx.entry($key)
+    };
+
+}
+
+macro_rules! push {
+    ($ctx:expr, $(($key:expr, $val:expr)),*) => {
+        $(push!(@impl $ctx, $key, $val);)*
+    };
+
+    ($ctx:expr, $key:expr, $val:expr) => {
+        push!(@impl $ctx, $key, $val)
+    };
+    (@impl $ctx:expr, $key:expr, $val:expr) => {
+        $ctx.push(($key, $val))
+    };
+
+}
+
+macro_rules! binop {
+    ($($call:ident),*) => {
+        $(binop!(@impl $call);)*
+    };
+    (@impl $call:ident) => {
+        pub fn $call(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
+            self.binary(lhs, rhs, BinaryOp::$call())
+        }
+    };
+}
+
+macro_rules! unop {
+    ($($call:ident),*) => {
+        $(unop!(@impl $call);)*
+    };
+    (@impl $call:ident) => {
+        pub fn $call(&mut self, recv: NodeIndex) -> NodeIndex {
+            self.unary(recv, UnaryOp::$call())
+        }
+    };
+}
+
 pub struct Dcg<T> {
     store: DynamicGraph<T>,
+}
+
+impl<T> Default for Dcg<T> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<T> Dcg<T> {
@@ -25,12 +83,7 @@ impl<T> Dcg<T> {
         }
     }
 
-    pub fn binary(
-        &mut self,
-        lhs: NodeIndex,
-        rhs: NodeIndex,
-        op: impl Into<BinaryExpr>,
-    ) -> NodeIndex {
+    pub fn binary(&mut self, lhs: NodeIndex, rhs: NodeIndex, op: impl Into<BinaryOp>) -> NodeIndex {
         let c = self.store.add_node(Node::binary(lhs, rhs, op));
         self.store.add_edge(lhs, c, Edge::new(lhs));
         self.store.add_edge(rhs, c, Edge::new(rhs));
@@ -56,7 +109,7 @@ impl<T> Dcg<T> {
     pub fn op(
         &mut self,
         inputs: impl IntoIterator<Item = NodeIndex>,
-        op: impl Into<Operations>,
+        op: impl Into<Op>,
     ) -> NodeIndex {
         let args = Vec::from_iter(inputs);
 
@@ -71,7 +124,7 @@ impl<T> Dcg<T> {
         self.store.remove_node(index)
     }
 
-    pub fn unary(&mut self, input: NodeIndex, op: impl Into<UnaryExpr>) -> NodeIndex {
+    pub fn unary(&mut self, input: NodeIndex, op: impl Into<UnaryOp>) -> NodeIndex {
         let c = self.store.add_node(Node::unary(input, op));
         self.store.add_edge(input, c, Edge::new(input));
         c
@@ -80,29 +133,18 @@ impl<T> Dcg<T> {
     pub fn variable(&mut self, value: T) -> NodeIndex {
         self.input(true, value)
     }
-}
 
-impl<T> Dcg<T> {
-    pub fn add(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.binary(lhs, rhs, BinaryExpr::add())
-    }
+    binop!(add, div, mul, pow, rem, sub);
 
-    pub fn div(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.binary(lhs, rhs, BinaryExpr::div())
-    }
-
-    pub fn mul(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.binary(lhs, rhs, BinaryExpr::mul())
-    }
-
-    pub fn sub(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex {
-        self.binary(lhs, rhs, BinaryExpr::sub())
-    }
+    unop!(
+        abs, acos, acosh, asin, asinh, atan, atanh, ceil, cos, cosh, exp, floor, inv, ln, neg,
+        recip, sin, sinh, sqr, sqrt, tan, tanh
+    );
 }
 
 impl<T> Dcg<T>
 where
-    T: Copy + Default + Neg<Output = T> + NumAssign,
+    T: Scalar<Real = T>,
 {
     pub fn backward(&self) -> Result<HashMap<NodeIndex, T>> {
         let sorted = toposort(&self.store, None)?;
@@ -122,36 +164,53 @@ where
 
             match node {
                 Node::Binary { lhs, rhs, op } => match op {
-                    BinaryExpr::Add(_) => {
-                        *store.entry(*lhs).or_default() += grad;
-                        *store.entry(*rhs).or_default() += grad;
+                    BinaryOp::Arith(inner) => match inner {
+                        Arithmetic::Add(_) => {
+                            *entry!(store[*lhs]) += grad;
+                            *entry!(store[*rhs]) += grad;
 
-                        stack.push((*lhs, grad));
-                        stack.push((*rhs, grad));
-                    }
-                    BinaryExpr::Mul(_) => {
-                        let lhs_grad = grad * self[*rhs].value();
-                        let rhs_grad = grad * self[*lhs].value();
-                        *store.entry(*lhs).or_default() += lhs_grad;
-                        *store.entry(*rhs).or_default() += rhs_grad;
+                            push!(stack, (*lhs, grad), (*rhs, grad));
+                        }
+                        Arithmetic::Div(_) => {
+                            let lhs_grad = grad / self[*rhs].value();
+                            let rhs_grad = grad * self[*lhs].value() / self[*rhs].value().powi(2);
+                            *entry!(store[*lhs]) += lhs_grad;
+                            *entry!(store[*rhs]) += rhs_grad;
 
-                        stack.push((*lhs, lhs_grad));
-                        stack.push((*rhs, rhs_grad));
-                    }
-                    BinaryExpr::Sub(_) => {
-                        *store.entry(*lhs).or_default() += grad;
-                        *store.entry(*rhs).or_default() -= grad;
+                            push!(stack, (*lhs, lhs_grad), (*rhs, rhs_grad));
+                        }
+                        Arithmetic::Mul(_) => {
+                            let lhs_grad = grad * self[*rhs].value();
+                            let rhs_grad = grad * self[*lhs].value();
+                            *entry!(store[*lhs]) += lhs_grad;
+                            *entry!(store[*rhs]) += rhs_grad;
+                            push!(stack, (*lhs, lhs_grad), (*rhs, rhs_grad));
+                        }
+                        Arithmetic::Pow(_) => {
+                            let lhs_grad = grad
+                                * self[*rhs].value()
+                                * self[*lhs].value().powf(self[*rhs].value() - T::one());
+                            let rhs_grad = grad
+                                * self[*lhs].value().powf(self[*rhs].value())
+                                * (self[*lhs].value().ln());
+                            *entry!(store[*lhs]) += lhs_grad;
+                            *entry!(store[*rhs]) += rhs_grad;
 
-                        stack.push((*lhs, grad));
-                        stack.push((*rhs, grad.neg()));
-                    }
-                    _ => {}
+                            push!(stack, (*lhs, lhs_grad), (*rhs, rhs_grad));
+                        }
+                        Arithmetic::Sub(_) => {
+                            *entry!(store[*lhs]) += grad;
+                            *entry!(store[*rhs]) -= grad;
+
+                            push!(stack, (*lhs, grad), (*rhs, -grad));
+                        }
+                        _ => todo!(),
+                    },
+                    _ => todo!(),
                 },
-                Node::Unary { op, .. } => match op {
-                    _ => {
-                        unimplemented!();
-                    }
-                },
+                Node::Unary { .. } => {
+                    unimplemented!();
+                }
                 Node::Input { param, .. } => {
                     if *param {
                         continue;

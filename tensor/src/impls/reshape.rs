@@ -23,13 +23,13 @@ where
             data: self.data().clone(),
         }
     }
-
+    #[doc(hidden)]
     pub fn pad(&self, shape: impl IntoShape, _with: T) -> Self {
         let shape = shape.into_shape();
 
         let _diff = *self.shape().rank() - *shape.rank();
 
-        unimplemented!()
+        todo!()
     }
     /// Swap two axes in the tensor.
     pub fn swap_axes(&self, swap: Axis, with: Axis) -> Self {
@@ -49,7 +49,7 @@ where
 
         TensorBase {
             id: TensorId::new(),
-            kind: self.kind.clone(),
+            kind: self.kind,
             layout,
             op: op.into(),
             data: data.clone(),

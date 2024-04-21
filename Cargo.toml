@@ -15,9 +15,11 @@ version = "0.3.1"
 default-members = [
     "acme"
 ]
+
 exclude = [ 
-    
+    "exp/container",
 ]
+
 members = [
     "acme", 
     "core",
@@ -25,11 +27,12 @@ members = [
     "graphs",
     "macros",
     "tensor",
-    "exp/ndtensor",
+    
 ]
 resolver = "2"
 
 [workspace.dependencies]
+paste = "1"
 strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
 

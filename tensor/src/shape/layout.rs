@@ -35,6 +35,10 @@ impl Layout {
             strides: stride,
         }
     }
+    /// Create a new layout with a scalar stride.
+    pub fn scalar() -> Self {
+        Self::contiguous(())
+    }
     #[doc(hidden)]
     /// Return stride offset for index.
     pub fn stride_offset(index: impl AsRef<[usize]>, strides: &Stride) -> isize {
@@ -184,14 +188,30 @@ impl Layout {
 
 // Internal methods
 impl Layout {
-    pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
+    pub(crate) fn index<Idx>(&self, idx: Idx) -> usize
+    where
+        Idx: AsRef<[usize]>,
+    {
         let idx = idx.as_ref();
         debug_assert_eq!(idx.len(), *self.rank(), "Dimension mismatch");
         self.index_unchecked(idx)
     }
 
-    pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
-        crate::coordinates_to_index(idx, self.strides())
+    pub(crate) fn index_unchecked<Idx>(&self, idx: Idx) -> usize
+    where
+        Idx: AsRef<[usize]>,
+    {
+        crate::coordinates_to_index::<Idx>(idx, self.strides())
+    }
+
+    pub(crate) fn _matmul(&self, rhs: &Layout) -> Result<Layout, ShapeError> {
+        let shape = self.shape().matmul(rhs.shape())?;
+        let layout = Layout {
+            offset: self.offset(),
+            shape,
+            strides: self.strides().clone(),
+        };
+        Ok(layout)
     }
 }
 

@@ -70,8 +70,6 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
     }
 }
 
-
-
 pub fn handle_call(expr: &ExprCall, var: &Ident) -> TokenStream {
     let ExprCall { args, func, .. } = expr;
 

@@ -5,95 +5,6 @@
 use super::{BinOp, BinaryAssignOp};
 use crate::ops::{Evaluator, OpKind, Operator, Params};
 use num::traits::{NumOps, Pow};
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
-
-macro_rules! impl_arith {
-    ($parent:ident: {$($var:ident($inner:ident): $new:ident),*}) => {
-        impl_arith!($parent: [$($var, $inner, $new),*]);
-    };
-    ($group:ident: [$(($variant:ident, $op:ident, $method:ident)),*]) => {
-        #[derive(
-            Clone,
-            Copy,
-            Debug,
-            Display,
-            EnumCount,
-            EnumIs,
-            EnumIter,
-            Eq,
-            Hash,
-            Ord,
-            PartialEq,
-            PartialOrd,
-            VariantNames,
-        )]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde::Deserialize, serde::Serialize,),
-            serde(rename_all = "lowercase", untagged),
-        )]
-        #[repr(C)]
-        #[strum(serialize_all = "lowercase")]
-        pub enum $group {
-            $(
-                $variant($op),
-            )*
-        }
-
-        impl $group {
-            $(
-                pub fn $method() -> Self {
-                    Self::$variant($op::new())
-                }
-            )*
-
-            pub fn name(&self) -> &str {
-                match self {
-                    $(
-                        $group::$variant(_) => stringify!($method),
-                    )*
-                }
-            }
-
-
-            pub fn op(self) -> Box<dyn Operator> {
-                match self {
-                    $(
-                        $group::$variant(op) => Box::new(op),
-                    )*
-                }
-            }
-        }
-
-        impl Operator for $group {
-            fn kind(&self) -> OpKind {
-                OpKind::Binary
-            }
-
-            fn name(&self) -> &str {
-                self.name()
-            }
-        }
-
-        impl<P, A, B, C> Evaluator<P> for $group
-        where
-            A: NumOps<B, C> + Pow<B, Output = C>,
-            P: Params<Pattern = (A, B)>,
-        {
-            type Output = C;
-
-            fn eval(&self, args: P) -> Self::Output
-
-            {
-                match self {
-                    $(
-                        $group::$variant(op) => Evaluator::eval(op, args),
-                    )*
-                }
-            }
-        }
-    };
-}
 
 macro_rules! impl_binary_op {
     // ($($args:tt),*) => {
@@ -113,13 +24,6 @@ macro_rules! impl_binary_op {
             impl_binary_op!(@loop $op, core::ops::$bound, $operator);
         )*
     };
-    (@loop $(($op:ident, $($p:ident)::*, $operator:tt)),*) => {
-        $(
-            impl_binary_op!($op, $($p)::*, $operator);
-        )*
-
-    };
-
     (@loop $operand:ident, $($p:ident)::*.$op:ident) => {
         operator!($operand<Binary>, $op);
         impl_evaluator!($operand, $($p)::*.$op);
@@ -134,6 +38,12 @@ macro_rules! impl_binary_op {
                 $($p)::*::$op(lhs, rhs)
             }
         }
+    };
+    (@loop $(($op:ident, $($p:ident)::*, $operator:tt)),*) => {
+        $(
+            impl_binary_op!($op, $($p)::*, $operator);
+        )*
+
     };
     (@loop $operand:ident, $($p:ident)::*, $op:tt) => {
         operator!($operand, Binary);
@@ -228,16 +138,14 @@ assign_op!(AddAssign, core::ops::AddAssign, +=);
 //     (Shr, Shr, >>)
 // );
 
-impl_arith!(
-    Arithmetic: [
-        (Add, Addition, add),
-        (Div, Division, div),
-        (Mul, Multiplication, mul),
-        (Pow, Power, pow),
-        (Rem, Remainder, rem),
-        (Sub, Subtraction, sub)
-    ]
-);
+operator_group!(Arithmetic<Binary> {
+    Add(Addition): add,
+    Div(Division): div,
+    Mul(Multiplication): mul,
+    Pow(Power): pow,
+    Rem(Remainder): rem,
+    Sub(Subtraction): sub
+});
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {
@@ -255,5 +163,24 @@ impl Arithmetic {
 impl Default for Arithmetic {
     fn default() -> Self {
         Arithmetic::add()
+    }
+}
+
+impl<P, A, B, C> Evaluator<P> for Arithmetic
+where
+    A: NumOps<B, C> + Pow<B, Output = C>,
+    P: Params<Pattern = (A, B)>,
+{
+    type Output = C;
+
+    fn eval(&self, args: P) -> Self::Output {
+        match self {
+            Arithmetic::Add(op) => Evaluator::eval(op, args),
+            Arithmetic::Div(op) => Evaluator::eval(op, args),
+            Arithmetic::Mul(op) => Evaluator::eval(op, args),
+            Arithmetic::Pow(op) => Evaluator::eval(op, args),
+            Arithmetic::Rem(op) => Evaluator::eval(op, args),
+            Arithmetic::Sub(op) => Evaluator::eval(op, args),
+        }
     }
 }

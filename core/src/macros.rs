@@ -44,24 +44,35 @@ macro_rules! impl_fmt {
 }
 
 macro_rules! impl_binary {
-    (impl $($path:ident)::* for $lhs:ident => $body:block) => {
-        impl<T> $($path)::*<T> for $lhs where T: $($tr)* {
+    (impl $($path:ident)::*<$rhs:ident>.$call:ident for $lhs:ident -> $res:ident {$body:expr}) => {
+        impl $($path)::*<$rhs> for $lhs {
             type Output = $res;
 
-            fn $method(self, rhs: $rhs) -> Self::Output $body
+            fn $call(self, rhs: $rhs) -> Self::Output {
+                $body(self, rhs)
+            }
         }
     };
-    ($lhs:ty, $rhs:ty, $res:ty: [$(( $op:ident, $method:ident, $e:expr)),*]) => {
+    (impl $($path:ident)::*<$rhs:ident>.$call:ident for $lhs:ident -> $res:ident where $($t:ident:$($bnd:tt),*),* {$body:expr}) => {
+        impl<$($t),*> $($path)::*<$rhs> for $lhs where $($t:$($bnd),*)* {
+            type Output = $res;
+
+            fn $method(self, rhs: $rhs) -> Self::Output {
+                $body(self, rhs)
+            }
+        }
+    };
+    ($lhs:ty, $rhs:ty, $res:ty: [$(($($path:ident)::*, $method:ident, $e:expr)),*]) => {
         $(
-            impl_binary!(@loop $lhs, $rhs, $res, $op, $method, $e);
+            impl_binary!(@loop $lhs, $rhs, $res, $($path)::*, $method, $e);
         )*
     };
-    ($lhs:ty, $rhs:ty, $res:ty, $op:ident, $method:ident, $e:expr) => {
-        impl_binary!(@loop $lhs, $rhs, $res, $op, $method, $e);
+    ($lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*, $method:ident, $e:expr) => {
+        impl_binary!(@loop $lhs, $rhs, $res, $($path)::*, $method, $e);
     };
 
-    (@loop $lhs:ty, $rhs:ty, $res:ty, $trait:path, $method:ident, $e:expr, where T: $($tr:tt)+*) => {
-        impl<T> $trait<T> for $lhs where T: $($tr)* {
+    (@loop $lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*, $method:ident, $e:expr, where T: $($tr:tt)+*) => {
+        impl<T> $($path)::*<T> for $lhs where T: $($tr)* {
             type Output = $res;
 
             fn $method(self, rhs: $rhs) -> Self::Output {
@@ -69,8 +80,8 @@ macro_rules! impl_binary {
             }
         }
     };
-    (@loop $lhs:ty, $rhs:ty, $res:ty, $op:ident, $method:ident, $e:expr) => {
-        impl $op<$rhs> for $lhs {
+    (@loop $lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*, $method:ident, $e:expr) => {
+        impl $($path)::*<$rhs> for $lhs {
             type Output = $res;
 
             fn $method(self, rhs: $rhs) -> Self::Output {
@@ -82,15 +93,80 @@ macro_rules! impl_binary {
 
 struct U(usize);
 
-use core::ops::*;
+impl_binary!(impl core::ops::Add<U>.add for U -> U { | lhs: U, rhs: U | U(lhs.0 + rhs.0) });
 impl_binary!(
     U, U, U: [
-        (Add, add, | lhs: U, rhs: U | U(lhs.0 + rhs.0)),
-        (Div, div, | lhs: U, rhs: U | U(lhs.0 / rhs.0)),
-        (Mul, mul, | lhs: U, rhs: U | U(lhs.0 * rhs.0)),
-        (Sub, sub, | lhs: U, rhs: U | U(lhs.0 - rhs.0))
+        // (core::ops::Add, add, | lhs: U, rhs: U | U(lhs.0 + rhs.0)),
+        (core::ops::Div, div, | lhs: U, rhs: U | U(lhs.0 / rhs.0)),
+        (core::ops::Mul, mul, | lhs: U, rhs: U | U(lhs.0 * rhs.0)),
+        (core::ops::Sub, sub, | lhs: U, rhs: U | U(lhs.0 - rhs.0))
     ]
 );
+
+macro_rules! operator_group {
+    ($group:ident<$kind:ident> {$($variant:ident($op:ident): $method:ident),*}) => {
+        #[derive(
+            Clone,
+            Copy,
+            Debug,
+            Eq,
+            Hash,
+            Ord,
+            PartialEq,
+            PartialOrd,
+            strum::AsRefStr,
+            strum::Display,
+            strum::EnumCount,
+            strum::EnumIs,
+            strum::EnumIter,
+            strum::EnumString,
+            strum::VariantNames,
+        )]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Deserialize, serde::Serialize,),
+            serde(rename_all = "snake_case", untagged),
+        )]
+        #[repr(C)]
+        #[strum(serialize_all = "snake_case")]
+        pub enum $group {
+            $(
+                $variant($op),
+            )*
+        }
+
+        impl $group {
+            $(
+                pub fn $method() -> Self {
+                    Self::$variant($op::new())
+                }
+            )*
+
+            pub fn name(&self) -> &str {
+                self.as_ref()
+            }
+
+
+            pub fn op(self) -> Box<dyn Operator> {
+                match self {
+                    $(
+                        $group::$variant(op) => Box::new(op),
+                    )*
+                }
+            }
+        }
+
+        impl Operator for $group {
+            fn kind(&self) -> OpKind {
+                OpKind::$kind
+            }
+
+            fn name(&self) -> &str {
+                self.as_ref()
+            }
+        }
+    };
+}
 
 macro_rules! evaluator {
     ($op:ident($($args:ident: $ty:ty),*) -> $output:ty $body:block) => {

@@ -11,17 +11,15 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{ItemFn, Signature};
 
-#[allow(dead_code)]
 pub fn partial_impl(grad: &PartialAst) -> TokenStream {
     let PartialAst { scope, .. } = grad;
-    let grad = match scope {
+    match scope {
         PartialScope::Fn(item_fn) => handle_item_fn(item_fn),
         _ => quote! {},
-    };
-    grad
+    }
 }
 
-pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
+fn handle_item_fn(item: &ItemFn) -> TokenStream {
     let ItemFn { block, sig, .. } = item;
     let Signature { inputs, .. } = sig;
 

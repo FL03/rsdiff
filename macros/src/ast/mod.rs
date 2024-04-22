@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![allow(dead_code)]
+pub use self::{ad::AutodiffAst, partials::PartialAst};
 
 pub mod ad;
 pub mod grad;

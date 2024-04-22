@@ -18,7 +18,6 @@ pub(crate) mod autodiff;
 pub(crate) mod operator;
 pub(crate) mod partial;
 
-use ast::ad::AutodiffAst;
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 
@@ -61,7 +60,7 @@ use syn::parse_macro_input;
 #[proc_macro]
 pub fn autodiff(input: TokenStream) -> TokenStream {
     // Parse the input expression into a syntax tree
-    let expr = parse_macro_input!(input as AutodiffAst);
+    let expr = parse_macro_input!(input as ast::AutodiffAst);
 
     // Generate code to compute the gradient
     let result = autodiff::impl_autodiff(&expr);
@@ -81,8 +80,8 @@ pub fn operator(_attr: TokenStream, item: TokenStream) -> TokenStream {
 #[doc(hidden)]
 #[proc_macro_attribute]
 pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(item as syn::ItemFn);
-    let result = partial::handle_item_fn(&ast);
+    let ast = parse_macro_input!(item as ast::PartialAst);
+    let result = partial::partial_impl(&ast);
     TokenStream::from(result)
 }
 

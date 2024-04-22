@@ -6,7 +6,7 @@
 //!
 //! A computational graph forms the backbone of automatic differentiation. Computational graphs are directed acyclic graphs (DAGs)
 //! that represent any computation as a series of nodes and edges.
-pub use self::graph::Dcg;
+pub use self::{edge::Edge, graph::Dcg, node::Node};
 
 pub(crate) mod graph;
 

@@ -4,77 +4,36 @@
 */
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
-use syn::punctuated::Punctuated;
-use syn::{Attribute, Block, Expr, Ident, Item, Signature, Token, Type};
+use syn::{Attribute, Item, ItemFn};
 
-// #77 Try to integrate with the #[operator] macro by collecting the String created by invoking <call>_lexical()
-pub enum Scope {
-    Expr(Expr),
-    Item(Item),
-    Custom(Expr, TokenStream),
+pub enum PartialScope {
+    Fn(ItemFn),
+    Verbatim(TokenStream), // Not considered
 }
 
-impl Parse for Scope {
+impl Parse for PartialScope {
     fn parse(input: ParseStream) -> Result<Self> {
-        if let Ok(item) = input.parse() {
-            Ok(Self::Item(item))
-        } else if let Ok(expr) = input.parse() {
-            Ok(Self::Expr(expr))
-        } else {
-            Err(input.error("expected item or expression"))
+        let item: Item = input.parse()?;
+        match item {
+            Item::Fn(item_fn) => Ok(Self::Fn(item_fn)),
+            _ => {
+                dbg!("Not handled by acme yet");
+                Ok(Self::Verbatim(input.parse()?))
+            }
         }
     }
 }
-pub struct Partial {
-    pub attrs: Vec<Attribute>,
-    pub expr: Scope,
-    pub var: Ident,
+
+pub struct PartialAst {
+    pub attrs: Vec<Attribute>, // #[partial(attr, ..)]
+    // pub args: Punctuated<Type, Token![,]>, // x1: T1, ..., xn: Tn
+    pub scope: PartialScope,
 }
 
-impl Parse for Partial {
+impl Parse for PartialAst {
     fn parse(input: ParseStream) -> Result<Self> {
         let attrs = input.call(Attribute::parse_outer)?;
-        let variable = input.parse()?;
-        input.parse::<Token![:]>()?;
-        let expr = input.parse()?;
-        Ok(Partial {
-            attrs,
-            expr,
-            var: variable,
-        })
-    }
-}
-
-pub struct Partials {
-    pub expr: Expr,
-    pub split: Token![:],
-    pub vars: Punctuated<Type, Token![,]>,
-}
-
-impl Parse for Partials {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let vars = input.parse_terminated(Type::parse, Token![,])?;
-        let split = input.parse::<Token![:]>()?;
-        let expr = input.parse()?;
-        Ok(Self { expr, split, vars })
-    }
-}
-
-pub struct PartialFnCall {
-    pub attrs: Vec<Attribute>,
-    pub body: Box<Block>,
-    pub sig: Signature,
-}
-
-impl Parse for PartialFnCall {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let attrs = input.call(Attribute::parse_outer)?;
-        let sig: Signature = input.parse()?;
-        let body: Block = input.parse()?;
-        Ok(Self {
-            attrs,
-            body: Box::new(body),
-            sig,
-        })
+        let scope = input.parse()?;
+        Ok(Self { attrs, scope })
     }
 }

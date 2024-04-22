@@ -7,7 +7,9 @@ use crate::handle::{expr, item};
 use proc_macro2::TokenStream;
 
 pub fn impl_autodiff(partial: &AutodiffAst) -> TokenStream {
-    let AutodiffAst { expr, var, .. } = partial;
+    let AutodiffAst {
+        scope: expr, var, ..
+    } = partial;
 
     match expr {
         PartialFn::Expr(inner) => expr::handle_expr(inner, var),

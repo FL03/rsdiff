@@ -8,6 +8,7 @@ pub(crate) mod binary;
 pub(crate) mod unary;
 
 use crate::ops::Methods;
+use core::str::FromStr;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::parse;
@@ -45,7 +46,16 @@ pub fn handle_expr(expr: &Expr, variable: &Ident) -> TokenStream {
         // Differentiate groups
         Expr::Group(inner) => handle_expr(&inner.expr, variable),
         // Differentiate literals
-        Expr::Lit(_) => quote! { 0.0 },
+        Expr::Lit(inner) => match &inner.lit {
+            syn::Lit::Str(literal) => {
+                match parse::<syn::ItemFn>(TokenStream::from_str(&literal.value()).unwrap().into())
+                {
+                    Ok(item) => crate::handle::item::handle_item_fn(&item, variable),
+                    Err(_) => quote! { 0.0 },
+                }
+            }
+            _ => quote! { 0.0 },
+        },
         // Differentiate method calls
         Expr::MethodCall(inner) => Methods::from_method_call(inner, variable),
         // Differentiate parenthesized expressions

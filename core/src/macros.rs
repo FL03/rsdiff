@@ -44,7 +44,7 @@ macro_rules! impl_fmt {
 }
 
 macro_rules! impl_binary {
-    (impl $($path:ident)::*<$rhs:ident>.$call:ident for $lhs:ident -> $res:ident {$body:expr}) => {
+    (impl $($path:ident)::*.$call:ident($lhs:ident, $rhs:ident) -> $res:ident {$body:expr}) => {
         impl $($path)::*<$rhs> for $lhs {
             type Output = $res;
 
@@ -93,7 +93,7 @@ macro_rules! impl_binary {
 
 struct U(usize);
 
-impl_binary!(impl core::ops::Add<U>.add for U -> U { | lhs: U, rhs: U | U(lhs.0 + rhs.0) });
+impl_binary!(impl core::ops::Add.add(U, U) -> U { | lhs: U, rhs: U | U(lhs.0 + rhs.0) });
 impl_binary!(
     U, U, U: [
         // (core::ops::Add, add, | lhs: U, rhs: U | U(lhs.0 + rhs.0)),

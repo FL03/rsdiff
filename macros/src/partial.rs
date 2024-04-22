@@ -5,18 +5,20 @@
 //! An attribute macro
 //!
 //!
-use crate::ast::grad::GradientAst;
+use crate::ast::partials::{PartialAst, PartialScope};
 use crate::handle::block::handle_block;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{ItemFn, Signature};
 
 #[allow(dead_code)]
-pub fn partial_impl(grad: &GradientAst) -> TokenStream {
-    let GradientAst { attrs, item } = grad;
-    let _attrs = attrs;
-    let item = item;
-    handle_item_fn(item)
+pub fn partial_impl(grad: &PartialAst) -> TokenStream {
+    let PartialAst { scope, .. } = grad;
+    let grad = match scope {
+        PartialScope::Fn(item_fn) => handle_item_fn(item_fn),
+        _ => quote! {},
+    };
+    grad
 }
 
 pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
@@ -38,7 +40,7 @@ pub fn handle_item_fn(item: &ItemFn) -> TokenStream {
         .collect::<Vec<_>>();
 
     quote! {
-        [#(#grad)*]
+        #item
     }
 }
 

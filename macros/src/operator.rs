@@ -17,7 +17,7 @@ pub fn impl_operator(ast: &OperatorAst) -> TokenStream {
         Item::Fn(inner) => handle_operator_func(&inner),
         _ => panic!("Expected a function"),
     };
-    
+
     if let Some(attrs) = attrs {
         let ext = handle_operator_attr(&attrs, &item);
         res = quote! {

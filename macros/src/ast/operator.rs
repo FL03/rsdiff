@@ -42,7 +42,6 @@ impl OperatorAttr {
 
     pub fn parser(&mut self, meta: ParseNestedMeta) -> Result<()> {
         if meta.path.is_ident("lexical") {
-    
             let value: Ident = meta.value()?.parse()?;
             self.lexical = Some(value);
         } else {

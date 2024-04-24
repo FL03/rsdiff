@@ -69,11 +69,13 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
     TokenStream::from(result)
 }
 
+
 #[doc(hidden)]
 #[proc_macro_attribute]
-pub fn operator(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(item as syn::Item);
-    let result = operator::impl_operator(ast);
+pub fn operator(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attrs = parse_macro_input!(attr with syn::Attribute::parse_outer);
+    let item = parse_macro_input!(item as syn::Item);
+    let result = operator::impl_operator(attrs, item);
     TokenStream::from(result)
 }
 

@@ -57,6 +57,20 @@ pub fn attrs_is_lexical(attrs: &Vec<syn::Attribute>) -> bool {
     })
 }
 
+#[allow(dead_code)]
+pub fn fn_args_ident(arg: &syn::FnArg) -> Ident {
+    use syn::Pat;
+    match arg {
+        syn::FnArg::Typed(inner) => match inner.pat.as_ref() {
+            Pat::Ident(ident) => {
+                ident.ident.clone()
+            }
+            _ => panic!("Expected an identifier"),
+        }
+        _ => panic!("Expected a typed argument"),
+    }
+}
+
 pub fn foil_expr(a: &Expr, b: &ExprParen, var: &Ident) -> TokenStream {
     let ExprParen {
         attrs,

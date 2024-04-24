@@ -7,6 +7,7 @@ pub use self::{ad::AutodiffAst, partials::PartialAst};
 
 pub mod ad;
 pub mod grad;
+pub mod operator;
 pub mod partials;
 
 use proc_macro2::Span;

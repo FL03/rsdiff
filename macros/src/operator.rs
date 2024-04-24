@@ -7,26 +7,14 @@
 //!
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{Expr, FnArg, Ident, Item, ItemFn, Signature};
+use syn::{Attribute, Item, ItemFn, Lit, LitStr, Signature};
 use syn::spanned::Spanned;
 
-pub fn impl_operator(item: Item) -> TokenStream {
+pub fn impl_operator(attrs: Vec<Attribute>, item: Item) -> TokenStream {
+    println!("attrs: {:?}", &attrs);
     match item {
         Item::Fn(inner) => handle_operator_func(&inner),
         _ => panic!("Expected a function"),
-    }
-}
-
-fn fn_args_ident(arg: &FnArg) -> Ident {
-    use syn::Pat;
-    match arg {
-        FnArg::Typed(inner) => match inner.pat.as_ref() {
-            Pat::Ident(ident) => {
-                ident.ident.clone()
-            }
-            _ => panic!("Expected an identifier"),
-        }
-        _ => panic!("Expected a typed argument"),
     }
 }
 
@@ -34,8 +22,8 @@ fn handle_operator_func(item: &ItemFn) -> TokenStream {
     let item_tk = item.to_token_stream();
     let item_str = item_tk.to_string();
     let _lit = {
-        let lit_str = syn::LitStr::new(&item_str, item.span());
-        syn::Lit::Str(lit_str)
+        let lit_str = LitStr::new(&item_str, item.span());
+        Lit::Str(lit_str)
     };
     // let grad: Vec<TokenStream> = item.sig.inputs.iter().map(|i| crate::handle::handle_expr(&Expr::Lit(syn::ExprLit {attrs: Vec::new(), lit: _lit}), &fn_args_ident(i))).collect();
     let ItemFn { sig, .. } = item;

@@ -2,30 +2,34 @@
     Appellation: variables <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{BinaryOp, Gradient, Op, UnaryOp};
-use crate::specs::{Evaluate, EvaluateMut, EvaluateOnce};
+use crate::prelude::{AtomicId, BinaryOp, Gradient, Op, UnaryOp};
+use crate::specs::{Eval, EvalMut, EvalOnce};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Neg, Not};
 use num::{Num, One, Zero};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 #[repr(C)]
 pub struct Variable<T> {
+    id: AtomicId,
     name: String,
     operation: Option<Op>,
     pub(crate) value: Option<T>,
 }
 
 impl<T> Variable<T> {
-    pub fn new(name: impl ToString) -> Self {
+    pub fn new() -> Self {
         Self {
-            name: name.to_string(),
+            id: AtomicId::new(),
+            name: String::new(),
             operation: None,
             value: None,
         }
+    }
+
+    pub fn id(&self) -> AtomicId {
+        self.id
     }
 
     pub const fn is_expression(&self) -> bool {
@@ -56,12 +60,25 @@ impl<T> Variable<T> {
         self.value = Some(value);
     }
 
+    pub fn set_op(&mut self, op: impl Into<Op>) {
+        self.operation = Some(op.into());
+    }
+
+    pub fn with_id(mut self, id: AtomicId) -> Self {
+        self.id = id;
+        self
+    }
+
     pub fn with_name(mut self, name: impl ToString) -> Self {
         self.name = name.to_string();
         self
     }
 
     pub fn with_op(mut self, op: impl Into<Op>) -> Self {
+        let op = op.into();
+        if self.name.is_empty() {
+            self.name = op.to_string();
+        }
         self.operation = Some(op.into());
         self
     }
@@ -84,13 +101,20 @@ impl<T> BorrowMut<T> for Variable<T> {
     }
 }
 
-impl<T> std::fmt::Display for Variable<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name)
+impl<T> core::fmt::Display for Variable<T>
+where
+    T: core::fmt::Display,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        if let Some(value) = self.value.as_ref() {
+            write!(f, "{}", value)
+        } else {
+            write!(f, "{}", self.id)
+        }
     }
 }
 
-impl<T> Evaluate for Variable<T>
+impl<T> Eval for Variable<T>
 where
     T: Copy + Default,
 {
@@ -98,7 +122,7 @@ where
         self.value.as_ref().copied().unwrap_or_default()
     }
 }
-impl<T> EvaluateMut for Variable<T>
+impl<T> EvalMut for Variable<T>
 where
     T: Default,
 {
@@ -107,7 +131,7 @@ where
     }
 }
 
-impl<T> EvaluateOnce for Variable<T>
+impl<T> EvalOnce for Variable<T>
 where
     T: Default,
 {
@@ -143,9 +167,8 @@ where
     type Output = Variable<T>;
 
     fn neg(self) -> Self::Output {
-        let name = format!("-{}", self.name());
         let value = self.eval_once().neg();
-        Variable::new(name).with_op(UnaryOp::Neg).with_value(value)
+        Variable::new().with_op(UnaryOp::Neg).with_value(value)
     }
 }
 
@@ -156,9 +179,8 @@ where
     type Output = Variable<T>;
 
     fn neg(self) -> Self::Output {
-        let name = format!("-{}", self.name());
         let value = self.eval().neg();
-        Variable::new(name).with_op(UnaryOp::Neg).with_value(value)
+        Variable::new().with_op(UnaryOp::Neg).with_value(value)
     }
 }
 
@@ -169,9 +191,8 @@ where
     type Output = Variable<T>;
 
     fn not(self) -> Self::Output {
-        let name = format!("!{}", self.name());
         let value = self.eval_once().not();
-        Variable::new(name).with_op(UnaryOp::Not).with_value(value)
+        Variable::new().with_op(UnaryOp::Not).with_value(value)
     }
 }
 
@@ -182,7 +203,7 @@ where
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(|value| Variable::new(str).with_value(value))
+        T::from_str_radix(str, radix).map(|value| Variable::new().with_name(str).with_value(value))
     }
 }
 
@@ -191,7 +212,7 @@ where
     T: Copy + Default + One,
 {
     fn one() -> Self {
-        Variable::new("one").with_value(T::one())
+        Variable::new().with_value(T::one())
     }
 }
 
@@ -200,7 +221,7 @@ where
     T: Copy + Default + Zero,
 {
     fn zero() -> Self {
-        Variable::new("0").with_value(T::zero())
+        Variable::new().with_value(T::zero())
     }
 
     fn is_zero(&self) -> bool {
@@ -222,9 +243,8 @@ macro_rules! impl_std_op {
             type Output = Variable<T>;
 
             fn $method(self, rhs: Variable<T>) -> Self::Output {
-                let name = format!("{}", stringify!($method));
                 let value = self.eval_once() $e rhs.eval_once();
-                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
+                Variable::new().with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -235,9 +255,8 @@ macro_rules! impl_std_op {
             type Output = Variable<T>;
 
             fn $method(self, rhs: &'a Variable<T>) -> Self::Output {
-                let name = format!("{}", stringify!($method));
                 let value = self.eval_once() $e rhs.eval();
-                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
+                Variable::new().with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -248,9 +267,8 @@ macro_rules! impl_std_op {
             type Output = Variable<T>;
 
             fn $method(self, rhs: Variable<T>) -> Self::Output {
-                let name = format!("{}", stringify!($method));
                 let value = self.eval() $e rhs.eval_once();
-                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
+                Variable::new().with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -261,9 +279,8 @@ macro_rules! impl_std_op {
             type Output = Variable<T>;
 
             fn $method(self, rhs: &'a Variable<T>) -> Self::Output {
-                let name = format!("{}", stringify!($method));
                 let value = self.eval() $e rhs.eval();
-                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
+                Variable::new().with_op(BinaryOp::$method()).with_value(value)
             }
         }
 
@@ -274,9 +291,8 @@ macro_rules! impl_std_op {
             type Output = Self;
 
             fn $method(self, rhs: T) -> Self::Output {
-                let name = format!("{}", stringify!($method));
                 let value = self.eval_once() $e rhs;
-                Variable::new(name).with_op(BinaryOp::$method()).with_value(value)
+                Variable::new().with_op(BinaryOp::$method()).with_value(value)
             }
         }
     };

@@ -2,6 +2,8 @@
     Appellation: layout <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::iter::LayoutIter;
+use crate::shape::dim::stride_offset;
 use crate::shape::{Axis, IntoShape, IntoStride, Rank, Shape, ShapeError, ShapeResult, Stride};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -16,7 +18,7 @@ pub struct Layout {
 }
 
 impl Layout {
-    pub fn new(offset: usize, shape: impl IntoShape, strides: impl IntoStride) -> Self {
+    pub unsafe fn new(offset: usize, shape: impl IntoShape, strides: impl IntoStride) -> Self {
         Self {
             offset,
             shape: shape.into_shape(),
@@ -32,6 +34,19 @@ impl Layout {
             shape,
             strides: stride,
         }
+    }
+    /// Create a new layout with a scalar stride.
+    pub fn scalar() -> Self {
+        Self::contiguous(())
+    }
+    #[doc(hidden)]
+    /// Return stride offset for index.
+    pub fn stride_offset(index: impl AsRef<[usize]>, strides: &Stride) -> isize {
+        let mut offset = 0;
+        for (&i, &s) in izip!(index.as_ref(), strides.as_slice()) {
+            offset += stride_offset(i, s);
+        }
+        offset
     }
     /// Broadcast the layout to a new shape.
     ///
@@ -56,16 +71,25 @@ impl Layout {
             };
             stride.push(s)
         }
-        Ok(Self::new(self.offset, shape, stride))
+        let layout = unsafe { Layout::new(0, shape, stride) };
+        Ok(layout)
     }
     /// Determine if the current layout is contiguous or not.
     pub fn is_contiguous(&self) -> bool {
         self.shape().is_contiguous(&self.strides)
     }
+    /// Checks to see if the layout is empy; i.e. a scalar of Rank(0)
+    pub fn is_scalar(&self) -> bool {
+        self.shape().is_scalar()
+    }
     /// A function for determining if the layout is square.
     /// An n-dimensional object is square if all of its dimensions are equal.
     pub fn is_square(&self) -> bool {
         self.shape().is_square()
+    }
+
+    pub fn iter(&self) -> LayoutIter {
+        LayoutIter::new(self.clone())
     }
     /// Peek the offset of the layout.
     pub fn offset(&self) -> usize {
@@ -164,20 +188,30 @@ impl Layout {
 
 // Internal methods
 impl Layout {
-    pub(crate) fn index(&self, idx: impl AsRef<[usize]>) -> usize {
+    pub(crate) fn index<Idx>(&self, idx: Idx) -> usize
+    where
+        Idx: AsRef<[usize]>,
+    {
         let idx = idx.as_ref();
-        if idx.len() != *self.rank() {
-            panic!("Dimension mismatch");
-        }
+        debug_assert_eq!(idx.len(), *self.rank(), "Dimension mismatch");
         self.index_unchecked(idx)
     }
 
-    pub(crate) fn index_unchecked(&self, idx: impl AsRef<[usize]>) -> usize {
-        idx.as_ref()
-            .iter()
-            .zip(self.strides().iter())
-            .map(|(i, s)| i * s)
-            .sum()
+    pub(crate) fn index_unchecked<Idx>(&self, idx: Idx) -> usize
+    where
+        Idx: AsRef<[usize]>,
+    {
+        crate::coordinates_to_index::<Idx>(idx, self.strides())
+    }
+
+    pub(crate) fn _matmul(&self, rhs: &Layout) -> Result<Layout, ShapeError> {
+        let shape = self.shape().matmul(rhs.shape())?;
+        let layout = Layout {
+            offset: self.offset(),
+            shape,
+            strides: self.strides().clone(),
+        };
+        Ok(layout)
     }
 }
 

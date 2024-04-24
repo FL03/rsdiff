@@ -5,12 +5,17 @@
 //! # Types
 //!
 //!
-pub use self::{constants::*, dual::*, variables::*};
+pub use self::{constants::*, dtype::*, dual::*, variables::*};
 
 pub(crate) mod constants;
+pub(crate) mod dtype;
 pub(crate) mod dual;
 pub(crate) mod variables;
 
+/// A type alias for a boxed `Any` type.
+pub type AnyBox = Box<dyn core::any::Any>;
+/// A type alias for a boxed `Any` type that is `Send` and `Sync`.
+pub type AnySyncBox = Box<dyn core::any::Any + Send + Sync>;
 /// A boxed error type for use in the library.
 #[cfg(feature = "std")]
 pub type BoxError = Box<dyn std::error::Error + Send + Sync>;

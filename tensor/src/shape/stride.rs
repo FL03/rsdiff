@@ -2,7 +2,7 @@
    Appellation: stride <mod>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{Axis, Rank};
+use super::{dim, Axis, Rank};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut, Index, IndexMut};
 use core::slice::{Iter as SliceIter, IterMut as SliceIterMut};
@@ -20,6 +20,12 @@ where
     fn into_stride(self) -> Stride {
         self.into()
     }
+}
+
+pub enum Strides {
+    Contiguous,
+    Fortran,
+    Stride(Stride),
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -84,6 +90,28 @@ impl Stride {
     pub fn reverse(&mut self) {
         self.0.reverse()
     }
+    /// Returns a new stride with the elements reversed.
+    pub fn reversed(&self) -> Self {
+        let mut stride = self.clone();
+        stride.reverse();
+        stride
+    }
+    /// Sets the element at the specified axis, returning None if the axis is out of bounds.
+    pub fn set(&mut self, axis: Axis, value: usize) -> Option<usize> {
+        self.0.get_mut(*axis).map(|v| core::mem::replace(v, value))
+    }
+    ///
+    pub fn stride_offset<Idx>(&self, index: &Idx) -> isize
+    where
+        Idx: AsRef<[usize]>,
+    {
+        index
+            .as_ref()
+            .iter()
+            .copied()
+            .zip(self.iter().copied())
+            .fold(0, |acc, (i, s)| acc + dim::stride_offset(i, s))
+    }
     /// Swaps two elements in the stride, inplace.
     pub fn swap(&mut self, a: usize, b: usize) {
         self.0.swap(a, b)
@@ -100,7 +128,7 @@ impl Stride {
 impl Stride {
     pub(crate) fn _fastest_varying_stride_order(&self) -> Self {
         let mut indices = self.clone();
-        for (i, elt) in indices.as_slice_mut().into_iter().enumerate() {
+        for (i, elt) in indices.as_slice_mut().iter_mut().enumerate() {
             *elt = i;
         }
         let strides = self.as_slice();

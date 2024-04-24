@@ -3,18 +3,19 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::AtomicId;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
-pub struct Id<Idx = usize> {
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
+pub struct IndexId<Idx = usize> {
     id: AtomicId,
     index: Idx,
 }
 
-impl<Idx> Id<Idx> {
-    pub fn new(index: Idx) -> Self {
+impl<Idx> IndexId<Idx> {
+    pub fn new(id: AtomicId, index: Idx) -> Self {
+        Self { id, index }
+    }
+    pub fn from_index(index: Idx) -> Self {
         Self {
             id: AtomicId::new(),
             index,
@@ -30,15 +31,11 @@ impl<Idx> Id<Idx> {
     }
 }
 
-impl<Idx> std::fmt::Display for Id<Idx>
+impl<Idx> core::fmt::Display for IndexId<Idx>
 where
-    Idx: std::fmt::Display,
+    Idx: core::fmt::Display,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        if f.alternate() {
-            write!(f, "{}.{}", self.index(), self.id)
-        } else {
-            write!(f, "{}", self.index())
-        }
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        write!(f, "{}({})", self.id(), self.index())
     }
 }

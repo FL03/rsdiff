@@ -5,12 +5,12 @@
 use crate::prelude::{Layout, TensorId};
 use crate::shape::{Rank, Shape, Stride};
 
-pub trait NdTensor {
-    type Data: TensorData;
+pub trait NdTensor<T> {
+    type Data: TensorData<Elem = T>;
 
-    fn as_mut_ptr(&mut self) -> *mut <Self::Data as TensorData>::Elem;
+    fn as_mut_ptr(&mut self) -> *mut T;
 
-    fn as_ptr(&self) -> *const <Self::Data as TensorData>::Elem;
+    fn as_ptr(&self) -> *const T;
 
     fn id(&self) -> TensorId;
 
@@ -35,6 +35,18 @@ pub trait NdTensor {
 
 pub trait TensorData {
     type Elem;
+}
+
+impl<T> TensorData for [T] {
+    type Elem = T;
+}
+
+impl<'a, T> TensorData for &'a [T] {
+    type Elem = T;
+}
+
+impl<T> TensorData for Vec<T> {
+    type Elem = T;
 }
 
 pub trait TensorDataMut: TensorData {

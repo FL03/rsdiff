@@ -10,7 +10,9 @@
 pub trait Associative {}
 
 /// Commutative Property describes an operation that is invariant under the exchange of its operands.
-pub trait Commutative {}
+pub trait Commutative {
+    const IS_COMMUTATIVE: bool;
+}
 
 #[cfg(test)]
 mod tests {

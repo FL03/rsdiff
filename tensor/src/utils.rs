@@ -3,9 +3,19 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::{Scalar, TensorExpr, TensorResult};
-use crate::shape::ShapeError;
+use crate::shape::{ShapeError, Stride};
 use crate::tensor::{from_vec_with_op, TensorBase};
-use num::Zero;
+
+pub(crate) fn coordinates_to_index<Idx>(coords: Idx, strides: &Stride) -> usize
+where
+    Idx: AsRef<[usize]>,
+{
+    coords
+        .as_ref()
+        .iter()
+        .zip(strides.iter())
+        .fold(0, |acc, (&i, &s)| acc + i * s)
+}
 
 pub fn matmul<T>(lhs: &TensorBase<T>, rhs: &TensorBase<T>) -> TensorResult<TensorBase<T>>
 where
@@ -33,38 +43,32 @@ where
     Ok(tensor)
 }
 
-/// Returns the lower triangular portion of a matrix.
-pub fn tril<T>(a: &TensorBase<T>) -> TensorBase<T>
-where
-    T: Clone + Zero,
-{
-    let mut out = a.clone();
-    for i in 0..a.shape()[0] {
-        for j in i + 1..a.shape()[1] {
-            out[[i, j]] = T::zero();
-        }
-    }
-    out
-}
-/// Returns the upper triangular portion of a matrix.
-pub fn triu<T>(a: &TensorBase<T>) -> TensorBase<T>
-where
-    T: Clone + Zero,
-{
-    let mut out = a.clone();
-    for i in 0..a.shape()[0] {
-        for j in 0..i {
-            out[[i, j]] = T::zero();
-        }
-    }
-    out
-}
-
 macro_rules! i {
     ($($x:expr),*) => {
         vec![$($x),*]
     };
 
+}
+
+macro_rules! impl_partial_eq {
+    ($s:ident -> $cmp:tt: [$($t:ty),*]) => {
+        $(
+            impl_partial_eq!($s -> $cmp, $t);
+        )*
+    };
+    ($s:ident -> $cmp:tt, $t:ty) => {
+        impl PartialEq<$t> for $s {
+            fn eq(&self, other: &$t) -> bool {
+                self.$cmp == *other
+            }
+        }
+
+        impl PartialEq<$s> for $t {
+            fn eq(&self, other: &$s) -> bool {
+                *self == other.$cmp
+            }
+        }
+    };
 }
 
 macro_rules! izip {

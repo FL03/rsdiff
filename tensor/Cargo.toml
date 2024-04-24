@@ -43,8 +43,8 @@ strum = { features = ["derive"], version = "0.26" }
 
 [dependencies.acme-core]
 path = "../core"
-version = "0.3.0"
-# version = "0.3.0-nightly.5"
+version = "0.3.1"
+# version = "0.3.1-nightly"
 
 [dev-dependencies]
 approx = "0.5"

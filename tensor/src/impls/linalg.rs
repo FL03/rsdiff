@@ -8,7 +8,7 @@
 use crate::linalg::{Inverse, Matmul};
 use crate::prelude::{Scalar, ShapeError, TensorError, TensorExpr, TensorResult};
 use crate::tensor::{self, TensorBase};
-use acme::prelude::UnaryOp;
+use acme::prelude::{nested, UnaryOp};
 use num::traits::{Num, NumAssign};
 
 fn inverse_impl<T>(tensor: &TensorBase<T>) -> TensorResult<TensorBase<T>>
@@ -45,7 +45,7 @@ where
         }
 
         for j in 0..(2 * n) {
-            aug[[i, j]] = aug[[i, j]] / pivot;
+            aug[[i, j]] /= pivot;
         }
 
         for j in 0..n {
@@ -127,16 +127,12 @@ where
         let sc = |m: usize, n: usize| m * self.ncols() + n;
         let oc = |m: usize, n: usize| m * other.ncols() + n;
 
-        let shape = self.shape().matmul_shape(&other.shape()).unwrap();
+        let shape = self.shape().matmul_shape(other.shape()).unwrap();
         let mut result = vec![T::zero(); shape.size()];
 
-        for i in 0..self.nrows() {
-            for j in 0..other.ncols() {
-                for k in 0..self.ncols() {
-                    result[oc(i, j)] += self.data[sc(i, k)] * other.data[oc(k, j)];
-                }
-            }
-        }
+        nested!(i in 0..self.nrows() => j in 0..other.ncols() => k in 0..self.ncols() => {
+            result[oc(i, j)] += self.data[sc(i, k)] * other.data[oc(k, j)]
+        });
         let op = TensorExpr::matmul(self.clone(), other.clone());
         tensor::from_vec_with_op(false, op, shape, result)
     }

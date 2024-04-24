@@ -7,13 +7,17 @@
 //!
 extern crate proc_macro;
 
-pub(crate) mod ast;
-pub(crate) mod diff;
-pub(crate) mod grad;
-pub(crate) mod ops;
+pub(crate) use self::{error::Error, primitives::*, utils::*};
 
-// use ast::gradient::GradientAst;
-use ast::partials::PartialAst;
+pub(crate) mod ast;
+pub(crate) mod error;
+pub(crate) mod handle;
+pub(crate) mod ops;
+pub(crate) mod utils;
+
+pub(crate) mod autodiff;
+pub(crate) mod operator;
+
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 
@@ -56,19 +60,24 @@ use syn::parse_macro_input;
 #[proc_macro]
 pub fn autodiff(input: TokenStream) -> TokenStream {
     // Parse the input expression into a syntax tree
-    let expr = parse_macro_input!(input as PartialAst);
+    let expr = parse_macro_input!(input as ast::AutodiffAst);
 
     // Generate code to compute the gradient
-    let result = diff::generate_autodiff(&expr);
+    let result = autodiff::impl_autodiff(&expr);
 
     // Return the generated code as a token stream
     TokenStream::from(result)
 }
 
+#[doc(hidden)]
 #[proc_macro_attribute]
-pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(item as syn::ItemFn);
-    let result = grad::handle_item_fn(&ast);
+pub fn operator(args: TokenStream, item: TokenStream) -> TokenStream {
+    let mut attrs = ast::operator::OperatorAttr::new();
+    let op_parser = syn::meta::parser(|meta| attrs.parser(meta));
+    let _ = parse_macro_input!(args with op_parser);
+    let item = parse_macro_input!(item as syn::Item);
+    let ast = ast::OperatorAst::new(Some(attrs), item);
+    let result = operator::impl_operator(&ast);
     TokenStream::from(result)
 }
 
@@ -81,4 +90,9 @@ pub(crate) mod kw {
     syn::custom_keyword!(ln);
     syn::custom_keyword!(sin);
     syn::custom_keyword!(tan);
+}
+
+pub(crate) mod primitives {
+    pub type Result<T = ()> = std::result::Result<T, crate::Error>;
+    pub type BoxError = Box<dyn std::error::Error>;
 }

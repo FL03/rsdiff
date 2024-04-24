@@ -11,7 +11,17 @@ repository.workspace = true
 version.workspace = true
 
 [features]
-default = []
+default = [
+    "std"
+]
+
+full = [
+    "default",
+    "serde",
+    "trace",
+]
+
+std = []
 
 serde = [
     "dep:serde",
@@ -22,6 +32,11 @@ serde-ext = [
     "dep:serde_json",
     "petgraph/serde-1",
     "acme-core/serde",
+]
+
+trace = [
+    "dep:tracing",
+    "acme-core/trace",
 ]
 
 [lib]
@@ -41,11 +56,12 @@ serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
 smart-default.workspace = true
 strum.workspace = true
+tracing = { optional = true, version = "0.1" }
 
 [dependencies.acme-core]
 path = "../core"
-version = "0.3.0"
-# version = "0.3.0-nightly.5"
+version = "0.3.1"
+# version = "0.3.1-nightly"
 
 [package.metadata.docs.rs]
 all-features = true

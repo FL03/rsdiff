@@ -2,15 +2,13 @@
     Appellation: constants <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{EvaluateOnce, Gradient};
+use crate::prelude::{EvalOnce, Gradient};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut, Neg, Not};
 use num::{Num, One, Zero};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 #[repr(C)]
 pub struct Constant<T>(pub(crate) T);
 
@@ -70,16 +68,32 @@ impl<T> DerefMut for Constant<T> {
     }
 }
 
-impl<T> std::fmt::Display for Constant<T>
-where
-    T: std::fmt::Display,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
+macro_rules! fmt_const {
+    ($($name:ident($($args:tt)*)),*) => {
+        $(
+            fmt_const!(@impl $name($($args)*));
+        )*
+    };
+    (@impl $name:ident($($args:tt)*)) => {
+        impl<T> core::fmt::$name for Constant<T> where T: core::fmt::$name {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                write!(f, $($args)*, self.0)
+            }
+        }
+    };
 }
 
-impl<T> EvaluateOnce for Constant<T> {
+fmt_const!(
+    Binary("{:b}"),
+    Display("{}"),
+    LowerExp("{:e}"),
+    LowerHex("{:x}"),
+    Octal("{:o}"),
+    UpperExp("{:E}"),
+    UpperHex("{:X}")
+);
+
+impl<T> EvalOnce for Constant<T> {
     type Output = T;
 
     fn eval_once(self) -> Self::Output {

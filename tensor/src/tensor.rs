@@ -2,11 +2,11 @@
     Appellation: tensor <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::actions::iter::Iter;
+use crate::actions::iter::{Iter, IterMut};
 use crate::error::{TensorError, TensorResult};
 use crate::ops::{BackpropOp, TensorExpr};
 use crate::prelude::{TensorId, TensorKind};
-use crate::shape::{IntoShape, Layout, Rank, Shape, Stride};
+use crate::shape::{IntoShape, IntoStride, Layout, Rank, Shape, Stride};
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::{self, Vec};
@@ -62,6 +62,7 @@ pub(crate) fn from_vec_with_op<T>(
 }
 
 #[derive(Clone, Debug, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct TensorBase<T = f64> {
     pub(crate) id: TensorId,
     pub(crate) data: Vec<T>,
@@ -77,6 +78,23 @@ impl<T> TensorBase<T> {
         I: IntoIterator<Item = T>,
     {
         Self::from_vec(Vec::from_iter(iter))
+    }
+    pub unsafe fn from_raw_parts(
+        ptr: *mut T,
+        shape: impl IntoShape,
+        stride: impl IntoStride,
+    ) -> Self {
+        let shape = shape.into_shape();
+        let stride = stride.into_stride();
+
+        let data = Vec::from_raw_parts(ptr, shape.size(), shape.size());
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::new(0, shape, stride),
+            data,
+            op: BackpropOp::none(),
+        }
     }
     /// Create a new tensor from a scalar value.
     pub fn from_scalar(value: T) -> Self {
@@ -94,6 +112,17 @@ impl<T> TensorBase<T> {
         I: IntoIterator<Item = T>,
     {
         Self::from_shape_vec(shape, Vec::from_iter(iter))
+    }
+    pub unsafe fn from_shape_ptr(shape: impl IntoShape, ptr: *mut T) -> Self {
+        let layout = Layout::contiguous(shape);
+        let data = Vec::from_raw_parts(ptr, layout.size(), layout.size());
+        Self {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: layout.clone(),
+            data,
+            op: BackpropOp::none(),
+        }
     }
     /// Create a new tensor from a [Vec], with a specified [shape](Shape).
     pub fn from_shape_vec(shape: impl IntoShape, data: Vec<T>) -> Self {
@@ -142,6 +171,10 @@ impl<T> TensorBase<T> {
             .zip(other.data())
             .for_each(|(a, b)| *a = b.clone());
     }
+
+    pub fn boxed(self) -> Box<Self> {
+        Box::new(self)
+    }
     /// Detach the computational graph from the tensor
     pub fn detach(&self) -> Self
     where
@@ -183,6 +216,14 @@ impl<T> TensorBase<T> {
     pub const fn id(&self) -> TensorId {
         self.id
     }
+
+    pub unsafe fn into_scalar(self) -> T
+    where
+        T: Clone,
+    {
+        debug_assert!(self.is_scalar(), "Tensor is not scalar");
+        self.data.first().unwrap().clone()
+    }
     /// Returns true if the tensor is contiguous.
     pub fn is_contiguous(&self) -> bool {
         self.layout().is_contiguous()
@@ -203,9 +244,13 @@ impl<T> TensorBase<T> {
     pub const fn is_variable(&self) -> bool {
         self.kind().is_variable()
     }
-    /// Return an iterator over the tensor
+    /// Creates an immutable iterator over the elements in the tensor.
     pub fn iter(&self) -> Iter<'_, T> {
-        Iter::new(self)
+        Iter::new(self.view())
+    }
+    /// Create a mutable iterator over the elements in the tensor.
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+        IterMut::new(self)
     }
     /// Get the kind of the tensor
     pub const fn kind(&self) -> TensorKind {
@@ -290,6 +335,10 @@ impl<T> TensorBase<T> {
         unsafe { self.with_layout_unchecked(layout) }
     }
     /// Set the layout of the tensor without checking for compatibility
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because it does not check if the layout is compatible with the tensor.
     pub unsafe fn with_layout_unchecked(mut self, layout: Layout) -> Self {
         self.layout = layout;
         self
@@ -300,7 +349,7 @@ impl<T> TensorBase<T> {
         self
     }
 
-    pub unsafe fn with_shape_unchecked(mut self, shape: impl IntoShape) -> Self {
+    pub fn with_shape_c(mut self, shape: impl IntoShape) -> Self {
         self.layout = self.layout.with_shape_c(shape);
         self
     }
@@ -320,6 +369,15 @@ impl<'a, T> TensorBase<&'a T> {
 }
 
 impl<T> TensorBase<T> {
+    pub fn view_from_scalar(scalar: &T) -> TensorBase<&T> {
+        TensorBase {
+            id: TensorId::new(),
+            kind: TensorKind::default(),
+            layout: Layout::scalar(),
+            op: BackpropOp::none(),
+            data: vec![scalar],
+        }
+    }
     pub fn to_owned(&self) -> TensorBase<T>
     where
         T: Clone,
@@ -327,13 +385,23 @@ impl<T> TensorBase<T> {
         self.clone()
     }
 
-    pub fn view<'a>(&'a self) -> TensorBase<&'a T> {
+    pub fn view(&self) -> TensorBase<&T> {
         TensorBase {
             id: self.id(),
             kind: self.kind(),
             layout: self.layout().clone(),
             op: self.op().view(),
             data: self.data().iter().collect(),
+        }
+    }
+
+    pub fn view_mut(&mut self) -> TensorBase<&mut T> {
+        TensorBase {
+            id: self.id(),
+            kind: self.kind(),
+            layout: self.layout().clone(),
+            op: self.op.view_mut(),
+            data: self.data.iter_mut().collect(),
         }
     }
 }
@@ -352,7 +420,7 @@ impl<T> TensorBase<T> {
         self.data.get(index)
     }
 
-    pub(crate) fn get_by_index_mut(&mut self, index: usize) -> Option<&mut T> {
+    pub(crate) fn get_mut_by_index(&mut self, index: usize) -> Option<&mut T> {
         self.data.get_mut(index)
     }
 

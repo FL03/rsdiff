@@ -33,6 +33,14 @@ impl Axis {
     pub fn axis(&self) -> usize {
         self.0
     }
+
+    pub fn dec(&self) -> Axis {
+        self - 1
+    }
+
+    pub fn inc(&self) -> Axis {
+        self + 1
+    }
 }
 
 impl AsRef<usize> for Axis {
@@ -66,3 +74,62 @@ impl From<Axis> for usize {
         axis.0
     }
 }
+
+macro_rules! impl_std_ops {
+    ($(($trait:tt, $method:ident, $e:tt)),*) => {
+        $(
+           impl_std_ops!($trait, $method, $e);
+        )*
+    };
+    ($trait:tt, $method:ident, $e:tt) => {
+        impl core::ops::$trait<usize> for Axis {
+            type Output = Axis;
+
+            fn $method(self, rhs: usize) -> Self::Output {
+                Axis(self.0 $e rhs)
+            }
+        }
+
+        impl<'a> core::ops::$trait<usize> for &'a Axis {
+            type Output = Axis;
+
+            fn $method(self, rhs: usize) -> Self::Output {
+                Axis(self.0 $e rhs)
+            }
+        }
+
+        impl core::ops::$trait for Axis {
+            type Output = Axis;
+
+            fn $method(self, rhs: Axis) -> Self::Output {
+                Axis(self.0 $e rhs.0)
+            }
+        }
+
+        impl<'a> core::ops::$trait<Axis> for &'a Axis {
+            type Output = Axis;
+
+            fn $method(self, rhs: Axis) -> Self::Output {
+                Axis(self.0 $e rhs.0)
+            }
+        }
+
+        impl<'a> core::ops::$trait<&'a Axis> for Axis {
+            type Output = Axis;
+
+            fn $method(self, rhs: &'a Axis) -> Self::Output {
+                Axis(self.0 $e rhs.0)
+            }
+        }
+
+        impl<'a> core::ops::$trait<&'a Axis> for &'a Axis {
+            type Output = Axis;
+
+            fn $method(self, rhs: &'a Axis) -> Self::Output {
+                Axis(self.0 $e rhs.0)
+            }
+        }
+    };
+}
+
+impl_std_ops!((Add, add, +), (Sub, sub, -), (Mul, mul, *), (Div, div, /), (Rem, rem, %));

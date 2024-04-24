@@ -32,7 +32,7 @@ mod impls {
 
     impl<I, M, T> ForwardIter<T> for I
     where
-        I: Iterator<Item = M>,
+        I: IntoIterator<Item = M>,
         M: Forward<T, Output = T>,
         T: Clone,
     {

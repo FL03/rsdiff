@@ -8,7 +8,14 @@ use acme::prelude::BinaryOp;
 use core::borrow::Borrow;
 use core::ops::{Deref, DerefMut};
 
+pub trait TensorOp {
+    type Output;
+
+    fn name(&self) -> &str;
+}
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct BackpropOp<A = f64, B = A>(Option<TensorExpr<A, B>>);
 
 impl<A, B> BackpropOp<A, B> {
@@ -46,6 +53,10 @@ impl<A, B> BackpropOp<A, B> {
 
     pub fn view(&self) -> BackpropOp<&A, &B> {
         BackpropOp(self.0.as_ref().map(|op| op.view()))
+    }
+
+    pub fn view_mut(&mut self) -> BackpropOp<&mut A, &mut B> {
+        BackpropOp(self.0.as_mut().map(|op| op.view_mut()))
     }
 }
 

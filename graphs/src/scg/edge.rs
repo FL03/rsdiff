@@ -3,12 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::grad::GradientId;
-use crate::id::Id;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use crate::Id;
 
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Edge<T> {
     id: Option<GradientId<T>>,
     data: T,
@@ -36,10 +34,6 @@ impl<T> Edge<T> {
     }
 
     pub fn input(&self) -> Option<Id> {
-        if let Some(id) = self.id() {
-            Some(**id)
-        } else {
-            None
-        }
+        self.id().map(|id| **id)
     }
 }

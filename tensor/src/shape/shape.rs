@@ -3,17 +3,17 @@
    Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{Axis, Rank, ShapeError, Stride};
-use crate::prelude::{SwapAxes, TensorResult};
+use crate::iter::zip;
+use crate::prelude::{Ixs, SwapAxes};
 #[cfg(not(feature = "std"))]
 use alloc::vec;
 use core::ops::{self, Deref};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use std::vec;
+
 /// A shape is a description of the number of elements in each dimension.
-#[cfg_attr(feature = "serde", derive(Deserialize, Serialize,))]
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
 pub struct Shape(Vec<usize>);
 
 impl Shape {
@@ -23,6 +23,14 @@ impl Shape {
     /// Creates a new shape of rank 0.
     pub fn scalar() -> Self {
         Self(Vec::new())
+    }
+
+    pub fn stride_offset(index: &[usize], strides: &Stride) -> Ixs {
+        let mut offset = 0;
+        for (&i, &s) in index.iter().zip(strides.as_slice()) {
+            offset += super::dim::stride_offset(i, s);
+        }
+        offset
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
@@ -47,22 +55,46 @@ impl Shape {
             .iter()
             .filter(|&&d| d != 0)
             .try_fold(1usize, |acc, &d| acc.checked_mul(d))
-            .ok_or_else(|| ShapeError::Overflow)?;
-        if size_nonzero > ::std::isize::MAX as usize {
+            .ok_or(ShapeError::Overflow)?;
+        if size_nonzero > core::isize::MAX as usize {
             Err(ShapeError::Overflow)
         } else {
             Ok(self.size())
         }
+    }
+    /// Decrement the dimensions of the shape by 1,
+    /// returning a new shape.
+    pub fn dec(&self) -> Self {
+        let mut shape = self.clone();
+        shape.dec_inplace();
+        shape
+    }
+    /// Decrement the dimensions of the shape by 1, inplace.
+    pub fn dec_inplace(&mut self) {
+        for dim in self.iter_mut() {
+            *dim -= 1;
+        }
+    }
+    /// Decrement the dimension at the given [Axis] by 1.
+    pub fn dec_axis(&mut self, axis: Axis) {
+        self[axis] -= 1;
     }
     /// Attempts to create a one-dimensional shape that describes the
     /// diagonal of the current shape.
     pub fn diag(&self) -> Shape {
         Self::new(i![self.nrows()])
     }
-    pub fn get_final_position(&self) -> Vec<usize> {
-        self.iter().map(|&dim| dim - 1).collect()
+
+    pub fn first_index(&self) -> Option<Vec<usize>> {
+        if self.is_empty() {
+            return None;
+        }
+        Some(vec![0; *self.rank()])
     }
-    /// Inserts a new dimension along the given [Axis].
+    pub fn get_final_position(&self) -> Vec<usize> {
+        self.dec().to_vec()
+    }
+    /// Inserts a new dimension along the given [Axis], inplace.
     pub fn insert(&mut self, index: Axis, dim: usize) {
         self.0.insert(*index, dim)
     }
@@ -71,18 +103,6 @@ impl Shape {
         let mut shape = self.clone();
         shape.insert(index, 1);
         shape
-    }
-    /// Returns true if the shape is empty.
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-    /// Returns true if the shape is a scalar.
-    pub fn is_scalar(&self) -> bool {
-        self.is_empty()
-    }
-    /// Checks to see if the shape is square
-    pub fn is_square(&self) -> bool {
-        self.iter().all(|&dim| dim == self[0])
     }
     /// Returns true if the strides are C contiguous (aka row major).
     pub fn is_contiguous(&self, stride: &Stride) -> bool {
@@ -98,6 +118,22 @@ impl Shape {
         }
         true
     }
+    /// Returns true if the shape is a scalar.
+    pub fn is_scalar(&self) -> bool {
+        self.0.is_empty()
+    }
+    /// Checks to see if the shape is square
+    pub fn is_square(&self) -> bool {
+        self.iter().all(|&dim| dim == self[0])
+    }
+    /// Creates an immutable iterator over the elements of the shape
+    pub fn iter(&self) -> core::slice::Iter<usize> {
+        self.0.iter()
+    }
+    /// Creates a mutable iterator over the elements of the shape.
+    pub fn iter_mut(&mut self) -> core::slice::IterMut<usize> {
+        self.0.iter_mut()
+    }
     /// The number of columns in the shape.
     pub fn ncols(&self) -> usize {
         if self.len() >= 2 {
@@ -106,6 +142,32 @@ impl Shape {
             1
         } else {
             0
+        }
+    }
+    #[doc(hidden)]
+    /// Iteration -- Use self as size, and return next index after `index`
+    /// or None if there are no more.
+    // FIXME: use &Self for index or even &mut?
+    #[inline]
+    pub fn next_for<D>(&self, index: D) -> Option<Vec<usize>>
+    where
+        D: AsRef<[usize]>,
+    {
+        let mut index = index.as_ref().to_vec();
+        let mut done = false;
+        for (&dim, ix) in zip(self.as_slice(), index.as_mut_slice()).rev() {
+            *ix += 1;
+            if *ix == dim {
+                *ix = 0;
+            } else {
+                done = true;
+                break;
+            }
+        }
+        if done {
+            Some(index)
+        } else {
+            None
         }
     }
     /// The number of rows in the shape.
@@ -150,7 +212,6 @@ impl Shape {
     pub fn size(&self) -> usize {
         self.0.iter().product()
     }
-
     /// Swap the dimensions of the current [Shape] at the given [Axis].
     pub fn swap(&mut self, a: Axis, b: Axis) {
         self.0.swap(a.axis(), b.axis())
@@ -161,13 +222,17 @@ impl Shape {
         shape.swap(swap, with);
         shape
     }
+    /// A utilitarian function for converting the shape to a vector.
+    pub fn to_vec(&self) -> Vec<usize> {
+        self.0.clone()
+    }
 }
 
 // Internal methods
 #[allow(dead_code)]
 #[doc(hidden)]
 impl Shape {
-    pub(crate) fn default_strides(&self) -> Stride {
+    pub fn default_strides(&self) -> Stride {
         // Compute default array strides
         // Shape (a, b, c) => Give strides (b * c, c, 1)
         let mut strides = Stride::zeros(self.rank());
@@ -187,9 +252,22 @@ impl Shape {
         strides
     }
 
-    pub(crate) fn matmul_shape(&self, other: &Self) -> TensorResult<Self> {
+    pub(crate) fn matmul(&self, other: &Self) -> Result<Self, ShapeError> {
+        if self.rank() == 2 && other.rank() == 2 {
+            return Ok(Self::from((self[0], other[1])));
+        } else if self.rank() == 2 && other.rank() == 1 {
+            return Ok(Self::from(self[0]));
+        } else if self.rank() == 1 && other.rank() == 2 {
+            return Ok(Self::from(other[0]));
+        } else if self.rank() == 1 && other.rank() == 1 {
+            return Ok(Self::scalar());
+        }
+        Err(ShapeError::IncompatibleShapes)
+    }
+
+    pub(crate) fn matmul_shape(&self, other: &Self) -> Result<Self, ShapeError> {
         if *self.rank() != 2 || *other.rank() != 2 || self[1] != other[0] {
-            return Err(ShapeError::IncompatibleShapes.into());
+            return Err(ShapeError::IncompatibleShapes);
         }
         Ok(Self::from((self[0], other[1])))
     }
@@ -271,6 +349,14 @@ impl Extend<usize> for Shape {
         self.0.extend(iter)
     }
 }
+
+impl From<Shape> for Vec<usize> {
+    fn from(shape: Shape) -> Self {
+        shape.0
+    }
+}
+
+impl_partial_eq!(Shape -> 0: [[usize], Vec<usize>]);
 
 impl SwapAxes for Shape {
     fn swap_axes(&self, a: Axis, b: Axis) -> Self {
@@ -402,6 +488,12 @@ impl From<Vec<usize>> for Shape {
 
 impl From<&[usize]> for Shape {
     fn from(shape: &[usize]) -> Self {
+        Self(shape.to_vec())
+    }
+}
+
+impl<const N: usize> From<[usize; N]> for Shape {
+    fn from(shape: [usize; N]) -> Self {
         Self(shape.to_vec())
     }
 }

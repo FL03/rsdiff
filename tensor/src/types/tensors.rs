@@ -4,24 +4,31 @@
 */
 use crate::shape::Rank;
 use crate::tensor::TensorBase;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
-#[derive(Clone, Debug, EnumDiscriminants, Eq, PartialEq)]
-#[strum_discriminants(derive(
-    Display,
-    EnumCount,
-    EnumIs,
-    EnumIter,
-    EnumString,
-    Hash,
-    Ord,
-    PartialOrd,
-    VariantNames
-))]
-#[strum_discriminants(name(TensorType))]
-#[cfg_attr(feature = "serde", strum_discriminants(derive(Deserialize, Serialize)))]
+#[derive(Clone, Debug, EnumCount, EnumDiscriminants, EnumIs, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase"),
+    strum_discriminants(derive(serde::Deserialize, serde::Serialize))
+)]
+#[repr(C)]
+#[strum(serialize_all = "lowercase")]
+#[strum_discriminants(
+    derive(
+        Display,
+        EnumCount,
+        EnumIs,
+        EnumIter,
+        EnumString,
+        Hash,
+        Ord,
+        PartialOrd,
+        VariantNames
+    ),
+    name(TensorType)
+)]
 pub enum Tensors<T> {
     Scalar(T),
     Tensor(TensorBase<T>),
@@ -34,13 +41,6 @@ impl<T> Tensors<T> {
 
     pub fn tensor(tensor: TensorBase<T>) -> Self {
         Self::Tensor(tensor)
-    }
-
-    pub fn is_scalar(&self) -> bool {
-        match self {
-            Self::Scalar(_) => true,
-            _ => false,
-        }
     }
 
     pub fn rank(&self) -> Rank {
@@ -57,7 +57,7 @@ where
 {
     fn from(tensor: TensorBase<T>) -> Self {
         if tensor.rank().is_scalar() {
-            Self::Scalar(tensor.data()[0].clone())
+            Self::Scalar(unsafe { tensor.into_scalar() })
         } else {
             Self::Tensor(tensor)
         }

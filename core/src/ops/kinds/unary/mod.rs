@@ -11,7 +11,7 @@ pub(crate) mod kinds;
 pub(crate) mod operator;
 pub(crate) mod specs;
 
-pub trait Unary<T> {
+pub trait ApplyUnary<T> {
     type Output;
 
     fn apply(&self, x: T) -> Self::Output;

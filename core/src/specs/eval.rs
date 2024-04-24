@@ -46,7 +46,28 @@ macro_rules! impl_eval {
             }
         }
     };
-    ($ty:ty, $e:expr) => {
+    (@impl $t:ident.$call:ident<$($res:tt)*>) => {
+        impl EvalOnce for $t {
+            type Output = $($res)*;
+
+            fn eval_once(self) -> Self::Output {
+                self.$call()
+            }
+        }
+
+        impl EvalMut for $t {
+            fn eval_mut(&mut self) -> Self::Output {
+                *self.$call()
+            }
+        }
+
+        impl Eval for $t {
+            fn eval(&self) -> Self::Output {
+                *self.$call()
+            }
+        }
+    };
+    ($ty:ty => $e:expr) => {
         impl EvalOnce for $ty {
             type Output = $ty;
 

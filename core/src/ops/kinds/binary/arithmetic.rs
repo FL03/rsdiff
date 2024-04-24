@@ -3,21 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{BinOp, BinaryAssignOp};
-use crate::ops::{Evaluate, OpKind, Operator, Params};
-use num::traits::{NumOps, Pow};
+use num::traits::{NumAssignOps, NumOps, Pow};
 
 macro_rules! impl_binary_op {
-    // ($($args:tt),*) => {
-    //     impl_binary_op!(@loop $($args),*);
-
-    // };
-    ($(($operand:ident, $($p:ident)::*.$op:ident)),*) => {
+    ($($operand:ident($($p:ident)::*.$op:ident)),*) => {
         $(
             impl_binary_op!(@loop $operand, $($p)::*.$op);
         )*
-    };
-    ($operand:ident, $($p:ident)::*.$op:ident) => {
-        impl_binary_op!(@loop $operand, $($p)::*.$op);
     };
     (std $(($op:ident, $bound:ident, $operator:tt)),*) => {
         $(
@@ -25,9 +17,6 @@ macro_rules! impl_binary_op {
         )*
     };
     (@loop $operand:ident, $($p:ident)::*.$op:ident) => {
-        operator!($operand<Binary>.$op);
-        // impl_evaluator!($operand, $($p)::*.$op);
-
         impl<A, B, C> BinOp<A, B> for $operand
         where
             A: $($p)::*<B, Output = C>,
@@ -61,15 +50,13 @@ macro_rules! impl_binary_op {
     };
 }
 
-macro_rules! assign_op {
-    ($(($operand:ident, $($p:ident)::*, $op:tt)),*) => {
-        $(assign_op!(@loop $operand, $($p)::*, $op);)*
+macro_rules! impl_binary_assign {
+    ($($operand:ident($($p:ident)::*.$op:ident)),*) => {
+        $(
+            impl_binary_assign!(@impl $operand($($p)::*.$op));
+        )*
     };
-    ($operand:ident, $($p:ident)::*, $op:tt) => {
-        assign_op!(@impl $operand, $($p)::*, $op);
-    };
-    (@impl $operand:ident, $($p:ident)::*, $op:tt) => {
-        operator!($operand<Binary>);
+    (@impl $operand:ident($($p:ident)::*.$op:ident)) => {
 
         impl<A, B> BinOp<A, B> for $operand
         where
@@ -79,7 +66,7 @@ macro_rules! assign_op {
 
             fn eval(&self, lhs: A, rhs: B) -> Self::Output {
                 let mut lhs = lhs;
-                lhs $op rhs;
+                $($p)::*::$op(&mut lhs, rhs);
                 lhs
             }
         }
@@ -89,34 +76,28 @@ macro_rules! assign_op {
             A: $($p)::*<B>,
         {
             fn eval(&self, mut lhs: A, rhs: B) {
-                lhs $op rhs;
+                $($p)::*::$op(&mut lhs, rhs);
             }
         }
     };
 }
 
-impl<O, P, A, B> Evaluate<P> for O
-where
-    O: BinOp<A, B> + Operator,
-    P: Params<Pattern = (A, B)>,
-{
-    type Output = <O as BinOp<A, B>>::Output;
-
-    fn eval(&self, args: P) -> Self::Output {
-        let (lhs, rhs) = args.into_pattern();
-        BinOp::eval(self, lhs, rhs)
-    }
-}
 impl_binary_op!(
-    (Addition, core::ops::Add.add),
-    (Division, core::ops::Div.div),
-    (Multiplication, core::ops::Mul.mul),
-    (Remainder, core::ops::Rem.rem),
-    (Subtraction, core::ops::Sub.sub),
-    (Power, num::traits::Pow.pow)
+    Addition(core::ops::Add.add),
+    Division(core::ops::Div.div),
+    Multiplication(core::ops::Mul.mul),
+    Remainder(core::ops::Rem.rem),
+    Subtraction(core::ops::Sub.sub),
+    Power(num::traits::Pow.pow)
 );
 
-assign_op!(AddAssign, core::ops::AddAssign, +=);
+impl_binary_assign!(
+    AddAssign(core::ops::AddAssign.add_assign),
+    DivAssign(core::ops::DivAssign.div_assign),
+    MulAssign(core::ops::MulAssign.mul_assign),
+    RemAssign(core::ops::RemAssign.rem_assign),
+    SubAssign(core::ops::SubAssign.sub_assign)
+);
 
 // impl_binary_op!(
 //     (BitAnd, BitAnd.
@@ -126,7 +107,7 @@ assign_op!(AddAssign, core::ops::AddAssign, +=);
 //     (Shr, Shr, >>)
 // );
 
-operator_group!(Arithmetic<Binary> {
+operations!(Arithmetic<Binary> {
     Add(Addition): add,
     Div(Division): div,
     Mul(Multiplication): mul,
@@ -135,8 +116,12 @@ operator_group!(Arithmetic<Binary> {
     Sub(Subtraction): sub
 });
 
-operator_group!(ArithmeticAssign<Binary> {
-    AddAssign(AddAssign): add_assign
+operations!(ArithmeticAssign<Binary> {
+    AddAssign(AddAssign): add_assign,
+    DivAssign(DivAssign): div_assign,
+    MulAssign(MulAssign): mul_assign,
+    RemAssign(RemAssign): rem_assign,
+    SubAssign(SubAssign): sub_assign
 });
 
 impl Arithmetic {
@@ -166,9 +151,47 @@ impl Arithmetic {
     }
 }
 
+impl ArithmeticAssign {
+    pub fn new(op: ArithmeticAssign) -> Self {
+        op
+    }
+
+    pub fn assign_op<A, B>(&self) -> Box<dyn BinaryAssignOp<A, B>>
+    where
+        A: NumAssignOps<B>,
+    {
+        match *self {
+            ArithmeticAssign::AddAssign(op) => Box::new(op),
+            ArithmeticAssign::DivAssign(op) => Box::new(op),
+            ArithmeticAssign::MulAssign(op) => Box::new(op),
+            ArithmeticAssign::RemAssign(op) => Box::new(op),
+            ArithmeticAssign::SubAssign(op) => Box::new(op),
+        }
+    }
+
+    pub fn bin_op<A, B>(&self) -> Box<dyn BinOp<A, B, Output = A>>
+    where
+        A: NumAssignOps<B>,
+    {
+        match *self {
+            ArithmeticAssign::AddAssign(op) => Box::new(op),
+            ArithmeticAssign::DivAssign(op) => Box::new(op),
+            ArithmeticAssign::MulAssign(op) => Box::new(op),
+            ArithmeticAssign::RemAssign(op) => Box::new(op),
+            ArithmeticAssign::SubAssign(op) => Box::new(op),
+        }
+    }
+}
+
 impl Default for Arithmetic {
     fn default() -> Self {
         Arithmetic::add()
+    }
+}
+
+impl Default for ArithmeticAssign {
+    fn default() -> Self {
+        ArithmeticAssign::add_assign()
     }
 }
 
@@ -179,13 +202,26 @@ where
     type Output = A;
 
     fn eval(&self, lhs: A, rhs: B) -> Self::Output {
-        match self {
-            Arithmetic::Add(op) => BinOp::eval(op, lhs, rhs),
-            Arithmetic::Div(op) => BinOp::eval(op, lhs, rhs),
-            Arithmetic::Mul(op) => BinOp::eval(op, lhs, rhs),
-            Arithmetic::Pow(op) => BinOp::eval(op, lhs, rhs),
-            Arithmetic::Rem(op) => BinOp::eval(op, lhs, rhs),
-            Arithmetic::Sub(op) => BinOp::eval(op, lhs, rhs),
-        }
+        self.binop().eval(lhs, rhs)
+    }
+}
+
+impl<A, B> BinOp<A, B> for ArithmeticAssign
+where
+    A: NumAssignOps<B>,
+{
+    type Output = A;
+
+    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
+        self.bin_op().eval(lhs, rhs)
+    }
+}
+
+impl<A, B> BinaryAssignOp<A, B> for ArithmeticAssign
+where
+    A: NumAssignOps<B>,
+{
+    fn eval(&self, lhs: A, rhs: B) {
+        self.assign_op().eval(lhs, rhs)
     }
 }

@@ -2,20 +2,12 @@
    Appellation: args <binary>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinaryOp, Operation};
-use crate::ops::{IntoOp, Params};
+use crate::ops::Params;
 use core::mem;
 
-pub trait BinArgs: Params<Pattern = (Self::Lhs, Self::Rhs)> {
+pub trait BinaryParams: Params<Pattern = (Self::Lhs, Self::Rhs)> {
     type Lhs;
     type Rhs;
-
-    fn apply(self, op: BinaryOp) -> Operation<Self>
-    where
-        Self: Sized,
-    {
-        Operation::new(self, op.into_op())
-    }
 
     fn lhs(&self) -> &Self::Lhs;
 
@@ -63,7 +55,7 @@ impl<T> BinaryArgs<T, T> {
     }
 }
 
-impl<A, B> BinArgs for BinaryArgs<A, B> {
+impl<A, B> BinaryParams for BinaryArgs<A, B> {
     type Lhs = A;
     type Rhs = B;
 
@@ -100,7 +92,7 @@ where
     }
 }
 
-impl<A, B> BinArgs for (A, B) {
+impl<A, B> BinaryParams for (A, B) {
     type Lhs = A;
     type Rhs = B;
 

@@ -91,8 +91,106 @@ macro_rules! impl_binary {
     };
 }
 
-macro_rules! operator_group {
+macro_rules! evaluator {
+    ($op:ident($($args:ident),*) -> $output:ty where $($t:ident: $($rest:tt)*),* $body:block) => {
+        impl<P, $($args)*> $crate::ops::Evaluate<P> for $op
+        where
+            P: $crate::ops::Params<Pattern = ($($arg),*)>,
+            $($t: $($rest)*),*
+        {
+            type Output = $output;
+
+            fn eval(&self, params: P) -> Self::Output $body
+        }
+    };
+    ($op:ident<$($pat:tt)*>($($args:ident),*) -> $output:ty where $($t:ident: $($rest:tt)*),* $body:block) => {
+        impl<P, $($args)*> $crate::ops::Evaluate<P> for $op
+        where
+            P: $crate::ops::Params<Pattern = $($pat)*>,
+            $($t: $($rest)*),*
+        {
+            type Output = $output;
+
+            fn eval(&self, params: P) -> Self::Output $body
+        }
+    };
+    (nary $op:ident<Vec<T>> -> $output:ident where $($t:ident: $($rest:tt)*),* {$body:expr}) => {
+        impl<P, T> $crate::ops::Evaluate<P> for $op
+        where
+            P: $crate::ops::Params<Pattern = Vec<T>>,
+            $($t:$($rest)*),*
+        {
+            type Output = $output;
+
+            fn eval(&self, params: P) -> Self::Output {
+                $body(params)
+            }
+        }
+    };
+}
+
+macro_rules! operand {
+    ($($op:ident<$kind:ident>),*) => {
+        $(
+            operand!(@base $op<$kind>.$op);
+        )*
+    };
+    ($($op:ident<$kind:ident>.$name:ident),*) => {
+        $(
+            operand!(@base $op<$kind>.$name);
+        )*
+    };
+    (@base $op:ident<$kind:ident>.$name:ident) => {
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
+        pub struct $op;
+
+        impl $op {
+            pub fn new() -> Self {
+                Self
+            }
+
+            pub fn kind(&self) -> $crate::ops::OpKind::$kind {
+                $crate::ops::OpKind::$kind
+            }
+
+            pub fn name(&self) -> &str {
+                stringify!($name)
+            }
+
+
+        }
+
+        operand!(@impl $op<$kind>.$name);
+    };
+    (@impl $op:ident<$kind:ident>.$name:ident) => {
+        impl core::fmt::Display for $op {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                write!(f, "{}", self.name())
+            }
+        }
+
+        impl $crate::ops::Operand for $op {
+            type Kind = $crate::ops::$kind;
+
+            fn name(&self) -> &str {
+                self.name()
+            }
+
+            fn optype(&self) -> Self::Kind {
+                $crate::ops::$kind
+            }
+        }
+    };
+
+}
+
+macro_rules! operations {
     ($group:ident<$kind:ident> {$($variant:ident($op:ident): $method:ident),*}) => {
+        $(
+            operation!($op<$kind>.$method);
+        )*
+
         #[derive(
             Clone,
             Copy,
@@ -155,54 +253,21 @@ macro_rules! operator_group {
                 $crate::ops::$kind
             }
         }
-
-        impl $crate::ops::Operator for $group {
-            fn kind(&self) -> $crate::ops::OpKind {
-                $crate::ops::OpKind::$kind
-            }
-
-            fn name(&self) -> &str {
-                self.as_ref()
-            }
-        }
     };
 }
 
-macro_rules! evaluator {
-    ($op:ident($($args:ident),*) -> $output:ty where $($arg:ident: $($rest:tt)*),* $body:block) => {
-        impl<P, $($args)*> $crate::ops::Evaluate<P> for $op
-        where
-            P: $crate::ops::Params<Pattern = ($($arg),*)>,
-            $($arg: $($rest)*),*
-        {
-            type Output = $output
-
-            fn eval(&self, ) -> Self::Output {
-                $call($($args),*)
-            }
-        }
-    };
-}
-
-macro_rules! operator {
+macro_rules! operation {
     ($($op:ident<$kind:ident>),*) => {
         $(
-            operator!(@impl $op<$kind>.$op);
+            operation!(@base $op<$kind>.$op);
         )*
     };
     ($($op:ident<$kind:ident>.$name:ident),*) => {
         $(
-            operator!(@impl $op<$kind>.$name);
+            operation!(@base $op<$kind>.$name);
         )*
     };
-    ($kind:ident: $($op:ident),*) => {
-        operator!($(op<$kind>),*);
-    };
-    ($kind:ident: $(($op:ident.$name:ident)),*) => {
-        operator!($(($op<$kind>.$name)),*);
-    };
-    (@impl $op:ident<$kind:ident>.$name:ident) => {
-
+    (@base $op:ident<$kind:ident>.$name:ident) => {
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
         pub struct $op;
@@ -217,6 +282,9 @@ macro_rules! operator {
             }
         }
 
+        operation!(@impl $op<$kind>.$name);
+    };
+    (@impl $op:ident<$kind:ident>.$name:ident) => {
         impl core::fmt::Display for $op {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 write!(f, "{}", self.name())
@@ -232,17 +300,6 @@ macro_rules! operator {
 
             fn optype(&self) -> Self::Kind {
                 $crate::ops::$kind
-            }
-        }
-
-        impl $crate::ops::Operator for $op {
-
-            fn kind(&self) -> $crate::ops::OpKind {
-                OpKind::$kind
-            }
-
-            fn name(&self) -> &str {
-                self.name()
             }
         }
     };

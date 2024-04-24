@@ -10,7 +10,6 @@ pub enum Error {
     Unknown(String),
 }
 
-
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         let err = match self {
@@ -29,7 +28,6 @@ impl From<&str> for Error {
         Error::Unknown(msg.to_string())
     }
 }
-
 
 macro_rules! from_err {
     ($err:ident($($from:ident)::*)) => {

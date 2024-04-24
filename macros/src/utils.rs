@@ -22,6 +22,14 @@ macro_rules! bin_op {
 }
 
 macro_rules! binary_expr {
+    ($ctx:expr, $left:expr, $right:expr) => {
+        ExprBinary {
+            attrs: $ctx.attrs.to_vec(),
+            left: Box::new($left),
+            op: $ctx.op,
+            right: Box::new($right),
+        }
+    };
     ($attrs:expr, $left:expr, $right:expr, $variant:ident($op:tt)) => {
         ExprBinary {
             attrs: $attrs,
@@ -36,15 +44,6 @@ macro_rules! binary_expr {
             left: $left,
             op: $op,
             right: $right,
-        }
-    };
-
-    (ctx: $ctx:expr, $left:expr, $right:expr) => {
-        ExprBinary {
-            attrs: $ctx.attrs.to_vec(),
-            left: Box::new($left),
-            op: $ctx.op,
-            right: Box::new($right),
         }
     };
 }
@@ -82,7 +81,7 @@ pub fn foil_expr(a: &Expr, b: &ExprParen, var: &Ident) -> TokenStream {
         let pleft = binary_expr!(attrs.to_vec(), box_a.clone(), inner.left, Mul(star));
         let pright = binary_expr!(attrs.to_vec(), box_a, inner.right, Mul(star));
         // Create a new expression with the two new terms; (a + b) * c = a * c + b * c
-        let new_expr = binary_expr!(ctx: inner, pleft.into(), pright.into());
+        let new_expr = binary_expr!(inner, pleft.into(), pright.into());
 
         handle_expr(&new_expr.into(), var)
     } else {

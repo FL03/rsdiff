@@ -20,7 +20,7 @@ jobs:
     name: Publish (core)
     runs-on: ubuntu-latest
     env:
-      CARGO_PACKAGE_NAME: ${{ github.env.BASENAME }}-core
+      CARGO_PACKAGE_NAME: ${{ github.event.repository.name }}-core
     steps:
       - uses: actions/checkout@v4
       - name: Publish (${{ env.CARGO_PACKAGE_NAME }})

@@ -5,6 +5,11 @@
 
 pub type BoxedBinOp<A, B = A, C = A> = Box<dyn BinOp<A, B, Output = C>>;
 
+pub trait BinaryOperand<A, B> {
+    type Args: crate::ops::Params<Pattern = (A, B)>;
+    type Output;
+}
+
 pub trait BinOp<A, B = A> {
     type Output;
 

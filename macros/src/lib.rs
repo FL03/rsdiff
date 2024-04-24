@@ -7,16 +7,16 @@
 //!
 extern crate proc_macro;
 
-pub(crate) use self::{primitives::*, utils::*};
+pub(crate) use self::{error::Error, primitives::*, utils::*};
 
 pub(crate) mod ast;
+pub(crate) mod error;
 pub(crate) mod handle;
 pub(crate) mod ops;
 pub(crate) mod utils;
 
 pub(crate) mod autodiff;
 pub(crate) mod operator;
-pub(crate) mod partial;
 
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
@@ -69,21 +69,15 @@ pub fn autodiff(input: TokenStream) -> TokenStream {
     TokenStream::from(result)
 }
 
-
 #[doc(hidden)]
 #[proc_macro_attribute]
-pub fn operator(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let attrs = parse_macro_input!(attr with syn::Attribute::parse_outer);
+pub fn operator(args: TokenStream, item: TokenStream) -> TokenStream {
+    let mut attrs = ast::operator::OperatorAttr::new();
+    let op_parser = syn::meta::parser(|meta| attrs.parser(meta));
+    let _ = parse_macro_input!(args with op_parser);
     let item = parse_macro_input!(item as syn::Item);
-    let result = operator::impl_operator(attrs, item);
-    TokenStream::from(result)
-}
-
-#[doc(hidden)]
-#[proc_macro_attribute]
-pub fn partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(item as ast::PartialAst);
-    let result = partial::partial_impl(&ast);
+    let ast = ast::OperatorAst::new(attrs, item);
+    let result = operator::impl_operator(&ast);
     TokenStream::from(result)
 }
 
@@ -99,5 +93,6 @@ pub(crate) mod kw {
 }
 
 pub(crate) mod primitives {
+    pub type Result<T = ()> = std::result::Result<T, crate::Error>;
     pub type BoxError = Box<dyn std::error::Error>;
 }

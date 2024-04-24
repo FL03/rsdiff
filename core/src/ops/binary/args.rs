@@ -2,19 +2,19 @@
    Appellation: args <binary>
    Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{BinaryOp, BinaryOperator};
-use crate::ops::Params;
+use super::{BinaryOp, Operation};
+use crate::ops::{IntoOp, Params};
 use core::mem;
 
 pub trait BinArgs: Params<Pattern = (Self::Lhs, Self::Rhs)> {
     type Lhs;
     type Rhs;
 
-    fn apply(self, op: BinaryOp) -> BinaryOperator<Self>
+    fn apply(self, op: BinaryOp) -> Operation<Self>
     where
         Self: Sized,
     {
-        BinaryOperator::new(self, op)
+        Operation::new(self, op.into_op())
     }
 
     fn lhs(&self) -> &Self::Lhs;

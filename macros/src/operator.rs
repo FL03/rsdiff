@@ -5,13 +5,14 @@
 //! An attribute macro
 //!
 //!
+use crate::ast::OperatorAst;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{Attribute, Item, ItemFn, Lit, LitStr, Signature};
 use syn::spanned::Spanned;
+use syn::{Item, ItemFn, Lit, LitStr, Signature};
 
-pub fn impl_operator(attrs: Vec<Attribute>, item: Item) -> TokenStream {
-    println!("attrs: {:?}", &attrs);
+pub fn impl_operator(ast: &OperatorAst) -> TokenStream {
+    let OperatorAst { item, .. } = ast;
     match item {
         Item::Fn(inner) => handle_operator_func(&inner),
         _ => panic!("Expected a function"),

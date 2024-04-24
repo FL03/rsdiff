@@ -12,7 +12,7 @@
 //!         e != 0
 //!         e^2 = 0
 
-use crate::prelude::{EvaluateOnce, Gradient};
+use crate::prelude::{EvalOnce, Gradient};
 use core::fmt;
 use core::ops::{self, Neg, Not};
 use num::{Num, One, Zero};
@@ -62,7 +62,7 @@ where
     }
 }
 
-impl<T> EvaluateOnce for Dual<T> {
+impl<T> EvalOnce for Dual<T> {
     type Output = T;
 
     fn eval_once(self) -> Self::Output {

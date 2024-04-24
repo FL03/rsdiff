@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::prelude::{AtomicId, BinaryOp, Gradient, Op, UnaryOp};
-use crate::specs::{Evaluate, EvaluateMut, EvaluateOnce};
+use crate::specs::{Eval, EvalMut, EvalOnce};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Neg, Not};
 use num::{Num, One, Zero};
@@ -114,7 +114,7 @@ where
     }
 }
 
-impl<T> Evaluate for Variable<T>
+impl<T> Eval for Variable<T>
 where
     T: Copy + Default,
 {
@@ -122,7 +122,7 @@ where
         self.value.as_ref().copied().unwrap_or_default()
     }
 }
-impl<T> EvaluateMut for Variable<T>
+impl<T> EvalMut for Variable<T>
 where
     T: Default,
 {
@@ -131,7 +131,7 @@ where
     }
 }
 
-impl<T> EvaluateOnce for Variable<T>
+impl<T> EvalOnce for Variable<T>
 where
     T: Default,
 {

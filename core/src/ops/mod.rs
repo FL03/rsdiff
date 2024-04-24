@@ -47,7 +47,7 @@ pub(crate) mod prelude {
 #[cfg(test)]
 mod tests {
     use super::binary::Arithmetic;
-    use super::{Evaluator, Params};
+    use super::{Evaluate, Params};
 
     #[test]
     fn test_args() {

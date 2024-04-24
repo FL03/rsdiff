@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::{BinOp, BinaryAssignOp};
-use crate::ops::{Evaluator, OpKind, Operator, Params};
+use crate::ops::{Evaluate, OpKind, Operator, Params};
 use num::traits::{NumOps, Pow};
 
 macro_rules! impl_binary_op {
@@ -25,8 +25,8 @@ macro_rules! impl_binary_op {
         )*
     };
     (@loop $operand:ident, $($p:ident)::*.$op:ident) => {
-        operator!($operand<Binary>, $op);
-        impl_evaluator!($operand, $($p)::*.$op);
+        operator!($operand<Binary>.$op);
+        // impl_evaluator!($operand, $($p)::*.$op);
 
         impl<A, B, C> BinOp<A, B> for $operand
         where
@@ -73,11 +73,12 @@ macro_rules! assign_op {
 
         impl<A, B> BinOp<A, B> for $operand
         where
-            A: Copy + $($p)::*<B>,
+            A: $($p)::*<B>,
         {
             type Output = A;
 
-            fn eval(&self, mut lhs: A, rhs: B) -> Self::Output {
+            fn eval(&self, lhs: A, rhs: B) -> Self::Output {
+                let mut lhs = lhs;
                 lhs $op rhs;
                 lhs
             }
@@ -94,31 +95,18 @@ macro_rules! assign_op {
     };
 }
 
-macro_rules! impl_evaluator {
-    ($(($operand:ident, $($p:ident)::*.$call:ident)),*) => {
-        $(
-            impl_evaluator!(@loop $operand, $($p)::*.$call);
-        )*
-    };
-    ($operand:ident, $($p:ident)::*.$call:ident) => {
-        impl_evaluator!(@loop $operand, $($p)::*.$call);
-    };
-    (@loop $operand:ident, $($p:ident)::*.$call:ident) => {
-        impl<P, A, B, C> Evaluator<P> for $operand
-        where
-            A: $($p)::*<B, Output = C>,
-            P: $crate::ops::Params<Pattern = (A, B)>
-        {
-            type Output = C;
+impl<O, P, A, B> Evaluate<P> for O
+where
+    O: BinOp<A, B> + Operator,
+    P: Params<Pattern = (A, B)>,
+{
+    type Output = <O as BinOp<A, B>>::Output;
 
-            fn eval(&self, args: P) -> Self::Output {
-                let (lhs, rhs) = args.into_pattern();
-                $($p)::*::$call(lhs, rhs)
-            }
-        }
-    };
+    fn eval(&self, args: P) -> Self::Output {
+        let (lhs, rhs) = args.into_pattern();
+        BinOp::eval(self, lhs, rhs)
+    }
 }
-
 impl_binary_op!(
     (Addition, core::ops::Add.add),
     (Division, core::ops::Div.div),
@@ -147,6 +135,10 @@ operator_group!(Arithmetic<Binary> {
     Sub(Subtraction): sub
 });
 
+operator_group!(ArithmeticAssign<Binary> {
+    AddAssign(AddAssign): add_assign
+});
+
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {
         op
@@ -158,6 +150,20 @@ impl Arithmetic {
             _ => false,
         }
     }
+
+    pub fn binop<A, B, C>(&self) -> Box<dyn BinOp<A, B, Output = C>>
+    where
+        A: NumOps<B, C> + Pow<B, Output = C>,
+    {
+        match *self {
+            Arithmetic::Add(op) => Box::new(op),
+            Arithmetic::Div(op) => Box::new(op),
+            Arithmetic::Mul(op) => Box::new(op),
+            Arithmetic::Pow(op) => Box::new(op),
+            Arithmetic::Rem(op) => Box::new(op),
+            Arithmetic::Sub(op) => Box::new(op),
+        }
+    }
 }
 
 impl Default for Arithmetic {
@@ -166,21 +172,20 @@ impl Default for Arithmetic {
     }
 }
 
-impl<P, A, B, C> Evaluator<P> for Arithmetic
+impl<A, B> BinOp<A, B> for Arithmetic
 where
-    A: NumOps<B, C> + Pow<B, Output = C>,
-    P: Params<Pattern = (A, B)>,
+    A: NumOps<B> + Pow<B, Output = A>,
 {
-    type Output = C;
+    type Output = A;
 
-    fn eval(&self, args: P) -> Self::Output {
+    fn eval(&self, lhs: A, rhs: B) -> Self::Output {
         match self {
-            Arithmetic::Add(op) => Evaluator::eval(op, args),
-            Arithmetic::Div(op) => Evaluator::eval(op, args),
-            Arithmetic::Mul(op) => Evaluator::eval(op, args),
-            Arithmetic::Pow(op) => Evaluator::eval(op, args),
-            Arithmetic::Rem(op) => Evaluator::eval(op, args),
-            Arithmetic::Sub(op) => Evaluator::eval(op, args),
+            Arithmetic::Add(op) => BinOp::eval(op, lhs, rhs),
+            Arithmetic::Div(op) => BinOp::eval(op, lhs, rhs),
+            Arithmetic::Mul(op) => BinOp::eval(op, lhs, rhs),
+            Arithmetic::Pow(op) => BinOp::eval(op, lhs, rhs),
+            Arithmetic::Rem(op) => BinOp::eval(op, lhs, rhs),
+            Arithmetic::Sub(op) => BinOp::eval(op, lhs, rhs),
         }
     }
 }

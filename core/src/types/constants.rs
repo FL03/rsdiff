@@ -2,7 +2,7 @@
     Appellation: constants <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::prelude::{EvaluateOnce, Gradient};
+use crate::prelude::{EvalOnce, Gradient};
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut, Neg, Not};
 use num::{Num, One, Zero};
@@ -93,7 +93,7 @@ fmt_const!(
     UpperHex("{:X}")
 );
 
-impl<T> EvaluateOnce for Constant<T> {
+impl<T> EvalOnce for Constant<T> {
     type Output = T;
 
     fn eval_once(self) -> Self::Output {

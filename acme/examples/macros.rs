@@ -19,7 +19,7 @@ fn main() -> acme::prelude::BoxResult {
     Ok(())
 }
 
-#[operator]
+#[operator(lexical = true)]
 pub fn sigmoid<T>(x: T) -> T
 where
     T: Float,

@@ -62,11 +62,9 @@ pub fn fn_args_ident(arg: &syn::FnArg) -> Ident {
     use syn::Pat;
     match arg {
         syn::FnArg::Typed(inner) => match inner.pat.as_ref() {
-            Pat::Ident(ident) => {
-                ident.ident.clone()
-            }
+            Pat::Ident(ident) => ident.ident.clone(),
             _ => panic!("Expected an identifier"),
-        }
+        },
         _ => panic!("Expected a typed argument"),
     }
 }

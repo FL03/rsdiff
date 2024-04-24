@@ -39,8 +39,3 @@ impl Parse for AutodiffAst {
         Ok(Self { scope, split, var })
     }
 }
-
-pub enum AutodiffVar {
-    Ident(Ident),
-    Let(syn::ExprLet),
-}

@@ -34,8 +34,8 @@ macro_rules! impl_fmt {
             }
         }
     };
-    ($target:ident<$($t:ident),*>, $name:ident($($args:tt)*)) => {
-        impl<$($t),*> core::fmt::$name for $target<$($t),*> {
+    (impl<$($t:ident),*> $name:ident($($args:tt)*) for $target:ident where $($arg:ident:$($bnd:tt)*),*) => {
+        impl<$($t),*> core::fmt::$name for $target<$($t),*> where $($arg:$($bnd)*),* {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 write!(f, $($args)*)
             }
@@ -62,16 +62,16 @@ macro_rules! impl_binary {
             }
         }
     };
-    ($lhs:ty, $rhs:ty, $res:ty: [$(($($path:ident)::*, $method:ident, $e:expr)),*]) => {
+    ($lhs:ty, $rhs:ty, $res:ty: [$(($($path:ident)::*.$method:ident, $e:expr)),*]) => {
         $(
-            impl_binary!(@loop $lhs, $rhs, $res, $($path)::*, $method, $e);
+            impl_binary!(@loop $lhs, $rhs, $res, $($path)::*.$method, $e);
         )*
     };
-    ($lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*, $method:ident, $e:expr) => {
-        impl_binary!(@loop $lhs, $rhs, $res, $($path)::*, $method, $e);
+    ($lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*.$method:ident, $e:expr) => {
+        impl_binary!(@loop $lhs, $rhs, $res, $($path)::*.$method, $e);
     };
 
-    (@loop $lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*, $method:ident, $e:expr, where T: $($tr:tt)+*) => {
+    (@loop $lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*.$method:ident, $e:expr, where T: $($tr:tt)+*) => {
         impl<T> $($path)::*<T> for $lhs where T: $($tr)* {
             type Output = $res;
 
@@ -80,7 +80,7 @@ macro_rules! impl_binary {
             }
         }
     };
-    (@loop $lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*, $method:ident, $e:expr) => {
+    (@loop $lhs:ty, $rhs:ty, $res:ty, $($path:ident)::*.$method:ident, $e:expr) => {
         impl $($path)::*<$rhs> for $lhs {
             type Output = $res;
 
@@ -90,18 +90,6 @@ macro_rules! impl_binary {
         }
     };
 }
-
-struct U(usize);
-
-impl_binary!(impl core::ops::Add.add(U, U) -> U { | lhs: U, rhs: U | U(lhs.0 + rhs.0) });
-impl_binary!(
-    U, U, U: [
-        // (core::ops::Add, add, | lhs: U, rhs: U | U(lhs.0 + rhs.0)),
-        (core::ops::Div, div, | lhs: U, rhs: U | U(lhs.0 / rhs.0)),
-        (core::ops::Mul, mul, | lhs: U, rhs: U | U(lhs.0 * rhs.0)),
-        (core::ops::Sub, sub, | lhs: U, rhs: U | U(lhs.0 - rhs.0))
-    ]
-);
 
 macro_rules! operator_group {
     ($group:ident<$kind:ident> {$($variant:ident($op:ident): $method:ident),*}) => {
@@ -147,7 +135,7 @@ macro_rules! operator_group {
             }
 
 
-            pub fn op(self) -> Box<dyn Operator> {
+            pub fn op(self) -> Box<dyn $crate::ops::Operator> {
                 match self {
                     $(
                         $group::$variant(op) => Box::new(op),
@@ -156,9 +144,21 @@ macro_rules! operator_group {
             }
         }
 
-        impl Operator for $group {
-            fn kind(&self) -> OpKind {
-                OpKind::$kind
+        impl $crate::ops::Operand for $group {
+            type Kind = $crate::ops::$kind;
+
+            fn name(&self) -> &str {
+                self.as_ref()
+            }
+
+            fn optype(&self) -> Self::Kind {
+                $crate::ops::$kind
+            }
+        }
+
+        impl $crate::ops::Operator for $group {
+            fn kind(&self) -> $crate::ops::OpKind {
+                $crate::ops::OpKind::$kind
             }
 
             fn name(&self) -> &str {
@@ -169,10 +169,11 @@ macro_rules! operator_group {
 }
 
 macro_rules! evaluator {
-    ($op:ident($($args:ident: $ty:ty),*) -> $output:ty $body:block) => {
-        impl<P, $($args)*> Evaluator<P> for $op
+    ($op:ident($($args:ident),*) -> $output:ty where $($arg:ident: $($rest:tt)*),* $body:block) => {
+        impl<P, $($args)*> $crate::ops::Evaluate<P> for $op
         where
             P: $crate::ops::Params<Pattern = ($($arg),*)>,
+            $($arg: $($rest)*),*
         {
             type Output = $output
 
@@ -184,29 +185,23 @@ macro_rules! evaluator {
 }
 
 macro_rules! operator {
-    ($(($op:ident<$kind:ident>, $name:ident)),*) => {
-        $(
-            operator!(@impl $op<$kind>, $name);
-        )*
-    };
     ($($op:ident<$kind:ident>),*) => {
         $(
-            operator!(@impl $op<$kind>, $op);
+            operator!(@impl $op<$kind>.$op);
+        )*
+    };
+    ($($op:ident<$kind:ident>.$name:ident),*) => {
+        $(
+            operator!(@impl $op<$kind>.$name);
         )*
     };
     ($kind:ident: $($op:ident),*) => {
         operator!($(op<$kind>),*);
     };
-    ($kind:ident: $(($op:ident, $name:ident)),*) => {
-        operator!($(($op<$kind>, $name)),*);
+    ($kind:ident: $(($op:ident.$name:ident)),*) => {
+        operator!($(($op<$kind>.$name)),*);
     };
-    ($op:ident<$kind:ident>) => {
-        operator!(@impl $op<$kind>, $op);
-    };
-    ($op:ident<$kind:ident>, $name:ident) => {
-        operator!(@impl $op<$kind>, $name);
-    };
-    (@impl $op:ident<$kind:ident>, $name:ident) => {
+    (@impl $op:ident<$kind:ident>.$name:ident) => {
 
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize,))]
@@ -228,6 +223,18 @@ macro_rules! operator {
             }
         }
 
+        impl $crate::ops::Operand for $op {
+            type Kind = $crate::ops::$kind;
+
+            fn name(&self) -> &str {
+                self.name()
+            }
+
+            fn optype(&self) -> Self::Kind {
+                $crate::ops::$kind
+            }
+        }
+
         impl $crate::ops::Operator for $op {
 
             fn kind(&self) -> $crate::ops::OpKind {
@@ -241,3 +248,16 @@ macro_rules! operator {
     };
 
 }
+
+/* *************** Samples *************** */
+struct U(usize);
+
+impl_binary!(impl core::ops::Add.add(U, U) -> U { | lhs: U, rhs: U | U(lhs.0 + rhs.0) });
+impl_binary!(
+    U, U, U: [
+        // (core::ops::Add, add, | lhs: U, rhs: U | U(lhs.0 + rhs.0)),
+        (core::ops::Div.div, | lhs: U, rhs: U | U(lhs.0 / rhs.0)),
+        (core::ops::Mul.mul, | lhs: U, rhs: U | U(lhs.0 * rhs.0)),
+        (core::ops::Sub.sub, | lhs: U, rhs: U | U(lhs.0 - rhs.0))
+    ]
+);

@@ -2,6 +2,7 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::{Binary, OperandType, Ternary, Unary};
 use super::{BinaryOp, Operator, TernaryOp, UnaryOp};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
@@ -47,6 +48,22 @@ pub enum Op {
     Unary(UnaryOp),
 }
 
+impl OpKind {
+    pub fn from_type(op: impl OperandType) -> Self {
+        match op.kind() {
+            OpKind::Binary => Self::Binary,
+            OpKind::Ternary => Self::Ternary,
+            OpKind::Unary => Self::Unary,
+        }
+    }
+    pub fn optype(&self) -> Box<dyn OperandType> {
+        match self {
+            OpKind::Binary => Box::new(Binary),
+            OpKind::Ternary => Box::new(Ternary),
+            OpKind::Unary => Box::new(Unary),
+        }
+    }
+}
 impl Op {
     pub fn binary(op: BinaryOp) -> Self {
         Self::Binary(op)

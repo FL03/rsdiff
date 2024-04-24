@@ -5,13 +5,32 @@
 use super::kinds::OpKind;
 
 pub trait OperandType {
+    fn kind(&self) -> OpKind;
+
     private!();
+}
+
+pub trait Operand {
+    type Kind: OperandType;
+
+    fn kind(&self) -> OpKind {
+        self.optype().kind()
+    }
+
+    fn name(&self) -> &str;
+
+    fn optype(&self) -> Self::Kind;
 }
 
 pub trait Operator {
     fn kind(&self) -> OpKind;
 
     fn name(&self) -> &str;
+
+    #[doc(hidden)]
+    fn optype(&self) -> Box<dyn OperandType> {
+        self.kind().optype()
+    }
 }
 
 pub trait Params {
@@ -20,7 +39,7 @@ pub trait Params {
     fn into_pattern(self) -> Self::Pattern;
 }
 
-pub trait Evaluator<Args>
+pub trait Evaluate<Args>
 where
     Self: Operator,
     Args: Params,
@@ -32,7 +51,7 @@ where
 
 pub trait Differentiable<Args>
 where
-    Self: Evaluator<Args>,
+    Self: Evaluate<Args>,
     Args: Params,
 {
     type Grad;
@@ -123,9 +142,13 @@ macro_rules! impl_operand_ty {
         pub struct $kind;
 
         impl OperandType for $kind {
+            fn kind(&self) -> OpKind {
+                OpKind::$kind
+            }
+
             seal!();
         }
     };
 }
 
-impl_operand_ty!(Binary, Nary, Ternary, Unary);
+impl_operand_ty!(Binary, Ternary, Unary);

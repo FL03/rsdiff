@@ -5,15 +5,16 @@
 
 #[derive(Clone, Debug)]
 pub enum Error {
-    Parse(syn::parse::Error),
+    Ast(String),
     Syn(syn::Error),
     Unknown(String),
 }
 
+
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         let err = match self {
-            Error::Parse(err) => err.to_string(),
+            Error::Ast(err) => err.to_string(),
             Error::Syn(err) => err.to_string(),
             Error::Unknown(msg) => msg.to_string(),
         };
@@ -29,6 +30,7 @@ impl From<&str> for Error {
     }
 }
 
+
 macro_rules! from_err {
     ($err:ident($($from:ident)::*)) => {
         from_err!(@impl $err($($from)::*));
@@ -43,4 +45,5 @@ macro_rules! from_err {
 }
 
 from_err!(Syn(syn::Error));
+
 from_err!(Unknown(String));

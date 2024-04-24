@@ -8,8 +8,8 @@ keywords = ["acme", "autodiff", "mathematics", "tensor"]
 license = "Apache-2.0"
 repository = "https://github.com/FL03/acme"
 readme = "README.md"
-version = "0.3.1"
-# version = "0.3.1-nightly"
+version = "0.3.2"
+# version = "0.3.2-nightly"
 
 [workspace]
 default-members = [

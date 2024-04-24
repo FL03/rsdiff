@@ -100,16 +100,16 @@ required-features = ["macros"]
 [build-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.1" }
-acme-derive = { optional = true, path = "../derive", version = "0.3.1" }
-acme-graphs = { optional = true, path = "../graphs", version = "0.3.1" }
-acme-macros = { optional = true, path = "../macros", version = "0.3.1" }
-acme-tensor = { optional = true, path = "../tensor", version = "0.3.1" }
-# acme-core = { path = "../core", version = "0.3.1-nightly" }
-# acme-derive = { optional = true, path = "../derive", version = "0.3.1-nightly" }
-# acme-graphs = { optional = true, path = "../graphs", version = "0.3.1-nightly" }
-# acme-macros = { optional = true, path = "../macros", version = "0.3.1-nightly" }
-# acme-tensor = { optional = true, path = "../tensor", version = "0.3.1-nightly" }
+acme-core = { path = "../core", version = "0.3.2" }
+acme-derive = { optional = true, path = "../derive", version = "0.3.2" }
+acme-graphs = { optional = true, path = "../graphs", version = "0.3.2" }
+acme-macros = { optional = true, path = "../macros", version = "0.3.2" }
+acme-tensor = { optional = true, path = "../tensor", version = "0.3.2" }
+# acme-core = { path = "../core", version = "0.3.2-nightly" }
+# acme-derive = { optional = true, path = "../derive", version = "0.3.2-nightly" }
+# acme-graphs = { optional = true, path = "../graphs", version = "0.3.2-nightly" }
+# acme-macros = { optional = true, path = "../macros", version = "0.3.2-nightly" }
+# acme-tensor = { optional = true, path = "../tensor", version = "0.3.2-nightly" }
 
 [dev-dependencies]
 approx = "0.5"

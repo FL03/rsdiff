@@ -5,15 +5,17 @@
 use crate::NodeIndex;
 use acme::id::IndexId;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Edge<Idx = NodeIndex> {
+    args: Vec<Idx>,
     source: IndexId<Idx>,
 }
 
 impl<Idx> Edge<Idx> {
-    pub fn new(source: Idx) -> Self {
+    pub fn new(args: impl IntoIterator<Item = Idx>, source: Idx) -> Self {
         Self {
+            args: Vec::from_iter(args),
             source: IndexId::from_index(source),
         }
     }

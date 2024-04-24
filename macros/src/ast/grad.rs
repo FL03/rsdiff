@@ -2,6 +2,7 @@
     Appellation: gradient <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![allow(dead_code)]
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{Attribute, ExprArray, ItemFn};
@@ -11,7 +12,6 @@ pub struct GradientAst {
     pub item: ItemFn,
 }
 
-#[allow(dead_code)]
 impl GradientAst {
     pub fn new(attrs: Vec<Attribute>, item: ItemFn) -> Self {
         Self { attrs, item }

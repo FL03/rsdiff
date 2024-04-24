@@ -7,6 +7,7 @@ use crate::id::IndexId;
 use crate::prelude::AnyBox;
 use strum::EnumIs;
 
+#[doc(hidden)]
 #[derive(Clone, Debug, EnumIs, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Expr<K = usize, V = AnyBox> {
     Binary(BinaryExpr<K, V>),

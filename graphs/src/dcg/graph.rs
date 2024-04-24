@@ -85,8 +85,8 @@ impl<T> Dcg<T> {
 
     pub fn binary(&mut self, lhs: NodeIndex, rhs: NodeIndex, op: impl Into<BinaryOp>) -> NodeIndex {
         let c = self.store.add_node(Node::binary(lhs, rhs, op));
-        self.store.add_edge(lhs, c, Edge::new(lhs));
-        self.store.add_edge(rhs, c, Edge::new(rhs));
+        self.store.add_edge(lhs, c, Edge::new([rhs], lhs));
+        self.store.add_edge(rhs, c, Edge::new([lhs], rhs));
         c
     }
 
@@ -114,8 +114,8 @@ impl<T> Dcg<T> {
         let args = Vec::from_iter(inputs);
 
         let c = self.store.add_node(Node::op(args.clone(), op));
-        for arg in args {
-            self.store.add_edge(arg, c, Edge::new(arg));
+        for arg in args.iter() {
+            self.store.add_edge(*arg, c, Edge::new(args.clone(), *arg));
         }
         c
     }
@@ -126,7 +126,7 @@ impl<T> Dcg<T> {
 
     pub fn unary(&mut self, input: NodeIndex, op: impl Into<UnaryOp>) -> NodeIndex {
         let c = self.store.add_node(Node::unary(input, op));
-        self.store.add_edge(input, c, Edge::new(input));
+        self.store.add_edge(input, c, Edge::new([input], input));
         c
     }
 

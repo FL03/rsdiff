@@ -5,18 +5,51 @@
 //! # Operations
 //!
 //!
-pub use self::binary::{Arithmetic, BinaryOp};
-pub use self::ternary::{TernaryExpr, TernaryOp};
-pub use self::unary::UnaryOp;
-pub use self::{expr::*, kinds::*, operator::*};
+
+pub use self::{expr::*, kinds::*, ops::*};
+pub use self::{kinds::prelude::*, traits::prelude::*};
 
 pub(crate) mod expr;
-pub(crate) mod kinds;
-pub(crate) mod operator;
+pub(crate) mod ops;
 
-pub mod binary;
-pub mod ternary;
-pub mod unary;
+pub(crate) mod kinds {
+
+    pub mod binary;
+    pub mod nary;
+    pub mod ternary;
+    pub mod unary;
+
+    pub(crate) mod prelude {
+        pub use super::binary::{
+            Arithmetic, ArithmeticAssign, BinOp, BinaryArgs, BinaryOp, BinaryParams,
+        };
+        pub use super::nary::NaryOp;
+        pub use super::ternary::{TernaryExpr, TernaryOp};
+        pub use super::unary::UnaryOp;
+    }
+}
+
+pub(crate) mod traits {
+    pub use self::prelude::*;
+
+    pub mod evaluate;
+    pub mod operand;
+    pub mod operator;
+    pub mod params;
+
+    pub(crate) mod prelude {
+        pub use super::evaluate::*;
+        pub use super::operand::*;
+        pub use super::operator::*;
+        pub use super::params::*;
+    }
+}
+
+#[doc(hidden)]
+pub mod exp {
+    //! # Experimental
+    pub mod operator;
+}
 
 pub trait IntoOp<F>
 where
@@ -38,16 +71,14 @@ where
 pub(crate) mod prelude {
     pub use super::IntoOp;
 
-    pub use super::binary::*;
-    pub use super::kinds::{Op, OpKind};
-    pub use super::ternary::*;
-    pub use super::unary::*;
+    pub use super::kinds::prelude::*;
+    pub use super::ops::{Op, OpKind};
+    pub use super::traits::prelude::*;
 }
 
 #[cfg(test)]
 mod tests {
-    use super::binary::Arithmetic;
-    use super::{Evaluator, Params};
+    use super::{Arithmetic, Evaluate, Params};
 
     #[test]
     fn test_args() {

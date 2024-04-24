@@ -8,7 +8,7 @@ pub(crate) mod kinds;
 
 // use super::{Evaluator, Operator, Params};
 
-pub trait Ternary<A, B = A, C = A> {
+pub trait ApplyTernary<A, B = A, C = A> {
     type Output;
 
     fn apply(&self, a: A, b: B, c: C) -> Self::Output;

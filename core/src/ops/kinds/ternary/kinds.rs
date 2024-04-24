@@ -2,7 +2,7 @@
     Appellation: kinds <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::ops::ternary::Ternary;
+use crate::ops::ternary::ApplyTernary;
 use crate::ops::{OpKind, Operator};
 use strum::{Display, EnumCount, EnumDiscriminants, EnumIs, EnumIter, EnumString, VariantNames};
 
@@ -90,7 +90,7 @@ impl Operator for Affine {
     }
 }
 
-impl<A, B, C> Ternary<A, B, C> for Affine
+impl<A, B, C> ApplyTernary<A, B, C> for Affine
 where
     A: core::ops::Mul<B, Output = C>,
     C: core::ops::Add<Output = C>,

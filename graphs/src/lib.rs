@@ -13,6 +13,8 @@ pub use self::graph::*;
 
 pub(crate) mod graph;
 
+#[doc(hidden)]
+pub mod cg;
 pub mod dcg;
 pub mod error;
 pub mod grad;

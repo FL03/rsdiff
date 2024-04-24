@@ -3,9 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::ops::{OpKind, Operator};
-use strum::{Display, EnumCount, EnumIs, EnumIter, VariantNames};
+use strum::{AsRefStr, Display, EnumCount, EnumIs, EnumIter, VariantNames};
 
 #[derive(
+    AsRefStr,
     Clone,
     Copy,
     Debug,

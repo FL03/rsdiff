@@ -14,15 +14,13 @@ version.workspace = true
 [features]
 default = [
     "core",
-    "tensor",
+    "graph",
 ]
 
 full = [
-    "core",
+    "default",
     "derive",
-    "graph",
     "serde",
-    "tensor",
     "trace",
 ]
 
@@ -37,10 +35,6 @@ graph = [
     "dep:acme-graphs"
 ]
 
-io = [
-    "acme-tensor/io"
-]
-
 macros = [
     "dep:acme-macros"
 ]
@@ -48,17 +42,13 @@ macros = [
 serde = [
     "acme-core/serde",
     "acme-graphs/serde",
-    "acme-tensor/serde"
 ]
 
 std = [
     "acme-core/std",
-    "acme-tensor/std"
+    "acme-graphs/std",
 ]
 
-tensor = [
-    "dep:acme-tensor"
-]
 
 trace = [
     "acme-core/trace",
@@ -74,9 +64,6 @@ crate-type = ["cdylib", "rlib"]
 doctest = true
 test = true
 
-[[bench]]
-name = "tensor"
-required-features = ["tensor"]
 
 [[example]]
 doc = true
@@ -104,12 +91,10 @@ acme-core = { path = "../core", version = "0.3.2" }
 acme-derive = { optional = true, path = "../derive", version = "0.3.2" }
 acme-graphs = { optional = true, path = "../graphs", version = "0.3.2" }
 acme-macros = { optional = true, path = "../macros", version = "0.3.2" }
-acme-tensor = { optional = true, path = "../tensor", version = "0.3.2" }
 # acme-core = { path = "../core", version = "0.3.2-nightly" }
 # acme-derive = { optional = true, path = "../derive", version = "0.3.2-nightly" }
 # acme-graphs = { optional = true, path = "../graphs", version = "0.3.2-nightly" }
 # acme-macros = { optional = true, path = "../macros", version = "0.3.2-nightly" }
-# acme-tensor = { optional = true, path = "../tensor", version = "0.3.2-nightly" }
 
 [dev-dependencies]
 approx = "0.5"

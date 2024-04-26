@@ -10,7 +10,7 @@ use num::Float;
 fn main() -> acme::prelude::BoxResult {
     let x = 5f64;
     println!("{}", sigmoid(x));
-    // println!("{}", sigmoid_lex());
+    println!("{}", sigmoid_lex());
     let dx = sigmoid_prime(x);
     // assert_eq!(dx, autodiff!(x: SIGMOID_LEXICAL));
     println!("{}", dx);
@@ -18,7 +18,7 @@ fn main() -> acme::prelude::BoxResult {
     Ok(())
 }
 
-#[operator()]
+#[operator(lex = sigmoid_lex)]
 pub fn sigmoid<T>(x: T) -> T
 where
     T: Float,

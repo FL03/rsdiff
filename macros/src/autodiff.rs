@@ -7,13 +7,11 @@ use crate::handle::{expr, item};
 use proc_macro2::TokenStream;
 
 pub fn impl_autodiff(partial: &AutodiffAst) -> TokenStream {
-    let AutodiffAst {
-        scope: expr, var, ..
-    } = partial;
+    let AutodiffAst { args, scope, .. } = partial;
 
-    match expr {
-        Scope::Expr(inner) => expr::handle_expr(inner, var),
-        Scope::Item(inner) => item::handle_item(&inner.clone().into(), var),
+    match scope {
+        Scope::Expr(inner) => expr::handle_expr(inner, args),
+        Scope::Item(inner) => item::handle_item(&inner.clone().into(), args),
         Scope::Verbatim(_inner) => panic!("Custom functions not yet supported"),
     }
 }

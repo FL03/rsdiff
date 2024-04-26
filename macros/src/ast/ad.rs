@@ -2,6 +2,7 @@
     Appellation: ad <ast>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::handle::{expr, item};
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{Expr, Ident, ItemFn, Token};
@@ -11,6 +12,16 @@ pub enum Scope {
     Expr(Expr),
     Item(ItemFn),
     Verbatim(TokenStream), // Not considered
+}
+
+impl Scope {
+    pub fn handle(&self, args: &Ident) -> TokenStream {
+        match self {
+            Scope::Expr(scope) => expr::handle_expr(scope, args),
+            Scope::Item(scope) => item::handle_item_fn(scope, args),
+            Scope::Verbatim(_) => panic!("Custom functions not yet supported"),
+        }
+    }
 }
 
 impl Parse for Scope {
@@ -26,16 +37,16 @@ impl Parse for Scope {
 }
 
 pub struct AutodiffAst {
-    pub scope: Scope,
+    pub args: Ident,
     pub split: Token![:],
-    pub var: Ident,
+    pub scope: Scope,
 }
 
 impl Parse for AutodiffAst {
     fn parse(input: ParseStream) -> Result<Self> {
-        let var = input.parse()?;
+        let args = input.parse()?;
         let split = input.parse::<Token![:]>()?;
         let scope = input.parse()?;
-        Ok(Self { scope, split, var })
+        Ok(Self { args, split, scope })
     }
 }

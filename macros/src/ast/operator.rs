@@ -4,7 +4,7 @@
 */
 use proc_macro2::Span;
 use syn::meta::ParseNestedMeta;
-use syn::{Ident, Item,};
+use syn::{Ident, Item};
 
 pub struct OperatorAst {
     pub attrs: Option<OperatorAttr>,
@@ -25,17 +25,19 @@ impl OperatorAst {
 #[derive(Clone, Debug, Default)]
 pub struct OperatorAttr {
     pub lex: Option<Ident>,
+    pub params: Vec<Ident>,
 }
 
 impl OperatorAttr {
     pub fn new() -> Self {
         Self { 
             lex: None,
+            params: Vec::new(),
         }
     }
 
     pub fn parser(&mut self, meta: ParseNestedMeta) -> syn::Result<()> {
-        if meta.path.is_ident("lexical") {
+        if meta.path.is_ident("lex") {
             let value = meta.value()?.parse()?;
             self.lex = Some(value);
         } else {

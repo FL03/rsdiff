@@ -75,8 +75,8 @@ macro_rules! impl_binary_assign {
         where
             A: $($p)::*<B>,
         {
-            fn eval(&self, mut lhs: A, rhs: B) {
-                $($p)::*::$op(&mut lhs, rhs);
+            fn eval(&self, lhs: &mut A, rhs: B) {
+                $($p)::*::$op(lhs, rhs);
             }
         }
     };
@@ -221,7 +221,7 @@ impl<A, B> BinaryAssignOp<A, B> for ArithmeticAssign
 where
     A: NumAssignOps<B>,
 {
-    fn eval(&self, lhs: A, rhs: B) {
+    fn eval(&self, lhs: &mut A, rhs: B) {
         self.assign_op().eval(lhs, rhs)
     }
 }

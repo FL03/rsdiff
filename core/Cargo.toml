@@ -39,6 +39,7 @@ test = true
 
 [dependencies]
 num = "0.4"
+paste.workspace = true
 serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
 smart-default.workspace = true

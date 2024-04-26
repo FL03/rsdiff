@@ -92,7 +92,7 @@ pub(crate) mod kw {
     syn::custom_keyword!(tan);
 }
 
+#[allow(unused)]
 pub(crate) mod primitives {
     pub type Result<T = ()> = std::result::Result<T, crate::Error>;
-    pub type BoxError = Box<dyn std::error::Error>;
 }

@@ -5,8 +5,8 @@
 
 pub type BoxedBinOp<A, B = A, C = A> = Box<dyn BinOp<A, B, Output = C>>;
 
-pub trait BinaryOperand<A, B> {
-    type Args: crate::ops::Params<Pattern = (A, B)>;
+pub trait Module {
+    type Args: crate::ops::Params;
     type Output;
 }
 
@@ -17,7 +17,7 @@ pub trait BinOp<A, B = A> {
 }
 
 pub trait BinaryAssignOp<A, B = A> {
-    fn eval(&self, lhs: A, rhs: B);
+    fn eval(&self, lhs: &mut A, rhs: B);
 }
 
 impl<S, A, B, C> BinOp<A, B> for S
@@ -40,20 +40,35 @@ impl<A, B, C> BinOp<A, B> for Box<dyn BinOp<A, B, Output = C>> {
 }
 
 impl<A, B> BinaryAssignOp<A, B> for Box<dyn BinaryAssignOp<A, B>> {
-    fn eval(&self, lhs: A, rhs: B) {
+    fn eval(&self, lhs: &mut A, rhs: B) {
         self.as_ref().eval(lhs, rhs)
     }
 }
 
-pub trait Logarithm<T> {
+pub trait Log<T> {
     type Output;
 
     fn log(self, base: T) -> Self::Output;
 }
 
 macro_rules! impl_log {
-    ($t:ty) => {
-        impl Logarithm<$t> for $t {
+    ($($t:ty),*) => {
+        $(
+            impl_log!(@impl $t);
+        )*
+    };
+    ($($call:ident<$out:ty>($t:ty)),*) => {
+        $(
+            impl_log!(@impl $call<$out>($t));
+        )*
+    };
+    ($call:ident<$out:ty>: $($t:ty),*) => {
+        $(
+            impl_log!(@impl $call<$out>($t));
+        )*
+    };
+    (@impl $t:ty) => {
+        impl Log<$t> for $t {
             type Output = $t;
 
             fn log(self, base: $t) -> Self::Output {
@@ -61,33 +76,17 @@ macro_rules! impl_log {
             }
         }
     };
-    (other $t:ty => $out:ty; $method:ident) => {
-        impl Logarithm<$t> for $t {
+    (@impl $call:ident<$out:ty>($t:ty)) => {
+        impl Log<$t> for $t {
             type Output = $out;
 
             fn log(self, base: $t) -> Self::Output {
-                self.$method(base)
+                self.$call(base)
             }
         }
     };
-    (all [$($t:ty),*]) => {
-        $(
-            impl_log!($t);
-        )*
-    };
 }
 
-impl_log!(all [f32, f64]);
+impl_log!(f32, f64);
 
-impl_log!(other i8 => u32; ilog);
-impl_log!(other i16 => u32; ilog);
-impl_log!(other i32 => u32; ilog);
-impl_log!(other i64 => u32; ilog);
-impl_log!(other i128 => u32; ilog);
-impl_log!(other isize => u32; ilog);
-impl_log!(other u8 => u32; ilog);
-impl_log!(other u16 => u32; ilog);
-impl_log!(other u32 => u32; ilog);
-impl_log!(other u64 => u32; ilog);
-impl_log!(other u128 => u32; ilog);
-impl_log!(other usize => u32; ilog);
+impl_log!(ilog<u32>: i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);

@@ -1,18 +1,19 @@
 /*
-    Appellation: specs <mod>
+    Appellation: traits <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+pub use self::{eval::*, propagate::*, scalar::Scalar};
 
-pub use self::{eval::*, gradient::*, prop::*, scalar::Scalar, store::*};
-
-pub(crate) mod eval;
-pub(crate) mod gradient;
-pub(crate) mod prop;
-pub(crate) mod scalar;
-pub(crate) mod store;
+pub mod eval;
+pub mod propagate;
+pub mod scalar;
 
 pub trait AsSlice<T> {
     fn as_slice(&self) -> &[T];
+}
+
+pub trait AsSliceMut<T> {
+    fn as_mut_slice(&mut self) -> &mut [T];
 }
 
 impl<S, T> AsSlice<T> for S
@@ -24,26 +25,26 @@ where
     }
 }
 
-pub trait AsSliceMut<T> {
-    fn as_slice_mut(&mut self) -> &mut [T];
-}
-
 impl<S, T> AsSliceMut<T> for S
 where
     S: AsMut<[T]>,
 {
-    fn as_slice_mut(&mut self) -> &mut [T] {
+    fn as_mut_slice(&mut self) -> &mut [T] {
         self.as_mut()
     }
 }
 
+pub trait Gradient<T> {
+    type Gradient;
+
+    fn grad(&self, args: T) -> Self::Gradient;
+}
+
 pub(crate) mod prelude {
     pub use super::eval::*;
-    pub use super::gradient::*;
-    pub use super::prop::*;
-    pub use super::scalar::*;
-    pub use super::store::*;
-    pub use super::{AsSlice, AsSliceMut};
+    pub use super::propagate::*;
+    pub use super::scalar::Scalar;
+    pub use super::{AsSlice, AsSliceMut, Gradient};
 }
 
 #[cfg(test)]

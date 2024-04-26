@@ -4,15 +4,7 @@
 */
 use proc_macro2::Span;
 use syn::meta::ParseNestedMeta;
-use syn::{Ident, Item, Result};
-
-// pub fn from_proc_macro_attribute(args: TokenStream, item: TokenStream) -> OperatorAst {
-//     let mut attrs = OperatorAttr::new();
-//     let op_parser = syn::meta::parser(|meta| attrs.parse(meta));
-//     let _ = syn::parse_macro_input!(args with op_parser);
-//     let item = syn::parse_macro_input!(item as syn::Item);
-//     return OperatorAst::new(attrs, item);
-// }
+use syn::{Ident, Item,};
 
 pub struct OperatorAst {
     pub attrs: Option<OperatorAttr>,
@@ -32,18 +24,20 @@ impl OperatorAst {
 
 #[derive(Clone, Debug, Default)]
 pub struct OperatorAttr {
-    pub lexical: Option<Ident>,
+    pub lex: Option<Ident>,
 }
 
 impl OperatorAttr {
     pub fn new() -> Self {
-        Self { lexical: None }
+        Self { 
+            lex: None,
+        }
     }
 
-    pub fn parser(&mut self, meta: ParseNestedMeta) -> Result<()> {
+    pub fn parser(&mut self, meta: ParseNestedMeta) -> syn::Result<()> {
         if meta.path.is_ident("lexical") {
-            let value: Ident = meta.value()?.parse()?;
-            self.lexical = Some(value);
+            let value = meta.value()?.parse()?;
+            self.lex = Some(value);
         } else {
             return Err(meta.error("Unknown attribute"));
         }
@@ -51,10 +45,10 @@ impl OperatorAttr {
     }
 
     pub fn is_lexical(&self) -> bool {
-        self.lexical.is_some()
+        self.lex.is_some()
     }
 
     pub fn set_lexical(&mut self, value: Option<Ident>) {
-        self.lexical = value;
+        self.lex = value;
     }
 }

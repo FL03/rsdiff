@@ -12,6 +12,7 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+pub use self::traits::prelude::*;
 // pub use self::utils::*;
 
 #[macro_use]
@@ -27,8 +28,15 @@ pub mod id;
 pub mod math;
 #[macro_use]
 pub mod ops;
-pub mod specs;
+pub mod stores;
+pub mod traits;
 pub mod types;
+
+#[doc(hidden)]
+pub mod exp {
+    //! # Experimental
+    pub mod operator;
+}
 
 #[doc(hidden)]
 pub mod prelude {
@@ -36,6 +44,7 @@ pub mod prelude {
     pub use crate::id::*;
     pub use crate::nested;
     pub use crate::ops::prelude::*;
-    pub use crate::specs::prelude::*;
+    pub use crate::stores::prelude::*;
+    pub use crate::traits::prelude::*;
     pub use crate::types::*;
 }

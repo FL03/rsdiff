@@ -2,6 +2,7 @@
     Appellation: stores <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use crate::id::Identify;
 #[cfg(not(feature = "std"))]
 use alloc::collections::{btree_map, BTreeMap};
 use core::borrow::Borrow;
@@ -53,7 +54,8 @@ pub trait Store<K, V> {
 
 pub trait StoreExt<T>
 where
-    T: crate::id::Identifiable,
+    T: Identify,
+    <T as Identify>::Id: Copy,
 {
     type Store: Store<T::Id, T>;
 
@@ -81,7 +83,8 @@ where
 impl<S, T> StoreExt<T> for S
 where
     S: Store<T::Id, T>,
-    T: crate::id::Identifiable,
+    T: Identify,
+    <T as Identify>::Id: Copy,
 {
     type Store = S;
 
@@ -132,9 +135,9 @@ macro_rules! impl_entry {
 }
 
 macro_rules! impl_store {
-    ($t:ty, where $($preds:tt)* ) => {
+    ($t:ty where $($rest:tt)*) => {
 
-        impl<K, V> Store<K, V> for $t where $($preds)* {
+        impl<K, V> Store<K, V> for $t where $($rest)* {
             fn get(&self, key: &K) -> Option<&V> {
                 <$t>::get(self, &key)
             }
@@ -158,6 +161,6 @@ macro_rules! impl_store {
 impl_entry!(btree_map where K: Ord);
 #[cfg(feature = "std")]
 impl_entry!(hash_map where K: Eq + core::hash::Hash);
-impl_store!(BTreeMap<K, V>, where K: Ord);
+impl_store!(BTreeMap<K, V> where K: Ord);
 #[cfg(feature = "std")]
-impl_store!(HashMap<K, V>, where K: Eq + core::hash::Hash);
+impl_store!(HashMap<K, V> where K: Eq + core::hash::Hash);

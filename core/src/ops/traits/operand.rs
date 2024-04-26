@@ -71,7 +71,14 @@ macro_rules! impl_operand_ty {
     (@impl $kind:ident) => {
         #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
         #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+        #[repr(transparent)]
         pub struct $kind;
+
+        impl $kind {
+            pub fn new() -> Self {
+                Self
+            }
+        }
 
         impl OperandType for $kind {
             fn kind(&self) -> OpKind {

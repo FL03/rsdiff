@@ -45,12 +45,6 @@ pub(crate) mod traits {
     }
 }
 
-#[doc(hidden)]
-pub mod exp {
-    //! # Experimental
-    pub mod operator;
-}
-
 pub trait IntoOp<F>
 where
     F: Operator,

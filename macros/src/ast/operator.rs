@@ -30,7 +30,7 @@ pub struct OperatorAttr {
 
 impl OperatorAttr {
     pub fn new() -> Self {
-        Self { 
+        Self {
             lex: None,
             params: Vec::new(),
         }

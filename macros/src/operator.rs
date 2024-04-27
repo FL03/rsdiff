@@ -47,7 +47,6 @@ fn handle_attr(attrs: &OperatorAttr, item: &Item) -> TokenStream {
     res
 }
 
-
 fn handle_operator_func(item: &ItemFn) -> TokenStream {
     let item_tk = item.to_token_stream();
     let item_str = item_tk.to_string();

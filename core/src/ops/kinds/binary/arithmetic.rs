@@ -82,31 +82,6 @@ macro_rules! impl_binary_assign {
     };
 }
 
-impl_binary_op!(
-    Addition(core::ops::Add.add),
-    Division(core::ops::Div.div),
-    Multiplication(core::ops::Mul.mul),
-    Remainder(core::ops::Rem.rem),
-    Subtraction(core::ops::Sub.sub),
-    Power(num::traits::Pow.pow)
-);
-
-impl_binary_assign!(
-    AddAssign(core::ops::AddAssign.add_assign),
-    DivAssign(core::ops::DivAssign.div_assign),
-    MulAssign(core::ops::MulAssign.mul_assign),
-    RemAssign(core::ops::RemAssign.rem_assign),
-    SubAssign(core::ops::SubAssign.sub_assign)
-);
-
-// impl_binary_op!(
-//     (BitAnd, BitAnd.
-//     (BitOr, BitOr, |),
-//     (BitXor, BitXor, &|),
-//     (Shl, Shl, <<),
-//     (Shr, Shr, >>)
-// );
-
 operations!(Arithmetic<Binary> {
     Add(Addition): add,
     Div(Division): div,
@@ -123,6 +98,23 @@ operations!(ArithmeticAssign<Binary> {
     RemAssign(RemAssign): rem_assign,
     SubAssign(SubAssign): sub_assign
 });
+
+impl_binary_op!(
+    Addition(core::ops::Add.add),
+    Division(core::ops::Div.div),
+    Multiplication(core::ops::Mul.mul),
+    Remainder(core::ops::Rem.rem),
+    Subtraction(core::ops::Sub.sub),
+    Power(num::traits::Pow.pow)
+);
+
+impl_binary_assign!(
+    AddAssign(core::ops::AddAssign.add_assign),
+    DivAssign(core::ops::DivAssign.div_assign),
+    MulAssign(core::ops::MulAssign.mul_assign),
+    RemAssign(core::ops::RemAssign.rem_assign),
+    SubAssign(core::ops::SubAssign.sub_assign)
+);
 
 impl Arithmetic {
     pub fn new(op: Arithmetic) -> Self {

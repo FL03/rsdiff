@@ -14,6 +14,17 @@ default = [
     "std",
 ]
 
+full = [
+    "default",
+    "approx",
+    "serde",
+    "trace"
+]
+
+approx = [
+    "dep:approx"
+]
+
 serde = [
     "dep:serde",
     "serde-ext",
@@ -38,6 +49,7 @@ test = true
 [build-dependencies]
 
 [dependencies]
+approx = { optional = true, version = "0.5" }
 num = "0.4"
 paste.workspace = true
 serde = { optional = true, features = ["derive"], version = "1" }
@@ -47,6 +59,7 @@ strum.workspace = true
 tracing = { optional = true, version = "0.1" }
 
 [dev-dependencies]
+approx = "0.5"
 lazy_static = "1"
 
 [package.metadata.docs.rs]

@@ -8,9 +8,15 @@
 //! Each sub-module is dedicated to a specific branch of mathematics.
 pub use self::props::*;
 
-pub(crate) mod props;
-
+#[doc(hidden)]
+pub mod cluster;
 pub mod linalg;
+pub mod num;
+pub mod props;
+#[doc(hidden)]
+pub mod signal;
+#[doc(hidden)]
+pub mod stats;
 
 pub trait Group {}
 

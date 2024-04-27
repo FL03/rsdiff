@@ -2,8 +2,6 @@
     Appellation: atomic <mod>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-
-use crate::id::Identifier;
 use core::borrow::{Borrow, BorrowMut};
 use core::ops::{Deref, DerefMut};
 use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
@@ -80,8 +78,6 @@ impl DerefMut for AtomicId {
         &mut self.0
     }
 }
-
-impl Identifier for AtomicId {}
 
 impl From<usize> for AtomicId {
     fn from(id: usize) -> Self {

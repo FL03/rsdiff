@@ -21,6 +21,7 @@ pub mod grad;
 pub mod scg;
 
 pub use petgraph::graph::{EdgeIndex, GraphIndex, NodeIndex};
+pub use petgraph::stable_graph::DefaultIx;
 
 pub(crate) type Id = acme::id::IndexId<crate::NodeIndex>;
 

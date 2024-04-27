@@ -3,16 +3,19 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::id::IndexId;
-use crate::ops::{BinaryOp, TernaryOp, UnaryOp};
+use crate::ops::{BinaryOp, NaryOp, TernaryOp, UnaryOp};
 use crate::prelude::AnyBox;
 use paste::paste;
 use strum::EnumIs;
 
+pub(crate) type BoxExpr<K = usize, V = AnyBox> = Box<Expr<K, V>>;
+
 #[derive(Clone, Debug, EnumIs, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Expr<K = usize, V = AnyBox> {
     Binary(ExprBinary<K, V>),
+    Nary(ExprNary<K, V>),
+    Ternary(ExprTernary<K, V>),
     Unary(ExprUnary<K, V>),
-
     Constant(V),
     Variable { id: IndexId<K>, value: V },
 }
@@ -26,6 +29,14 @@ impl<K, V> Expr<K, V> {
         Self::Constant(value)
     }
 
+    pub fn nary(args: impl IntoIterator<Item = Expr<K, V>>, op: NaryOp) -> Self {
+        Self::Nary(ExprNary::new(args, op))
+    }
+
+    pub fn ternary(x: Expr<K, V>, y: Expr<K, V>, z: Expr<K, V>, op: TernaryOp) -> Self {
+        Self::Ternary(ExprTernary::new(x, y, z, op))
+    }
+
     pub fn unary(recv: Expr<K, V>, op: UnaryOp) -> Self {
         Self::Unary(ExprUnary::new(recv, op))
     }
@@ -35,6 +46,10 @@ impl<K, V> Expr<K, V> {
             id: IndexId::from_index(idx),
             value,
         }
+    }
+
+    pub fn boxed(self) -> BoxExpr<K, V> {
+        Box::new(self)
     }
 }
 
@@ -83,3 +98,42 @@ macro_rules! expr_variant {
 expr_variant!(ExprBinary<BinaryOp>(lhs, rhs));
 expr_variant!(ExprTernary<TernaryOp>(x, y, z));
 expr_variant!(ExprUnary<UnaryOp>(recv));
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ExprNary<K = usize, V = AnyBox> {
+    args: Vec<Box<Expr<K, V>>>,
+    op: NaryOp,
+}
+
+impl<K, V> ExprNary<K, V> {
+    pub fn new(args: impl IntoIterator<Item = Expr<K, V>>, op: NaryOp) -> Self {
+        Self {
+            args: Vec::from_iter(args.into_iter().map(|i| i.boxed())),
+            op,
+        }
+    }
+
+    pub fn as_slice(&self) -> &[Box<Expr<K, V>>] {
+        &self.args
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut [Box<Expr<K, V>>] {
+        &mut self.args
+    }
+
+    pub fn args(&self) -> &Vec<Box<Expr<K, V>>> {
+        &self.args
+    }
+
+    pub fn args_mut(&mut self) -> &mut Vec<Box<Expr<K, V>>> {
+        &mut self.args
+    }
+
+    pub fn op(&self) -> NaryOp {
+        self.op
+    }
+
+    pub fn op_mut(&mut self) -> &mut NaryOp {
+        &mut self.op
+    }
+}

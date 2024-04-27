@@ -97,18 +97,8 @@ where
     }
 }
 
-pub trait Cache<K, V> {
-    fn get_or_insert_with<F>(&mut self, key: K, f: F) -> &mut V
-    where
-        F: FnOnce() -> V;
-}
-
-pub trait OrInsert<K, V> {
-    fn or_insert(&mut self, key: K, value: V) -> &mut V;
-}
-
 macro_rules! entry {
-    ($($prefix:ident)::* -> $call:ident($($arg:tt),*)) => {
+    ($($prefix:ident)::*.$call:ident($($arg:tt),*)) => {
         $($prefix)::*::Entry::$call($($arg),*)
     };
 
@@ -116,20 +106,18 @@ macro_rules! entry {
 
 macro_rules! impl_entry {
     ($($prefix:ident)::* where $($preds:tt)* ) => {
-
         impl<'a, K, V> Entry<'a> for $($prefix)::*::Entry<'a, K, V> where $($preds)* {
             type Key = K;
             type Value = V;
 
             fn key(&self) -> &Self::Key {
-                entry!($($prefix)::* -> key(self))
+                entry!($($prefix)::*.key(self))
             }
 
             fn or_insert(self, default: Self::Value) -> &'a mut Self::Value {
-                entry!($($prefix)::* -> or_insert(self, default))
+                entry!($($prefix)::*.or_insert(self, default))
             }
         }
-
     };
 
 }

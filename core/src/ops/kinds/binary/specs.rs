@@ -5,11 +5,6 @@
 
 pub type BoxedBinOp<A, B = A, C = A> = Box<dyn BinOp<A, B, Output = C>>;
 
-pub trait Module {
-    type Args: crate::ops::Params;
-    type Output;
-}
-
 pub trait BinOp<A, B = A> {
     type Output;
 

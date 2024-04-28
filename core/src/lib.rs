@@ -24,8 +24,6 @@ pub(crate) mod utils;
 
 pub mod error;
 pub mod id;
-#[doc(hidden)]
-pub mod math;
 #[macro_use]
 pub mod ops;
 pub mod stores;

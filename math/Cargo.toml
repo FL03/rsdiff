@@ -1,54 +1,51 @@
 [package]
 authors.workspace = true
-description = "This is the core library for the Acme project. It contains the core primitives that are used throughout the project."
+categories = ["mathematics"]
+description.workspace = true
 edition.workspace = true
 homepage.workspace = true
+keywords.workspace = true
 license.workspace = true
-name = "acme-core"
-readme.workspace = true
+name = "acme-math"
 repository.workspace = true
+readme.workspace = true
 version.workspace = true
 
 [features]
 default = [
-    "std",
+    "std"
 ]
 
 full = [
     "default",
     "approx",
     "serde",
-    "trace"
+    "trace",
 ]
 
 approx = [
-    "dep:approx"
+    "dep:approx",
 ]
 
 serde = [
     "dep:serde",
-    "serde-ext",
 ]
-
-serde-ext = [
-    "dep:serde_json",
-]
-
-std = []
 
 trace = [
     "dep:tracing",
 ]
 
-wasi = []
+std = [
+    "acme-core/std"
+]
 
-wasm = []
+wasi = [
+    "acme-core/wasi"
+]
 
-[lib]
-bench = false
-crate-type = ["cdylib", "rlib"]
-doctest = true
-test = true
+wasm = [
+    "acme-core/wasm"
+]
 
 [build-dependencies]
 
@@ -57,14 +54,17 @@ approx = { optional = true, version = "0.5" }
 num = "0.4"
 paste.workspace = true
 serde = { optional = true, features = ["derive"], version = "1" }
-serde_json = { optional = true, version = "1" }
 smart-default.workspace = true
 strum.workspace = true
 tracing = { optional = true, version = "0.1" }
 
+[dependencies.acme-core]
+path = "../core"
+version = "0.3.2"
+# version = "0.3.2-nightly"
+
 [dev-dependencies]
 approx = "0.5"
-lazy_static = "1"
 
 [package.metadata.docs.rs]
 all-features = true

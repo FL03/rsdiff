@@ -4,22 +4,7 @@
 */
 use super::{CGraph, Edge, Node};
 use crate::NodeIndex;
-use acme::ops::{BinaryOp, Op};
-use num::traits::{Num, Pow};
-
-macro_rules! get {
-    ($self:ident[$($index:expr),*]) => {
-        (
-            $(
-                get!(@impl $self[$index]),
-            )*
-        )
-    };
-    (@impl $self:ident[$index:expr]) => {
-        &$self.store[$index]
-    };
-
-}
+use acme::ops::{BinaryOp, Op, UnaryOp};
 
 pub struct Graph<T> {
     store: CGraph<T>,
@@ -48,58 +33,67 @@ impl<T> Graph<T> {
         self.add_node(Node::new(weight, true))
     }
 
-    pub fn add_op(&mut self, args: Vec<NodeIndex>, res: T, op: impl Into<Op>) {
+    pub fn op(&mut self, args: Vec<NodeIndex>, res: T, op: impl Into<Op>) -> NodeIndex {
         let dest = self.add_node_data(res);
         let edge = Edge::new(args.clone(), op);
         for arg in args {
             self.add_edge(dest, arg, edge.clone());
         }
+        dest
     }
+}
+
+macro_rules! binary_op {
+    ($($($p:ident)::*.$call:ident),*) => {
+        $(
+            binary_op!(@impl $($p)::*.$call);
+        )*
+    };
+    (std $($p:ident.$call:ident),*) => {
+        $(
+            binary_op!(@impl core::ops::$p.$call);
+        )*
+    };
+    (@impl $($p:ident)::*.$call:ident) => {
+        pub fn $call(&mut self, lhs: NodeIndex, rhs: NodeIndex) -> NodeIndex where T: $($p)::*<T, Output = T> {
+            let (a, b) = get!(self[lhs, rhs]);
+
+            let res = $($p)::*::$call(*a.data(), *b.data());
+            self.op(vec![lhs, rhs], res, BinaryOp::$call())
+        }
+    };
+}
+
+macro_rules! unary_op {
+    ($($($p:ident)::*.$call:ident$(($($rest:tt)*))?),* $(,)?) => {
+        $(
+            unary_op!(@impl $($p)::*.$call$(($($rest)*))?);
+
+        )*
+    };
+    (core $($p:ident.$call:ident$(($($rest:tt)*))?),* $(,)?) => {
+        $(
+            unary_op!(@impl core::ops::$p.$call(where T: core::ops::$p<Output = T>));
+
+        )*
+    };
+    (@impl $($p:ident)::*.$call:ident$(($($rest:tt)*))?) => {
+        pub fn $call(&mut self, recv: NodeIndex) -> NodeIndex $($($rest)*)? {
+            let (a,) = get!(self[recv]);
+
+            let res = $($p)::*::$call(*a.data());
+            self.op(vec![recv], res, UnaryOp::$call())
+        }
+    };
 }
 
 impl<T> Graph<T>
 where
-    T: Copy + Num + Pow<T, Output = T>,
+    T: Copy,
 {
-    pub fn add(&mut self, lhs: NodeIndex, rhs: NodeIndex) {
-        let (a, b) = get!(self[lhs, rhs]);
+    binary_op!(std Add.add, Div.div, Mul.mul, Rem.rem, Sub.sub);
 
-        let res = *a.data() + *b.data();
-        self.add_op(vec![lhs, rhs], res, BinaryOp::add());
-    }
+    binary_op!(num::traits::Pow.pow);
 
-    pub fn div(&mut self, lhs: NodeIndex, rhs: NodeIndex) {
-        let (a, b) = get!(self[lhs, rhs]);
-
-        let res = *a.data() / *b.data();
-        self.add_op(vec![lhs, rhs], res, BinaryOp::div());
-    }
-
-    pub fn mul(&mut self, lhs: NodeIndex, rhs: NodeIndex) {
-        let (a, b) = get!(self[lhs, rhs]);
-
-        let res = *a.data() * *b.data();
-        self.add_op(vec![lhs, rhs], res, BinaryOp::mul());
-    }
-
-    pub fn pow(&mut self, lhs: NodeIndex, rhs: NodeIndex) {
-        let (a, b) = get!(self[lhs, rhs]);
-
-        let res = a.data().pow(*b.data());
-        self.add_op(vec![lhs, rhs], res, BinaryOp::pow());
-    }
-
-    pub fn rem(&mut self, lhs: NodeIndex, rhs: NodeIndex) {
-        let (a, b) = get!(self[lhs, rhs]);
-
-        let res = *a.data() % *b.data();
-        self.add_op(vec![lhs, rhs], res, BinaryOp::rem());
-    }
-
-    pub fn sub(&mut self, lhs: NodeIndex, rhs: NodeIndex) {
-        let (a, b) = get!(self[lhs, rhs]);
-
-        let res = *a.data() - *b.data();
-        self.add_op(vec![lhs, rhs], res, BinaryOp::sub());
-    }
+    unary_op!(core Neg.neg(), Not.not());
 }

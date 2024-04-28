@@ -24,13 +24,15 @@ members = [
     "core",
     "derive",
     "graphs",
-    "macros",
+    "macros", 
+    "math",
     
 ]
 resolver = "2"
 
 [workspace.dependencies]
 paste = "1"
+scsys = "0.2.1"
 strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
 

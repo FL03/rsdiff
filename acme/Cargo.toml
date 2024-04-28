@@ -14,6 +14,7 @@ version.workspace = true
 [features]
 default = [
     "core",
+    "math",
     "graph",
 ]
 
@@ -39,6 +40,10 @@ macros = [
     "dep:acme-macros"
 ]
 
+math = [
+    "dep:acme-math"
+]
+
 serde = [
     "acme-core/serde",
     "acme-graphs/serde",
@@ -55,6 +60,15 @@ trace = [
     "acme-graphs/trace",
 ]
 
+wasi = [
+    "acme-core/wasi",
+    "acme-graphs/wasi",
+]
+
+wasm = [
+    "acme-core/wasm",
+    "acme-graphs/wasm",
+]
 
 
 
@@ -91,10 +105,13 @@ acme-core = { path = "../core", version = "0.3.2" }
 acme-derive = { optional = true, path = "../derive", version = "0.3.2" }
 acme-graphs = { optional = true, path = "../graphs", version = "0.3.2" }
 acme-macros = { optional = true, path = "../macros", version = "0.3.2" }
+acme-math = { optional = true, path = "../math", version = "0.3.2" }
+
 # acme-core = { path = "../core", version = "0.3.2-nightly" }
 # acme-derive = { optional = true, path = "../derive", version = "0.3.2-nightly" }
 # acme-graphs = { optional = true, path = "../graphs", version = "0.3.2-nightly" }
 # acme-macros = { optional = true, path = "../macros", version = "0.3.2-nightly" }
+# acme-math = { optional = true, path = "../math", version = "0.3.2-nightly" }
 
 [dev-dependencies]
 approx = "0.5"

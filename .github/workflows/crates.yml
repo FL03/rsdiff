@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: [ derive, graphs, macros ]
+        features: [ derive, graphs, macros, math ]
     env:
       CARGO_PACKAGE_NAME: ${{ github.event.repository.name }}-${{ matrix.features }}
     steps:

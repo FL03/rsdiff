@@ -12,6 +12,8 @@ extern crate acme_core as acme;
 pub use self::graph::*;
 
 pub(crate) mod graph;
+#[macro_use]
+pub(crate) mod macros;
 
 #[doc(hidden)]
 pub mod cg;

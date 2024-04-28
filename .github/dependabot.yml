@@ -28,3 +28,7 @@ updates:
     directory: /macros
     schedule:
       interval: daily
+  - package-ecosystem: cargo
+    directory: /math
+    schedule:
+      interval: daily

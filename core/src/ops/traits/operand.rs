@@ -63,7 +63,7 @@ where
 }
 
 macro_rules! impl_operand_ty {
-    ($($kind:ident),*) => {
+    ($($kind:ident),* $(,)?) => {
         $(
             impl_operand_ty!(@impl $kind);
         )*
@@ -73,12 +73,6 @@ macro_rules! impl_operand_ty {
         #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
         #[repr(transparent)]
         pub struct $kind;
-
-        impl $kind {
-            pub fn new() -> Self {
-                Self
-            }
-        }
 
         impl OperandType for $kind {
             fn kind(&self) -> OpKind {
@@ -90,4 +84,4 @@ macro_rules! impl_operand_ty {
     };
 }
 
-impl_operand_ty!(Binary, Nary, Ternary, Unary);
+impl_operand_ty!(Binary, Nary, Ternary, Unary,);

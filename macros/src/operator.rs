@@ -13,39 +13,36 @@ use syn::{Item, ItemFn, Lit, LitStr, Signature};
 
 pub fn impl_operator(ast: &OperatorAst) -> TokenStream {
     let OperatorAst { attrs, item, .. } = ast;
+
     let mut res = match item {
         Item::Fn(inner) => handle_operator_func(&inner),
         _ => panic!("Expected a function"),
     };
 
     if let Some(attrs) = attrs {
-        let ext = handle_operator_attr(&attrs, &item);
-        res = quote! {
-            #res
-
-            #ext
-        };
+        let ext = handle_attr(&attrs, &item);
+        res.extend(ext);
     }
     res
 }
 
-fn handle_operator_attr(attrs: &OperatorAttr, item: &Item) -> TokenStream {
-    let OperatorAttr { lexical } = attrs;
+fn handle_attr(attrs: &OperatorAttr, item: &Item) -> TokenStream {
+    let OperatorAttr { lex, .. } = attrs;
     let item_tk = item.to_token_stream();
     let item_str = item_tk.to_string();
     let mut res = TokenStream::new();
-    if let Some(lex) = lexical {
-        let lex_const = format_ident!("{}", lex.to_string().to_uppercase());
-        let lex_func = format_ident!("{}", lex.to_string().to_lowercase());
+    if let Some(l) = lex {
+        let constant = format_ident!("{}", l.to_string().to_uppercase());
+        let function = format_ident!("{}", l.to_string().to_lowercase());
         res = quote! {
             #res
 
-            pub const #lex_const: &str = #item_str;
+            pub const #constant: &str = #item_str;
 
-            pub fn #lex_func() -> String {
+            pub fn #function() -> String {
                 #item_str.to_string()
             }
-        }
+        };
     }
     res
 }

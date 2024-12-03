@@ -10,7 +10,7 @@ pub(crate) mod specs;
 
 use crate::ops::{Binary, Evaluate, Operand};
 use smart_default::SmartDefault;
-use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
+use strum::{AsRefStr, Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 impl<O, P, A, B> Evaluate<P> for O
 where
@@ -26,6 +26,7 @@ where
 }
 
 #[derive(
+    AsRefStr,
     Clone,
     Copy,
     Debug,

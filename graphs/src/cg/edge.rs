@@ -14,10 +14,10 @@ pub struct Edge<Idx = NodeIndex> {
 }
 
 impl<Idx> Edge<Idx> {
-    pub fn new(args: impl IntoIterator<Item = Idx>, op: Op) -> Self {
+    pub fn new(args: impl IntoIterator<Item = Idx>, op: impl Into<Op>) -> Self {
         Self {
             args: Vec::from_iter(args.into_iter().map(IndexId::from_index)),
-            op,
+            op: op.into(),
         }
     }
 

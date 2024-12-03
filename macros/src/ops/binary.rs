@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::handle::handle_expr;
-use crate::BoxError;
+use crate::Error;
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::str::FromStr;
@@ -26,7 +26,7 @@ pub enum BinaryOp {
 }
 
 impl BinaryOp {
-    pub fn from_binary(op: BinOp) -> Result<Self, BoxError> {
+    pub fn from_binary(op: BinOp) -> crate::Result<Self> {
         use BinOp::*;
         match op {
             Add(_) | AddAssign(_) => Ok(Self::Add),
@@ -73,7 +73,7 @@ impl core::fmt::Display for BinaryOp {
 }
 
 impl FromStr for BinaryOp {
-    type Err = BoxError;
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -110,7 +110,7 @@ impl Parse for BinaryOp {
 }
 
 impl TryFrom<BinOp> for BinaryOp {
-    type Error = BoxError;
+    type Error = Error;
 
     fn try_from(op: BinOp) -> Result<Self, Self::Error> {
         Self::from_binary(op)
@@ -118,7 +118,7 @@ impl TryFrom<BinOp> for BinaryOp {
 }
 
 impl TryFrom<Ident> for BinaryOp {
-    type Error = BoxError;
+    type Error = Error;
 
     fn try_from(ident: Ident) -> Result<Self, Self::Error> {
         Self::from_str(ident.to_string().as_str())

@@ -12,6 +12,8 @@ extern crate acme_core as acme;
 pub use self::graph::*;
 
 pub(crate) mod graph;
+#[macro_use]
+pub(crate) mod macros;
 
 #[doc(hidden)]
 pub mod cg;
@@ -21,6 +23,7 @@ pub mod grad;
 pub mod scg;
 
 pub use petgraph::graph::{EdgeIndex, GraphIndex, NodeIndex};
+pub use petgraph::stable_graph::DefaultIx;
 
 pub(crate) type Id = acme::id::IndexId<crate::NodeIndex>;
 

@@ -21,7 +21,6 @@ full = [
     "trace",
 ]
 
-std = []
 
 serde = [
     "dep:serde",
@@ -39,6 +38,18 @@ trace = [
     "acme-core/trace",
 ]
 
+std = [
+    "acme-core/std",
+]
+
+wasi = [
+    "acme-core/wasi",
+]
+
+wasm = [
+    "acme-core/wasm",
+]
+
 [lib]
 bench = false
 crate-type = ["cdylib", "rlib"]
@@ -51,6 +62,7 @@ test = true
 
 [dependencies]
 num = "0.4"
+paste = "1"
 petgraph = "0.6"
 serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }

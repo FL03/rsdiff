@@ -76,7 +76,7 @@ pub fn operator(args: TokenStream, item: TokenStream) -> TokenStream {
     let op_parser = syn::meta::parser(|meta| attrs.parser(meta));
     let _ = parse_macro_input!(args with op_parser);
     let item = parse_macro_input!(item as syn::Item);
-    let ast = ast::OperatorAst::new(Some(attrs), item);
+    let ast = ast::OperatorAst::new(Some(dbg!(attrs)), item);
     let result = operator::impl_operator(&ast);
     TokenStream::from(result)
 }
@@ -92,7 +92,7 @@ pub(crate) mod kw {
     syn::custom_keyword!(tan);
 }
 
+#[allow(unused)]
 pub(crate) mod primitives {
     pub type Result<T = ()> = std::result::Result<T, crate::Error>;
-    pub type BoxError = Box<dyn std::error::Error>;
 }

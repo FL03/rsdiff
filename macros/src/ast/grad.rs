@@ -2,9 +2,9 @@
     Appellation: gradient <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#![allow(dead_code)]
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream, Result};
+use syn::Ident;
 use syn::{Attribute, ExprArray, ItemFn};
 
 pub struct GradientAst {
@@ -16,14 +16,6 @@ impl GradientAst {
     pub fn new(attrs: Vec<Attribute>, item: ItemFn) -> Self {
         Self { attrs, item }
     }
-
-    pub fn attributes(&self) -> &[Attribute] {
-        &self.attrs
-    }
-
-    pub fn item(&self) -> &ItemFn {
-        &self.item
-    }
 }
 
 impl Parse for GradientAst {
@@ -34,8 +26,13 @@ impl Parse for GradientAst {
     }
 }
 
+pub struct GradientAttr {
+    pub name: Option<Ident>,
+}
+
 pub enum ExprGrad {
     Array(ExprArray),
+    Fn(ItemFn),
     Verbatim(TokenStream),
 }
 

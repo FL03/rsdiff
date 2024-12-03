@@ -8,27 +8,11 @@ use super::DynamicGraph;
 use crate::prelude::GraphResult as Result;
 use crate::NodeIndex;
 
-use acme::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
-use acme::prelude::Scalar;
+use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
+use rsdiff::prelude::Scalar;
 use core::ops::Index;
 use petgraph::algo::toposort;
 use std::collections::HashMap;
-
-macro_rules! entry {
-    ($ctx:ident[$key:expr]) => {
-        entry!(@base $ctx[$key]).or_default()
-    };
-    ($ctx:ident[$key:expr], $val:expr) => {
-        entry!(@base $ctx[$key].or_insert($val))
-    };
-    (@base $ctx:ident[$key:expr].$call:ident($val:expr)) => {
-        entry!($ctx[$key]).$call:ident($val)
-    };
-    (@base $ctx:ident[$key:expr]) => {
-        $ctx.entry($key)
-    };
-
-}
 
 macro_rules! push {
     ($ctx:expr, $(($key:expr, $val:expr)),*) => {

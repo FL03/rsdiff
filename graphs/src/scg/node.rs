@@ -7,8 +7,8 @@
 //! A computational graph relies on weighted nodes to represent constants, operations, and variables.
 //! The edges connecting to any given node are considered to be inputs and help to determine the flow of information
 use crate::NodeIndex;
-use acme::id::AtomicId;
-use acme::ops::{Op, Operator};
+use rsdiff::id::AtomicId;
+use rsdiff::ops::{Op, Operator};
 use smart_default::SmartDefault;
 use strum::{Display, EnumCount, EnumIs, VariantNames};
 

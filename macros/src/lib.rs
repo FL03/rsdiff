@@ -1,8 +1,8 @@
 /*
-    Appellation: acme-macros <library>
+    Appellation: rsdiff-macros <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # acme-macros
+//! # rsdiff-macros
 //!
 //!
 extern crate proc_macro;
@@ -29,7 +29,7 @@ use syn::parse_macro_input;
 /// ### Basic arithmetic
 ///
 /// ```
-/// extern crate acme_macros as macros;
+/// extern crate rsdiff_macros as macros;
 ///
 /// use macros::autodiff;
 ///
@@ -46,7 +46,7 @@ use syn::parse_macro_input;
 /// ### Trigonometric functions
 ///
 /// ```
-/// extern crate acme_macros as macros;
+/// extern crate rsdiff_macros as macros;
 ///
 /// use macros::autodiff;
 ///
@@ -76,7 +76,7 @@ pub fn operator(args: TokenStream, item: TokenStream) -> TokenStream {
     let op_parser = syn::meta::parser(|meta| attrs.parser(meta));
     let _ = parse_macro_input!(args with op_parser);
     let item = parse_macro_input!(item as syn::Item);
-    let ast = ast::OperatorAst::new(Some(attrs), item);
+    let ast = ast::OperatorAst::new(Some(dbg!(attrs)), item);
     let result = operator::impl_operator(&ast);
     TokenStream::from(result)
 }
@@ -92,7 +92,7 @@ pub(crate) mod kw {
     syn::custom_keyword!(tan);
 }
 
+#[allow(unused)]
 pub(crate) mod primitives {
     pub type Result<T = ()> = std::result::Result<T, crate::Error>;
-    pub type BoxError = Box<dyn std::error::Error>;
 }

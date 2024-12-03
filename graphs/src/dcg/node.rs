@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::NodeIndex;
-use acme::id::AtomicId;
-use acme::ops::{BinaryOp, Op, UnaryOp};
+use rsdiff::id::AtomicId;
+use rsdiff::ops::{BinaryOp, Op, UnaryOp};
 
 #[derive(Clone, Debug)]
 pub enum Node<T> {

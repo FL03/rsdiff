@@ -4,7 +4,7 @@
 */
 #![cfg(test)]
 #![allow(unused)]
-extern crate acme_macros as macros;
+extern crate rsdiff_macros as macros;
 
 use defs::*;
 use macros::autodiff;

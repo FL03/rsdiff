@@ -4,7 +4,7 @@
 */
 use super::{Edge, Node, Operation};
 use crate::prelude::GraphResult as Result;
-use acme::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
+use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
 use num::traits::{NumAssign, NumOps, Signed};
 use petgraph::algo::toposort;
 use petgraph::prelude::{DiGraph, NodeIndex};

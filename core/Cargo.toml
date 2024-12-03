@@ -4,7 +4,7 @@ description = "This is the core library for the Acme project. It contains the co
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
-name = "acme-core"
+name = "rsdiff-core"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -12,6 +12,17 @@ version.workspace = true
 [features]
 default = [
     "std",
+]
+
+full = [
+    "default",
+    "approx",
+    "serde",
+    "trace"
+]
+
+approx = [
+    "dep:approx"
 ]
 
 serde = [
@@ -29,6 +40,10 @@ trace = [
     "dep:tracing",
 ]
 
+wasi = []
+
+wasm = []
+
 [lib]
 bench = false
 crate-type = ["cdylib", "rlib"]
@@ -38,7 +53,9 @@ test = true
 [build-dependencies]
 
 [dependencies]
+approx = { optional = true, version = "0.5" }
 num = "0.4"
+paste.workspace = true
 serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
 smart-default.workspace = true
@@ -46,6 +63,7 @@ strum.workspace = true
 tracing = { optional = true, version = "0.1" }
 
 [dev-dependencies]
+approx = "0.5"
 lazy_static = "1"
 
 [package.metadata.docs.rs]

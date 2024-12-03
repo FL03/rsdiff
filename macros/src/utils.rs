@@ -49,14 +49,6 @@ macro_rules! binary_expr {
 }
 
 #[allow(dead_code)]
-pub fn attrs_is_lexical(attrs: &Vec<syn::Attribute>) -> bool {
-    attrs.iter().any(|attr| match &attr.meta {
-        syn::Meta::Path(inner) => inner.is_ident("lexical"),
-        _ => false,
-    })
-}
-
-#[allow(dead_code)]
 pub fn fn_args_ident(arg: &syn::FnArg) -> Ident {
     use syn::Pat;
     match arg {

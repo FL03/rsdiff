@@ -4,9 +4,9 @@
 */
 #![cfg(test)]
 
-extern crate acme_core as acme;
+extern crate rsdiff_core as rsdiff;
 
-use acme::nested;
+use rsdiff::nested;
 
 #[test]
 fn test_nested() {

@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::NodeIndex;
-use acme::id::IndexId;
-use acme::ops::Op;
+use rsdiff::id::IndexId;
+use rsdiff::ops::Op;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -14,10 +14,10 @@ pub struct Edge<Idx = NodeIndex> {
 }
 
 impl<Idx> Edge<Idx> {
-    pub fn new(args: impl IntoIterator<Item = Idx>, op: Op) -> Self {
+    pub fn new(args: impl IntoIterator<Item = Idx>, op: impl Into<Op>) -> Self {
         Self {
             args: Vec::from_iter(args.into_iter().map(IndexId::from_index)),
-            op,
+            op: op.into(),
         }
     }
 

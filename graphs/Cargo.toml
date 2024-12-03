@@ -5,7 +5,7 @@ description = "Computational graphs for Rust"
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
-name = "acme-graphs"
+name = "rsdiff-graphs"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -21,7 +21,6 @@ full = [
     "trace",
 ]
 
-std = []
 
 serde = [
     "dep:serde",
@@ -31,12 +30,24 @@ serde = [
 serde-ext = [
     "dep:serde_json",
     "petgraph/serde-1",
-    "acme-core/serde",
+    "rsdiff-core/serde",
 ]
 
 trace = [
     "dep:tracing",
-    "acme-core/trace",
+    "rsdiff-core/trace",
+]
+
+std = [
+    "rsdiff-core/std",
+]
+
+wasi = [
+    "rsdiff-core/wasi",
+]
+
+wasm = [
+    "rsdiff-core/wasm",
 ]
 
 [lib]
@@ -51,6 +62,7 @@ test = true
 
 [dependencies]
 num = "0.4"
+paste = "1"
 petgraph = "0.6"
 serde = { optional = true, features = ["derive"], version = "1" }
 serde_json = { optional = true, version = "1" }
@@ -58,10 +70,9 @@ smart-default.workspace = true
 strum.workspace = true
 tracing = { optional = true, version = "0.1" }
 
-[dependencies.acme-core]
+[dependencies.rsdiff-core]
 path = "../core"
-version = "0.3.1"
-# version = "0.3.1-nightly"
+version = "0.0.1"
 
 [package.metadata.docs.rs]
 all-features = true

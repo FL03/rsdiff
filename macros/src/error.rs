@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub enum Error {
     Ast(String),

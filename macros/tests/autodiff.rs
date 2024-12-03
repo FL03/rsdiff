@@ -4,7 +4,7 @@
 */
 #![cfg(test)]
 #![allow(unused)]
-extern crate acme_macros as macros;
+extern crate rsdiff_macros as macros;
 
 use approx::assert_abs_diff_eq;
 use macros::autodiff;

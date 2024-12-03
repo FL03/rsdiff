@@ -1,17 +1,19 @@
 /*
-    Appellation: acme-graphs <library>
+    Appellation: rsdiff-graphs <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # acme-graphs
+//! # rsdiff-graphs
 //!
 //!
 
-extern crate acme_core as acme;
+extern crate rsdiff_core as rsdiff;
 
 #[doc(inline)]
 pub use self::graph::*;
 
 pub(crate) mod graph;
+#[macro_use]
+pub(crate) mod macros;
 
 #[doc(hidden)]
 pub mod cg;
@@ -21,8 +23,9 @@ pub mod grad;
 pub mod scg;
 
 pub use petgraph::graph::{EdgeIndex, GraphIndex, NodeIndex};
+pub use petgraph::stable_graph::DefaultIx;
 
-pub(crate) type Id = acme::id::IndexId<crate::NodeIndex>;
+pub(crate) type Id = rsdiff::id::IndexId<crate::NodeIndex>;
 
 #[doc(hidden)]
 pub mod prelude {

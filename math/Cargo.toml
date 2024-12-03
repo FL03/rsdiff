@@ -1,0 +1,75 @@
+[package]
+authors.workspace = true
+categories = ["mathematics"]
+description.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+name = "rsdiff-math"
+repository.workspace = true
+readme.workspace = true
+version.workspace = true
+
+[features]
+default = [
+    "std"
+]
+
+full = [
+    "default",
+    "approx",
+    "serde",
+    "trace",
+]
+
+approx = [
+    "dep:approx",
+]
+
+serde = [
+    "dep:serde",
+]
+
+trace = [
+    "dep:tracing",
+]
+
+std = [
+    "rsdiff-core/std"
+]
+
+wasi = [
+    "rsdiff-core/wasi"
+]
+
+wasm = [
+    "rsdiff-core/wasm"
+]
+
+[build-dependencies]
+
+[dependencies]
+approx = { optional = true, version = "0.5" }
+num = "0.4"
+paste.workspace = true
+serde = { optional = true, features = ["derive"], version = "1" }
+smart-default.workspace = true
+strum.workspace = true
+tracing = { optional = true, version = "0.1" }
+
+[dependencies.rsdiff-core]
+path = "../core"
+version = "0.0.1"
+# version = "0.3.2-nightly"
+
+[dev-dependencies]
+approx = "0.5"
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

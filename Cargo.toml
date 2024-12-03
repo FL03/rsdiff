@@ -1,38 +1,38 @@
 [workspace.package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
+authors = ["FL03 <jo3mccain@icloud.com>"]
 categories = ["mathematics", "science"]
-description = "Acme aims to provide a solid foundation for developing robust machine-learning systems in Rust."
+description = "rsdiff aims to provide a solid foundation for developing robust machine-learning systems in Rust."
 edition = "2021"
-homepage = "https://github.com/FL03/acme/wikis"
+homepage = "https://github.com/FL03/rsdiff/wikis"
 keywords = ["acme", "autodiff", "mathematics", "tensor"]
 license = "Apache-2.0"
-repository = "https://github.com/FL03/acme"
+repository = "https://github.com/FL03/rsdiff"
 readme = "README.md"
-version = "0.3.1"
-# version = "0.3.1-nightly"
+version = "0.0.1"
+# version = "0.3.2-nightly"
 
 [workspace]
 default-members = [
-    "acme"
+    "rsdiff"
 ]
 
 exclude = [ 
-    "exp/container",
 ]
 
 members = [
-    "acme", 
+    "rsdiff", 
     "core",
     "derive",
     "graphs",
-    "macros",
-    "tensor",
+    "macros", 
+    "math",
     
 ]
 resolver = "2"
 
 [workspace.dependencies]
 paste = "1"
+scsys = "0.2.1"
 strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
 

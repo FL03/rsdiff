@@ -2,9 +2,9 @@
     Appellation: node <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use acme::id::AtomicId;
+use rsdiff::id::AtomicId;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Node<T> {
     pub(crate) id: AtomicId,
     pub(crate) data: T,

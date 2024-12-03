@@ -2,7 +2,7 @@
     Appellation: node <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use acme::id::AtomicId;
+use rsdiff::id::AtomicId;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Node<T> {

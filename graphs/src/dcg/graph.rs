@@ -8,8 +8,8 @@ use super::DynamicGraph;
 use crate::prelude::GraphResult as Result;
 use crate::NodeIndex;
 
-use acme::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
-use acme::prelude::Scalar;
+use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
+use rsdiff::prelude::Scalar;
 use core::ops::Index;
 use petgraph::algo::toposort;
 use std::collections::HashMap;

@@ -6,7 +6,7 @@ edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "acme"
+name = "rsdiff"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -28,46 +28,46 @@ full = [
 core = []
 
 derive = [
-    "dep:acme-derive",
+    "dep:rsdiff-derive",
     "macros"
 ]
 
 graph = [
-    "dep:acme-graphs"
+    "dep:rsdiff-graphs"
 ]
 
 macros = [
-    "dep:acme-macros"
+    "dep:rsdiff-macros"
 ]
 
 math = [
-    "dep:acme-math"
+    "dep:rsdiff-math"
 ]
 
 serde = [
-    "acme-core/serde",
-    "acme-graphs/serde",
+    "rsdiff-core/serde",
+    "rsdiff-graphs/serde",
 ]
 
 std = [
-    "acme-core/std",
-    "acme-graphs/std",
+    "rsdiff-core/std",
+    "rsdiff-graphs/std",
 ]
 
 
 trace = [
-    "acme-core/trace",
-    "acme-graphs/trace",
+    "rsdiff-core/trace",
+    "rsdiff-graphs/trace",
 ]
 
 wasi = [
-    "acme-core/wasi",
-    "acme-graphs/wasi",
+    "rsdiff-core/wasi",
+    "rsdiff-graphs/wasi",
 ]
 
 wasm = [
-    "acme-core/wasm",
-    "acme-graphs/wasm",
+    "rsdiff-core/wasm",
+    "rsdiff-graphs/wasm",
 ]
 
 
@@ -101,17 +101,11 @@ required-features = ["macros"]
 [build-dependencies]
 
 [dependencies]
-acme-core = { path = "../core", version = "0.3.2" }
-acme-derive = { optional = true, path = "../derive", version = "0.3.2" }
-acme-graphs = { optional = true, path = "../graphs", version = "0.3.2" }
-acme-macros = { optional = true, path = "../macros", version = "0.3.2" }
-acme-math = { optional = true, path = "../math", version = "0.3.2" }
-
-# acme-core = { path = "../core", version = "0.3.2-nightly" }
-# acme-derive = { optional = true, path = "../derive", version = "0.3.2-nightly" }
-# acme-graphs = { optional = true, path = "../graphs", version = "0.3.2-nightly" }
-# acme-macros = { optional = true, path = "../macros", version = "0.3.2-nightly" }
-# acme-math = { optional = true, path = "../math", version = "0.3.2-nightly" }
+rsdiff-core = { path = "../core", version = "0.0.1" }
+rsdiff-derive = { optional = true, path = "../derive", version = "0.0.1" }
+rsdiff-graphs = { optional = true, path = "../graphs", version = "0.0.1" }
+rsdiff-macros = { optional = true, path = "../macros", version = "0.0.1" }
+rsdiff-math = { optional = true, path = "../math", version = "0.0.1" }
 
 [dev-dependencies]
 approx = "0.5"

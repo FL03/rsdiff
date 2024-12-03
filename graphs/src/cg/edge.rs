@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::NodeIndex;
-use acme::id::IndexId;
-use acme::ops::Op;
+use rsdiff::id::IndexId;
+use rsdiff::ops::Op;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]

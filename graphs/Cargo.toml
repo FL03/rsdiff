@@ -30,12 +30,12 @@ serde = [
 serde-ext = [
     "dep:serde_json",
     "petgraph/serde-1",
-    "acme-core/serde",
+    "rsdiff-core/serde",
 ]
 
 trace = [
     "dep:tracing",
-    "acme-core/trace",
+    "rsdiff-core/trace",
 ]
 
 std = [
@@ -73,7 +73,6 @@ tracing = { optional = true, version = "0.1" }
 [dependencies.rsdiff-core]
 path = "../core"
 version = "0.0.1"
-# version = "0.3.2-nightly"
 
 [package.metadata.docs.rs]
 all-features = true

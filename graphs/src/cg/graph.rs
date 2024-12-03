@@ -4,7 +4,7 @@
 */
 use super::{CGraph, Edge, Node};
 use crate::NodeIndex;
-use acme::ops::{BinaryOp, Op, UnaryOp};
+use rsdiff::ops::{BinaryOp, Op, UnaryOp};
 
 pub struct Graph<T> {
     store: CGraph<T>,

@@ -21,7 +21,7 @@ pub trait GraphData {
 
 impl<S> GraphData for S
 where
-    S: acme::prelude::Scalar<Real = S>,
+    S: rsdiff::prelude::Scalar<Real = S>,
 {
     type Value = S;
 }

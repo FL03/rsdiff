@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #![cfg(test)]
-extern crate acme_graphs as graphs;
+extern crate rsdiff_graphs as graphs;
 
 use graphs::dcg::Dcg;
 

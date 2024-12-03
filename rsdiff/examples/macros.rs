@@ -2,12 +2,12 @@
     Appellation: autodiff <example>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-extern crate acme;
+extern crate rsdiff;
 
-use acme::{autodiff, operator};
+use rsdiff::{autodiff, operator};
 use num::Float;
 
-fn main() -> acme::prelude::BoxResult {
+fn main() -> rsdiff::prelude::BoxResult {
     let x = 5f64;
     println!("{}", sigmoid(x));
     println!("{}", sigmoid_lex());

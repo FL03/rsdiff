@@ -4,9 +4,9 @@
 */
 #![cfg(test)]
 #![allow(unused_variables)]
-extern crate acme_macros as acme;
+extern crate rsdiff_macros as rsdiff;
 
-use acme::autodiff;
+use rsdiff::autodiff;
 
 #[test]
 fn test_add() {

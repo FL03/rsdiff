@@ -11,6 +11,7 @@
 
 #[doc(inline)]
 pub use rsdiff_core::*;
+#[allow(unused_imports)]
 #[cfg(feature = "derive")]
 #[doc(inline)]
 pub use rsdiff_derive::*;
@@ -26,6 +27,7 @@ pub use rsdiff_math as math;
 
 pub mod prelude {
     pub use rsdiff_core::prelude::*;
+    #[allow(unused_imports)]
     #[cfg(feature = "derive")]
     pub use rsdiff_derive::*;
     #[cfg(feature = "graph")]

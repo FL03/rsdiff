@@ -4,9 +4,9 @@
 */
 // #![cfg(feature = "macros")]
 #![allow(unused_variables)]
-extern crate acme;
+extern crate rsdiff;
 
-use acme::autodiff;
+use rsdiff::autodiff;
 
 macro_rules! format_exp {
     (symbolic: {exp: $ex:expr, vars: [$($var:ident),*] }) => {

@@ -1,8 +1,8 @@
 /*
-    Appellation: acme-macros <library>
+    Appellation: rsdiff-macros <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-//! # acme-macros
+//! # rsdiff-macros
 //!
 //!
 extern crate proc_macro;
@@ -29,7 +29,7 @@ use syn::parse_macro_input;
 /// ### Basic arithmetic
 ///
 /// ```
-/// extern crate acme_macros as macros;
+/// extern crate rsdiff_macros as macros;
 ///
 /// use macros::autodiff;
 ///
@@ -46,7 +46,7 @@ use syn::parse_macro_input;
 /// ### Trigonometric functions
 ///
 /// ```
-/// extern crate acme_macros as macros;
+/// extern crate rsdiff_macros as macros;
 ///
 /// use macros::autodiff;
 ///

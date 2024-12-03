@@ -6,9 +6,9 @@
 #![feature(fn_traits, tuple_trait, unboxed_closures)]
 #![cfg(all(test, feature = "macros"))]
 
-extern crate acme;
+extern crate rsdiff;
 
-use acme::prelude::autodiff;
+use rsdiff::prelude::autodiff;
 use utils::*;
 
 #[test]

@@ -4,10 +4,10 @@
 */
 #![cfg(feature = "graph")]
 
-extern crate acme;
+extern crate rsdiff;
 
-use acme::graph::prelude::GraphResult;
-use acme::graph::scg::Scg;
+use rsdiff::graph::prelude::GraphResult;
+use rsdiff::graph::scg::Scg;
 
 fn main() -> GraphResult<()> {
     let mut scg = Scg::new();

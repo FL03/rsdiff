@@ -5,7 +5,7 @@ description = "Computational graphs for Rust"
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
-name = "acme-graphs"
+name = "rsdiff-graphs"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -39,15 +39,15 @@ trace = [
 ]
 
 std = [
-    "acme-core/std",
+    "rsdiff-core/std",
 ]
 
 wasi = [
-    "acme-core/wasi",
+    "rsdiff-core/wasi",
 ]
 
 wasm = [
-    "acme-core/wasm",
+    "rsdiff-core/wasm",
 ]
 
 [lib]
@@ -70,9 +70,9 @@ smart-default.workspace = true
 strum.workspace = true
 tracing = { optional = true, version = "0.1" }
 
-[dependencies.acme-core]
+[dependencies.rsdiff-core]
 path = "../core"
-version = "0.3.2"
+version = "0.0.1"
 # version = "0.3.2-nightly"
 
 [package.metadata.docs.rs]

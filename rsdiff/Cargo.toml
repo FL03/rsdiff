@@ -111,7 +111,7 @@ rsdiff-math = { optional = true, path = "../math", version = "0.0.1" }
 approx = "0.5"
 lazy_static = "1"
 num = "0.4"
-rand = "0.8"
+rand = "0.9"
 
 [package.metadata.docs.rs]
 all-features = true

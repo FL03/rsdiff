@@ -33,7 +33,7 @@ resolver = "2"
 [workspace.dependencies]
 paste = "1"
 scsys = "0.2.1"
-strum = { features = ["derive"], version = "0.26" }
+strum = { features = ["derive"], version = "0.27" }
 smart-default = "0.7"
 
 [profile.dev]

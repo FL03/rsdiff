@@ -883,6 +883,7 @@ dependencies = [
  "anyhow",
  "approx",
  "criterion",
+ "num",
  "rsdiff-core",
  "rsdiff-derive",
  "rsdiff-graphs",

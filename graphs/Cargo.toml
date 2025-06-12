@@ -30,6 +30,10 @@ doctest = true
 test = true
 
 [dependencies]
+rsdiff-core = { workspace = true }
+# custom
+scsys = { workspace = true }
+# data-structures
 petgraph = { workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
@@ -68,10 +72,10 @@ std = [
     "anyhow?/std",
     "approx?/std",
     "num/std",
-    "num-traits?/std",
+    "num-traits/std",
     "rsdiff-core/std",
     "serde?/std",
-    "serde-json?/std",
+    "serde_json?/std",
     "tracing?/std",
     "thiserror/std",
 ]

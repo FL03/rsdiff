@@ -66,14 +66,13 @@ full = [
 
 # ************* [FF:Environments] *************
 std = [
-    "alloc",
     "anyhow?/std",
     "approx?/std",
     "num/std",
-    "num-traits?/std",
+    "num-traits/std",
     "rsdiff-core/std",
     "serde?/std",
-    "serde-json?/std",
+    "serde_json?/std",
     "tracing?/std",
     "thiserror/std",
 ]

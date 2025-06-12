@@ -73,10 +73,10 @@ std = [
     "anyhow?/std",
     "approx?/std",
     "num/std",
-    "num-traits?/std",
+    "num-traits/std",
     "scsys/std",
     "serde?/std",
-    "serde-json?/std",
+    "serde_json?/std",
     "tracing?/std",
     "thiserror/std",
 ]
@@ -110,11 +110,11 @@ json = [
 
 serde = [
     "dep:serde",
-    "dep:serde-derive",
+    "dep:serde_derive",
     "scsys/serde",
 ]
 
-serde-json = ["dep:serde_json"]
+serde_json = ["dep:serde_json"]
 
 tracing = [
     "dep:tracing",

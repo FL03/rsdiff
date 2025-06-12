@@ -73,6 +73,7 @@ std = [
     "approx?/std",
     "num/std",
     "num-traits/std",
+    "petgraph/std",
     "rsdiff-core/std",
     "serde?/std",
     "serde_json?/std",
@@ -110,6 +111,7 @@ json = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "petgraph/serde-1",
     "rsdiff-core/serde",
 ]
 

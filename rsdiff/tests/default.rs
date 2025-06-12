@@ -11,6 +11,6 @@ fn lib_compiles() {
     {
         lhs + rhs
     }
-    let result = f(2, 2);
+    let result = add(2, 2);
     assert_eq!(result, 4);
 }

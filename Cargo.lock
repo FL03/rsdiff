@@ -711,6 +711,7 @@ dependencies = [
  "hashbrown",
  "indexmap",
  "serde",
+ "serde_derive",
 ]
 
 [[package]]

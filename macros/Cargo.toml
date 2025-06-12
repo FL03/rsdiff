@@ -1,14 +1,17 @@
 [package]
+build = "build.rs"
+description = "the crate implements custom macros for rsdiff"
+name = "rsdiff-macros"
+
 authors.workspace = true
 categories.workspace = true
-description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "rsdiff-macros"
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
 
 [lib]

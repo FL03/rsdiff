@@ -2,8 +2,9 @@
     Appellation: acme-math <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 pub use self::traits::prelude::*;

@@ -1,13 +1,55 @@
 [package]
-authors.workspace = true
+build = "build.rs"
 description = "This is the core library for the Acme project. It contains the core primitives that are used throughout the project."
+name = "rsdiff-core"
+
+authors.workspace = true
+categories.workspace = true
 edition.workspace = true
 homepage.workspace = true
+keywords.workspace = true
 license.workspace = true
-name = "rsdiff-core"
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs"]
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib"
+]
+bench = false
+doc = true
+doctest = true
+test = true
+
+[dependencies]
+# error handling
+anyhow = { optional = true, workspace = true }
+thiserror = { workspace = true }
+# math
+approx = { optional = true, workspace = true}
+num = { workspace = true }
+num-traits = { workspace = true }
+# serialization
+serde = { optional = true, features = ["derive"], workspace = true }
+serde_derive = { optional = true, workspace = true }
+serde_json = { optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { workspace = true  }
+# tracing
+tracing = { optional = true, workspace = true}
+
+[dev-dependencies]
+lazy_static = { workspace = true }
 
 [features]
 default = [
@@ -21,55 +63,45 @@ full = [
     "trace"
 ]
 
-approx = [
-    "dep:approx"
-]
-
-serde = [
-    "dep:serde",
-    "serde-ext",
-]
-
-serde-ext = [
-    "dep:serde_json",
-]
-
-std = []
-
-trace = [
-    "dep:tracing",
+# ************* [FF:Environments] *************
+std = [
+    "alloc",
+    "anyhow?/std",
+    "approx?/std",
+    "num/std",
+    "num-traits?/std",
+    "serde?/std",
+    "serde-json?/std",
+    "tracing?/std",
+    "thiserror/std",
 ]
 
 wasi = []
 
 wasm = []
 
-[lib]
-bench = false
-crate-type = ["cdylib", "rlib"]
-doctest = true
-test = true
+# ************* [FF:Dependencies] *************
+alloc = [
+    "num/alloc",
+    "serde?/alloc",
+    "serde-json?/alloc",
+]
 
-[build-dependencies]
+anyhow = ["dep:anyhow"]
 
-[dependencies]
-approx = { optional = true, version = "0.5" }
-num = "0.4"
-paste.workspace = true
-serde = { optional = true, features = ["derive"], version = "1" }
-serde_json = { optional = true, version = "1" }
-smart-default.workspace = true
-strum.workspace = true
-tracing = { optional = true, version = "0.1" }
+approx = ["dep:approx"]
 
-[dev-dependencies]
-approx = "0.5"
-lazy_static = "1"
+json = [
+    "alloc",
+    "serde",
+    "serde_json"
+]
 
-[package.metadata.docs.rs]
-all-features = true
-rustc-args = ["--cfg", "docsrs"]
+serde = [
+    "dep:serde",
+    "dep:serde-derive",
+]
 
-[target.wasm32-unknown-unknown]
+serde-json = ["dep:serde_json"]
 
-[target.wasm32-wasi]
+tracing = ["dep:tracing"]

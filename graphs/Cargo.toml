@@ -1,14 +1,53 @@
 [package]
+build = "build.rs"
+description = "Computational graphs for Rust"
+name = "rsdiff-graphs"
+
 authors.workspace = true
 categories.workspace = true
-description = "Computational graphs for Rust"
 edition.workspace = true
 homepage.workspace = true
+keywords.workspace = true
 license.workspace = true
-name = "rsdiff-graphs"
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs"]
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib"
+]
+bench = false
+doc = true
+doctest = true
+test = true
+
+[dependencies]
+petgraph = { workspace = true }
+# error handling
+anyhow = { optional = true, workspace = true }
+thiserror = { workspace = true }
+# math
+approx = { optional = true, workspace = true}
+num = { workspace = true }
+num-traits = { workspace = true }
+# serialization
+serde = { optional = true, features = ["derive"], workspace = true }
+serde_derive = { optional = true, workspace = true }
+serde_json = { optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { workspace = true  }
+# tracing
+tracing = { optional = true, workspace = true}
 
 [features]
 default = [
@@ -17,29 +56,22 @@ default = [
 
 full = [
     "default",
+    "approx",
     "serde",
     "trace",
 ]
 
-
-serde = [
-    "dep:serde",
-    "serde-ext",
-]
-
-serde-ext = [
-    "dep:serde_json",
-    "petgraph/serde-1",
-    "rsdiff-core/serde",
-]
-
-trace = [
-    "dep:tracing",
-    "rsdiff-core/trace",
-]
-
+# ************* [FF:Environments] *************
 std = [
+    "anyhow?/std",
+    "approx?/std",
+    "num/std",
+    "num-traits?/std",
     "rsdiff-core/std",
+    "serde?/std",
+    "serde-json?/std",
+    "tracing?/std",
+    "thiserror/std",
 ]
 
 wasi = [
@@ -50,34 +82,32 @@ wasm = [
     "rsdiff-core/wasm",
 ]
 
-[lib]
-bench = false
-crate-type = ["cdylib", "rlib"]
-doctest = true
-test = true
+# ************* [FF:Dependencies] *************
 
-[build-dependencies]
+anyhow = [
+    "dep:anyhow",
+    "rsdiff-core/anyhow",
+]
 
-[dev-dependencies]
+approx = [
+    "dep:approx",
+    "rsdiff-core/approx",
+]
 
-[dependencies]
-num = "0.4"
-paste = "1"
-petgraph = "0.6"
-serde = { optional = true, features = ["derive"], version = "1" }
-serde_json = { optional = true, version = "1" }
-smart-default.workspace = true
-strum.workspace = true
-tracing = { optional = true, version = "0.1" }
+json = [
+    "alloc",
+    "rsdiff-core/json",
+    "serde",
+    "serde_json",
+]
 
-[dependencies.rsdiff-core]
-path = "../core"
-version = "0.0.1"
+serde = [
+    "dep:serde",
+    "dep:serde_derive",
+    "rsdiff-core/serde",
+]
 
-[package.metadata.docs.rs]
-all-features = true
-rustc-args = ["--cfg", "docsrs"]
-
-[target.wasm32-unknown-unknown]
-
-[target.wasm32-wasi]
+tracing = [
+    "dep:tracing",
+    "rsdiff-core/tracing",
+]

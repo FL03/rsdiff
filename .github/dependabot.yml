@@ -1,34 +1,18 @@
 version: 2
+
 updates:
   - package-ecosystem: cargo
+    directories:  
+      - /
+      - rshyper
+      - core
+    schedule:
+      interval: monthly
+  - package-ecosystem: devcontainers
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /acme
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /core
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /derive
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /graphs
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /macros
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /math
-    schedule:
-      interval: daily
+      interval: monthly

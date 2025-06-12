@@ -1,15 +1,54 @@
 [package]
+build = "build.rs"
+description = "the crate provides custom mathematical operations for rsdiff"
+name = "rsdiff-math"
+
 authors.workspace = true
-categories = ["mathematics"]
-description.workspace = true
+categories.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "rsdiff-math"
-repository.workspace = true
 readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs"]
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib"
+]
+bench = false
+doc = true
+doctest = true
+test = true
+
+[dependencies]
+rsdiff-core = { workspace = true }
+
+# error handling
+anyhow = { optional = true, workspace = true }
+thiserror = { workspace = true }
+# math
+approx = { optional = true, workspace = true}
+num = { workspace = true }
+num-traits = { workspace = true }
+# serialization
+serde = { optional = true, features = ["derive"], workspace = true }
+serde_derive = { optional = true, workspace = true }
+serde_json = { optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { workspace = true  }
+# tracing
+tracing = { optional = true, workspace = true}
 
 [features]
 default = [
@@ -23,53 +62,61 @@ full = [
     "trace",
 ]
 
+# ************* [FF:Environments] *************
+std = [
+    "alloc",
+    "anyhow?/std",
+    "approx?/std",
+    "num/std",
+    "num-traits?/std",
+    "rsdiff-core/std",
+    "serde?/std",
+    "serde-json?/std",
+    "tracing?/std",
+    "thiserror/std",
+]
+
+wasi = [
+    "rsdiff-core/wasi",
+]
+
+wasm = [
+    "rsdiff-core/wasm",
+]
+
+# ************* [FF:Dependencies] *************
+alloc = [
+    "num/alloc",
+    "serde?/alloc",
+    "serde-json?/alloc",
+]
+
+anyhow = [
+    "dep:anyhow",
+    "rsdiff-core/anyhow",
+]
+
 approx = [
     "dep:approx",
+    "rsdiff-core/approx",
+]
+
+json = [
+    "alloc",
+    "rsdiff-core/json",
+    "serde",
+    "serde_json",
 ]
 
 serde = [
     "dep:serde",
+    "dep:serde_derive",
+    "rsdiff-core/serde",
 ]
 
-trace = [
+tracing = [
     "dep:tracing",
+    "rsdiff-core/tracing",
 ]
 
-std = [
-    "rsdiff-core/std"
-]
 
-wasi = [
-    "rsdiff-core/wasi"
-]
-
-wasm = [
-    "rsdiff-core/wasm"
-]
-
-[build-dependencies]
-
-[dependencies]
-approx = { optional = true, version = "0.5" }
-num = "0.4"
-paste.workspace = true
-serde = { optional = true, features = ["derive"], version = "1" }
-smart-default.workspace = true
-strum.workspace = true
-tracing = { optional = true, version = "0.1" }
-
-[dependencies.rsdiff-core]
-path = "../core"
-version = "0.0.1"
-# version = "0.3.2-nightly"
-
-[dev-dependencies]
-approx = "0.5"
-
-[package.metadata.docs.rs]
-all-features = true
-rustc-args = ["--cfg", "docsrs"]
-
-[target.wasm32-unknown-unknown]
-
-[target.wasm32-wasi]

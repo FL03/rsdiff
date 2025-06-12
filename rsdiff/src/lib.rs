@@ -7,7 +7,11 @@
 //! rsdiff is an autodifferentiaion library for Rust. It is designed to be a
 //! flexible and powerful tool for building machine learning models and
 //! other differentiable programs.
+#![cfg_attr(not(feature = "std"), no_std)]
 #![crate_name = "rsdiff"]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 #[doc(inline)]
 pub use rsdiff_core::*;

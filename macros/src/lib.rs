@@ -5,6 +5,8 @@
 //! # rsdiff-macros
 //!
 //!
+// #![cfg_attr(not(feature = "std"), no_std)]
+
 extern crate proc_macro;
 
 pub(crate) use self::{error::Error, primitives::*, utils::*};

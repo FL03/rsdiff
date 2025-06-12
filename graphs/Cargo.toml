@@ -56,9 +56,11 @@ default = [
 
 full = [
     "default",
+    "anyhow",
     "approx",
+    "json",
     "serde",
-    "trace",
+    "tracing",
 ]
 
 # ************* [FF:Environments] *************
@@ -95,7 +97,7 @@ approx = [
 ]
 
 json = [
-    "alloc",
+    "std",
     "rsdiff-core/json",
     "serde",
     "serde_json",
@@ -106,6 +108,8 @@ serde = [
     "dep:serde_derive",
     "rsdiff-core/serde",
 ]
+
+serde_json = ["dep:serde_json"]
 
 tracing = [
     "dep:tracing",

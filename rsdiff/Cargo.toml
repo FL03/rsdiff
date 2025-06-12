@@ -50,8 +50,9 @@ default = [
 full = [
     "default",
     "derive",
+    "json",
     "serde",
-    "trace",
+    "tracing",
 ]
 
 # ************* [FF:Features] *************
@@ -85,15 +86,41 @@ wasm = [
 ]
 
 # ************* [FF:Dependencies] *************
-serde = [
-    "rsdiff-core/serde",
-    "rsdiff-graphs/serde",
+alloc = [
+    "rsdiff-core/alloc",
+    "rsdiff-math?/alloc",
 ]
 
+anyhow = [
+    "rsdiff-core/anyhow",
+    "rsdiff-graphs?/anyhow",
+    "rsdiff-math?/anyhow",
+]
+
+approx = [
+    "rsdiff-core/approx",
+    "rsdiff-graphs?/approx",
+    "rsdiff-math?/approx",
+]
+
+json = [
+    "alloc",
+    "serde",
+    "rsdiff-core/json",
+    "rsdiff-graphs?/json",
+    "rsdiff-math?/json",
+]
+
+serde = [
+    "rsdiff-core/serde",
+    "rsdiff-graphs?/serde",
+    "rsdiff-math?/serde",
+]
 
 tracing = [
     "rsdiff-core/tracing",
-    "rsdiff-graphs?/trace",
+    "rsdiff-math?/tracing",
+    "rsdiff-graphs?/tracing",
 ]
 
 # ************* [Benchmarks] *************

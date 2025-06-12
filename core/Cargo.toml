@@ -30,6 +30,8 @@ doctest = true
 test = true
 
 [dependencies]
+# custom
+scsys = { workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
@@ -58,9 +60,11 @@ default = [
 
 full = [
     "default",
+    "anyhow",
     "approx",
+    "json",
     "serde",
-    "trace"
+    "tracing",
 ]
 
 # ************* [FF:Environments] *************
@@ -70,21 +74,27 @@ std = [
     "approx?/std",
     "num/std",
     "num-traits?/std",
+    "scsys/std",
     "serde?/std",
     "serde-json?/std",
     "tracing?/std",
     "thiserror/std",
 ]
 
-wasi = []
+wasi = [
+    "scsys/wasi",
+]
 
-wasm = []
+wasm = [
+    "scsys/wasm",
+]
 
 # ************* [FF:Dependencies] *************
 alloc = [
     "num/alloc",
+    "scsys/alloc",
     "serde?/alloc",
-    "serde-json?/alloc",
+    "serde_json?/alloc",
 ]
 
 anyhow = ["dep:anyhow"]
@@ -93,6 +103,7 @@ approx = ["dep:approx"]
 
 json = [
     "alloc",
+    "scsys/json",
     "serde",
     "serde_json"
 ]
@@ -100,8 +111,12 @@ json = [
 serde = [
     "dep:serde",
     "dep:serde-derive",
+    "scsys/serde",
 ]
 
 serde-json = ["dep:serde_json"]
 
-tracing = ["dep:tracing"]
+tracing = [
+    "dep:tracing",
+    "scsys/tracing"
+]

@@ -2,10 +2,14 @@ version: 2
 
 updates:
   - package-ecosystem: cargo
-    directories:  
+    directories:
       - /
-      - rshyper
+      - rsdiff
       - core
+      - derive
+      - graphs
+      - macros
+      - math
     schedule:
       interval: monthly
   - package-ecosystem: devcontainers

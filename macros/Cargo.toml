@@ -14,25 +14,23 @@ repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
-[lib]
-proc-macro = true
-test = true
-
-[build-dependencies]
-
-[dependencies]
-num = "0.4"
-proc-macro2 = { features = ["nightly", "span-locations"], version = "1" }
-quote = "1"
-syn = { features = ["extra-traits", "fold", "full"], version = "2" }
-
-[dev-dependencies]
-approx = "0.5"
-
 [package.metadata.docs.rs]
 all-features = true
 rustc-args = ["--cfg", "docsrs"]
 
-[target.wasm32-unknown-unknown]
+[lib]
+proc-macro = true
+bench = false
+doc = true
+doctest = true
+test = true
 
-[target.wasm32-wasi]
+[dependencies]
+num = { workspace = true }
+# proc-macros
+proc-macro2 = { features = ["span-locations"], version = "1" }
+quote = { version = "1" }
+syn = { features = ["extra-traits", "fold", "full"], version = "2" }
+
+[dev-dependencies]
+approx = { workspace = true }

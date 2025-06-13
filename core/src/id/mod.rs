@@ -15,8 +15,8 @@ pub(crate) mod kinds {
 
 #[cfg(test)]
 mod tests {
-    use super::traits::*;
     use super::AtomicId;
+    use super::traits::*;
 
     #[test]
     fn test_id() {

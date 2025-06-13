@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        package:  [ rsdiff-core, rsdiff-graphs, rsdiff-math, rsdiff-derive, rsdiff-macros, rsdiff ]
+        package:  [ rsdiff-core, rsdiff-math, rsdiff-graphs, rsdiff-derive, rsdiff-macros, rsdiff ]
     steps:
       -
         name: Checkout

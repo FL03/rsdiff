@@ -31,7 +31,8 @@ test = true
 
 [dependencies]
 rsdiff-core = { workspace = true }
-
+# custom
+scsys = { workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
@@ -71,6 +72,7 @@ std = [
     "num/std",
     "num-traits/std",
     "rsdiff-core/std",
+    "scsys/std",
     "serde?/std",
     "serde_json?/std",
     "tracing?/std",
@@ -79,15 +81,19 @@ std = [
 
 wasi = [
     "rsdiff-core/wasi",
+    "scsys/wasi",
 ]
 
 wasm = [
     "rsdiff-core/wasm",
+    "scsys/wasm",
 ]
 
 # ************* [FF:Dependencies] *************
 alloc = [
     "num/alloc",
+    "rsdiff-core/alloc",
+    "scsys/alloc",
     "serde?/alloc",
     "serde_json?/alloc",
 ]
@@ -95,6 +101,7 @@ alloc = [
 anyhow = [
     "dep:anyhow",
     "rsdiff-core/anyhow",
+    "scsys/anyhow",
 ]
 
 approx = [
@@ -105,6 +112,7 @@ approx = [
 json = [
     "alloc",
     "rsdiff-core/json",
+    "scsys/json",
     "serde",
     "serde_json",
 ]
@@ -113,6 +121,7 @@ serde = [
     "dep:serde",
     "dep:serde_derive",
     "rsdiff-core/serde",
+    "scsys/serde",
 ]
 
 serde_json = ["dep:serde_json"]
@@ -120,4 +129,5 @@ serde_json = ["dep:serde_json"]
 tracing = [
     "dep:tracing",
     "rsdiff-core/tracing",
+    "scsys/tracing",
 ]

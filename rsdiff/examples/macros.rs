@@ -6,10 +6,8 @@
 
 extern crate rsdiff;
 
-use rsdiff::operator;
 use num::Float;
-
-
+use rsdiff::operator;
 
 fn main() -> rsdiff::prelude::BoxResult {
     let x = 5f64;

@@ -4,10 +4,10 @@
 */
 use super::{Edge, Node, Operation};
 use crate::prelude::GraphResult as Result;
-use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
 use num::traits::{NumAssign, NumOps, Signed};
 use petgraph::algo::toposort;
 use petgraph::prelude::{DiGraph, NodeIndex};
+use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
 use std::collections::BTreeMap;
 
 pub(crate) type ValueStore<T> = BTreeMap<NodeIndex, T>;

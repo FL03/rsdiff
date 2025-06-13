@@ -963,6 +963,7 @@ dependencies = [
  "num-traits",
  "paste",
  "rsdiff-core",
+ "scsys",
  "serde",
  "serde_derive",
  "serde_json",
@@ -1013,6 +1014,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "50a68cdb65ec0a505e6a8d486755ffff8751db626d3933dae305b80192f5827b"
 dependencies = [
+ "anyhow",
  "config",
  "scsys-core",
  "serde",

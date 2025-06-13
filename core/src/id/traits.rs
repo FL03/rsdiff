@@ -102,5 +102,7 @@ macro_rules! identifier {
     };
 }
 
-identifier!(f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
+identifier!(
+    f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize
+);
 identifier!(bool, char, &str, String);

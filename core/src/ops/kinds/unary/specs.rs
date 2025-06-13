@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use core::ops::Neg;
-use num::traits::{Inv, Num};
 use num::Complex;
+use num::traits::{Inv, Num};
 
 pub struct Logistical;
 

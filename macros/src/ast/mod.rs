@@ -10,9 +10,9 @@ pub mod grad;
 pub mod operator;
 
 use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens};
-use syn::parse::{Parse, ParseStream, Result};
+use quote::{ToTokens, quote};
 use syn::Expr;
+use syn::parse::{Parse, ParseStream, Result};
 
 pub struct BackendAst {
     pub args: Args,

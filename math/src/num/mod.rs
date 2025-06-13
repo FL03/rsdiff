@@ -8,7 +8,7 @@ pub mod traits;
 
 pub(crate) mod utils {
     use num::integer::Integer;
-    use num::traits::{Num, ToPrimitive, Unsigned};
+    use num_traits::{Num, ToPrimitive, Unsigned};
 
     pub fn harmonic<T>(n: T) -> f64
     where

@@ -1,11 +1,5 @@
 [workspace]
-default-members = [
-    "rsdiff"
-]
-
-exclude = [
-]
-
+default-members = ["rsdiff"]
 members = [
     "rsdiff",
     "core",
@@ -13,7 +7,6 @@ members = [
     "graphs",
     "macros",
     "math",
-
 ]
 resolver = "3"
 
@@ -38,20 +31,18 @@ license = "Apache-2.0"
 repository = "https://github.com/FL03/rsdiff.git"
 readme = "README.md"
 rust-version = "1.85.0"
-version = "0.0.2"
-# version = "0.3.2-nightly"
+version = "0.0.3"
 
 [workspace.dependencies]
 # local
-rsdiff = { default-features = false, path = "rsdiff", version = "0.0.2" }
-rsdiff-core = { default-features = false, path = "core", version = "0.0.2" }
-rsdiff-derive = { default-features = false, path = "derive", version = "0.0.2" }
-rsdiff-graphs = { default-features = false, path = "graphs", version = "0.0.2" }
-rsdiff-macros = { default-features = false, path = "macros", version = "0.0.2" }
-rsdiff-math = { default-features = false, path = "math", version = "0.0.2" }
+rsdiff = { default-features = false, path = "rsdiff", version = "0.0.3" }
+rsdiff-core = { default-features = false, path = "core", version = "0.0.3" }
+rsdiff-derive = { default-features = false, path = "derive", version = "0.0.3" }
+rsdiff-graphs = { default-features = false, path = "graphs", version = "0.0.3" }
+rsdiff-macros = { default-features = false, path = "macros", version = "0.0.3" }
+rsdiff-math = { default-features = false, path = "math", version = "0.0.3" }
 # custom
 scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
-
 # benchmarking
 criterion = { version = "0.6" }
 # concurrency & parallelism

@@ -16,7 +16,7 @@ Autodifferentiation is a powerful technique used in machine learning and optimiz
 
 ## Features
 
-- [x] `hash_graph` - A hash-based hypergraph implementation.
+- [x] `macros` - enables the `autodiff` macro for automatically differentiating in-place logic.
 
 ## Usage
 
@@ -25,10 +25,9 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies.rsdiff]
 features = [
-    "hash_graph",
     "macros",
 ]
-version = "0.1.x"
+version = "0.0.x"
 ```
 
 ### Examples
@@ -38,45 +37,28 @@ For more detailed examples, please refer to the [examples directory](https://git
 #### _Example #1:_ Basic Usage
 
 ```rust
-    extern crate rsdiff;
+use rsdiff::autodiff;
 
-    fn main() -> rsdiff::Result<()> {
-        // initialize a new instance of a hypergraph
-        let mut graph: HashGraph<usize, usize> = HashGraph::new();
-        // use the macro to insert nodes into the graph
-        rsdiff::hypernode! {
-            graph {
-                let v0;
-                let v1 = 2;
-                let v2 = 3;
-                let v3 = 4;
-            }
-        }
-        // Add some hyperedges
-        let e1 = graph.insert_edge(vec![v0, v1, v2])?;
-        println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);
-
-        let e2 = graph.insert_edge(vec![v1, v2, v3])?;
-        println!("Added hyperedge {e2}: {:?}", [v1, v2, v3]);
-
-        // Get neighbors of vertex v1
-        let neighbors = graph.neighbors(&v1)?;
-        println!("Neighbors of {}: {:?}", v1, neighbors);
-
-        // Get degree of vertex v1
-        let degree = graph.get_degree_of_node(&v1);
-        println!("Degree of {v1}: {degree}");
-
-        // Remove a vertex
-        graph.remove_vertex(&v2)?;
-        println!("Removed vertex {v2}");
-
-        println!("---------\nFinal graph state: {:?}", graph);
-        Ok(())
-    }
-
+fn main() {
+    let x = 3f64;
+    let y = 4f64;
+    assert_eq!(y, autodiff!(x: x * y));
+    assert_eq!(x, autodiff!(y: x * y));
+    assert_eq!(1f64, autodiff!(x: x + y));
+}
 ```
 
+### _Example #2:_ Trigonometric functions
+
+```rust
+use rsdiff::autodiff;
+
+fn main() {
+    let x = 2f64;
+    assert_eq!(autodiff!(x: x.cos()), -x.sin());
+    assert_eq!(autodiff!(x: x.sin()), x.cos());
+    assert_eq!(autodiff!(x: x.tan()), x.cos().powi(2).recip());
+}
 ## Getting Started
 
 ### Prerequisites

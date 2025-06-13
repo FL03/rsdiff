@@ -44,7 +44,7 @@ num = { workspace = true }
 
 [features]
 default = [
-    "core",
+    "std",
     "math",
     "graph",
 ]
@@ -58,8 +58,6 @@ full = [
 ]
 
 # ************* [FF:Features] *************
-core = []
-
 derive = [
     "dep:rsdiff-derive",
     "macros"
@@ -73,6 +71,7 @@ math = ["dep:rsdiff-math"]
 
 # ************* [FF:Environments] *************
 std = [
+    "alloc",
     "rsdiff-core/std",
     "rsdiff-graphs/std",
 ]

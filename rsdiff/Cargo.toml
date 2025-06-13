@@ -45,13 +45,14 @@ num = { workspace = true }
 [features]
 default = [
     "std",
+    "macros",
     "math",
-    "graph",
 ]
 
 full = [
     "default",
     "derive",
+    "graph",
     "json",
     "serde",
     "tracing",
@@ -60,7 +61,7 @@ full = [
 # ************* [FF:Features] *************
 derive = [
     "dep:rsdiff-derive",
-    "macros"
+    "macros",
 ]
 
 graph = ["dep:rsdiff-graphs"]

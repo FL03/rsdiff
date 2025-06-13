@@ -78,7 +78,7 @@ jobs:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       -
         name: Benchmark (${{ matrix.target }})
-        run: cargo bench --locked --workspace --all-features --workspace --verbose --
+        run: cargo bench --locked --verbose --workspace --all-features --
       -
         name: Upload the benchmarks
         id: artifacts

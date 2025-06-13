@@ -5,7 +5,7 @@
 
 extern crate rsdiff;
 
-use rsdiff::prelude::autodiff;
+use rsdiff::autodiff;
 use utils::*;
 
 #[test]

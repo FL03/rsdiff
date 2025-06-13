@@ -4,11 +4,9 @@
 */
 extern crate rsdiff_core as rsdiff;
 
-#[cfg(feature = "alloc")]
 #[test]
 fn test_nested() {
-    use alloc::vec::Vec;
-    
+
     use rsdiff::nested;
     let a = Vec::from_iter(0..9);
     let b = Vec::from_iter(0..9);

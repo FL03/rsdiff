@@ -39,6 +39,7 @@ rsdiff-math = { optional = true, workspace = true }
 approx = { features = ["std"], workspace = true }
 anyhow = { features = ["std"], workspace = true }
 criterion = { features = ["plotters"], workspace = true }
+lazy_static = { workspace = true }
 num = { workspace = true }
 
 [features]

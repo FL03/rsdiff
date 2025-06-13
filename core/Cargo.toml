@@ -120,3 +120,11 @@ tracing = [
     "dep:tracing",
     "scsys/tracing"
 ]
+
+# ************* [Unit Tests] *************
+[[test]]
+name = "default"
+
+[[test]]
+name = "utils"
+required-features = ["std"]

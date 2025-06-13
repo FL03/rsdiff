@@ -2,27 +2,16 @@
     Appellation: macros <test>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#![allow(unused_variables)]
-#![feature(fn_traits, tuple_trait, unboxed_closures)]
-#![cfg(all(test, feature = "macros"))]
 
 extern crate rsdiff;
 
-use rsdiff::prelude::autodiff;
+use rsdiff::autodiff;
 use utils::*;
 
 #[test]
 #[ignore = "Custom function calls are not yet supported"]
-fn test_func_handler() {
-    let (x, y) = (1_f64, 2_f64);
-    assert_eq!(autodiff!(x: Sample(x)), 2.0 * x);
-    // assert_eq!(autodiff!(x: Sample::mul_item), y);
-}
-
-#[test]
-#[ignore = "Custom function calls are not yet supported"]
 fn test_function_call() {
-    let (x, y) = (1_f64, 2_f64);
+    let (_x, y) = (1_f64, 2_f64);
     // differentiating a function call w.r.t. x
     assert_eq!(autodiff!(x: add(x, y)), 1.0);
     // differentiating a function call w.r.t. some variable
@@ -33,7 +22,7 @@ fn test_function_call() {
 #[test]
 #[ignore = "Custom trait methods are not yet supported"]
 fn test_method() {
-    let (x, y) = (1_f64, 2_f64);
+    let (_x, _y) = (1_f64, 2_f64);
     // assert_eq!(autodiff!(x: x.sigmoid()), sigmoid_prime(x));
 }
 
@@ -105,17 +94,6 @@ mod utils {
             T: Copy + Mul<T, Output = T>,
         {
             Self::sqr
-        }
-    }
-
-    impl<T> FnOnce<(T,)> for Sample
-    where
-        T: Copy + Mul<T, Output = T>,
-    {
-        type Output = T;
-
-        extern "rust-call" fn call_once(self, args: (T,)) -> Self::Output {
-            Self::sqr(args.0)
         }
     }
 }

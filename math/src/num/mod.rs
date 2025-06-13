@@ -8,7 +8,7 @@ pub mod traits;
 
 pub(crate) mod utils {
     use num::integer::Integer;
-    use num::traits::{Num, ToPrimitive, Unsigned};
+    use num_traits::{Num, ToPrimitive, Unsigned};
 
     pub fn harmonic<T>(n: T) -> f64
     where
@@ -20,11 +20,12 @@ pub(crate) mod utils {
 
 #[cfg(test)]
 mod tests {
-    use super::traits::NaturalNumber;
-    use approx::assert_relative_eq;
 
+    #[cfg(feature = "approx")]
     #[test]
     fn test_harmonic() {
+        use super::traits::NaturalNumber;
+        use approx::assert_relative_eq;
         assert_relative_eq!(1u8.harmonic(), 1.0);
         assert_relative_eq!(2u16.harmonic(), super::harmonic(2u16));
         assert_relative_eq!(3u32.harmonic(), 11.0 / 6.0);

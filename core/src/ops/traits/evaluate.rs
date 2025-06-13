@@ -25,16 +25,18 @@ where
 }
 
 pub trait FnArgs {
-    
     type Kind;
 }
 
 pub struct Partial<T, F> {
     pub args: T,
-    pub func: F
+    pub func: F,
 }
 
-impl<T, F> Partial<T, F> where F: for <'a> Fn(&'a T) -> T {
+impl<T, F> Partial<T, F>
+where
+    F: for<'a> Fn(&'a T) -> T,
+{
     pub fn new(args: T, func: F) -> Self {
         Self { args, func }
     }

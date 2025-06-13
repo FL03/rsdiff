@@ -1,59 +1,114 @@
-[workspace.package]
-authors = ["FL03 <jo3mccain@icloud.com>"]
-categories = ["mathematics", "science"]
-description = "rsdiff aims to provide a solid foundation for developing robust machine-learning systems in Rust."
-edition = "2021"
-homepage = "https://github.com/FL03/rsdiff/wikis"
-keywords = ["acme", "autodiff", "mathematics", "tensor"]
-license = "Apache-2.0"
-repository = "https://github.com/FL03/rsdiff"
-readme = "README.md"
-version = "0.0.1"
-# version = "0.3.2-nightly"
-
 [workspace]
 default-members = [
     "rsdiff"
 ]
 
-exclude = [ 
+exclude = [
 ]
 
 members = [
-    "rsdiff", 
+    "rsdiff",
     "core",
     "derive",
     "graphs",
-    "macros", 
+    "macros",
     "math",
-    
+
 ]
-resolver = "2"
+resolver = "3"
+
+[workspace.package]
+authors = [
+    "FL03 <jo3mccain@icloud.com> (https://github.com/FL03)",
+    "Scattered-Systems <support@scsys.io> (https://github.com/scattered-systems)"
+]
+categories = [
+    "mathematics",
+    "science",
+]
+description = "rsdiff aims to provide a solid foundation for developing robust machine-learning systems in Rust."
+edition = "2024"
+homepage = "https://github.com/FL03/rsdiff/wikis"
+keywords = [
+    "autodiff",
+    "mathematics",
+    "tensor",
+]
+license = "Apache-2.0"
+repository = "https://github.com/FL03/rsdiff.git"
+readme = "README.md"
+rust-version = "1.85.0"
+version = "0.0.2"
+# version = "0.3.2-nightly"
 
 [workspace.dependencies]
-paste = "1"
-scsys = "0.2.1"
-strum = { features = ["derive"], version = "0.26" }
-smart-default = "0.7"
+# local
+rsdiff = { default-features = false, path = "rsdiff", version = "0.0.2" }
+rsdiff-core = { default-features = false, path = "core", version = "0.0.2" }
+rsdiff-derive = { default-features = false, path = "derive", version = "0.0.2" }
+rsdiff-graphs = { default-features = false, path = "graphs", version = "0.0.2" }
+rsdiff-macros = { default-features = false, path = "macros", version = "0.0.2" }
+rsdiff-math = { default-features = false, path = "math", version = "0.0.2" }
+# custom
+scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
+
+# benchmarking
+criterion = { version = "0.6" }
+# concurrency & parallelism
+crossbeam = { default-features = false, version = "0.8" }
+rayon = { default-features = false, version = "1" }
+rayon-core = { default-features = false, version = "1" }
+# data-structures
+petgraph = { version = "0.8" }
+# error-handling
+anyhow = { default-features = false, version = "1" }
+thiserror = { default-features = false, version = "2" }
+# mathematics
+approx = { default-features = false, version = "0.5" }
+num = { default-features = false, version = "0.4" }
+num-complex = { default-features = false, version = "0.4" }
+num-traits = { default-features = false, version = "0.2" }
+# macros & utilities
+lazy_static = { default-features = false, version = "1" }
+paste = { version = "1" }
+strum = { default-features = false, features = ["derive"], version = "0.27" }
+smart-default = { version = "0.7" }
+# random
+getrandom = { default-features = false, version = "0.3" }
+rand = { default-features = false, version = "0.9" }
+rand_distr = { default-features = false, version = "0.5" }
+# serialization
+serde = { default-features = false, features = ["derive"], version = "1" }
+serde_derive = { version = "1" }
+serde_json = { default-features = false, version = "1" }
+# tracing
+tracing = { default-features = false, features = ["attributes"], version = "0.1" }
+tracing-subscriber = { default-features = false, features = ["ansi", "env-filter", "fmt"], version = "0.3" }
+# wasm
+wasm-bindgen = { default-features = false, version = "0.2" }
+
+# ************* [Profiles] *************
 
 [profile.dev]
 codegen-units = 256
 debug = true
 debug-assertions = true
 incremental = true
-lto = false
-panic = "unwind"
-rpath = false
-opt-level = 0
+lto  ="thin"
+panic = "abort"
+rpath = true
+opt-level = 2
 overflow-checks = true
+strip = "none"
 
 [profile.release]
 codegen-units = 16
 debug = false
 debug-assertions = false
 incremental = false
-lto = false
-panic = "unwind"
+lto = true
+panic = "abort"
 rpath = false
-opt-level = "z"
+opt-level = 0
 overflow-checks = false
+strip = "debuginfo"

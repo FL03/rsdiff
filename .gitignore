@@ -1,18 +1,26 @@
-# Docker
+# Artifacts
+**/.artifacts/data/
 **/.docker/data/
 
-# Environments
-/**/.idea
-/**/.vscode/
+## cache
+**/.cache/
 
-# Files and File Extensions
-**/config.*
-**/*.config.*
-!**/default.config.*
+# config
+**/.config/*.config.*
 
-**/*.bk
-**/*.bk.*
+**/*.env
+**/*.env.*
 
+# Dev
+
+### Idea
+
+**/.idea/
+
+### vscode
+**/.vscode/
+
+# Misc
 **/*.csv
 **/*.csv.*
 
@@ -20,11 +28,6 @@
 **/*.db.*
 
 **/*.db-*.*
-
-**/*.env
-**/*.env.*
-
-**/!*.env.example
 
 **/*.lock
 **/*.lock.*
@@ -34,29 +37,44 @@
 **/*.log
 **/*.log.*
 
+**/*.tmp
+**/*.tmp.*
+
+**/*.tmp-*
+
 **/*.whl
 **/*.whl.*
 
 **/*.zip
 **/*.zip.*
 
+## Nix
+**/*.drv
+**/*.drv.*
 
-# Nodejs
-/**/build/
-/**/node_modules/
+!**/flake.lock
 
-# Python
-/**/__pycache__/
-/**/dist/
-/**/venv/
 
-# Rust
+## Rust
 **/debug/
 **/target/
 
-rustc-ice-**.txt
+**/*.bk
+**/*.bk.*
 
-# Svelte
-/**/.DS_STORE/
-/**/__sapper__/
-/**/.svelte-kit/
+**/Cargo.lock
+
+# Exceptions
+!**/.config/default.config.*
+!**/.config/docker.config.*
+
+!**/*.env.example
+!**/*.env.default
+
+!**/default.env
+!**/default.env.*
+
+!**/example.env
+!**/example.env.*
+
+!**/Cargo.lock

@@ -5,6 +5,9 @@
 //! # rsdiff-macros
 //!
 //!
+#![allow(clippy::module_inception, clippy::needless_doctest_main)]
+// #![cfg_attr(not(feature = "std"), no_std)]
+
 extern crate proc_macro;
 
 pub(crate) use self::{error::Error, primitives::*, utils::*};

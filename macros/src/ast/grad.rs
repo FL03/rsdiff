@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use proc_macro2::TokenStream;
-use syn::parse::{Parse, ParseStream, Result};
 use syn::Ident;
+use syn::parse::{Parse, ParseStream, Result};
 use syn::{Attribute, ExprArray, ItemFn};
 
 pub struct GradientAst {

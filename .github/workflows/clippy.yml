@@ -1,50 +1,60 @@
 name: clippy
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 on:
   pull_request:
     branches: [ main, master ]
-    types: [ opened, reopened ]
+    types: [ opened, reopened, synchronize ]
+    paths:
+      - "**/clippy.yml"
+      - "**/*.rs"
+      - "**/Cargo.*"
   push:
     branches: [ main, master ]
-    tags: [ v*, "*-nightly" ]
+    tags: [ latest, v*.*.*, "*-nightly" ]
+    paths:
+      - "**/clippy.yml"
+      - "**/*.rs"
+      - "**/Cargo.*"
   release:
-    types: [ created ]
+    types: [ created, edited ]
   repository_dispatch:
     types: [ clippy ]
   workflow_dispatch:
 
-permissions:
-  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status 
-  contents: read
-  security-events: write
-
 jobs:
   clippy:
-    name: Clippy
+    continue-on-error: true
     runs-on: ubuntu-latest
+    permissions:
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+      contents: read
+      security-events: write
+      statuses: write
     steps:
-      - uses: actions/checkout@v4
       -
-        name: setup rust-toolchain
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          cache-workspaces: true
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           components: clippy, rustfmt
-      - 
-        name: setup cargo
+      -
+        name: Setup the for sarif output
         run: cargo install clippy-sarif sarif-fmt
-      - 
-        name: Run rust-clippy
+      -
+        name: Run Clippy
         run:
           cargo clippy
           --all-features
+          --workspace
           --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
-        continue-on-error: true
-      - 
+      -
         name: Upload analysis
         uses: github/codeql-action/upload-sarif@v3
         with:

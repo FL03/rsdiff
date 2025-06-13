@@ -2,10 +2,12 @@
     Appellation: autodiff <example>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+#![allow(unused_macros)]
+
 extern crate rsdiff;
 
-use rsdiff::{autodiff, operator};
 use num::Float;
+use rsdiff::operator;
 
 fn main() -> rsdiff::prelude::BoxResult {
     let x = 5f64;

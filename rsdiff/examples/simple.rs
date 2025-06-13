@@ -4,7 +4,7 @@
 */
 extern crate rsdiff;
 
-use rsdiff::prelude::{nested, BoxResult};
+use rsdiff::prelude::{BoxResult, nested};
 
 fn main() -> BoxResult {
     nested!(

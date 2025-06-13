@@ -1,14 +1,17 @@
 [package]
+build = "build.rs"
+description = "derive macros for rsdiff"
+name = "rsdiff-derive"
+
 authors.workspace = true
 categories.workspace = true
-description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "rsdiff-derive"
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
 
 [lib]

@@ -1,4 +1,7 @@
 [package]
+build = "build.rs"
+name = "rsdiff"
+
 authors.workspace = true
 categories.workspace = true
 description.workspace = true
@@ -6,10 +9,38 @@ edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "rsdiff"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs"]
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib"
+]
+bench = false
+doc = true
+doctest = true
+test = true
+
+[dependencies]
+rsdiff-core = { workspace = true }
+rsdiff-derive = { optional = true, workspace = true }
+rsdiff-graphs = { optional = true, workspace = true }
+rsdiff-macros = { optional = true, workspace = true }
+rsdiff-math = { optional = true, workspace = true }
+
+[dev-dependencies]
+approx = { features = ["std"], workspace = true }
+anyhow = { features = ["std"], workspace = true }
+criterion = { features = ["plotters"], workspace = true }
+lazy_static = { workspace = true }
+num = { workspace = true }
 
 [features]
 default = [
@@ -21,10 +52,12 @@ default = [
 full = [
     "default",
     "derive",
+    "json",
     "serde",
-    "trace",
+    "tracing",
 ]
 
+# ************* [FF:Features] *************
 core = []
 
 derive = [
@@ -32,32 +65,16 @@ derive = [
     "macros"
 ]
 
-graph = [
-    "dep:rsdiff-graphs"
-]
+graph = ["dep:rsdiff-graphs"]
 
-macros = [
-    "dep:rsdiff-macros"
-]
+macros = ["dep:rsdiff-macros"]
 
-math = [
-    "dep:rsdiff-math"
-]
+math = ["dep:rsdiff-math"]
 
-serde = [
-    "rsdiff-core/serde",
-    "rsdiff-graphs/serde",
-]
-
+# ************* [FF:Environments] *************
 std = [
     "rsdiff-core/std",
     "rsdiff-graphs/std",
-]
-
-
-trace = [
-    "rsdiff-core/trace",
-    "rsdiff-graphs/trace",
 ]
 
 wasi = [
@@ -70,15 +87,51 @@ wasm = [
     "rsdiff-graphs/wasm",
 ]
 
+# ************* [FF:Dependencies] *************
+alloc = [
+    "rsdiff-core/alloc",
+    "rsdiff-math?/alloc",
+]
 
+anyhow = [
+    "rsdiff-core/anyhow",
+    "rsdiff-graphs?/anyhow",
+    "rsdiff-math?/anyhow",
+]
 
-[lib]
-bench = true
-crate-type = ["cdylib", "rlib"]
-doctest = true
-test = true
+approx = [
+    "rsdiff-core/approx",
+    "rsdiff-graphs?/approx",
+    "rsdiff-math?/approx",
+]
 
+json = [
+    "alloc",
+    "serde",
+    "rsdiff-core/json",
+    "rsdiff-graphs?/json",
+    "rsdiff-math?/json",
+]
 
+serde = [
+    "rsdiff-core/serde",
+    "rsdiff-graphs?/serde",
+    "rsdiff-math?/serde",
+]
+
+tracing = [
+    "rsdiff-core/tracing",
+    "rsdiff-math?/tracing",
+    "rsdiff-graphs?/tracing",
+]
+
+# ************* [Benchmarks] *************
+[[bench]]
+name = "default"
+path = "benches/default.rs"
+harness = false
+
+# ************* [Examples] *************
 [[example]]
 doc = true
 name = "autodiff"
@@ -92,31 +145,7 @@ required-features = ["graph"]
 name = "macros"
 required-features = ["macros"]
 
-
+# ************* [Unit Tests] *************
 [[test]]
 name = "macros"
 required-features = ["macros"]
-
-
-[build-dependencies]
-
-[dependencies]
-rsdiff-core = { path = "../core", version = "0.0.1" }
-rsdiff-derive = { optional = true, path = "../derive", version = "0.0.1" }
-rsdiff-graphs = { optional = true, path = "../graphs", version = "0.0.1" }
-rsdiff-macros = { optional = true, path = "../macros", version = "0.0.1" }
-rsdiff-math = { optional = true, path = "../math", version = "0.0.1" }
-
-[dev-dependencies]
-approx = "0.5"
-lazy_static = "1"
-num = "0.4"
-rand = "0.8"
-
-[package.metadata.docs.rs]
-all-features = true
-rustc-args = ["--cfg", "docsrs"]
-
-[target.wasm32-unknown-unknown]
-
-[target.wasm32-wasi]

@@ -4,10 +4,10 @@
 */
 use crate::id::Identify;
 #[cfg(not(feature = "std"))]
-use alloc::collections::{btree_map, BTreeMap};
+use alloc::collections::{BTreeMap, btree_map};
 use core::borrow::Borrow;
 #[cfg(feature = "std")]
-use std::collections::{btree_map, hash_map, BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, btree_map, hash_map};
 
 pub trait Entry<'a> {
     type Key;

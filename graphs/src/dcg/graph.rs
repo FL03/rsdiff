@@ -2,16 +2,16 @@
     Appellation: graph <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+use super::DynamicGraph;
 use super::edge::Edge;
 use super::node::Node;
-use super::DynamicGraph;
-use crate::prelude::GraphResult as Result;
 use crate::NodeIndex;
+use crate::prelude::GraphResult as Result;
 
-use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
-use rsdiff::prelude::Scalar;
 use core::ops::Index;
 use petgraph::algo::toposort;
+use rsdiff::ops::{Arithmetic, BinaryOp, Op, UnaryOp};
+use rsdiff::prelude::Scalar;
 use std::collections::HashMap;
 
 macro_rules! push {

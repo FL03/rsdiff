@@ -9,7 +9,9 @@
 //! for interpreting various operations. The core module is the foundation for the rest of the
 //! library, and it is designed to be as lightweight as possible.
 //!
-#[cfg(not(feature = "std"))]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(feature = "alloc")]
 extern crate alloc;
 
 pub use self::traits::prelude::*;

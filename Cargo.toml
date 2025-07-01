@@ -50,7 +50,7 @@ rsdiff-graphs = { default-features = false, path = "graphs", version = "0.0.2" }
 rsdiff-macros = { default-features = false, path = "macros", version = "0.0.2" }
 rsdiff-math = { default-features = false, path = "math", version = "0.0.2" }
 # custom
-scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
+scsys = { default-features = false, features = ["derive"], version = "0.3.1" }
 
 # benchmarking
 criterion = { version = "0.6" }

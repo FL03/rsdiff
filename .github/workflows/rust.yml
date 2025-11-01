@@ -82,7 +82,7 @@ jobs:
       -
         name: Upload the benchmarks
         id: artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: benchmarks@${{ github.sha }}
           if-no-files-found: error
